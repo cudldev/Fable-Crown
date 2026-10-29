@@ -226,7 +226,8 @@ export type RpgOrder =
       verb: "talk" | "inspect" | "use" | "practice";
       itemId?: string;
     }
-  | { type: "travel-service"; objectId: string };
+  | { type: "travel-service"; objectId: string }
+  | { type: "talk-actor"; actorId: number };
 export type RpgCommand =
   | RpgOrder
   | { type: "enqueue"; order: RpgOrder }

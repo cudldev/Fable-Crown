@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import type { RpgState, TilePosition, WorldObject } from "../rpg/types";
+import type { RpgState, TilePosition, WorldObject, SimulationEffect } from "../rpg/types";
 import { worldForState } from "../rpg/world";
 import { ENEMIES } from "../rpg/content";
 import { artFrames } from "../art-frames";
@@ -15,9 +15,15 @@ import {
   sampleActorMotion,
   resolveActorFrameKey,
   type MotionTimeline,
-  observeHealth,
-  observedHits,
-  type ObservedHit,
+  consumeEffects,
+  committedImpact,
+  observeWorkContact,
+  observeFootstep,
+  workStroke,
+  resourceArt,
+  type EffectCursor,
+  type WorkContactCursor,
+  type FootstepCursor,
 } from "./presentation";
 export interface TileCamera {
   x: number;
@@ -42,6 +48,8 @@ interface Props {
   feedback?: FeedbackFloater[];
   previewRoute?: TilePosition[];
   presentationEpoch?: number;
+  onWorkContact?: (kind: string) => void;
+  onFootstep?: (mode: "walk" | "run") => void;
 }
 const base = import.meta.env.BASE_URL;
 const assetNames = [
@@ -75,6 +83,7 @@ const assetNames = [
   "iso-tree",
   "iso-oak",
   "iso-willow",
+  "prop-stump", "prop-exhausted-ore",
 ];
 const terrainAsset = {
   grass: "tile-grass",
@@ -112,6 +121,8 @@ export default function TileScene({
   feedback = [],
   previewRoute = [],
   presentationEpoch = 0,
+  onWorkContact,
+  onFootstep,
 }: Props) {
   const world = worldForState(state);
   const cachedWorld = useRef(world);
@@ -127,7 +138,7 @@ export default function TileScene({
   const depletedTrees = world.objects
     .filter(
       (object) =>
-        object.kind === "tree" &&
+        (object.kind === "tree" || object.kind === "rock") &&
         state.resources[object.id]?.available === false,
     )
     .map((object) => object.id)
@@ -140,27 +151,16 @@ export default function TileScene({
   const actorFrames = useRef(new Map<string, HTMLCanvasElement>());
   const facings = useRef(new Map<number, Facing>());
   const motionTimelines = useRef(new Map<number, MotionTimeline>());
-  const health = useRef(observeHealth(state, presentationEpoch));
-  const hitSplats = useRef<(ObservedHit & { startedAt: number })[]>([]);
-  if (
-    health.current.tick !== state.tick ||
-    health.current.epoch !== presentationEpoch
-  ) {
-    const next = observeHealth(state, presentationEpoch);
+  const effectCursor = useRef<EffectCursor | undefined>(undefined);
+  const liveEffects = useRef<(SimulationEffect & { startedAt: number })[]>([]);
+  const workContact = useRef<WorkContactCursor | undefined>(undefined);
+  const footstep = useRef<FootstepCursor | undefined>(undefined);
+  const incoming = consumeEffects(state, presentationEpoch, effectCursor.current);
+  effectCursor.current = incoming.cursor;
+  if (incoming.reset) { liveEffects.current = []; workContact.current = undefined; footstep.current = undefined; }
+  if (incoming.effects.length) {
     const time = performance.now();
-    const continuous =
-      next.epoch === health.current.epoch &&
-      next.tick === health.current.tick + 1;
-    hitSplats.current = [
-      ...(continuous
-        ? hitSplats.current.filter((hit) => time - hit.startedAt < 1200)
-        : []),
-      ...observedHits(health.current, next).map((hit) => ({
-        ...hit,
-        startedAt: time,
-      })),
-    ].slice(-12);
-    health.current = next;
+    liveEffects.current = [...liveEffects.current.filter(effect => time - effect.startedAt < 1200), ...incoming.effects.map(effect => ({ ...effect, startedAt: time }))].slice(-64);
   }
   if (cachedWorld.current !== world) {
     cachedWorld.current = world;
@@ -181,8 +181,8 @@ export default function TileScene({
     ),
     dragged = useRef(false),
     pinch = useRef(0);
-  const callbacks = useRef({ onCamera, onSelect });
-  callbacks.current = { onCamera, onSelect };
+  const callbacks = useRef({ onCamera, onSelect, onWorkContact, onFootstep });
+  callbacks.current = { onCamera, onSelect, onWorkContact, onFootstep };
   useEffect(() => {
     const observer = new ResizeObserver(([e]) =>
       setSize({ width: e.contentRect.width, height: e.contentRect.height }),
@@ -419,6 +419,13 @@ export default function TileScene({
       for (const actor of people) {
         samplePerson(actor, time);
       }
+      const step = observeFootstep(footstep.current, hero.motion, hero.timeline, presentationEpoch);
+      footstep.current = step.cursor;
+      if (step.mode) callbacks.current.onFootstep?.(step.mode);
+      const contact = observeWorkContact(workContact.current, workStroke(hero, state.tick, time - stamp.current.at,
+        world.objects.find(object => object.id === hero.action?.targetId), hero.motion), presentationEpoch);
+      workContact.current = contact.cursor;
+      if (contact.contact && contact.cursor.stroke && ["mine", "cut", "fish", "smith", "cook"].includes(contact.cursor.stroke.pose)) callbacks.current.onWorkContact?.(contact.cursor.stroke.pose);
       for (const enemy of enemies) {
         const previous =
           enemyFrames.current.previous.get(enemy.id) ?? enemy.position;
@@ -662,8 +669,17 @@ export default function TileScene({
       }
       const treeArt = (object: WorldObject) => {
         const name = `iso-${object.resourceId === "oak" ? "oak" : object.resourceId === "willow" ? "willow" : "tree"}`;
-        return images.current.has(name) ? name : (object.art ?? "forest");
+        return resourceArt(object.kind, state.resources[object.id]?.available !== false, images.current.has(name) ? name : (object.art ?? "forest"));
       };
+      function depletedProp(object: WorldObject, at: { x: number; y: number }) {
+        const name = resourceArt(object.kind, false, object.art ?? "ore");
+        if (images.current.has(name)) art(name, at, object.kind === "tree" ? 54 : 90, object.kind === "tree" ? 38 : 50);
+        else {
+          ctx.fillStyle = object.kind === "tree" ? "#8d724d" : "#7d8175";
+          ctx.strokeStyle = object.kind === "tree" ? "#5f5139" : "#555e54"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(at.x, at.y - 8, object.kind === "tree" ? 14 : 28, object.kind === "tree" ? 10 : 14, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+      }
       const distant = view.overview || view.zoom < 0.35;
       if (distant) {
         if (!farTrees.current) {
@@ -674,21 +690,23 @@ export default function TileScene({
           oc.scale(0.1, 0.1);
           oc.translate(world.height * 32, 16);
           for (const object of world.objects.filter(
-            (object) => object.kind === "tree",
+            (object) => object.kind === "tree" || object.kind === "rock",
           )) {
-            const name = treeArt(object),
+            const available = state.resources[object.id]?.available !== false;
+            const name = object.kind === "tree" ? treeArt(object) : resourceArt(object.kind, available, object.art ?? "ore"),
               img = images.current.get(name),
               frame = artFrames[name];
-            if (!img || !frame) continue;
             const at = tileToScreen(objectFoot(object));
+            if (!img || !frame) {
+              if (!available) { oc.fillStyle = object.kind === "tree" ? "#8d724d" : "#7d8175"; oc.beginPath(); oc.ellipse(at.x, at.y - 8, object.kind === "tree" ? 14 : 28, 10, 0, 0, Math.PI * 2); oc.fill(); }
+              continue;
+            }
             const variation =
               0.95 +
               ((object.position.x * 17 + object.position.y * 31) % 11) / 100;
-            const scale =
-              Math.min(110 / frame.boundsWidth, 130 / frame.boundsHeight) *
-              variation;
-            oc.globalAlpha =
-              state.resources[object.id]?.available === false ? 0.4 : 1;
+            const width = object.kind === "tree" ? available ? 110 : 54 : available ? 100 : 90;
+            const height = object.kind === "tree" ? available ? 130 : 38 : available ? 90 : 50;
+            const scale = Math.min(width / frame.boundsWidth, height / frame.boundsHeight) * (object.kind === "tree" ? variation : 1);
             oc.drawImage(
               img,
               at.x - frame.pivotX * scale,
@@ -711,7 +729,7 @@ export default function TileScene({
       for (const o of world.objects) {
         const foot = objectFoot(o);
         const selected = selection?.kind === "object" && selection.id === o.id;
-        if (o.kind === "tree" && distant && !selected) continue;
+        if ((o.kind === "tree" || o.kind === "rock") && distant && !selected) continue;
         if (!view.overview && !visible(foot, 350)) continue;
         const p = tileToScreen(foot);
         const inside =
@@ -760,13 +778,15 @@ export default function TileScene({
         drawables.push({
           depth: foot.x + foot.y,
           draw: () => {
-            if (o.kind === "tree" && distant) {
+            if ((o.kind === "tree" || o.kind === "rock") && distant) {
               // Its sprite is already in the composite; selection adds only a ring.
               ctx.strokeStyle = "#f3d98c";
               ctx.lineWidth = 2 / view.zoom;
               ctx.beginPath();
               ctx.ellipse(p.x, p.y, 20, 9, 0, 0, Math.PI * 2);
               ctx.stroke();
+            } else if ((o.kind === "tree" || o.kind === "rock") && state.resources[o.id]?.available === false) {
+              depletedProp(o, p);
             } else if (o.kind === "quest") {
               const name =
                 o.id === "quest-forge"
@@ -882,11 +902,7 @@ export default function TileScene({
                 p,
                 w,
                 h,
-                inside
-                  ? 0.18
-                  : state.resources[o.id]?.available === false
-                    ? 0.4
-                    : 1,
+                inside ? 0.18 : 1,
                 !!building,
               );
             } else if (o.kind !== "landmark") {
@@ -1059,6 +1075,40 @@ export default function TileScene({
           });
         }
       }
+      if (!view.overview) for (const effect of liveEffects.current) {
+        const age = time - effect.startedAt;
+        if (age < 0) continue;
+        if (effect.kind === "projectile" && effect.targetPosition && age < 150 && !reduced) {
+          const from = tileToScreen(effect.position), to = tileToScreen(effect.targetPosition), fraction = age / 150;
+          const x = from.x + (to.x - from.x) * fraction, y = from.y + (to.y - from.y) * fraction - 45;
+          const angle = Math.atan2(to.y - from.y, to.x - from.x);
+          drawables.push({ depth: effect.targetPosition.x + effect.targetPosition.y + 0.3, draw: () => {
+            ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+            ctx.strokeStyle = "#674b32"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(8, 0); ctx.stroke();
+            ctx.fillStyle = "#e7dcc2"; ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(5, -3); ctx.lineTo(5, 3); ctx.closePath(); ctx.fill(); ctx.restore();
+          } });
+        }
+        if (effect.kind === "defeat" && effect.targetPosition && age < 600) {
+          const at = tileToScreen(effect.targetPosition);
+          const victim = state.enemies.find(enemy => enemy.id === effect.targetId);
+          const name = effect.targetId === "player" ? "prince" : victim ? `enemy-${victim.definitionId}` : "";
+          if (name) drawables.push({ depth: effect.targetPosition.x + effect.targetPosition.y + 0.15, draw: () => art(name, at, 90, 90, reduced ? 0.3 : 0.7 * (1 - age / 600)) });
+        }
+        const impact = committedImpact(effect);
+        if (impact?.hit && age < 180) {
+          const at = tileToScreen(impact.position);
+          drawables.push({ depth: impact.position.x + impact.position.y + 0.2, draw: () => {
+            ctx.strokeStyle = "#be6957bb"; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(at.x, at.y - 24, 21, 25, 0, 0, Math.PI * 2); ctx.stroke();
+          } });
+        }
+        if (effect.kind === "action-result" && age < 260) {
+          const at = tileToScreen(effect.targetPosition ?? effect.position);
+          drawables.push({ depth: (effect.targetPosition ?? effect.position).x + (effect.targetPosition ?? effect.position).y + 0.2, draw: () => {
+            ctx.fillStyle = effect.success ? "#e7c675" : "#d2c6a8";
+            for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(at.x + (i - 1) * 9, at.y - 20 - (i % 2) * 7, 2.5, 0, Math.PI * 2); ctx.fill(); }
+          } });
+        }
+      }
       drawables.sort((a, b) => a.depth - b.depth).forEach((d) => d.draw());
       if (!view.overview)
         for (const actor of people) {
@@ -1106,23 +1156,25 @@ export default function TileScene({
         }
       ctx.save();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      for (const hit of hitSplats.current) {
-        const age = time - hit.startedAt;
+      for (const effect of liveEffects.current) {
+        const hit = committedImpact(effect);
+        const age = time - effect.startedAt;
+        if (!hit) continue;
         if (age < 0 || age > 1200 || view.overview) continue;
         const at = project(hit.position);
         const y = at.y - 42 - (reduced ? 0 : age / 55);
         ctx.globalAlpha = Math.min(1, (1200 - age) / 250);
-        ctx.fillStyle = "#923c36";
+        ctx.fillStyle = hit.hit ? "#923c36" : "#596765";
         ctx.strokeStyle = "#f7dfbb";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(at.x, y, 14, 0, Math.PI * 2);
+        ctx.ellipse(at.x, y, hit.hit ? 14 : 22, 14, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = "#fff0d7";
         ctx.font = "bold 15px Georgia";
         ctx.textAlign = "center";
-        ctx.fillText(String(hit.damage), at.x, y + 5);
+        ctx.fillText(hit.text, at.x, y + 5);
       }
       ctx.globalAlpha = 1;
       for (const [index, entry] of feedback.slice(-8).entries()) {

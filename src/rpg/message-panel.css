@@ -1,0 +1,181 @@
+.rpg-messages {
+  position: absolute;
+  left: 18px;
+  bottom: 118px;
+  width: min(520px, calc(100% - 36px));
+  z-index: 8;
+  color: #eee3c8;
+  background: #1d3743f2;
+  border: 1px solid #9f8d62;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px #10253038;
+  overflow: hidden;
+  font: 11px/1.45 system-ui;
+}
+.message-heading {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+}
+.message-heading button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  font:
+    12px Georgia,
+    serif;
+  padding: 8px 12px;
+}
+.message-unread {
+  color: #ffe0a0;
+}
+.message-preview {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 10px 4px 0;
+}
+.message-preview p {
+  display: flex;
+  margin: 0;
+  font: inherit;
+  line-height: 17px;
+}
+.message-preview p span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.message-preview b {
+  flex: 0 0 auto;
+  color: #dbba76;
+  margin-left: 3px;
+}
+.rpg-messages.expanded {
+  height: min(320px, 45dvh);
+  display: flex;
+  flex-direction: column;
+}
+.rpg-messages.expanded .message-heading {
+  flex-shrink: 0;
+  min-height: 44px;
+  border-bottom: 1px solid #a48f5b55;
+}
+.message-filters {
+  display: flex;
+  flex-shrink: 0;
+  gap: 3px;
+  padding: 0 6px;
+  border-bottom: 1px solid #a48f5b55;
+}
+.message-filters button {
+  min-height: 44px;
+  color: #e0d6bd;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font: 11px system-ui;
+  padding: 5px 14px;
+}
+.message-filters button[aria-selected="true"] {
+  color: #ffdfa0;
+  box-shadow: inset 0 -2px #cfb376;
+}
+.message-history {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 6px 12px;
+  scrollbar-color: #ad9664 #223c46;
+}
+.message-history p {
+  margin: 4px 0 9px;
+  font: 12px/1.5 system-ui;
+  overflow-wrap: anywhere;
+}
+.message-history small {
+  display: block;
+  color: #b6c9c4;
+  font: 9px/1.4 system-ui;
+  letter-spacing: 0.6px;
+}
+.message-history p[data-category="dialogue"] {
+  color: #e7d3aa;
+}
+.message-history b {
+  color: #dfbc76;
+}
+.message-blocker {
+  color: #f0c0a2;
+}
+.message-empty {
+  opacity: 0.75;
+}
+.rpg-shell .thought-peek {
+  left: auto;
+  right: 18px;
+  bottom: 166px;
+  max-width: calc(100vw - 560px);
+}
+.rpg-shell[data-panel-open="true"] .rpg-messages {
+  display: none;
+}
+.rpg-shell[data-panel-open="true"] .thought-peek {
+  left: 18px;
+  right: auto;
+  bottom: 118px;
+}
+@media (max-width: 760px) {
+  .rpg-messages {
+    left: 10px;
+    bottom: 140px;
+    width: auto;
+    max-width: calc(100% - 20px);
+  }
+  .message-preview {
+    display: none;
+  }
+  .rpg-messages.expanded {
+    right: 10px;
+    width: auto;
+  }
+  .rpg-shell .thought-peek {
+    right: 10px;
+    bottom: 140px;
+    max-width: calc(100vw - 150px);
+    padding: 6px 8px;
+    font-size: 11px;
+    gap: 5px;
+  }
+  .rpg-shell .thought-peek span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .rpg-shell[data-messages-open="true"] .thought-peek {
+    bottom: calc(140px + min(320px, 45dvh) + 8px);
+  }
+  .rpg-shell[data-panel-open="true"] .thought-peek {
+    left: auto;
+    right: 10px;
+    top: 88px;
+    bottom: auto;
+  }
+}
+@media (max-height: 500px) and (min-width: 761px) {
+  .rpg-messages {
+    bottom: 118px;
+    width: min(360px, calc(100vw - 440px));
+  }
+  .rpg-shell .thought-peek {
+    bottom: 170px;
+  }
+  .rpg-shell .camera-controls {
+    bottom: 118px;
+  }
+  .rpg-shell[data-panel-open="true"] .thought-peek {
+    bottom: 118px;
+  }
+}

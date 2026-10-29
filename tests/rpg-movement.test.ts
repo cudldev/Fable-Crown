@@ -163,7 +163,7 @@ describe("V5 copy migration and strict new fields", () => {
     reconcileRpg(migrated, NOW + 24000); reconcileRpg(loaded, NOW + 24000); expect(loaded).toEqual(migrated); valid(loaded);
   });
   it("requires all native V5 fields and validates bounded sequenced effect/message schemas without emitting any", () => {
-    const s = fresh(); stepRpg(s, 100); expect(s.effects).toEqual([]); expect(s.messages).toEqual([]); valid(s);
+    const s = fresh(); accept(s, { type: "wait" }); stepRpg(s, 100); expect(s.effects).toEqual([]); expect(s.messages).toEqual([]); valid(s);
     for (const mutate of [
       (state: RpgState) => { delete (state as Partial<RpgState>).effects; },
       (state: RpgState) => { state.effectSequence = -1; },

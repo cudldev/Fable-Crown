@@ -3,7 +3,7 @@ import { createRpg } from "../src/rpg/engine";
 import { actorAtlas } from "../src/render/actor-atlas";
 import type { ActorState, TilePosition } from "../src/rpg/types";
 import { tile } from "../src/rpg/world";
-import { actorFrameGeometry, actorFrameKey, observeActorMotion, resolveActorFrameKey, sampleActorMotion } from "../src/render/presentation";
+import { actorFrameGeometry, actorFrameKey, observeActorMotion, observeFootstep, resolveActorFrameKey, sampleActorMotion } from "../src/render/presentation";
 
 function actorAt(position: TilePosition): ActorState {
   return { ...createRpg(0).player, position, previousPosition: position, movement: null, path: [], action: null };
@@ -12,6 +12,52 @@ function moving(actor: ActorState, tick: number, mode: "walk" | "run", ...destin
   return { ...actor, previousPosition: actor.position, position: destinations.at(-1)!, movement: { tick, mode, tiles: [actor.position, ...destinations] } };
 }
 describe("legal movement presentation", () => {
+  it("emits one rendered foot contact at final arrival, then remains silent while idle", () => {
+    const actor = actorAt(tile(10, 10)), initial = observeActorMotion(actor, 0, 0, 0);
+    const walk = moving(actor, 1, "walk", tile(11, 10));
+    const timeline = observeActorMotion(walk, 1, 0, 600, initial);
+    let contact = observeFootstep(undefined, sampleActorMotion(timeline, 600), timeline, 0);
+    expect(contact.mode).toBeNull();
+    contact = observeFootstep(contact.cursor, sampleActorMotion(timeline, 1190), timeline, 0);
+    expect(contact.mode).toBeNull();
+    contact = observeFootstep(contact.cursor, sampleActorMotion(timeline, 1200), timeline, 0);
+    expect(contact.mode).toBe("walk");
+    expect(observeFootstep(contact.cursor, sampleActorMotion(timeline, 1500), timeline, 0).mode).toBeNull();
+    expect(observeFootstep(undefined, sampleActorMotion(timeline, 1500), timeline, 0).mode).toBeNull();
+  });
+  it("uses the completed carry segment's run mode at a transition into walking", () => {
+    const actor = actorAt(tile(10, 10)), initial = observeActorMotion(actor, 0, 0, 0);
+    const run = moving(actor, 1, "run", tile(11, 10), tile(11, 11));
+    const first = observeActorMotion(run, 1, 0, 600, initial);
+    const baseline = observeFootstep(undefined, sampleActorMotion(first, 1100), first, 0);
+    const walk = moving(run, 2, "walk", tile(12, 11));
+    const second = observeActorMotion(walk, 2, 0, 1100, first);
+    const contact = observeFootstep(baseline.cursor, sampleActorMotion(second, 1200), second, 0);
+    expect(sampleActorMotion(second, 1200).mode).toBe("walk");
+    expect(contact.mode).toBe("run");
+    expect(observeFootstep(contact.cursor, sampleActorMotion(second, 1200), second, 0).mode).toBeNull();
+  });
+  it("does not lose a final contact when the next stationary snapshot arrives before its render", () => {
+    const actor = actorAt(tile(10, 10)), initial = observeActorMotion(actor, 0, 0, 0);
+    const walk = moving(actor, 1, "walk", tile(11, 10));
+    const first = observeActorMotion(walk, 1, 0, 600, initial);
+    const baseline = observeFootstep(undefined, sampleActorMotion(first, 1190), first, 0);
+    const still = { ...walk, previousPosition: walk.position, movement: null };
+    const next = observeActorMotion(still, 2, 0, 1200, first);
+    expect(observeFootstep(baseline.cursor, sampleActorMotion(next, 1200), next, 0).mode).toBe("walk");
+  });
+  it("baselines foot contacts on epoch/gap/teleport and skips multi-step gait jumps", () => {
+    const actor = actorAt(tile(10, 10)), initial = observeActorMotion(actor, 0, 0, 0);
+    const run = moving(actor, 1, "run", tile(11, 10), tile(11, 11));
+    const first = observeActorMotion(run, 1, 0, 600, initial);
+    const baseline = observeFootstep(undefined, sampleActorMotion(first, 600), first, 0);
+    expect(observeFootstep(baseline.cursor, sampleActorMotion(first, 1200), first, 0).mode).toBeNull();
+    expect(observeFootstep(baseline.cursor, sampleActorMotion(first, 900), first, 1).mode).toBeNull();
+    const gap = observeActorMotion(run, 4, 0, 1200, first);
+    expect(observeFootstep(baseline.cursor, sampleActorMotion(gap, 1200), gap, 0).mode).toBeNull();
+    const teleport = observeActorMotion({ ...run, position: tile(100, 100), movement: null }, 2, 0, 1200, first);
+    expect(observeFootstep(baseline.cursor, sampleActorMotion(teleport, 1200), teleport, 0).mode).toBeNull();
+  });
   it("carries an early adjacent walking snapshot through the old corner at constant speed", () => {
     const actor = actorAt(tile(10, 10));
     const initial = observeActorMotion(actor, 0, 0, 0);

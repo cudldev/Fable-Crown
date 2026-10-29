@@ -1,0 +1,2 @@
+Use case: background-extraction. Edit the supplied six-character proof sheet: remove the entire painted backdrop and all floor shading to actual fully transparent RGBA alpha. Preserve each character, pose, tool, composition, painterly edges and proportions exactly. No checkerboard, no colored halo, no shadow. Only remove background.
+Built-in image_gen; transparent_background=true; reference work-se-cut-mine-proof-original.png. Unneeded correction; original was already transparent.

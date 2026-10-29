@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { RpgState } from "./types";
-import { objectById, riverAt } from "./world";
+import { riverAt } from "./world";
 type Settings = { muted: boolean; volume: number };
 const defaults: Settings = { muted: false, volume: 0.15 };
 export function useGameAudio(state: RpgState | null, epoch: number) {
@@ -122,44 +122,23 @@ export function useGameAudio(state: RpgState | null, epoch: number) {
       state.tick - prior.state.tick > 4
     )
       return;
-    const p = state.player,
-      old = prior.state.player,
-      steps = Math.max(
-        Math.abs(p.position.x - old.position.x),
-        Math.abs(p.position.y - old.position.y),
-      );
-    if (steps > 0 && steps <= 2) {
-      tone(95, 0.045);
-      if (steps === 2) tone(115, 0.045, 0.16);
-    }
-    if (
-      p.action &&
-      (!old.action ||
-        p.action.remaining > old.action.remaining ||
-        p.action.targetId !== old.action.targetId)
-    ) {
-      const kind = objectById(p.action.targetId ?? "")?.kind;
-      tone(
-        p.action.kind === "craft"
-          ? 620
-          : p.action.kind === "fight"
-            ? 160
-            : kind === "rock"
-              ? 1050
-              : kind === "tree"
-                ? 270
-                : 190,
-        0.075,
-        0,
-        "triangle",
-      );
+    const p = state.player;
+    for (const effect of state.effects.filter(
+      (effect) => effect.id > prior.state.effectSequence,
+    )) {
+      if (effect.kind === "projectile") tone(660, 0.055, 0, "triangle");
+      if (effect.kind === "hit" && (effect.amount ?? 0) > 0)
+        tone(effect.targetId === "player" ? 130 : 180, 0.09, 0, "triangle");
+      if (effect.kind === "defeat") {
+        tone(120, 0.13);
+        tone(80, 0.15, 0.08);
+      }
     }
     const seen = new Set(prior.state.rewards?.map((r) => r.id));
     if (state.rewards?.some((r) => !seen.has(r.id))) {
       tone(880, 0.09);
       tone(1175, 0.12, 0.07);
     }
-    if (p.health < old.health) tone(130, 0.12, 0, "triangle");
     if (filter.current && ctx.current)
       filter.current.frequency.setTargetAtTime(
         Math.abs(p.position.x - riverAt(p.position.y).center) < 7 ? 700 : 250,
@@ -179,6 +158,17 @@ export function useGameAudio(state: RpgState | null, epoch: number) {
     settings,
     unlocked,
     available,
+    workContact: (kind: string) => {
+      const frequencies: Record<string, number> = {
+        mine: 1050,
+        cut: 270,
+        fish: 190,
+        smith: 620,
+        cook: 330,
+      };
+      if (frequencies[kind]) tone(frequencies[kind], 0.065, 0, "triangle");
+    },
+    footstep: (mode: "walk" | "run") => tone(mode === "run" ? 115 : 95, 0.045),
     setMuted: (muted: boolean) => setSettings((s) => ({ ...s, muted })),
     setVolume: (volume: number) =>
       setSettings((s) => ({ ...s, volume: Math.max(0, Math.min(1, volume)) })),

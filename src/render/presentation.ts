@@ -4,6 +4,7 @@ import type {
   TilePosition,
   WorldObject,
   MovementTrace,
+  SimulationEffect,
 } from "../rpg/types";
 import type { ActorAtlasFrame, Facing } from "./actor-atlas";
 
@@ -31,6 +32,7 @@ export interface MotionTimeline {
   tick: number; epoch: number; at: number; signature: string;
   position: TilePosition; trace: MovementTrace | null; gaitBase: number; facing: Facing;
   segments: MotionSegment[];
+  discontinuous: boolean;
 }
 export interface MotionSegment { from: TilePosition; to: TilePosition; mode: "walk" | "run"; at: number; gaitStart: number }
 const segmentDuration = (segment: Pick<MotionSegment, "mode">) => segment.mode === "run" ? 300 : 600;
@@ -63,6 +65,7 @@ export function observeActorMotion(actor: ActorState, tick: number, epoch: numbe
   const previousSteps = previous?.trace ? previous.trace.tiles.length - 1 : 0;
   const gaitBase = connected ? previous.gaitBase + previousSteps : 0;
   let carry = connected ? previous.segments.filter(segment => segmentEnd(segment) > now) : [];
+  const droppedCarry = carry.length > 2;
   if (carry.length > 2) {
     // Bound backlog to two old legal steps; discard older debt rather than growing latency.
     let at = now;
@@ -81,7 +84,7 @@ export function observeActorMotion(actor: ActorState, tick: number, epoch: numbe
   }
   return {
     tick, epoch, at: now, signature, position: { ...actor.position }, trace,
-    gaitBase, segments,
+    gaitBase, segments, discontinuous: !connected || droppedCarry,
     facing: previous?.segments.length ? facingFromMotion(previous.segments.at(-1)!.from, previous.segments.at(-1)!.to, previous.facing) : previous?.facing ?? "se",
   };
 }
@@ -93,6 +96,21 @@ export function sampleActorMotion(timeline: MotionTimeline, now: number, reduced
   const { from, to } = segment;
   const position = reducedMotion ? timeline.position : { x: from.x + (to.x - from.x) * progress, y: from.y + (to.y - from.y) * progress };
   return { position, facing: facingFromMotion(from, to, timeline.facing), moving: !reducedMotion && now < segmentEnd(last), mode: segment.mode, gaitDistance: segment.gaitStart + progress };
+}
+
+export interface FootstepCursor { epoch: number; timeline: MotionTimeline; distance: number }
+/** Contact is a rendered tile crossing, including the frame that reaches final idle. */
+export function observeFootstep(previous: FootstepCursor | undefined, sample: MotionSample, timeline: MotionTimeline, epoch: number) {
+  const cursor = { epoch, timeline, distance: sample.gaitDistance };
+  if (!previous || previous.epoch !== epoch || timeline.tick < previous.timeline.tick || timeline.tick > previous.timeline.tick + 1 ||
+    (timeline !== previous.timeline && timeline.discontinuous)) return { cursor, mode: null };
+  const delta = sample.gaitDistance - previous.distance;
+  const crossed = Math.floor(sample.gaitDistance) - Math.floor(previous.distance);
+  if (delta < 0 || delta > 1 || crossed !== 1) return { cursor, mode: null };
+  const completed = timeline.segments.find(segment => segment.gaitStart + 1 === Math.floor(sample.gaitDistance)) ??
+    previous.timeline.segments.find(segment => segment.gaitStart + 1 === Math.floor(sample.gaitDistance));
+  // At a mode transition the new active segment can differ from the completed one.
+  return { cursor, mode: completed?.mode ?? null };
 }
 
 /** Body scale and anatomical ground anchor remain unchanged by the bake resolution. */
@@ -111,6 +129,7 @@ export function resolveActorFrameKey(key: string, frames: Readonly<Record<string
   const facing = diagonalFacing(direction as Facing);
   const candidate = `${facing}:${pose}${index === undefined ? "" : `:${index}`}`;
   if (frames[candidate]) return candidate;
+  if (frames[`${facing}:${pose}`]) return `${facing}:${pose}`;
   if (pose === "walk" || pose === "run") {
     const oldWalk = `${facing}:walk:${Number(index ?? 0) % 3}`;
     if (frames[oldWalk]) return oldWalk;
@@ -151,7 +170,40 @@ export function actorFrameKey(
   if (actor.path.length) return `${facing}:idle`;
   const pose = actionPose(actor, target);
   const actionFacing = pose === "idle" ? facing : diagonalFacing(facing);
-  return `${actionFacing}:${reducedMotion || Math.floor(Math.max(0, elapsedMs) / 280) % 2 === 0 ? pose : "idle"}`;
+  const stroke = workStroke(actor, 0, elapsedMs, target, motion);
+  return pose === "idle" ? `${facing}:idle` : `${actionFacing}:${pose}:${reducedMotion ? "contact" : stroke?.phase ?? "prepare"}`;
+}
+
+export interface WorkStroke { key: string; pose: string; phase: "prepare" | "contact" | "recover" }
+/** A stroke follows the authoritative action cycle; no phase creates an outcome. */
+export function workStroke(actor: ActorState, tick: number, elapsedMs: number, target?: WorldObject, motion?: MotionSample): WorkStroke | null {
+  const action = actor.action, pose = actionPose(actor, target);
+  if (!action || pose === "idle" || actor.path.length || motion?.moving) return null;
+  const progress = Math.max(0, Math.min(1, (action.duration - action.remaining + Math.max(0, Math.min(600, elapsedMs)) / 600) / Math.max(1, action.duration)));
+  return { key: `${tick - (action.duration - action.remaining)}:${action.kind}:${action.targetId ?? ""}:${action.recipeId ?? ""}:${action.duration}`, pose,
+    phase: progress < 0.45 ? "prepare" : progress < 0.7 ? "contact" : "recover" };
+}
+export interface WorkContactCursor { epoch: number; stroke: WorkStroke | null; contacted: boolean }
+export function observeWorkContact(previous: WorkContactCursor | undefined, stroke: WorkStroke | null, epoch: number) {
+  const same = previous?.epoch === epoch && previous.stroke?.key === stroke?.key;
+  const contact = !!stroke && !!same && !previous.contacted && previous.stroke?.phase === "prepare" && stroke.phase !== "prepare";
+  return { cursor: { epoch, stroke, contacted: same ? previous.contacted || contact : stroke?.phase !== "prepare" }, contact };
+}
+export interface EffectCursor { tick: number; epoch: number; sequence: number; calendar: string; position: TilePosition }
+export function consumeEffects(state: RpgState, epoch: number, previous?: EffectCursor): { cursor: EffectCursor; effects: SimulationEffect[]; reset: boolean } {
+  const cursor = { tick: state.tick, epoch, sequence: state.effectSequence, calendar: state.calendar, position: { ...state.player.position } };
+  const discontinuity = !previous || previous.epoch !== epoch || state.tick < previous.tick || state.tick > previous.tick + 1 || previous.calendar !== state.calendar || state.effectSequence < previous.sequence;
+  if (discontinuity) return { cursor, effects: [], reset: true };
+  const teleported = previous.position.worldId !== cursor.position.worldId || previous.position.plane !== cursor.position.plane || Math.max(Math.abs(previous.position.x - cursor.position.x), Math.abs(previous.position.y - cursor.position.y)) > 2;
+  return { cursor, reset: teleported, effects: state.effects.filter(effect => effect.id > previous.sequence && effect.id <= state.effectSequence && effect.tick === state.tick) };
+}
+export function committedImpact(effect: SimulationEffect): { position: TilePosition; text: string; hit: boolean } | null {
+  if (effect.kind !== "hit" || !effect.targetPosition) return null;
+  const hit = effect.success === true && (effect.amount ?? 0) > 0;
+  return { position: effect.targetPosition, text: hit ? String(effect.amount) : "Miss", hit };
+}
+export function resourceArt(kind: WorldObject["kind"], available: boolean, original: string): string {
+  return available ? original : kind === "tree" ? "prop-stump" : kind === "rock" ? "prop-exhausted-ore" : original;
 }
 
 export interface HealthObservation {

@@ -28,7 +28,7 @@ import {
   tile,
   FERRIES,
 } from "./world";
-import { startingSkills, levelForXp, XP_THRESHOLDS } from "./skills";
+import { startingSkills, levelForXp, XP_THRESHOLDS, skillName } from "./skills";
 import { ITEMS, RESOURCES, RECIPES, SHOPS, ENEMIES, QUESTS } from "./content";
 import {
   addItems,
@@ -38,6 +38,7 @@ import {
   itemCount,
 } from "./inventory";
 import { goalMet, goalSteps, suggestGoals } from "./planning";
+import { appendGameMessage, appendSimulationEffect } from "./events";
 
 export const calendarDate = (now: number) => {
   const d = new Date(now);
@@ -380,10 +381,12 @@ function finish(s: RpgState, message?: string) {
   }
 }
 function pulse(
+  s: RpgState,
   p: ActorState,
   kind: "gather" | "craft",
   id: string,
   ticks: number,
+  target: WorldObject,
 ): boolean {
   if (
     p.action?.kind !== kind ||
@@ -395,6 +398,8 @@ function pulse(
       duration: ticks,
       remaining: ticks,
     };
+    if (p.id === 0) appendSimulationEffect(s, { kind: "action-start", actorId: "player", position: p.position,
+      targetId: target.id, targetPosition: target.position, actionKind: kind });
   }
   p.action.remaining--;
   if (p.action.remaining > 0) return false;
@@ -437,7 +442,7 @@ function gather(s: RpgState, p: ActorState, target: WorldObject): boolean {
   const duration =
     r.skill === "mining" ? r.ticks - ((tool.tier ?? 1) - 1) : r.ticks;
   p.activity = `Gathering ${r.name}`;
-  if (!pulse(p, "gather", target.id, duration)) return false;
+  if (!pulse(s, p, "gather", target.id, duration, target)) return false;
   if (p.id !== 0)
     p.action = {
       kind: "gather",
@@ -453,7 +458,11 @@ function gather(s: RpgState, p: ActorState, target: WorldObject): boolean {
             (levelForXp(p.skills.woodcutting) - r.level) * 0.005,
         )
       : r.success;
-  if (random(s) >= chance) return false;
+  if (random(s) >= chance) {
+    if (p.id === 0) appendSimulationEffect(s, { kind: "action-result", actorId: "player", position: p.position,
+      targetId: target.id, targetPosition: target.position, actionKind: "gather", success: false, amount: 0 });
+    return false;
+  }
   if (
     !exchangeItems(
       p.inventory,
@@ -461,8 +470,14 @@ function gather(s: RpgState, p: ActorState, target: WorldObject): boolean {
       [{ itemId: r.itemId, quantity: 1 }],
     )
   )
-    return false;
-  const xp = award(p, r.skill, r.xp);
+    {
+      if (p.id === 0) appendSimulationEffect(s, { kind: "action-result", actorId: "player", position: p.position,
+        targetId: target.id, targetPosition: target.position, actionKind: "gather", success: false, amount: 0 });
+      return false;
+    }
+  if (p.id === 0) appendSimulationEffect(s, { kind: "action-result", actorId: "player", position: p.position,
+    targetId: target.id, targetPosition: target.position, actionKind: "gather", success: true, amount: 1 });
+  const xp = award(s, p, r.skill, r.xp);
   reward(s, p, [{ itemId: r.itemId, quantity: 1 }], { [r.skill]: xp });
   p.completed++;
   if (random(s) < r.depletion)
@@ -552,9 +567,12 @@ export function stationAvailable(s: RpgState, o: WorldObject) {
     ) && !(o.id === "briarford-range" && !s.quests.supper?.complete)
   );
 }
-function award(p: ActorState, skill: SkillId, xp: number) {
-  const before = p.skills[skill];
+function award(s: RpgState, p: ActorState, skill: SkillId, xp: number) {
+  const before = p.skills[skill], previousLevel = levelForXp(before);
   p.skills[skill] = Math.min(2_000_000_000, p.skills[skill] + xp);
+  const level = levelForXp(p.skills[skill]);
+  if (p.id === 0 && level > previousLevel)
+    appendGameMessage(s, "event", `level-${skill}-${level}`, `${skillName(skill)} reached level ${level}.`);
   return p.skills[skill] - before;
 }
 function reward(
@@ -596,9 +614,17 @@ function journal(s: RpgState, message: string) {
   s.journal.push(message);
   s.journal = s.journal.slice(-60);
 }
-function defeat(s: RpgState) {
+function discover(s: RpgState, id: string, name: string) {
+  if (s.control.visited.includes(id)) return;
+  s.control.visited.push(id);
+  appendGameMessage(s, "event", `discovery-${id}`, `Discovered ${name}.`);
+}
+function defeat(s: RpgState, enemy: EnemyState) {
   const p = s.player,
     items = s.grave?.items.map((i) => ({ ...i })) ?? [];
+  appendSimulationEffect(s, { kind: "defeat", actorId: enemy.id, position: enemy.position,
+    targetId: "player", targetPosition: p.position, actionKind: "fight", success: true });
+  appendGameMessage(s, "event", "defeat-player", `Alden was defeated by ${ENEMIES[enemy.definitionId].name}. Equipped gear and experience are safe; recover the backpack.`);
   for (const i of p.inventory) addItems(items, i.itemId, i.quantity, Infinity);
   s.grave = items.length
     ? { position: { ...p.position }, items, attempts: 0, retryAt: s.tick + 10 }
@@ -656,6 +682,13 @@ function attackRoute(s: RpgState, p: ActorState, e: EnemyState): TilePosition[] 
   for (const next of candidates) { const path = findPath(p.position, next, worldForState(s)); if (path) return path; }
   return null;
 }
+function actorApproachRoute(s: RpgState, actorId: number): TilePosition[] | null {
+  const target = s.npcs.find((actor) => actor.id === actorId);
+  if (!target || target.health <= 0) return null;
+  if (distance(s.player.position, target.position) <= 1 && lineOfSight(s, s.player.position, target.position)) return [];
+  const path = findPath(s.player.position, target.position, worldForState(s));
+  return path ? path.slice(0, -1) : null;
+}
 function fight(s: RpgState, id: string) {
   const p = s.player,
     e = s.enemies.find((e) => e.id === id);
@@ -683,8 +716,11 @@ function fight(s: RpgState, id: string) {
     return;
   }
   const duration = attackDuration(p, s.control.style);
-  if (p.action?.kind !== "fight" || p.action.targetId !== id)
+  if (p.action?.kind !== "fight" || p.action.targetId !== id) {
     p.action = { kind: "fight", targetId: id, duration, remaining: duration };
+    appendSimulationEffect(s, { kind: "action-start", actorId: "player", position: p.position,
+      targetId: e.id, targetPosition: e.position, actionKind: "fight" });
+  }
   p.activity = `Fighting ${ENEMIES[e.definitionId].name} · ${s.control.style}`;
   if (--p.action.remaining > 0) return;
   p.action = null;
@@ -711,6 +747,7 @@ function fight(s: RpgState, id: string) {
         (2 * (ENEMIES[e.definitionId].defence + 8)),
     ),
   );
+  let damage = 0;
   if (random(s) < chance) {
     const maximum =
       1 +
@@ -719,15 +756,22 @@ function fight(s: RpgState, id: string) {
           ((bow ? (weapon.rangedStrength ?? 0) + (ammunition?.rangedStrength ?? 0) : weapon?.strength ?? 0) + 64)) /
           640,
       );
-    const damage = Math.min(e.health, 1 + Math.floor(random(s) * maximum));
+    damage = Math.min(e.health, 1 + Math.floor(random(s) * maximum));
     e.health -= damage;
     const skill: SkillId = bow ? "ranged" : ["attack", "strength", "defence"].includes(s.control.style) ? s.control.style as SkillId : "attack";
-    const xp = award(p, skill, damage * (bow && s.control.style === "longrange" ? 20 : 40));
-    const defenceXp = bow && s.control.style === "longrange" ? award(p, "defence", damage * 20) : 0;
-    const hpXp = award(p, "hitpoints", Math.round((damage * 40) / 3));
+    const xp = award(s, p, skill, damage * (bow && s.control.style === "longrange" ? 20 : 40));
+    const defenceXp = bow && s.control.style === "longrange" ? award(s, p, "defence", damage * 20) : 0;
+    const hpXp = award(s, p, "hitpoints", Math.round((damage * 40) / 3));
     reward(s, p, [], { [skill]: xp, ...(defenceXp ? { defence: defenceXp } : {}), hitpoints: hpXp });
   }
+  if (bow) appendSimulationEffect(s, { kind: "projectile", actorId: "player", position: p.position,
+    targetId: e.id, targetPosition: e.position, actionKind: "fight", success: damage > 0, amount: damage });
+  appendSimulationEffect(s, { kind: "hit", actorId: "player", position: p.position,
+    targetId: e.id, targetPosition: e.position, actionKind: "fight", success: damage > 0, amount: damage });
   if (e.health === 0) {
+    appendSimulationEffect(s, { kind: "defeat", actorId: "player", position: p.position,
+      targetId: e.id, targetPosition: e.position, actionKind: "fight", success: true });
+    appendGameMessage(s, "event", `defeat-${e.definitionId}`, `Defeated ${ENEMIES[e.definitionId].name}.`);
     e.respawnAt = s.tick + ENEMIES[e.definitionId].respawnTicks;
     e.cooldown = 0;
     e.engagedUntil = 0;
@@ -793,6 +837,8 @@ function enemyStep(s: RpgState) {
     }
     if (e.cooldown) continue;
     e.cooldown = d.attackTicks;
+    appendSimulationEffect(s, { kind: "action-start", actorId: e.id, position: e.position,
+      targetId: "player", targetPosition: p.position, actionKind: "fight" });
     const armour = Object.values(p.equipment).reduce(
       (n, id) => n + (ITEMS[id!]?.defence ?? 0),
       0,
@@ -804,10 +850,16 @@ function enemyStep(s: RpgState) {
         (d.attack + 8) / (2 * (levelForXp(p.skills.defence) + 8 + armour)),
       ),
     );
+    const before = p.health;
     if (random(s) < chance)
       p.health = Math.max(0, p.health - (1 + Math.floor(random(s) * d.maxHit)));
+    const damage = before - p.health;
+    if (d.combatType === "ranged") appendSimulationEffect(s, { kind: "projectile", actorId: e.id, position: e.position,
+      targetId: "player", targetPosition: p.position, actionKind: "fight", success: damage > 0, amount: damage });
+    appendSimulationEffect(s, { kind: "hit", actorId: e.id, position: e.position,
+      targetId: "player", targetPosition: p.position, actionKind: "fight", success: damage > 0, amount: damage });
     if (!p.health) {
-      defeat(s);
+      defeat(s, e);
       break;
     }
   }
@@ -863,15 +915,20 @@ function recover(s: RpgState) {
     distance(p.position, grave.position) <= 7 &&
     lineOfSight(s, p.position, grave.position)
   ) {
+    const previousQuantity = grave.items.reduce((sum, item) => sum + item.quantity, 0);
     takeStacks(p.inventory, grave.items);
     if (!grave.items.length) {
       s.grave = null;
+      appendGameMessage(s, "event", "recovery-complete", "Recovered every backpack belonging.");
       finish(s, "Recovered every backpack belonging");
-    } else
+    } else {
+      if (grave.items.reduce((sum, item) => sum + item.quantity, 0) < previousQuantity)
+        appendGameMessage(s, "event", "recovery-partial", "Recovered what fits. Remaining belongings are safe at the grave.");
       finish(
         s,
         "Recovered what fits; remaining belongings stay safely in the grave",
       );
+    }
     return;
   }
   const path = recoveryRoute(s);
@@ -882,6 +939,7 @@ function recover(s: RpgState) {
   }
   grave.attempts++;
   grave.retryAt = s.tick + Math.min(200, 20 * grave.attempts);
+  appendGameMessage(s, "event", "recovery-blocked", "No safe recovery route yet. The backpack remains safely at the grave.");
   finish(s, "No safe recovery route yet; waiting before trying again");
 }
 export function currentQuestStage(s: RpgState, id: string): QuestStage | undefined {
@@ -929,6 +987,7 @@ function advanceStage(s: RpgState, id: string) {
   const q = QUESTS[id], progress = s.quests[id], stage = currentQuestStage(s, id);
   if (!stage) return;
   progress.stageId = stage.next ?? q.stages?.[(q.stages?.findIndex((candidate) => candidate.id === stage.id) ?? -1) + 1]?.id ?? "ready";
+  appendGameMessage(s, "event", `quest-stage-${id}-${stage.id}`, `${q.name}: completed — ${stage.description}`);
   if (s.dialogue?.questId === id) s.dialogue = null;
   s.control.steps = goalSteps(s, { id: `quest-${id}`, title: q.name, kind: "quest", questId: id });
 }
@@ -939,6 +998,8 @@ function chooseDialogue(s: RpgState, choiceId: string) {
   if (!choice || stage?.kind !== "choice") return false;
   const p = s.quests[dialogue.questId];
   (p.choices ??= {})[stage.id] = choice.id; p.stageId = choice.next;
+  appendGameMessage(s, "dialogue", `quest-choice-${dialogue.questId}-${stage.id}-${choice.id}`, `Alden: ${choice.label}.`);
+  appendGameMessage(s, "event", `quest-stage-${dialogue.questId}-${stage.id}`, `${QUESTS[dialogue.questId].name}: chose ${choice.label}.`);
   journal(s, `${QUESTS[dialogue.questId].name}: ${choice.label}`); s.dialogue = null;
   return true;
 }
@@ -953,6 +1014,7 @@ function questInteraction(s: RpgState, object: WorldObject, verb: "talk" | "insp
       stage.kind === "deliver" && (verb === "talk" || verb === "use");
     if (!legal) continue;
     if (stage.kind === "choice") {
+      appendGameMessage(s, "dialogue", `quest-dialogue-${id}-${stage.id}`, `${object.name}: ${stage.description}`);
       s.dialogue ??= { id: `${id}-${stage.id}-${s.tick}`, questId: id, targetId: object.id, text: stage.description,
         choices: stage.choices!.map(({ id: choice, label }) => ({ id: choice, label })), expiresAt: s.tick + 34 };
       finish(s, stage.description); return;
@@ -964,20 +1026,28 @@ function questInteraction(s: RpgState, object: WorldObject, verb: "talk" | "insp
         finish(s, "Bring the requested supplies and make room for the commission."); return;
       }
       reward(s, p, outputs, {});
+      appendGameMessage(s, "dialogue", `quest-dialogue-${id}-${stage.id}`, `${object.name}: I received the requested supplies. Thank you, Alden.`);
       (progress.counters ??= {})[`delivered-${stage.id}`] = 1;
     }
     if (stage.kind === "practice") {
       if (!itemCount(p.inventory, "training-bow") || !itemCount(p.inventory, "training-arrow")) {
         finish(s, "Bring the commissioned practice bow and blunt arrows."); return;
       }
-      if (p.action?.kind !== "practice" || p.action.targetId !== object.id)
+      if (p.action?.kind !== "practice" || p.action.targetId !== object.id) {
         p.action = { kind: "practice", targetId: object.id, duration: 4, remaining: 4 };
+        appendSimulationEffect(s, { kind: "action-start", actorId: "player", position: p.position,
+          targetId: object.id, targetPosition: object.position, actionKind: "practice" });
+      }
       p.activity = "Practising a measured bow shot";
       if (--p.action.remaining > 0) return;
       p.action = null; p.completed++;
+      appendSimulationEffect(s, { kind: "action-result", actorId: "player", position: p.position,
+        targetId: object.id, targetPosition: object.position, actionKind: "practice", success: true, amount: 1 });
       (progress.counters ??= {})[stage.id] = (progress.counters?.[stage.id] ?? 0) + 1;
       if (progress.counters[stage.id] < (stage.quantity ?? 1)) { finish(s, "Practice cycle complete"); return; }
     }
+    if (stage.kind === "talk") appendGameMessage(s, "dialogue", `quest-dialogue-${id}-${stage.id}`,
+      `${object.name}: Your work on ${QUESTS[id].name} is complete. Thank you, Alden.`);
     advanceStage(s, id); finish(s, stage.description);
     if (progress.stageId === "ready") questAction(s, id);
     return;
@@ -996,9 +1066,12 @@ function questAction(s: RpgState, id: string) {
   if (!route(s, p, objectById(q.giverId)!)) return;
   if (!state.accepted) {
     if (q.prerequisites?.some((required) => !s.quests[required]?.complete)) {
+      appendGameMessage(s, "dialogue", `quest-prerequisites-${id}`, `${objectById(q.giverId)!.name}: First complete ${q.prerequisites.map((required) => QUESTS[required].name).join(", ")}.`);
       finish(s, `First complete ${q.prerequisites.map((required) => QUESTS[required].name).join(", ")}.`); return;
     }
     state.accepted = true;
+    appendGameMessage(s, "event", `quest-accepted-${id}`, `Accepted: ${q.name}.`);
+    appendGameMessage(s, "dialogue", `quest-offer-${id}`, `${objectById(q.giverId)!.name}: ${q.description}`);
     journal(s, `Accepted: ${q.name}`);
     finish(s, `Accepted ${q.name}. Gather the requested supplies.`);
     return;
@@ -1007,7 +1080,10 @@ function questAction(s: RpgState, id: string) {
   if (stage) {
     if (stage.targetId === q.giverId && ["talk", "deliver", "choice"].includes(stage.kind))
       questInteraction(s, objectById(q.giverId)!, "talk");
-    else finish(s, stage.description);
+    else {
+      appendGameMessage(s, "dialogue", `quest-reminder-${id}-${stage.id}`, `${objectById(q.giverId)!.name}: ${stage.description}`);
+      finish(s, stage.description);
+    }
     return;
   }
   const requirements = Object.entries(q.requirements ?? {}).every(
@@ -1035,15 +1111,31 @@ function questAction(s: RpgState, id: string) {
   state.stageId = "complete";
   const gains: Partial<Record<SkillId, number>> = {};
   for (const [skill, xp] of Object.entries(q.reward.xp))
-    gains[skill as SkillId] = award(p, skill as SkillId, xp!);
+    gains[skill as SkillId] = award(s, p, skill as SkillId, xp!);
   reward(s, p, [{ itemId: "coins", quantity: q.reward.coins },
     ...(id === "bowyer" ? [{ itemId: "shortbow", quantity: 1 }] : []),
     ...(id === "watch" ? [{ itemId: "watch-token", quantity: 1 }] : [])], gains);
   journal(s, `Completed: ${q.name}. Unlocked ${q.reward.unlock}.`);
+  appendGameMessage(s, "event", `quest-completed-${id}`, `Completed: ${q.name}. Unlocked ${q.reward.unlock.replaceAll("-", " ")}.`);
   finish(s, `Completed ${q.name}`);
 }
 function execute(s: RpgState, order: RpgOrder) {
   const p = s.player;
+  if (order.type === "talk-actor") {
+    const npc = s.npcs.find((actor) => actor.id === order.actorId), path = actorApproachRoute(s, order.actorId);
+    if (!npc || path === null) { finish(s, "That villager is no longer available or reachable."); return; }
+    if (path.length) { p.path = path; p.activity = `Approaching ${npc.name}`; return; }
+    const home = TOWNS.find((town) => town.id === npc.home)?.name ?? npc.home;
+    const greetings: Record<string, string> = {
+      woodcutter: `I’m a woodcutter from ${home}. The woods keep me busy.`,
+      miner: `I’m a miner from ${home}. There is good stone to work nearby.`,
+      fisher: `I’m a fisher from ${home}. I keep an eye on the river.`,
+      smith: `I’m a smith from ${home}. A workshop always needs supplies.`,
+    };
+    appendGameMessage(s, "dialogue", `talk-actor-${npc.id}`, `${npc.name}: ${greetings[npc.role] ?? `I’m working for ${home}. Good to see you, Alden.`}`);
+    finish(s, `Spoke with ${npc.name}.`);
+    return;
+  }
   if (order.type === "interact") {
     const target = objectById(order.objectId)!;
     if (target.questId && order.verb === "talk" && !s.quests[target.questId].complete && s.control.source === "player") {
@@ -1203,9 +1295,11 @@ function execute(s: RpgState, order: RpgOrder) {
     }
     if (!route(s, p, station)) return;
     p.activity = recipe.name;
-    if (!pulse(p, "craft", recipe.id, recipe.ticks)) return;
+    if (!pulse(s, p, "craft", recipe.id, recipe.ticks, station)) return;
     const probe = p.inventory.map((i) => ({ ...i }));
     if (!exchangeItems(probe, recipe.inputs, [recipe.output])) {
+      appendSimulationEffect(s, { kind: "action-result", actorId: "player", position: p.position,
+        targetId: station.id, targetPosition: station.position, actionKind: "craft", success: false, amount: 0 });
       bankDetour(s, p);
       return;
     }
@@ -1229,8 +1323,10 @@ function execute(s: RpgState, order: RpgOrder) {
           ]
         : [];
     if (!exchangeItems(p.inventory, recipe.inputs, outputs)) return;
+    appendSimulationEffect(s, { kind: "action-result", actorId: "player", position: p.position,
+      targetId: station.id, targetPosition: station.position, actionKind: "craft", success, amount: success ? recipe.output.quantity : 0 });
     if (success) {
-      const xp = award(p, recipe.skill, recipe.xp);
+      const xp = award(s, p, recipe.skill, recipe.xp);
       reward(s, p, outputs, { [recipe.skill]: xp });
     }
     p.completed++;
@@ -1397,7 +1493,9 @@ function objectiveProgress(s: RpgState, goal: Ambition) {
   if (s.tick - prior.tick < 1200) return true;
   prior.failures = Math.min(10000, prior.failures + 1); prior.tick = s.tick;
   prior.blockedUntil = s.tick + Math.min(600, 100 * prior.failures);
-  finish(s, `Blocked: ${goal.title}. No objective progress; check the required tools, supplies, accessible services and route.`);
+  const message = `Blocked: ${goal.title}. No objective progress; check the required tools, supplies, accessible services and route.`;
+  appendGameMessage(s, "event", `blocker-${goal.id}`, message);
+  finish(s, message);
   s.control.thinkingUntil = prior.blockedUntil;
   return false;
 }
@@ -1428,8 +1526,7 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
     const target = objectById(goal.targetId!);
     if (!target) return null;
     if (adjacent(p, target)) {
-      if (!s.control.visited.includes(target.id))
-        s.control.visited.push(target.id);
+      discover(s, target.id, target.name);
       return null;
     }
     const path = pathToObject(p.position, target, worldForState(s));
@@ -1991,6 +2088,18 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
         p.runEnergy = Math.min(10000, p.runEnergy + 15);
         continue;
       }
+      if (p.id === 0 && s.control.active?.type === "talk-actor") {
+        const actorId = s.control.active.actorId;
+        const target = s.npcs.find((actor) => actor.id === actorId);
+        const endpoint = p.path.at(-1);
+        if (!target || target.health <= 0) { finish(s, "That villager is no longer available."); continue; }
+        if (distance(p.position, target.position) <= 1 && lineOfSight(s, p.position, target.position)) p.path = [];
+        else if (!endpoint || distance(endpoint, target.position) > 1 || !lineOfSight(s, endpoint, target.position)) {
+          const prepared = actorApproachRoute(s, target.id);
+          if (!prepared) { finish(s, "That villager is no longer reachable."); continue; }
+          p.path = prepared;
+        }
+      }
       if (p.id === 0 && s.control.active?.type === "attack" && s.control.queue[0] && inventoryOrder(s.control.queue[0])) {
         // A short inventory transaction pauses, rather than silently discards, the engagement.
         p.runEnergy = Math.min(10000, p.runEnergy + 15);
@@ -2039,7 +2148,9 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
           distance(p.position, town.position) < 12 &&
           !s.control.visited.includes(town.id)
         )
-          s.control.visited.push(town.id);
+          discover(s, town.id, town.name);
+      for (const landmark of WORLD.objects.filter((o) => o.kind === "landmark" || o.kind === "bridge"))
+        if (adjacent(p, landmark)) discover(s, landmark.id, landmark.name);
       if (s.control.thought && s.tick >= s.control.thought.expiresAt)
         s.control.thought = null;
       if (!s.control.thought && s.tick - s.control.lastThought >= 200) {
@@ -2158,6 +2269,7 @@ function validGoal(v: unknown): v is Ambition {
 function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
   if (!object(v)) return false;
   switch (v.type) {
+    case "talk-actor": return positive(v.actorId, WORLD.spawns.length - 1);
     case "unequip-ammo": return true;
     case "interact":
       return typeof v.objectId === "string" && !!objectById(v.objectId) &&
@@ -2240,6 +2352,8 @@ function orderProblem(
   queued = false,
 ): string | null {
   const p = s.player;
+  if (order.type === "talk-actor" && !s.npcs.some((actor) => actor.id === order.actorId && actor.health > 0))
+    return "That villager is not available.";
   if (order.type === "travel-service" && !s.quests[FERRIES[order.objectId].questId]?.complete)
     return "Complete River Letters to open this ferry.";
   if (order.type === "buy" || order.type === "sell") {
@@ -2327,6 +2441,7 @@ function removeOrder(s: RpgState, index: number) {
 /** Prepare movement without performing a transaction, spending RNG or changing the accepted intention. */
 function orderRoute(s: RpgState, order: RpgOrder): TilePosition[] | null {
   const p = s.player;
+  if (order.type === "talk-actor") return actorApproachRoute(s, order.actorId);
   if (order.type === "move") return findPath(p.position, order.position, worldForState(s));
   if (order.type === "attack") {
     const enemy = s.enemies.find((e) => e.id === order.enemyId);

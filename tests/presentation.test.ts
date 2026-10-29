@@ -31,9 +31,9 @@ describe("actor presentation never controls the simulation", () => {
     expect(actionPose(actor, target)).toBe("mine");
     expect(actionPose(actor, { ...target, kind: "tree" })).toBe("cut");
     expect(actionPose(actor, { ...target, kind: "fish" })).toBe("fish");
-    expect(actorFrameKey(actor, "nw", 20, false, target)).toBe("nw:mine");
-    expect(actorFrameKey(actor, "nw", 350, false, target)).toBe("nw:idle");
-    expect(actorFrameKey(actor, "nw", 350, true, target)).toBe("nw:mine");
+    expect(actorFrameKey(actor, "nw", 20, false, target)).toBe("nw:mine:prepare");
+    expect(actorFrameKey(actor, "nw", 350, false, target)).toBe("nw:mine:contact");
+    expect(actorFrameKey(actor, "nw", 350, true, target)).toBe("nw:mine:contact");
     actor.path = [tile(50, 50)];
     expect(actorFrameKey(actor, "nw", 20, false, target)).toBe("nw:idle");
     actor.path = []; actor.action.kind = "craft";

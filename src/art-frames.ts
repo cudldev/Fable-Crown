@@ -1,5 +1,21 @@
 // Generated alpha bounds and foot anchors; source pixels are unchanged.
 export const artFrames: Record<string,{width:number;height:number;boundsWidth:number;boundsHeight:number;pivotX:number;pivotY:number}> = {
+  "prop-exhausted-ore": {
+    "width": 512,
+    "height": 353,
+    "boundsWidth": 512,
+    "boundsHeight": 353,
+    "pivotX": 256,
+    "pivotY": 300
+  },
+  "prop-stump": {
+    "width": 512,
+    "height": 331,
+    "boundsWidth": 512,
+    "boundsHeight": 331,
+    "pivotX": 256,
+    "pivotY": 281
+  },
   "prince": {
     "width": 1536,
     "height": 1024,

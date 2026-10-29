@@ -1,0 +1,2 @@
+Use case: stylized-concept. Asset: one exhausted ore rock for a painterly watercolor and ink traditional Japanese fantasy village game. Low irregular grey-brown broken rock with dull fractured stone and a few dark empty seams, clearly depleted, no glitter or bright crystals. Three-quarter isometric view; one complete object centered with generous margins. Actual transparent alpha background, no ground, no baked shadow, no text, no border.
+Built-in image_gen; transparent_background=true.

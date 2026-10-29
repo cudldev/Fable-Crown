@@ -1,0 +1,2 @@
+Use case: stylized-concept. Asset: one isolated tree stump for a painterly watercolor and ink traditional Japanese fantasy village game. A low cut deciduous stump with visible pale growth rings, rough brown bark, modest exposed roots and a few green moss flecks, three-quarter isometric view. One complete object centered with generous empty margins. Actual transparent alpha background, no ground, no baked shadow, no text, no border.
+Built-in image_gen; transparent_background=true.

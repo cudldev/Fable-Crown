@@ -30,6 +30,7 @@ import { contextGoals } from "./context-goals";
 import { Minimap } from "../render/Minimap";
 import { useGameAudio } from "./useGameAudio";
 import { examineObject, itemUses } from "./interactions";
+import { MessagePanel } from "./MessagePanel";
 import type { TilePosition } from "./types";
 import type { SkillId, EquipmentSlot, CombatStyle } from "./types";
 import "./rpg.css";
@@ -70,6 +71,8 @@ export default function RpgApp() {
     [quantity, setQuantity] = useState(10),
     [bagItem, setBagItem] = useState<string | null>(null);
   const [feedbackEpoch, setFeedbackEpoch] = useState(0);
+  const [messagesOpen, setMessagesOpen] = useState(false);
+  const [rejection, setRejection] = useState<CommandReceipt | null>(null);
   const [commandNotice, setCommandNotice] = useState<{
     text: string;
     pending: boolean;
@@ -81,8 +84,7 @@ export default function RpgApp() {
   const [mapDestination, setMapDestination] = useState<TilePosition | null>(
       null,
     ),
-    [examining, setExamining] = useState(false),
-    [dialogue, setDialogue] = useState<string | null>(null);
+    [examining, setExamining] = useState(false);
   const worker = useRef<Worker | null>(null),
     input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -100,9 +102,12 @@ export default function RpgApp() {
       if (e.data.resetFeedback) {
         setFeedbackEpoch((value) => value + 1);
         setCommandNotice(null);
+        setMessagesOpen(false);
+        setRejection(null);
         latestRequest.current = "";
       }
       const receipt = e.data.receipt as CommandReceipt | undefined;
+      if (receipt) setRejection(receipt.accepted ? null : receipt);
       if (receipt && receipt.requestId === latestRequest.current)
         setCommandNotice({
           text: `${receipt.accepted ? "Accepted" : "Rejected"} · ${receipt.message}`,
@@ -110,7 +115,7 @@ export default function RpgApp() {
         });
       setHasArchive(e.data.hasArchive);
       setStorageOkay(e.data.storageOkay);
-      if (e.data.message) setMessage(e.data.message);
+      if (e.data.message && !receipt?.accepted) setMessage(e.data.message);
     };
     w.onerror = () => {
       setCommandNotice(null);
@@ -142,6 +147,7 @@ export default function RpgApp() {
       if (e.key === "Escape") {
         setSelection(null);
         setPanel(null);
+        setMessagesOpen(false);
       }
     };
     window.addEventListener("keydown", close);
@@ -172,16 +178,16 @@ export default function RpgApp() {
     command(next ? { type: "enqueue", order: o } : o);
     setSelection(null);
     setMapDestination(null);
-    setDialogue(null);
   };
   const open = (p: string) => {
+    setMessagesOpen(false);
     setPanel(panel === p ? null : p);
     setSelection(null);
   };
   const select = (s: TileSelection) => {
+    setMessagesOpen(false);
     setMapDestination(null);
     setExamining(false);
-    setDialogue(null);
     setPanel(null);
     if (s.kind === "tile") {
       order({ type: "move", position: s.position });
@@ -244,6 +250,8 @@ export default function RpgApp() {
       return `${o.verb} · ${objectById(o.objectId)?.name ?? o.objectId}`;
     if (o.type === "travel-service")
       return FERRIES[o.objectId]?.name ?? "Take the ferry";
+    if (o.type === "talk-actor")
+      return `Talk to ${state?.npcs.find((actor) => actor.id === o.actorId)?.name ?? "villager"}`;
     if (o.type === "unequip-ammo") return "Remove equipped arrows";
     if (o.type === "withdraw")
       return `Withdraw ${o.quantity} ${itemName(o.itemId)}`;
@@ -366,7 +374,12 @@ export default function RpgApp() {
                 } as RpgOrder)
     : null;
   return (
-    <main className="game-shell rpg-shell" aria-label="Fable Crown RPG">
+    <main
+      className="game-shell rpg-shell"
+      aria-label="Fable Crown RPG"
+      data-messages-open={messagesOpen}
+      data-panel-open={!!panel || (!!selection && selection.kind !== "tile")}
+    >
       {state ? (
         <TileScene
           state={state}
@@ -376,6 +389,8 @@ export default function RpgApp() {
           onSelect={select}
           feedback={reward.floaters}
           presentationEpoch={feedbackEpoch}
+          onWorkContact={audio.workContact}
+          onFootstep={audio.footstep}
           previewRoute={previewRoute}
         />
       ) : (
@@ -385,10 +400,26 @@ export default function RpgApp() {
         </div>
       )}
       {state && (
+        <MessagePanel
+          messages={state.messages}
+          epoch={feedbackEpoch}
+          expanded={messagesOpen}
+          rejection={rejection}
+          onExpandedChange={(value) => {
+            setMessagesOpen(value);
+            if (value) {
+              setPanel(null);
+              setSelection(null);
+            }
+          }}
+        />
+      )}
+      {state && (
         <Minimap
           state={state}
           previewRoute={previewRoute}
           onDestination={(position) => {
+            setMessagesOpen(false);
             setMapDestination(position);
             setSelection(null);
             setPanel(null);
@@ -582,11 +613,6 @@ export default function RpgApp() {
               {examineObject(state, selectedObject)}
             </p>
           )}
-          {dialogue && (
-            <p className="rpg-dialogue" aria-live="polite">
-              “{dialogue}”
-            </p>
-          )}
           {bagItem && itemCount(state.player.inventory, bagItem) > 0 && (
             <div className="context-goals" aria-label="Use carried item">
               <small>Selected: {itemName(bagItem)}</small>
@@ -766,20 +792,13 @@ export default function RpgApp() {
           <h2>{person.name}</h2>
           <button
             onClick={() =>
-              setDialogue(
-                person.id === 0
-                  ? "There is always another useful path. Guide my next ambition when you like."
-                  : `I make my own living as a ${person.role}. You can find my work around ${person.home}.`,
-              )
+              person.id === 0
+                ? open("thoughts")
+                : order({ type: "talk-actor", actorId: person.id })
             }
           >
-            Talk
+            {person.id === 0 ? "Thoughts" : "Talk"}
           </button>
-          {dialogue && (
-            <p className="rpg-dialogue" aria-live="polite">
-              “{dialogue}”
-            </p>
-          )}
           <p>{person.activity}</p>
           <p>
             Health {person.health} · Run energy{" "}
