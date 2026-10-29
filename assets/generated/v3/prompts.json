@@ -1,0 +1,34 @@
+[
+  {
+    "name": "tile-grass",
+    "prompt": "Create ONE flat seamless repeating ground MATERIAL TEXTURE for a painterly isometric fantasy RPG. Match the watercolor/gouache and expressive ink language of the ATTACHED APPROVED reference, but this is a quiet low-contrast material swatch for small ground tiles, NOT a scene, terrain map, clearing, diorama or perspective view. Square image, orthographic flat surface filling all pixels, compatible edges, no border, horizon, UI, labels, objects, people, trees, shadows or directional lighting. Broad calm painted color groups, subtle paper and brush marks, no photographic microtexture and no pixel art. The texture must not create a checkerboard or prominent repeating motif when used on many 64x32-pixel diamond tiles. Muted moss/sage green GRASS AND EARTH wash, predominantly soft green. A FEW restrained tiny grass brush accents, no flowers or stones; no yellow high-contrast blotches.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/tile-grass.png",
+    "runtime": "public/art/tile-grass.webp"
+  },
+  {
+    "name": "tile-dirt",
+    "prompt": "Create ONE flat seamless repeating ground MATERIAL TEXTURE for a painterly isometric fantasy RPG. Match the watercolor/gouache and expressive ink language of the ATTACHED APPROVED reference, but this is a quiet low-contrast material swatch for small ground tiles, NOT a scene, terrain map, clearing, diorama or perspective view. Square image, orthographic flat surface filling all pixels, compatible edges, no border, horizon, UI, labels, objects, people, trees, shadows or directional lighting. Broad calm painted color groups, subtle paper and brush marks, no photographic microtexture and no pixel art. The texture must not create a checkerboard or prominent repeating motif when used on many 64x32-pixel diamond tiles. Warm pale ochre/cream worn DIRT ROAD earth wash. Broad quiet buff color with a FEW faint painterly scuffs, no grass patches, leaves, large rocks or paving stones.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/tile-dirt.png",
+    "runtime": "public/art/tile-dirt.webp"
+  },
+  {
+    "name": "tile-stone",
+    "prompt": "Create ONE flat seamless repeating ground MATERIAL TEXTURE for a painterly isometric fantasy RPG. Match the watercolor/gouache and expressive ink language of the ATTACHED APPROVED reference, but this is a quiet low-contrast material swatch for small ground tiles, NOT a scene, terrain map, clearing, diorama or perspective view. Square image, orthographic flat surface filling all pixels, compatible edges, no border, horizon, UI, labels, objects, people, trees, shadows or directional lighting. Broad calm painted color groups, subtle paper and brush marks, no photographic microtexture and no pixel art. The texture must not create a checkerboard or prominent repeating motif when used on many 64x32-pixel diamond tiles. Pale cream/slate-gray STONE PAVING ground, worn broad slabs indicated with a FEW loose broken brown-gray ink lines; quiet blue-gray wash shadows. No grass or moss clusters. Simplified low-contrast flags, not individually detailed bricks.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/tile-stone.png",
+    "runtime": "public/art/tile-stone.webp"
+  },
+  {
+    "name": "tile-water",
+    "prompt": "Create ONE flat seamless repeating ground MATERIAL TEXTURE for a painterly isometric fantasy RPG. Match the watercolor/gouache and expressive ink language of the ATTACHED APPROVED reference, but this is a quiet low-contrast material swatch for small ground tiles, NOT a scene, terrain map, clearing, diorama or perspective view. Square image, orthographic flat surface filling all pixels, compatible edges, no border, horizon, UI, labels, objects, people, trees, shadows or directional lighting. Broad calm painted color groups, subtle paper and brush marks, no photographic microtexture and no pixel art. The texture must not create a checkerboard or prominent repeating motif when used on many 64x32-pixel diamond tiles. Muted blue/teal WATER surface wash, broad watercolor planes with a FEW subtle cream ripple strokes. No riverbanks, rocks, shoreline, fish or large waves. Calm low-contrast repeatable water material.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/tile-water.png",
+    "runtime": "public/art/tile-water.webp"
+  }
+]

@@ -1,0 +1,76 @@
+.rpg-shell .rpg-skill-mini {
+  display: inline-block;
+  font: 11px system-ui;
+  padding: 5px;
+  background: #e4dcc6;
+  margin: 3px;
+  border-radius: 3px;
+}
+.rpg-skill-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.rpg-skill-list button {
+  text-align: left;
+  min-width: 0;
+  padding: 10px;
+}
+.rpg-skill-list span {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font:
+    13px Georgia,
+    serif;
+}
+.rpg-skill-list small {
+  font: 10px system-ui;
+  display: block;
+  margin-top: 4px;
+}
+.rpg-skill-list progress {
+  width: 100%;
+  height: 5px;
+  margin-top: 8px;
+}
+.rpg-item-list > div,
+.rpg-bank-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid #c6b68e66;
+  font: 12px system-ui;
+}
+.rpg-item-list button,
+.rpg-bank-row button {
+  font: 11px system-ui;
+  min-height: 44px;
+  padding: 6px 9px;
+}
+.rpg-shell .context-panel label {
+  display: block;
+  margin: 10px 0;
+}
+.rpg-shell .context-panel select {
+  margin-left: 12px;
+}
+.rpg-shell .thought-panel li {
+  margin: 8px 0;
+  font: 13px/1.5 system-ui;
+}
+.rpg-shell .thought-panel .full {
+  margin: 6px 0;
+}
+.rpg-shell .drawer h3 {
+  font:
+    18px Georgia,
+    serif;
+  margin-top: 18px;
+}
+.rpg-shell .plan-choice {
+  display: block;
+  text-align: left;
+}

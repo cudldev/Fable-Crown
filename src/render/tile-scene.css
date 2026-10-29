@@ -1,0 +1,76 @@
+.tile-world {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  background: #c3c7aa;
+}
+.tile-world canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tile-hit-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.tile-hit-layer button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.tile-hit-layer button:focus-visible {
+  outline: 2px solid #f6d791;
+}
+.tile-object span {
+  display: block;
+  white-space: nowrap;
+  transform: translate(-25%, 22px);
+  font:
+    11px Georgia,
+    serif;
+  color: #35483d;
+  text-shadow: 0 1px 2px #fff;
+  background: #f4e9c9d9;
+  border-radius: 4px;
+  padding: 3px 6px;
+  width: max-content;
+}
+.tile-object span:empty {
+  display: none;
+}
+.tile-actor {
+  z-index: 2;
+}
+.tile-location {
+  position: absolute;
+  right: 20px;
+  top: 94px;
+  font: 11px system-ui;
+  color: #344b42;
+  background: #f1e6c9c9;
+  padding: 7px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .tile-object span {
+    font-size: 10px;
+  }
+  .tile-location {
+    top: 80px;
+    right: 10px;
+    font-size: 9px;
+  }
+}
