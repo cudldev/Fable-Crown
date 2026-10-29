@@ -105,10 +105,13 @@ test("enemy inspection, combat XP and loot, plus recoverable grave UI", async ({
     })
     .toBeGreaterThan(0);
   const fought = await snapshot(page);
+  // Alden may already have picked up the loot before this persisted snapshot.
   expect(
-    fought.drops.some((drop) =>
-      drop.items.some((item) => item.itemId === "raw-boar"),
-    ),
+    [
+      ...fought.player.inventory,
+      ...fought.bank,
+      ...fought.drops.flatMap((drop) => drop.items),
+    ].some((item) => item.itemId === "raw-boar" && item.quantity > 0),
   ).toBe(true);
 
   const recoverable = fixture();
@@ -174,8 +177,6 @@ test("quest ambition persists and real carried supplies complete a delivery", as
       ?.quantity,
   ).toBe(6);
 
-  await page.getByRole("button", { name: "Inspect Master smith Ren" }).click();
-  await page.getByRole("button", { name: "Do now" }).click();
   await expect
     .poll(async () => (await snapshot(page)).quests.forge?.complete)
     .toBe(true);
@@ -186,6 +187,13 @@ test("quest ambition persists and real carried supplies complete a delivery", as
   expect(
     done.player.inventory.find((item) => item.itemId === "bronze-bar"),
   ).toBeUndefined();
+  await page.getByRole("button", { name: "Open chronicle" }).click();
+  const completed = page
+    .locator(".rpg-quest")
+    .filter({ has: page.getByRole("heading", { name: "An Honest Forge" }) });
+  await expect(completed).toContainText("6 Logs delivered");
+  await expect(completed).toContainText("6 Bronze bar delivered");
+  await expect(completed).not.toContainText("0/6");
 });
 
 test("invalid import preserves the current chapter", async ({ page }) => {

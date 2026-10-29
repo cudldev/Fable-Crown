@@ -138,7 +138,7 @@ describe('tile RPG banking, shops and autonomy', () => {
   it('gives manual queue priority and Wait stops all prince work while NPCs continue', () => {
     const s=createRpg(NOW); stepRpg(s,10); expect(s.control.source).toBe('autonomous');
     const goal=structuredClone(s.control.goal); expect(applyRpgCommand(s,{type:'enqueue',order:{type:'move',position:tile(60,100)}}).ok).toBe(true); stepRpg(s); expect(s.control.source).toBe('player'); expect(s.control.goal).toEqual(goal);
-    applyRpgCommand(s,{type:'wait'}); const p=structuredClone(s.player); const total=s.npcs.reduce((n,a)=>n+a.completed,0); stepRpg(s,200); expect(s.player).toEqual(p); expect(s.control.active).toBeNull(); expect(s.control.queue).toEqual([]); expect(s.npcs.reduce((n,a)=>n+a.completed,0)).toBeGreaterThan(total); assertValid(s);
+    applyRpgCommand(s,{type:'wait'}); const p=structuredClone(s.player); const total=s.npcs.reduce((n,a)=>n+a.completed,0); stepRpg(s,200); expect(s.player).toEqual({...p,runEnergy:Math.min(10000,p.runEnergy+15*200)}); expect(s.control.active).toBeNull(); expect(s.control.queue).toEqual([]); expect(s.npcs.reduce((n,a)=>n+a.completed,0)).toBeGreaterThan(total); assertValid(s);
     expect(suggestGoals(s).length).toBeGreaterThanOrEqual(2); expect(goalMet(s,goal!)).toBe(false);
   });
 });

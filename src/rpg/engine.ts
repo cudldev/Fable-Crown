@@ -151,6 +151,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     grave: null,
     control: {
       waiting: false,
+      running: true,
       active: null,
       source: null,
       queue: [],
@@ -167,6 +168,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     journal: [
       "A new chapter begins. Earlier village chronicles remain archived.",
     ],
+    rewards: [],
   };
   s.control.goal = suggestGoals(s)[0].goal;
   s.control.steps = goalSteps(s, s.control.goal);
@@ -213,8 +215,13 @@ function route(s: RpgState, p: ActorState, o: WorldObject): boolean {
   return false;
 }
 function travel(s: RpgState, p: ActorState) {
-  let steps = p.runEnergy > 0 ? 2 : 1;
+  const player = p.id === 0;
+  if (player && p.runEnergy < 60) s.control.running = false;
+  const running = player ? s.control.running !== false : p.runEnergy > 0;
+  let steps = running ? 2 : 1;
+  if (player && !running) p.runEnergy = Math.min(10000, p.runEnergy + 15);
   while (steps-- && p.path.length) {
+    if (player && running && p.runEnergy < 60) break;
     const next = p.path[0];
     if (!canStep(p.position, next, worldForState(s))) {
       p.path = [];
@@ -224,8 +231,9 @@ function travel(s: RpgState, p: ActorState) {
     }
     p.position = { ...next };
     p.path.shift();
-    if (p.runEnergy > 0) p.runEnergy = Math.max(0, p.runEnergy - 60);
+    if (running && p.runEnergy > 0) p.runEnergy = Math.max(0, p.runEnergy - 60);
   }
+  if (player && running && p.runEnergy < 60) s.control.running = false;
 }
 function toolFor(p: ActorState, resource: ResourceDefinition) {
   return [
@@ -272,6 +280,65 @@ function bankOutput(s: RpgState, p: ActorState) {
           ? Math.max(0, stack.quantity - 6)
           : stack.quantity;
       if (quantity && addItems(bank, stack.itemId, quantity, Infinity))
+        removeItems(p.inventory, stack.itemId, quantity);
+    }
+  }
+  if (p.id === 0) {
+    // Spare upgrades can otherwise leave too little room to assemble multi-input recipes.
+    // Keep one best usable working tool per type, counting equipped tools; store every surplus safely.
+    const candidates = [
+      ...Object.values(p.equipment).map((id) => ({
+        item: ITEMS[id!],
+        carried: false,
+      })),
+      ...p.inventory.map((stack) => ({
+        item: ITEMS[stack.itemId],
+        carried: true,
+      })),
+    ]
+      .filter(
+        ({ item }) =>
+          item.tool &&
+          (!item.skill ||
+            levelForXp(p.skills[item.skill]) >= (item.level ?? 1)),
+      )
+      .sort(
+        (a, b) =>
+          (b.item.tier ?? 1) - (a.item.tier ?? 1) ||
+          b.item.value - a.item.value ||
+          Number(a.carried) - Number(b.carried) ||
+          a.item.id.localeCompare(b.item.id),
+      );
+    const kept = new Map<string, string>();
+    const selected = new Set<string>();
+    for (const { item, carried } of candidates) {
+      if (selected.has(item.tool!)) continue;
+      selected.add(item.tool!);
+      if (carried) kept.set(item.tool!, item.id);
+    }
+    const combatWeapon = p.inventory
+      .map((stack) => ITEMS[stack.itemId])
+      .filter(
+        (item) =>
+          item.kind === "gear" &&
+          item.slot === "weapon" &&
+          levelForXp(p.skills.attack) >= (item.attackLevel ?? 1),
+      )
+      .sort(
+        (a, b) => (b.attack ?? 0) - (a.attack ?? 0) || a.id.localeCompare(b.id),
+      )[0]?.id;
+    for (const stack of [...p.inventory]) {
+      const item = ITEMS[stack.itemId];
+      if (!item.tool && item.kind !== "gear") continue;
+      // Preserve ordinary combat loadouts; only store spare gear when it crowds out recipe workspace.
+      if (item.kind === "gear" && inventorySlots(p.inventory) <= 14) continue;
+      const retain =
+        (item.tool && kept.get(item.tool) === item.id) ||
+        item.id === combatWeapon
+          ? 1
+          : 0;
+      const quantity = stack.quantity - retain;
+      if (quantity > 0 && addItems(bank, stack.itemId, quantity, Infinity))
         removeItems(p.inventory, stack.itemId, quantity);
     }
   }
@@ -383,7 +450,8 @@ function gather(s: RpgState, p: ActorState, target: WorldObject): boolean {
     )
   )
     return false;
-  p.skills[r.skill] = Math.min(2_000_000_000, p.skills[r.skill] + r.xp);
+  const xp = award(p, r.skill, r.xp);
+  reward(s, p, [{ itemId: r.itemId, quantity: 1 }], { [r.skill]: xp });
   p.completed++;
   if (random(s) < r.depletion)
     s.resources[target.id] = {
@@ -456,7 +524,30 @@ export function stationAvailable(s: RpgState, o: WorldObject) {
   );
 }
 function award(p: ActorState, skill: SkillId, xp: number) {
+  const before = p.skills[skill];
   p.skills[skill] = Math.min(2_000_000_000, p.skills[skill] + xp);
+  return p.skills[skill] - before;
+}
+function reward(
+  s: RpgState,
+  p: ActorState,
+  items: ItemStack[],
+  xp: Partial<Record<SkillId, number>>,
+) {
+  if (p.id !== 0) return;
+  const gains = Object.fromEntries(
+    Object.entries(xp).filter(([, amount]) => amount > 0),
+  );
+  if (!items.length && !Object.keys(gains).length) return;
+  const log = (s.rewards ??= []);
+  const sequence = log.length ? Number(log[log.length - 1].id.slice(7)) + 1 : 1;
+  log.push({
+    id: `reward-${sequence}`,
+    tick: s.tick,
+    items: items.map((i) => ({ ...i })),
+    xp: gains,
+  });
+  if (log.length > 32) log.splice(0, log.length - 32);
 }
 function food(s: RpgState, id: string) {
   const item = ITEMS[id],
@@ -558,8 +649,9 @@ function fight(s: RpgState, id: string) {
       );
     const damage = Math.min(e.health, 1 + Math.floor(random(s) * maximum));
     e.health -= damage;
-    award(p, s.control.style, damage * 40);
-    award(p, "hitpoints", Math.round((damage * 40) / 3));
+    const xp = award(p, s.control.style, damage * 40);
+    const hpXp = award(p, "hitpoints", Math.round((damage * 40) / 3));
+    reward(s, p, [], { [s.control.style]: xp, hitpoints: hpXp });
   }
   if (e.health === 0) {
     e.respawnAt = s.tick + ENEMIES[e.definitionId].respawnTicks;
@@ -773,8 +865,10 @@ function questAction(s: RpgState, id: string) {
     return;
   }
   state.complete = true;
+  const gains: Partial<Record<SkillId, number>> = {};
   for (const [skill, xp] of Object.entries(q.reward.xp))
-    award(p, skill as SkillId, xp!);
+    gains[skill as SkillId] = award(p, skill as SkillId, xp!);
+  reward(s, p, [{ itemId: "coins", quantity: q.reward.coins }], gains);
   journal(s, `Completed: ${q.name}. Unlocked ${q.reward.unlock}.`);
   finish(s, `Completed ${q.name}`);
 }
@@ -794,6 +888,19 @@ function execute(s: RpgState, order: RpgOrder) {
     return;
   }
   if (order.type === "quest") {
+    // A direct visit is an intention to pursue this quest, including after accepting it.
+    // Queued visits arrive here only when they actually start, so enqueueing stays side-effect free.
+    if (s.control.source === "player" && !s.quests[order.questId].complete) {
+      const q = QUESTS[order.questId];
+      s.control.goal = {
+        id: `quest-${q.id}`,
+        kind: "quest",
+        questId: q.id,
+        title: q.name,
+      };
+      s.control.steps = goalSteps(s, s.control.goal);
+      s.control.thought = null;
+    }
     questAction(s, order.questId);
     return;
   }
@@ -861,8 +968,20 @@ function execute(s: RpgState, order: RpgOrder) {
         p.action = null;
       }
     }
-    if (gather(s, p, target) && --order.quantity === 0)
-      finish(s, "Gathering batch complete");
+    if (gather(s, p, target)) {
+      --order.quantity;
+      const skillAchieved =
+        s.control.source === "autonomous" &&
+        s.control.goal?.kind === "skill" &&
+        goalMet(s, s.control.goal);
+      if (order.quantity === 0 || skillAchieved)
+        finish(
+          s,
+          skillAchieved
+            ? "Skill ambition achieved"
+            : "Gathering batch complete",
+        );
+    }
     return;
   }
   if (order.type === "craft") {
@@ -912,11 +1031,10 @@ function execute(s: RpgState, order: RpgOrder) {
           ]
         : [];
     if (!exchangeItems(p.inventory, recipe.inputs, outputs)) return;
-    if (success)
-      p.skills[recipe.skill] = Math.min(
-        2_000_000_000,
-        p.skills[recipe.skill] + recipe.xp,
-      );
+    if (success) {
+      const xp = award(p, recipe.skill, recipe.xp);
+      reward(s, p, outputs, { [recipe.skill]: xp });
+    }
     p.completed++;
     if (--order.quantity === 0)
       finish(
@@ -1044,6 +1162,26 @@ function autoOrder(s: RpgState): RpgOrder | null {
 function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
   const p = s.player;
   if (goal.kind === "quest") return questPlan(s, goal.questId!);
+  if (goal.kind === "gather") {
+    const r = RESOURCES[goal.resourceId!];
+    const preparation = prepareResource(s, r, goal);
+    if (gatherProblem(p, r)) return preparation;
+    const target = preferredResource(s, r.id, goal.targetId);
+    const remaining =
+      goal.quantity! -
+      itemCount(p.inventory, r.itemId) -
+      itemCount(s.bank, r.itemId);
+    return target && remaining > 0
+      ? {
+          type: "gather",
+          objectId: target.id,
+          quantity: Math.min(
+            remaining,
+            Math.max(1, 28 - inventorySlots(p.inventory)),
+          ),
+        }
+      : null;
+  }
   if (goal.kind === "explore") {
     const target = objectById(goal.targetId!);
     if (!target) return null;
@@ -1076,31 +1214,8 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
   const starterResource = Object.values(RESOURCES).find(
     (r) => r.skill === gatheringSkill && r.level === 1,
   );
-  if (starterResource && !toolFor(p, starterResource)) {
-    const savedTool = s.bank.find(
-      (i) =>
-        ITEMS[i.itemId].tool === starterResource.tool &&
-        levelForXp(p.skills[starterResource.skill]) >=
-          (ITEMS[i.itemId].level ?? 1),
-    );
-    if (savedTool)
-      return { type: "withdraw", itemId: savedTool.itemId, quantity: 1 };
-    const basic = Object.values(ITEMS)
-      .filter(
-        (i) =>
-          i.tool === starterResource.tool &&
-          (i.level ?? 1) <= levelForXp(p.skills[starterResource.skill]),
-      )
-      .sort((a, b) => a.value - b.value)[0];
-    const shop = nearest(
-      p,
-      (o) => o.kind === "shop" && !!SHOPS[o.id]?.stock[basic?.id],
-    );
-    if (basic && shop && itemCount(p.inventory, "coins") >= basic.value)
-      return { type: "buy", shopId: shop.id, itemId: basic.id, quantity: 1 };
-    s.control.reason = `${goal.title}: obtain a ${starterResource.tool} to continue`;
-    return null;
-  }
+  if (starterResource && !toolFor(p, starterResource))
+    return prepareResource(s, starterResource, goal);
   if (
     skill === "smithing" &&
     !itemCount(p.inventory, "hammer") &&
@@ -1190,7 +1305,27 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
   if (["attack", "strength", "defence", "hitpoints"].includes(skill))
     return combatPlan(s, skill as SkillId);
   if (!["woodcutting", "mining", "fishing"].includes(skill)) return null;
-  const target = resourceFor(s, p, skill) ?? resourceFor(s, p, skill, false);
+  const clicked = goal.targetId ? objectById(goal.targetId) : undefined;
+  const preferred = clicked?.resourceId
+    ? RESOURCES[clicked.resourceId]
+    : undefined;
+  // A locked clicked resource remains the destination, while suitable resources train its prerequisites.
+  const preparation =
+    preferred && levelForXp(p.skills[skill]) >= preferred.level
+      ? prepareResource(s, preferred, goal)
+      : null;
+  if (
+    preferred &&
+    levelForXp(p.skills[skill]) >= preferred.level &&
+    gatherProblem(p, preferred)
+  )
+    return preparation;
+  const target =
+    (preferred && !gatherProblem(p, preferred)
+      ? preferredResource(s, preferred.id, clicked?.id)
+      : undefined) ??
+    resourceFor(s, p, skill) ??
+    resourceFor(s, p, skill, false);
   if (!target) {
     s.control.reason = `${goal.title}: obtain the required working tool first`;
     return null;
@@ -1200,6 +1335,104 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
     objectId: target.id,
     quantity: Math.max(1, 28 - inventorySlots(p.inventory)),
   };
+}
+function preferredResource(
+  s: RpgState,
+  resourceId: ResourceDefinition["id"],
+  targetId?: string,
+) {
+  const clicked = targetId ? objectById(targetId) : undefined;
+  return (
+    (clicked?.resourceId === resourceId && s.resources[clicked.id].available
+      ? clicked
+      : undefined) ??
+    nearest(
+      s.player,
+      (o) => o.resourceId === resourceId && s.resources[o.id].available,
+    ) ??
+    (clicked?.resourceId === resourceId
+      ? clicked
+      : nearest(s.player, (o) => o.resourceId === resourceId))
+  );
+}
+function prepareResource(
+  s: RpgState,
+  r: ResourceDefinition,
+  goal: Ambition,
+): RpgOrder | null {
+  const p = s.player;
+  if (levelForXp(p.skills[r.skill]) < r.level) {
+    const order = planGoal(s, {
+      id: `prepare-${r.id}`,
+      title: `Train ${r.skill} for ${r.name}`,
+      kind: "skill",
+      skill: r.skill,
+      level: r.level,
+    });
+    // Reconsider after each prerequisite harvest so the selected resource unlocks immediately.
+    if (order?.type === "gather") order.quantity = 1;
+    return order;
+  }
+  const needed = !toolFor(p, r)
+    ? Object.values(ITEMS)
+        .filter(
+          (i) =>
+            i.tool === r.tool &&
+            (i.level ?? 1) <= levelForXp(p.skills[r.skill]),
+        )
+        .sort((a, b) => a.value - b.value)[0]?.id
+    : r.bait && !itemCount(p.inventory, r.bait)
+      ? r.bait
+      : undefined;
+  if (!needed) return null;
+  // Prefer any usable banked tool, including a better tier than the cheapest shop tool.
+  const banked = !toolFor(p, r)
+    ? s.bank.find(
+        (i) =>
+          ITEMS[i.itemId].tool === r.tool &&
+          (ITEMS[i.itemId].level ?? 1) <= levelForXp(p.skills[r.skill]),
+      )
+    : s.bank.find((i) => i.itemId === needed);
+  if (inventorySlots(p.inventory) >= 28) return { type: "bank" };
+  if (banked) return { type: "withdraw", itemId: banked.itemId, quantity: 1 };
+  if (itemCount(s.bank, "coins"))
+    return {
+      type: "withdraw",
+      itemId: "coins",
+      quantity: itemCount(s.bank, "coins"),
+    };
+  const shop = nearest(
+    p,
+    (o) =>
+      o.kind === "shop" &&
+      !!SHOPS[o.id]?.stock[needed] &&
+      (s.shops.find((entry) => entry.id === o.id)?.stock[needed] ?? 0) > 0,
+  );
+  if (
+    shop &&
+    itemCount(p.inventory, "coins") >= SHOPS[shop.id].stock[needed].buy
+  )
+    return { type: "buy", shopId: shop.id, itemId: needed, quantity: 1 };
+  // Earn missing tool/bait money through an already usable trade; never create free equipment.
+  const surplus =
+    shop &&
+    p.inventory.find(
+      (i) =>
+        ITEMS[i.itemId].kind === "resource" &&
+        (SHOPS[shop.id].stock[i.itemId]?.sell ?? 0) > 0,
+    );
+  if (shop && surplus)
+    return {
+      type: "sell",
+      shopId: shop.id,
+      itemId: surplus.itemId,
+      quantity: surplus.quantity,
+    };
+  const earn = ["mining", "woodcutting", "fishing"]
+    .map((skill) => resourceFor(s, p, skill))
+    .find(Boolean);
+  s.control.reason = `${goal.title}: earn and obtain ${ITEMS[needed].name} first`;
+  return earn ? { type: "gather", objectId: earn.id, quantity: 1 } : null;
 }
 function acquire(
   s: RpgState,
@@ -1285,8 +1518,18 @@ function questPlan(s: RpgState, id: string): RpgOrder | null {
         level,
       });
   for (const item of q.items) {
+    if (itemCount(p.inventory, item.itemId) >= item.quantity) continue;
     const order = acquire(s, item.itemId, item.quantity);
     if (order) return order;
+    // Missing supplies are not the same as satisfied supplies. Stay on the prerequisite,
+    // rather than revisiting the giver indefinitely when no legal acquisition is available.
+    const detail =
+      s.control.reason === s.control.goal?.title
+        ? "Bring a usable tool and free backpack space."
+        : s.control.reason;
+    s.control.reason = `${q.name}: need ${item.quantity} ${ITEMS[item.itemId].name} (${itemCount(p.inventory, item.itemId)}/${item.quantity}). ${detail}`;
+    s.control.thinkingUntil = s.tick + 10;
+    return null;
   }
   if (q.kills && progress.kills < q.kills.quantity)
     return combatPlan(s, "attack", q.kills.enemyId);
@@ -1443,7 +1686,10 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
       }
     for (const p of [s.player, ...s.npcs]) {
       p.previousPosition = { ...p.position };
-      if (p.id === 0 && s.control.waiting) continue;
+      if (p.id === 0 && s.control.waiting) {
+        p.runEnergy = Math.min(10000, p.runEnergy + 15);
+        continue;
+      }
       if (
         p.id === 0 &&
         s.control.source === "autonomous" &&
@@ -1545,6 +1791,30 @@ function validGoal(v: unknown): v is Ambition {
     v.title.length > 200
   )
     return false;
+  if (
+    v.kind !== "gather" &&
+    (v.resourceId !== undefined || v.quantity !== undefined)
+  )
+    return false;
+  if (
+    v.targetId !== undefined &&
+    (typeof v.targetId !== "string" || !objectById(v.targetId))
+  )
+    return false;
+  if (v.kind === "gather") {
+    if (
+      typeof v.resourceId !== "string" ||
+      !Object.hasOwn(RESOURCES, v.resourceId) ||
+      !positive(v.quantity, 2_000_000_000)
+    )
+      return false;
+    const resource = RESOURCES[v.resourceId as ResourceDefinition["id"]];
+    return (
+      (v.skill === undefined || v.skill === resource.skill) &&
+      (v.targetId === undefined ||
+        objectById(v.targetId as string)?.resourceId === v.resourceId)
+    );
+  }
   if (v.kind === "equipment")
     return (
       typeof v.itemId === "string" &&
@@ -1555,7 +1825,11 @@ function validGoal(v: unknown): v is Ambition {
     return (
       typeof v.skill === "string" &&
       (SKILLS as readonly string[]).includes(v.skill) &&
-      positive(v.level, 99)
+      positive(v.level, 99) &&
+      (v.targetId === undefined ||
+        (!!objectById(v.targetId as string)?.resourceId &&
+          RESOURCES[objectById(v.targetId as string)!.resourceId!].skill ===
+            v.skill))
     );
   if (v.kind === "explore")
     return typeof v.targetId === "string" && !!objectById(v.targetId);
@@ -1743,6 +2017,20 @@ export function applyRpgCommand(
     s.control.style = command.skill;
     return ok("Combat training style changed.");
   }
+  if (command.type === "run") {
+    if (typeof command.enabled !== "boolean")
+      return fail("Choose running or walking.");
+    if (command.enabled && s.player.runEnergy < 60)
+      return fail(
+        "Not enough run energy. Walk or wait to recover before running.",
+      );
+    s.control.running = command.enabled;
+    return ok(
+      command.enabled
+        ? "Running enabled."
+        : "Walking enabled; run energy will recover.",
+    );
+  }
   if (command.type === "goal") {
     if (!validGoal(command.goal))
       return fail("That ambition is not available.");
@@ -1750,7 +2038,7 @@ export function applyRpgCommand(
     s.control.waiting = false;
     s.control.steps = goalSteps(s, command.goal);
     s.control.thought = null;
-    if (s.control.source === "autonomous") finish(s);
+    finish(s);
     s.control.thinkingUntil = s.tick + 1;
     return ok(`Ambition: ${command.goal.title}`);
   }
@@ -1842,6 +2130,32 @@ export function validateRpgSave(v: unknown): RpgState | null {
       !v.journal.every((i) => text(i))
     )
       return null;
+    if (v.rewards !== undefined) {
+      if (!Array.isArray(v.rewards) || v.rewards.length > 32) return null;
+      let lastId = 0,
+        lastTick = 0;
+      for (const event of v.rewards) {
+        if (
+          !object(event) ||
+          typeof event.id !== "string" ||
+          !/^reward-[1-9]\d*$/.test(event.id) ||
+          !positive(Number(event.id.slice(7)), v.tick) ||
+          Number(event.id.slice(7)) <= lastId ||
+          !positive(event.tick, v.tick) ||
+          event.tick <= lastTick ||
+          !stacks(event.items, 28) ||
+          !object(event.xp) ||
+          !Object.entries(event.xp).every(
+            ([skill, xp]) =>
+              (SKILLS as readonly string[]).includes(skill) && positive(xp),
+          ) ||
+          (!event.items.length && !Object.keys(event.xp).length)
+        )
+          return null;
+        lastId = Number(event.id.slice(7));
+        lastTick = event.tick;
+      }
+    }
     for (const id of Object.keys(QUESTS)) {
       const q = v.quests[id];
       if (
@@ -2005,6 +2319,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
     if (!integer(c.eatReadyAt)) return null;
     if (
       typeof c.waiting !== "boolean" ||
+      (c.running !== undefined && typeof c.running !== "boolean") ||
       !Array.isArray(c.queue) ||
       c.queue.length > 8 ||
       !c.queue.every((o) => validOrder(o, w)) ||

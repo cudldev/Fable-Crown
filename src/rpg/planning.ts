@@ -1,5 +1,5 @@
 import type { Ambition, RpgState, Thought } from "./types";
-import { ITEMS, QUESTS } from "./content";
+import { ITEMS, QUESTS, RESOURCES } from "./content";
 import { levelForXp } from "./skills";
 import { itemCount } from "./inventory";
 export function ownsItem(s: RpgState, id: string) {
@@ -11,6 +11,12 @@ export function ownsItem(s: RpgState, id: string) {
   );
 }
 export function goalMet(s: RpgState, goal: Ambition) {
+  if (goal.kind === "gather" && goal.resourceId && goal.quantity)
+    return (
+      itemCount(s.player.inventory, RESOURCES[goal.resourceId].itemId) +
+        itemCount(s.bank, RESOURCES[goal.resourceId].itemId) >=
+      goal.quantity
+    );
   if (goal.kind === "equipment")
     return !!goal.itemId && ownsItem(s, goal.itemId);
   if (goal.kind === "skill")
@@ -117,6 +123,17 @@ export function suggestGoals(s: RpgState): Thought["choices"] {
 }
 export function goalSteps(s: RpgState, goal: Ambition): string[] {
   if (goalMet(s, goal)) return ["Ambition achieved"];
+  if (goal.kind === "gather" && goal.resourceId) {
+    const r = RESOURCES[goal.resourceId];
+    return [
+      ...(levelForXp(s.player.skills[r.skill]) < r.level
+        ? [`Train ${r.skill} to ${r.level} using available resources`]
+        : []),
+      `Bring a usable ${r.tool}${r.bait ? ` and ${ITEMS[r.bait].name}` : ""}`,
+      `Gather ${ITEMS[r.itemId].name} until backpack and bank hold ${goal.quantity}`,
+      "Bank full backpacks, keep working tools, and resume gathering",
+    ];
+  }
   if (goal.kind === "equipment" && goal.itemId && ITEMS[goal.itemId]) {
     const item = ITEMS[goal.itemId];
     return [

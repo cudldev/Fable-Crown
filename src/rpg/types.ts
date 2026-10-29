@@ -170,7 +170,10 @@ export interface ActorState {
 export interface Ambition {
   id: string;
   title: string;
-  kind: "skill" | "equipment" | "quest" | "explore";
+  kind: "skill" | "equipment" | "quest" | "explore" | "gather";
+  /** Gather goals count held items across backpack and personal bank. */
+  resourceId?: ResourceId;
+  quantity?: number;
   skill?: SkillId;
   level?: number;
   itemId?: ItemId;
@@ -203,6 +206,7 @@ export type RpgCommand =
   | { type: "enqueue"; order: RpgOrder }
   | { type: "goal"; goal: Ambition }
   | { type: "style"; skill: CombatStyle }
+  | { type: "run"; enabled: boolean }
   | { type: "cancel-order"; index: number }
   | { type: "reorder-order"; index: number; direction: -1 | 1 }
   | { type: "wait" | "resume" };
@@ -278,6 +282,8 @@ export interface RpgState {
     retryAt: number;
   } | null;
   control: {
+    /** Older V3 saves default to running when energy permits. */
+    running?: boolean;
     waiting: boolean;
     active: RpgOrder | null;
     source?: "player" | "autonomous" | null;
@@ -293,4 +299,12 @@ export interface RpgState {
     lastThought: number;
   };
   journal: string[];
+  /** Bounded, deterministic player rewards. Older V3 saves may omit this log. */
+  rewards?: RewardEvent[];
+}
+export interface RewardEvent {
+  id: string;
+  tick: number;
+  items: ItemStack[];
+  xp: Partial<Record<SkillId, number>>;
 }

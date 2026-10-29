@@ -15,8 +15,8 @@ let state: RpgState,
   hasArchive = false,
   storageOkay = true,
   saving = Promise.resolve();
-function emit(message = "") {
-  self.postMessage({ state, message, hasArchive, storageOkay });
+function emit(message = "", resetFeedback = false) {
+  self.postMessage({ state, message, hasArchive, storageOkay, resetFeedback });
 }
 function save() {
   state.savedAt = Date.now();
@@ -46,6 +46,7 @@ void (async () => {
       : hasArchive
         ? "Your earlier chapter is archived. This is a fresh RPG journey."
         : "A new journey begins in Oakrest.",
+    true,
   );
 })();
 self.onmessage = async (
@@ -65,7 +66,7 @@ self.onmessage = async (
   if (type === "pause") {
     running = false;
     await save();
-    emit();
+    emit("", true);
   }
   if (type === "resume") {
     const r = reconcileRpg(state, Date.now());
@@ -74,6 +75,7 @@ self.onmessage = async (
     await save();
     emit(
       r.ticks ? `While you were away: ${r.ticks} ticks at quarter speed.` : "",
+      true,
     );
   }
   if (type === "import") {
@@ -86,13 +88,13 @@ self.onmessage = async (
     reconcileRpg(state, Date.now());
     last = Date.now();
     await save();
-    emit("Chronicle restored.");
+    emit("Chronicle restored.", true);
   }
   if (type === "reset") {
     state = createRpg(Date.now());
     last = Date.now();
     await save();
-    emit("A fresh RPG chapter begins. The old archive is unchanged.");
+    emit("A fresh RPG chapter begins. The old archive is unchanged.", true);
   }
   if (type === "archive") {
     try {
@@ -109,5 +111,5 @@ setInterval(() => {
   stepRpg(state, ticks);
   last += ticks * TICK_MS;
   if (state.tick % 8 === 0) void save();
-  emit();
+  emit("", ticks > 4);
 }, 100);

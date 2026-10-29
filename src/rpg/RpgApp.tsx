@@ -11,10 +11,13 @@ import {
   worldForState,
 } from "./world";
 import { SKILLS, type RpgState, type RpgCommand, type RpgOrder } from "./types";
-import { levelForXp, skillName, XP_THRESHOLDS } from "./skills";
+import { levelForXp, skillName } from "./skills";
 import { ITEMS, RESOURCES, RECIPES, SHOPS, ENEMIES, QUESTS } from "./content";
-import { itemCount, inventorySlots } from "./inventory";
+import { itemCount, inventorySlots, stackLimitFor } from "./inventory";
 import { suggestGoals } from "./planning";
+import { useRewardFeedback } from "./useRewardFeedback";
+import { formatXp, xpProgress } from "./reward-feedback";
+import { contextGoals } from "./context-goals";
 import type { SkillId, EquipmentSlot } from "./types";
 import "./rpg.css";
 const base = import.meta.env.BASE_URL;
@@ -53,6 +56,8 @@ export default function RpgApp() {
     [worldSize, setWorldSize] = useState(""),
     [quantity, setQuantity] = useState(10),
     [bagItem, setBagItem] = useState<string | null>(null);
+  const [feedbackEpoch, setFeedbackEpoch] = useState(0);
+  const reward = useRewardFeedback(state, feedbackEpoch);
   const worker = useRef<Worker | null>(null),
     input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -67,6 +72,7 @@ export default function RpgApp() {
         return;
       }
       setState(e.data.state);
+      if (e.data.resetFeedback) setFeedbackEpoch((value) => value + 1);
       setHasArchive(e.data.hasArchive);
       setStorageOkay(e.data.storageOkay);
       if (e.data.message) setMessage(e.data.message);
@@ -265,6 +271,7 @@ export default function RpgApp() {
           onCamera={setCamera}
           selection={selection}
           onSelect={select}
+          feedback={reward.floaters}
         />
       ) : (
         <div className="loading-screen">
@@ -299,6 +306,27 @@ export default function RpgApp() {
         </div>
       </header>
       <div className="camera-controls">
+        {state && (
+          <button
+            className="rpg-run-control"
+            aria-label="Toggle running"
+            aria-pressed={state.control.running !== false}
+            onClick={() =>
+              command({ type: "run", enabled: state.control.running === false })
+            }
+            title="Run: up to two tiles per tick. Walk to recover energy."
+          >
+            <span>
+              {state.control.running !== false ? "Run" : "Walk"} ·{" "}
+              {Math.floor(state.player.runEnergy / 100)}%
+            </span>
+            <progress
+              aria-label="Run energy"
+              value={state.player.runEnergy}
+              max={10000}
+            />
+          </button>
+        )}
         <button
           aria-label="Zoom in"
           onClick={() =>
@@ -385,17 +413,37 @@ export default function RpgApp() {
                 value={quantity}
                 onChange={(e) => setQuantity(Number(e.target.value))}
               >
-                {[1, 10, 28].map((n) => (
+                {[1, 5, 10, 28].map((n) => (
                   <option key={n}>{n}</option>
                 ))}
               </select>
             </label>
           )}
+          {selectedObject.kind !== "quest" &&
+            !["building", "landmark", "bridge"].includes(
+              selectedObject.kind,
+            ) && (
+              <div className="context-goals" aria-label="Goals for this place">
+                {contextGoals(state, selectedObject, quantity).map((choice) => (
+                  <button
+                    key={choice.id}
+                    className="choice"
+                    onClick={() => {
+                      command({ type: "goal", goal: choice.goal });
+                      setSelection(null);
+                    }}
+                  >
+                    <strong>{choice.label}</strong>
+                    <small>{choice.description}</small>
+                  </button>
+                ))}
+              </div>
+            )}
           {selectedObject.questId && QUESTS[selectedObject.questId] && (
             <>
               <p>{QUESTS[selectedObject.questId].description}</p>
               <button
-                className="full"
+                className="primary full"
                 onClick={() => {
                   const q = QUESTS[selectedObject.questId!];
                   command({
@@ -414,14 +462,29 @@ export default function RpgApp() {
               </button>
             </>
           )}
-          <div className="order-actions">
-            <button className="primary" onClick={() => order(contextualOrder!)}>
-              Do now
-            </button>
-            <button onClick={() => order(contextualOrder!, true)}>
-              Add next
-            </button>
-          </div>
+          {selectedObject.resourceId ? (
+            <details className="rpg-direct-orders">
+              <summary>Single action or queued order</summary>
+              <div className="order-actions">
+                <button onClick={() => order(contextualOrder!)}>Do now</button>
+                <button onClick={() => order(contextualOrder!, true)}>
+                  Add next
+                </button>
+              </div>
+            </details>
+          ) : (
+            <div className="order-actions">
+              <button
+                className="primary"
+                onClick={() => order(contextualOrder!)}
+              >
+                Do now
+              </button>
+              <button onClick={() => order(contextualOrder!, true)}>
+                Add next
+              </button>
+            </div>
+          )}
           {selectedObject.kind === "shop" && (
             <button
               className="full"
@@ -655,6 +718,28 @@ export default function RpgApp() {
               <span className="eyebrow">ALDEN’S INTENTIONS</span>
               <h2>{state.control.goal?.title ?? "The road ahead"}</h2>
               <p>{state.control.reason}</p>
+              {state.control.goal?.kind === "gather" &&
+                state.control.goal.resourceId &&
+                (() => {
+                  const g = state.control.goal,
+                    r = RESOURCES[g.resourceId!],
+                    held =
+                      itemCount(state.player.inventory, r.itemId) +
+                      itemCount(state.bank, r.itemId);
+                  return (
+                    <div className="rpg-goal-progress">
+                      <progress
+                        aria-label="Gathering goal progress"
+                        value={Math.min(held, g.quantity!)}
+                        max={g.quantity}
+                      />
+                      <small>
+                        {held} / {g.quantity} {ITEMS[r.itemId].name} carried or
+                        banked
+                      </small>
+                    </div>
+                  );
+                })()}
               <p className="rpg-current-order">
                 Now:{" "}
                 {state.control.active
@@ -769,9 +854,8 @@ export default function RpgApp() {
               <div className="rpg-skill-list">
                 {SKILLS.map((skill) => {
                   const xp = state.player.skills[skill],
-                    level = levelForXp(xp),
-                    start = XP_THRESHOLDS[level - 1]!,
-                    next = XP_THRESHOLDS[Math.min(98, level)]!,
+                    progress = xpProgress(xp),
+                    level = progress.level,
                     unlock = nextUnlock(skill, level),
                     target = unlock?.level ?? Math.min(99, level + 1);
                   return (
@@ -796,13 +880,14 @@ export default function RpgApp() {
                         <b>{level}</b>
                       </span>
                       <progress
-                        value={xp - start}
-                        max={Math.max(1, next - start)}
+                        aria-label={`${skillName(skill)} level progress`}
+                        value={progress.current}
+                        max={progress.span}
                       />
                       <small>
                         {Math.floor(xp / 10)} XP ·{" "}
                         {level < 99
-                          ? `${Math.ceil((next - xp) / 10)} to level ${level + 1}`
+                          ? `${formatXp(progress.remaining)} to level ${level + 1} · ${Math.floor((progress.current / progress.span) * 100)}%`
                           : "Mastered"}
                       </small>
                       {unlock && (
@@ -821,8 +906,8 @@ export default function RpgApp() {
               <span className="eyebrow">ALDEN’S PACK</span>
               <h2>Inventory & equipment</h2>
               <p aria-label="Backpack capacity">
-                {inventorySlots(state.player.inventory)} / 28 slots · coins and
-                supplies stack
+                {inventorySlots(state.player.inventory)} / 28 slots · ores, logs
+                and food use one slot each. Coins, bait and feathers stack.
               </p>
               <div className="rpg-backpack" aria-label="Backpack">
                 {Array.from({ length: 28 }, (_, i) => {
@@ -867,6 +952,12 @@ export default function RpgApp() {
                 <div className="rpg-item-inspect">
                   <h3>{itemName(bagItem)}</h3>
                   <p>
+                    {itemCount(state.player.inventory, bagItem)} carried · stack
+                    limit {stackLimitFor(bagItem).toLocaleString()} ·{" "}
+                    {ITEMS[bagItem]?.stackable
+                      ? "1 slot"
+                      : `${itemCount(state.player.inventory, bagItem)} slots`}
+                    .{" "}
                     {ITEMS[bagItem]?.skill
                       ? `${skillName(ITEMS[bagItem].skill!)} ${ITEMS[bagItem].level ?? 1} ${ITEMS[bagItem].kind === "food" ? "to make" : "to use"}. `
                       : ""}
@@ -1003,7 +1094,17 @@ export default function RpgApp() {
                           : "A NEW OPPORTUNITY"}
                     </span>
                     <h3>{q.name}</h3>
-                    <p>{q.description}</p>
+                    <p>
+                      {progress?.complete
+                        ? "Supplies delivered and rewards claimed."
+                        : q.description}
+                    </p>
+                    {!progress?.complete &&
+                      state.control.goal?.questId === q.id && (
+                        <p className="rpg-current-order">
+                          Now: {state.player.activity}
+                        </p>
+                      )}
                     {q.requirements && (
                       <small>
                         Skills:{" "}
@@ -1017,10 +1118,9 @@ export default function RpgApp() {
                     )}
                     {q.items.map((i) => (
                       <p key={i.itemId}>
-                        {itemName(i.itemId)} ·{" "}
-                        {itemCount(state.player.inventory, i.itemId) +
-                          itemCount(state.bank, i.itemId)}
-                        /{i.quantity} packed or banked
+                        {progress?.complete
+                          ? `✓ ${i.quantity} ${itemName(i.itemId)} delivered`
+                          : `${itemName(i.itemId)} · ${itemCount(state.player.inventory, i.itemId) + itemCount(state.bank, i.itemId)}/${i.quantity} packed or banked`}
                       </p>
                     ))}
                     {q.kills && (
@@ -1038,7 +1138,8 @@ export default function RpgApp() {
                         )
                         .join(" · ")}
                       <br />
-                      Unlock: {q.reward.unlock.replaceAll("-", " ")}
+                      {progress?.complete ? "Unlocked" : "Unlock"}:{" "}
+                      {q.reward.unlock.replaceAll("-", " ")}
                     </small>
                     {!progress?.complete && (
                       <button
@@ -1305,6 +1406,26 @@ export default function RpgApp() {
                 </em>
               </strong>
               <span className="doing-now">{player.activity}</span>
+              <span
+                className={`rpg-xp-inline ${reward.gain ? "gained" : ""}`}
+                aria-label="Recent skill experience"
+              >
+                <span>
+                  {skillName(reward.skill)}{" "}
+                  {levelForXp(player.skills[reward.skill])}
+                  {reward.gain > 0 && <b> +{formatXp(reward.gain)} XP</b>}
+                </span>
+                <progress
+                  aria-label={`${skillName(reward.skill)} experience progress`}
+                  value={xpProgress(player.skills[reward.skill]).current}
+                  max={xpProgress(player.skills[reward.skill]).span}
+                />
+                <small>
+                  {levelForXp(player.skills[reward.skill]) === 99
+                    ? "Mastered"
+                    : `${formatXp(xpProgress(player.skills[reward.skill]).remaining)} XP to next level`}
+                </small>
+              </span>
             </span>
           </button>
           <button
@@ -1339,6 +1460,9 @@ export default function RpgApp() {
           </button>
         </div>
       )}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {reward.announcement}
+      </div>
       <input
         hidden
         ref={input}

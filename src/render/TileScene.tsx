@@ -5,6 +5,7 @@ import { ENEMIES } from "../rpg/content";
 import { artFrames } from "../art-frames";
 import { tileToScreen, screenToTile } from "./iso";
 import "./tile-scene.css";
+import type { FeedbackFloater } from "./feedback";
 export interface TileCamera {
   x: number;
   y: number;
@@ -25,6 +26,7 @@ interface Props {
   onCamera: (c: TileCamera) => void;
   selection: TileSelection | null;
   onSelect: (s: TileSelection) => void;
+  feedback?: FeedbackFloater[];
 }
 const base = import.meta.env.BASE_URL;
 const assetNames = [
@@ -66,12 +68,15 @@ export default function TileScene({
   onCamera,
   selection,
   onSelect,
+  feedback = [],
 }: Props) {
   const world = worldForState(state);
   const cachedWorld = useRef(world);
   const root = useRef<HTMLDivElement>(null),
     canvas = useRef<HTMLCanvasElement>(null),
-    images = useRef(new Map<string, HTMLImageElement>()),
+    images = useRef(new Map<string, HTMLCanvasElement>()),
+    materials = useRef(new Map<string, HTMLCanvasElement>()),
+    hitElements = useRef(new Map<string, HTMLButtonElement>()),
     chunks = useRef(new Map<string, HTMLCanvasElement>()),
     overview = useRef<HTMLCanvasElement | null>(null);
   if (cachedWorld.current !== world) {
@@ -80,7 +85,6 @@ export default function TileScene({
     overview.current = null;
   }
   const [size, setSize] = useState({ width: 1200, height: 800 }),
-    [now, setNow] = useState(0),
     [artVersion, setArtVersion] = useState(0);
   const stamp = useRef({ tick: state.tick, at: performance.now() });
   if (stamp.current.tick !== state.tick)
@@ -109,7 +113,15 @@ export default function TileScene({
       img.src = `${base}art/${name}.webp`;
       img.onload = () => {
         if (alive) {
-          images.current.set(name, img);
+          const source = document.createElement("canvas");
+          const ratio = Math.min(1, 512 / Math.max(img.width, img.height));
+          source.width = Math.max(1, Math.round(img.width * ratio));
+          source.height = Math.max(1, Math.round(img.height * ratio));
+          source
+            .getContext("2d")!
+            .drawImage(img, 0, 0, source.width, source.height);
+          images.current.set(name, source);
+          materials.current.clear();
           chunks.current.clear();
           overview.current = null;
           setArtVersion((v) => v + 1);
@@ -120,15 +132,7 @@ export default function TileScene({
       alive = false;
     };
   }, []);
-  useEffect(() => {
-    let id = 0;
-    const frame = (t: number) => {
-      setNow(t);
-      id = requestAnimationFrame(frame);
-    };
-    id = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(id);
-  }, []);
+  const now = performance.now();
   const reduced =
     typeof matchMedia !== "undefined" &&
     matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -173,7 +177,7 @@ export default function TileScene({
       };
     });
   const drops = state.drops.filter(
-    (d) => d.expiresAt > state.tick && d.items.length,
+    (d) => (d.expiresAt === 0 || d.expiresAt > state.tick) && d.items.length,
   );
   const hero = people[0]!,
     fit =
@@ -244,37 +248,45 @@ export default function TileScene({
         if (x >= world.width || y >= world.height) continue;
         const terrain = world.terrain[y * world.width + x]!,
           p = tileToScreen({ x: lx, y: ly });
-        ctx.save();
-        diamond(ctx, p.x, p.y);
-        ctx.clip();
-        ctx.fillStyle = {
-          grass: "#b6be86",
-          dirt: "#d8bf91",
-          stone: "#ddccb0",
-          water: "#83a9aa",
-          sand: "#d8cfad",
-        }[terrain];
-        ctx.fill();
-        const img = images.current.get(terrainAsset[terrain]);
-        if (img) {
-          ctx.globalAlpha = 0.9;
-          ctx.drawImage(img, p.x - 33, p.y - 17, 66, 34);
-          ctx.globalAlpha = 1;
-          if (terrain === "dirt") {
-            ctx.fillStyle = "#d7bb8744";
-            ctx.fillRect(p.x - 32, p.y - 16, 64, 32);
+        let material = materials.current.get(terrain);
+        if (!material) {
+          material = document.createElement("canvas");
+          material.width = 66;
+          material.height = 34;
+          const mc = material.getContext("2d")!;
+          diamond(mc, 33, 17);
+          mc.clip();
+          mc.fillStyle = {
+            grass: "#b6be86",
+            dirt: "#d8bf91",
+            stone: "#ddccb0",
+            water: "#83a9aa",
+            sand: "#d8cfad",
+          }[terrain];
+          mc.fill();
+          const image = images.current.get(terrainAsset[terrain]);
+          if (image) {
+            mc.globalAlpha = 0.9;
+            mc.drawImage(image, 0, 0, 66, 34);
+            mc.globalAlpha = 1;
+            if (terrain === "dirt") {
+              mc.fillStyle = "#d7bb8744";
+              mc.fillRect(1, 1, 64, 32);
+            }
+          } else if (terrain === "water") {
+            mc.strokeStyle = "#dae0cb66";
+            mc.lineWidth = 1.5;
+            mc.beginPath();
+            mc.moveTo(18, 19);
+            mc.quadraticCurveTo(33, 13, 47, 18);
+            mc.stroke();
           }
-        } else if (terrain === "water") {
-          ctx.strokeStyle = "#dae0cb66";
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(p.x - 15, p.y + 2);
-          ctx.quadraticCurveTo(p.x, p.y - 4, p.x + 14, p.y + 1);
-          ctx.stroke();
+          materials.current.set(terrain, material);
         }
-        ctx.restore();
+        ctx.drawImage(material, p.x - 33, p.y - 17);
       }
-    if (chunks.current.size >= 12)
+    // Bounded 48 MiB terrain LRU; distant views use a single ~4 MiB composite.
+    if (chunks.current.size >= 24)
       chunks.current.delete(chunks.current.keys().next().value!);
     chunks.current.set(key, c);
     return c;
@@ -282,44 +294,95 @@ export default function TileScene({
   useEffect(() => {
     const c = canvas.current;
     if (!c) return;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    if (c.width !== size.width * dpr || c.height !== size.height * dpr) {
-      c.width = size.width * dpr;
-      c.height = size.height * dpr;
-    }
-    const ctx = c.getContext("2d")!;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, size.width, size.height);
-    ctx.fillStyle = "#c3c7aa";
-    ctx.fillRect(0, 0, size.width, size.height);
-    ctx.translate(
-      size.width / 2 - center.x * view.zoom,
-      size.height / 2 - center.y * view.zoom,
-    );
-    ctx.scale(view.zoom, view.zoom);
-    if (view.overview) {
-      if (!overview.current) {
-        const out = document.createElement("canvas");
-        out.width = (world.width + world.height) * 3.2;
-        out.height = (world.width + world.height) * 1.6 + 8;
-        const oc = out.getContext("2d")!;
-        oc.scale(0.1, 0.1);
-        oc.translate(world.height * 32, 16);
-        for (let cy = 0; cy < world.height / 32; cy++)
-          for (let cx = 0; cx < world.width / 32; cx++) {
-            const p = tileToScreen({ x: cx * 32, y: cy * 32 });
-            oc.drawImage(groundChunk(cx, cy), p.x - 1024, p.y - 16, 2048, 1024);
-          }
-        overview.current = out;
+    let frameId = 0;
+    const paint = (time: number) => {
+      const fraction = reduced
+        ? 1
+        : clamp((time - stamp.current.at) / 600, 0, 1);
+      for (const actor of people) {
+        actor.draw.x =
+          actor.previousPosition.x +
+          (actor.position.x - actor.previousPosition.x) * fraction;
+        actor.draw.y =
+          actor.previousPosition.y +
+          (actor.position.y - actor.previousPosition.y) * fraction;
       }
-      ctx.drawImage(
-        overview.current,
-        -world.height * 32,
-        -16,
-        overview.current.width * 10,
-        overview.current.height * 10,
+      for (const enemy of enemies) {
+        const previous =
+          enemyFrames.current.previous.get(enemy.id) ?? enemy.position;
+        if (
+          Math.abs(previous.x - enemy.position.x) +
+            Math.abs(previous.y - enemy.position.y) <=
+          2
+        )
+          enemy.draw = {
+            x: previous.x + (enemy.position.x - previous.x) * fraction,
+            y: previous.y + (enemy.position.y - previous.y) * fraction,
+          };
+      }
+      if (camera.follow && !camera.overview) {
+        view.x = hero.draw.x;
+        view.y = hero.draw.y + 2 / Math.max(0.2, view.zoom);
+        Object.assign(center, tileToScreen(view));
+      }
+      for (const actor of people) {
+        const el = hitElements.current.get(`actor-${actor.id}`),
+          at = project(actor.draw);
+        if (el) {
+          el.style.left = `${at.x}px`;
+          el.style.top = `${at.y - 35 * view.zoom}px`;
+        }
+      }
+      for (const object of world.objects) {
+        const el = hitElements.current.get(`object-${object.id}`);
+        if (el) {
+          const at = project({
+            x: object.position.x + (object.width - 1) / 2,
+            y: object.position.y + object.height - 1,
+          });
+          el.style.left = `${at.x}px`;
+          el.style.top = `${at.y}px`;
+        }
+      }
+      for (const drop of drops) {
+        const el = hitElements.current.get(`drop-${drop.id}`),
+          at = project(drop.position);
+        if (el) {
+          el.style.left = `${at.x}px`;
+          el.style.top = `${at.y - 10 * view.zoom}px`;
+        }
+      }
+      if (state.grave) {
+        const el = hitElements.current.get("grave"),
+          at = project(state.grave.position);
+        if (el) {
+          el.style.left = `${at.x}px`;
+          el.style.top = `${at.y - 20 * view.zoom}px`;
+        }
+      }
+      for (const enemy of enemies) {
+        const el = hitElements.current.get(`enemy-${enemy.id}`),
+          at = project(enemy.draw);
+        if (el) {
+          el.style.left = `${at.x}px`;
+          el.style.top = `${at.y - 30 * view.zoom}px`;
+        }
+      }
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      if (c.width !== size.width * dpr || c.height !== size.height * dpr) {
+        c.width = size.width * dpr;
+        c.height = size.height * dpr;
+      }
+      const ctx = c.getContext("2d")!;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, size.width, size.height);
+      ctx.fillStyle = "#c3c7aa";
+      ctx.fillRect(0, 0, size.width, size.height);
+      ctx.translate(
+        size.width / 2 - center.x * view.zoom,
+        size.height / 2 - center.y * view.zoom,
       );
-    } else {
+      ctx.scale(view.zoom, view.zoom);
       const corners = [
         unproject({ x: -160, y: -200 }),
         unproject({ x: size.width + 160, y: -200 }),
@@ -346,301 +409,409 @@ export default function TileScene({
           0,
           5,
         );
-      for (let sum = minX + minY; sum <= maxX + maxY; sum++)
-        for (let cx = minX; cx <= maxX; cx++) {
-          const cy = sum - cx;
-          if (cy < minY || cy > maxY) continue;
-          const p = tileToScreen({ x: cx * 32, y: cy * 32 });
-          ctx.drawImage(groundChunk(cx, cy), p.x - 1024, p.y - 16, 2048, 1024);
-        }
-    }
-    if (camera.grid && !view.overview) {
-      const tl = unproject({ x: -100, y: -100 }),
-        br = unproject({ x: size.width + 100, y: size.height + 100 });
-      const radius = Math.ceil((size.width + size.height) / view.zoom / 64);
-      ctx.strokeStyle = "#40594233";
-      ctx.lineWidth = 1 / view.zoom;
-      for (
-        let y = Math.max(0, Math.floor(view.y - radius));
-        y < Math.min(world.height, view.y + radius);
-        y++
-      )
-        for (
-          let x = Math.max(0, Math.floor(view.x - radius));
-          x < Math.min(world.width, view.x + radius);
-          x++
-        ) {
-          const p = tileToScreen({ x, y });
-          diamond(ctx, p.x, p.y);
-          ctx.stroke();
-        }
-      void tl;
-      void br;
-    }
-    function art(
-      name: string,
-      p: { x: number; y: number },
-      w: number,
-      h: number,
-      alpha = 1,
-    ) {
-      const img = images.current.get(name);
-      if (!img) return;
-      const frame = artFrames[name];
-      ctx.globalAlpha = alpha;
-      if (frame) {
-        const scale = Math.min(w / frame.boundsWidth, h / frame.boundsHeight);
-        ctx.drawImage(
-          img,
-          p.x - frame.pivotX * scale,
-          p.y - frame.pivotY * scale,
-          img.width * scale,
-          img.height * scale,
-        );
-      } else ctx.drawImage(img, p.x - w / 2, p.y - h, w, h);
-      ctx.globalAlpha = 1;
-    }
-    const drawables: { depth: number; draw: () => void }[] = [];
-    for (const o of world.objects) {
-      const foot = {
-        x: o.position.x + (o.width - 1) / 2,
-        y: o.position.y + o.height - 1,
-      };
-      if (!view.overview && !visible(foot, 350)) continue;
-      const p = tileToScreen(foot);
-      drawables.push({
-        depth: foot.x + foot.y,
-        draw: () => {
-          if (o.kind === "quest") {
-            const name =
-              o.id === "quest-forge"
-                ? "smith"
-                : o.id === "quest-supper"
-                  ? "actor-fisher"
-                  : "builder";
-            art(name, p, 90, 90);
-            ctx.fillStyle = "#f5df9f";
-            ctx.strokeStyle = "#66522f";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y - 106, 11, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = "#493925";
-            ctx.font = "bold 18px Georgia";
-            ctx.textAlign = "center";
-            ctx.fillText("!", p.x, p.y - 100);
-          } else if (
-            (o.kind === "anvil" || o.kind === "range") &&
-            images.current.has(o.kind === "anvil" ? "anvil" : "cooking-range")
-          ) {
-            art(
-              o.kind === "anvil" ? "anvil" : "cooking-range",
-              p,
-              110,
-              o.kind === "anvil" ? 90 : 110,
-            );
-          } else if (o.art) {
-            const w =
-                o.kind === "tree"
-                  ? 170
-                  : o.kind === "rock"
-                    ? 100
-                    : o.kind === "bridge"
-                      ? 290
-                      : Math.max(170, (o.width + o.height) * 32),
-              h =
-                o.kind === "tree"
-                  ? 170
-                  : o.kind === "rock"
-                    ? 90
-                    : Math.max(140, w * 0.8);
-            art(
-              o.art!,
-              p,
-              w,
-              h,
-              state.resources[o.id]?.available === false ? 0.4 : 1,
-            );
-          } else if (o.kind !== "landmark") {
-            ctx.fillStyle = o.kind === "fish" ? "#447d8599" : "#756c59";
-            ctx.beginPath();
-            ctx.ellipse(
-              p.x,
-              p.y - 6,
-              o.kind === "anvil" ? 17 : 12,
-              7,
-              0,
-              0,
-              Math.PI * 2,
-            );
-            ctx.fill();
-            if (o.kind === "range") {
-              ctx.fillStyle = "#de9b55";
-              ctx.fillRect(p.x - 8, p.y - 25, 16, 20);
+      // Keep the entire visible working set within the terrain cache budget.
+      if (
+        view.overview ||
+        view.zoom < 0.35 ||
+        (maxX - minX + 1) * (maxY - minY + 1) > 24
+      ) {
+        if (!overview.current) {
+          const out = document.createElement("canvas");
+          out.width = (world.width + world.height) * 3.2;
+          out.height = (world.width + world.height) * 1.6 + 8;
+          const oc = out.getContext("2d")!;
+          oc.scale(0.1, 0.1);
+          oc.translate(world.height * 32, 16);
+          for (let cy = 0; cy < world.height / 32; cy++)
+            for (let cx = 0; cx < world.width / 32; cx++) {
+              const p = tileToScreen({ x: cx * 32, y: cy * 32 });
+              oc.drawImage(
+                groundChunk(cx, cy),
+                p.x - 1024,
+                p.y - 16,
+                2048,
+                1024,
+              );
             }
+          overview.current = out;
+        }
+        ctx.drawImage(
+          overview.current,
+          -world.height * 32,
+          -16,
+          overview.current.width * 10,
+          overview.current.height * 10,
+        );
+      } else {
+        for (let sum = minX + minY; sum <= maxX + maxY; sum++)
+          for (let cx = minX; cx <= maxX; cx++) {
+            const cy = sum - cx;
+            if (cy < minY || cy > maxY) continue;
+            const p = tileToScreen({ x: cx * 32, y: cy * 32 });
+            ctx.drawImage(
+              groundChunk(cx, cy),
+              p.x - 1024,
+              p.y - 16,
+              2048,
+              1024,
+            );
           }
-        },
-      });
-    }
-    if (!view.overview)
-      for (const p of people)
-        if (visible(p.draw)) {
-          const at = tileToScreen(p.draw);
-          drawables.push({
-            depth: p.draw.x + p.draw.y + 0.1,
-            draw: () => {
-              ctx.fillStyle = "#2b433833";
+      }
+      if (camera.grid && !view.overview && view.zoom >= 0.35) {
+        ctx.strokeStyle = "#40594233";
+        ctx.lineWidth = 1 / view.zoom;
+        // Shared tile edges need only one path, rather than a stroke per cell.
+        ctx.beginPath();
+        for (let x = -0.5; x <= world.width - 0.5; x++) {
+          const a = tileToScreen({ x, y: -0.5 }),
+            b = tileToScreen({ x, y: world.height - 0.5 });
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+        }
+        for (let y = -0.5; y <= world.height - 0.5; y++) {
+          const a = tileToScreen({ x: -0.5, y }),
+            b = tileToScreen({ x: world.width - 0.5, y });
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+        }
+        ctx.stroke();
+      }
+      function art(
+        name: string,
+        p: { x: number; y: number },
+        w: number,
+        h: number,
+        alpha = 1,
+      ) {
+        const img = images.current.get(name);
+        if (!img) return;
+        // The source image is released after baking; frame geometry stays full-size.
+        const frame = artFrames[name];
+        ctx.globalAlpha = alpha;
+        if (frame) {
+          const scale = Math.min(w / frame.boundsWidth, h / frame.boundsHeight);
+          ctx.drawImage(
+            img,
+            p.x - frame.pivotX * scale,
+            p.y - frame.pivotY * scale,
+            frame.width * scale,
+            frame.height * scale,
+          );
+        } else ctx.drawImage(img, p.x - w / 2, p.y - h, w, h);
+        ctx.globalAlpha = 1;
+      }
+      const drawables: { depth: number; draw: () => void }[] = [];
+      for (const o of world.objects) {
+        const foot = {
+          x: o.position.x + (o.width - 1) / 2,
+          y: o.position.y + o.height - 1,
+        };
+        if (!view.overview && !visible(foot, 350)) continue;
+        const p = tileToScreen(foot);
+        drawables.push({
+          depth: foot.x + foot.y,
+          draw: () => {
+            if (o.kind === "quest") {
+              const name =
+                o.id === "quest-forge"
+                  ? "smith"
+                  : o.id === "quest-supper"
+                    ? "actor-fisher"
+                    : "builder";
+              art(name, p, 90, 90);
+              ctx.fillStyle = "#f5df9f";
+              ctx.strokeStyle = "#66522f";
+              ctx.lineWidth = 2;
               ctx.beginPath();
-              ctx.ellipse(at.x, at.y, 13, 5, 0, 0, Math.PI * 2);
+              ctx.arc(p.x, p.y - 106, 11, 0, Math.PI * 2);
               ctx.fill();
-              if (
-                p.id === 0 ||
-                (selection?.kind === "actor" && selection.id === p.id)
-              ) {
-                ctx.strokeStyle = "#f3d98c";
-                ctx.lineWidth = 2;
+              ctx.stroke();
+              ctx.fillStyle = "#493925";
+              ctx.font = "bold 18px Georgia";
+              ctx.textAlign = "center";
+              ctx.fillText("!", p.x, p.y - 100);
+            } else if (
+              (o.kind === "anvil" || o.kind === "range") &&
+              images.current.has(o.kind === "anvil" ? "anvil" : "cooking-range")
+            ) {
+              art(
+                o.kind === "anvil" ? "anvil" : "cooking-range",
+                p,
+                110,
+                o.kind === "anvil" ? 90 : 110,
+              );
+            } else if (o.art) {
+              const w =
+                  o.kind === "tree"
+                    ? 170
+                    : o.kind === "rock"
+                      ? 100
+                      : o.kind === "bridge"
+                        ? 290
+                        : Math.max(170, (o.width + o.height) * 32),
+                h =
+                  o.kind === "tree"
+                    ? 170
+                    : o.kind === "rock"
+                      ? 90
+                      : Math.max(140, w * 0.8);
+              art(
+                o.art!,
+                p,
+                w,
+                h,
+                state.resources[o.id]?.available === false ? 0.4 : 1,
+              );
+            } else if (o.kind !== "landmark") {
+              ctx.fillStyle = o.kind === "fish" ? "#447d8599" : "#756c59";
+              ctx.beginPath();
+              ctx.ellipse(
+                p.x,
+                p.y - 6,
+                o.kind === "anvil" ? 17 : 12,
+                7,
+                0,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+              if (o.kind === "range") {
+                ctx.fillStyle = "#de9b55";
+                ctx.fillRect(p.x - 8, p.y - 25, 16, 20);
+              }
+            }
+          },
+        });
+      }
+      if (!view.overview)
+        for (const p of people)
+          if (visible(p.draw)) {
+            const at = tileToScreen(p.draw);
+            drawables.push({
+              depth: p.draw.x + p.draw.y + 0.1,
+              draw: () => {
+                ctx.fillStyle = "#2b433833";
                 ctx.beginPath();
-                ctx.ellipse(at.x, at.y, 19, 8, 0, 0, Math.PI * 2);
+                ctx.ellipse(at.x, at.y, 13, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                if (
+                  p.id === 0 ||
+                  (selection?.kind === "actor" && selection.id === p.id)
+                ) {
+                  ctx.strokeStyle = "#f3d98c";
+                  ctx.lineWidth = 2;
+                  ctx.beginPath();
+                  ctx.ellipse(at.x, at.y, 19, 8, 0, 0, Math.PI * 2);
+                  ctx.stroke();
+                }
+                const name =
+                  p.role === "fisher"
+                    ? "actor-fisher"
+                    : assetNames.includes(p.role)
+                      ? p.role
+                      : "builder";
+                art(name, at, 90, 90);
+              },
+            });
+          }
+      if (!view.overview) {
+        for (const enemy of enemies) {
+          if (!visible(enemy.draw)) continue;
+          const at = tileToScreen(enemy.draw);
+          const targeted =
+            (selection?.kind === "enemy" && selection.id === enemy.id) ||
+            (state.control.active?.type === "attack" &&
+              state.control.active.enemyId === enemy.id);
+          drawables.push({
+            depth: enemy.draw.x + enemy.draw.y + 0.1,
+            draw: () => {
+              ctx.fillStyle = "#493b343b";
+              ctx.beginPath();
+              ctx.ellipse(at.x, at.y, 19, 7, 0, 0, Math.PI * 2);
+              ctx.fill();
+              if (targeted) {
+                ctx.strokeStyle = "#b14537";
+                ctx.lineWidth = 2 / view.zoom;
                 ctx.stroke();
               }
-              const name =
-                p.role === "fisher"
-                  ? "actor-fisher"
-                  : assetNames.includes(p.role)
-                    ? p.role
-                    : "builder";
-              art(name, at, 90, 90);
+              const name = `enemy-${enemy.definitionId}`;
+              if (images.current.has(name)) art(name, at, 92, 86);
+              else {
+                ctx.fillStyle =
+                  enemy.definitionId === "rock-mite" ? "#7b8074" : "#886449";
+                ctx.strokeStyle = "#493c34";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(at.x, at.y - 15, 22, 14, -0.12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              }
+              const health = clamp(
+                enemy.health / (enemy.definition?.health ?? enemy.health),
+                0,
+                1,
+              );
+              ctx.fillStyle = "#302e29";
+              ctx.fillRect(at.x - 22, at.y - 95, 44, 6);
+              ctx.fillStyle = targeted ? "#db8c68" : "#8da36e";
+              ctx.fillRect(at.x - 21, at.y - 94, 42 * health, 4);
             },
           });
         }
-    if (!view.overview) {
-      for (const enemy of enemies) {
-        if (!visible(enemy.draw)) continue;
-        const at = tileToScreen(enemy.draw);
-        const targeted =
-          (selection?.kind === "enemy" && selection.id === enemy.id) ||
-          (state.control.active?.type === "attack" &&
-            state.control.active.enemyId === enemy.id);
-        drawables.push({
-          depth: enemy.draw.x + enemy.draw.y + 0.1,
-          draw: () => {
-            ctx.fillStyle = "#493b343b";
-            ctx.beginPath();
-            ctx.ellipse(at.x, at.y, 19, 7, 0, 0, Math.PI * 2);
-            ctx.fill();
-            if (targeted) {
-              ctx.strokeStyle = "#b14537";
-              ctx.lineWidth = 2 / view.zoom;
-              ctx.stroke();
-            }
-            const name = `enemy-${enemy.definitionId}`;
-            if (images.current.has(name)) art(name, at, 92, 86);
-            else {
-              ctx.fillStyle =
-                enemy.definitionId === "rock-mite" ? "#7b8074" : "#886449";
-              ctx.strokeStyle = "#493c34";
+        for (const drop of drops) {
+          if (!visible(drop.position, 80)) continue;
+          const at = tileToScreen(drop.position);
+          drawables.push({
+            depth: drop.position.x + drop.position.y + 0.2,
+            draw: () => {
+              ctx.fillStyle = "#51483944";
+              ctx.beginPath();
+              ctx.ellipse(at.x, at.y, 13, 5, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "#b98b52";
+              ctx.strokeStyle = "#564735";
               ctx.lineWidth = 2;
               ctx.beginPath();
-              ctx.ellipse(at.x, at.y - 15, 22, 14, -0.12, 0, Math.PI * 2);
+              ctx.moveTo(at.x - 5, at.y - 25);
+              ctx.lineTo(at.x + 5, at.y - 25);
+              ctx.bezierCurveTo(
+                at.x + 3,
+                at.y - 17,
+                at.x + 17,
+                at.y - 5,
+                at.x + 8,
+                at.y - 2,
+              );
+              ctx.quadraticCurveTo(at.x, at.y + 2, at.x - 9, at.y - 3);
+              ctx.quadraticCurveTo(at.x - 15, at.y - 8, at.x - 5, at.y - 25);
               ctx.fill();
               ctx.stroke();
-            }
-            const health = clamp(
-              enemy.health / (enemy.definition?.health ?? enemy.health),
-              0,
-              1,
-            );
-            ctx.fillStyle = "#302e29";
-            ctx.fillRect(at.x - 22, at.y - 95, 44, 6);
-            ctx.fillStyle = targeted ? "#db8c68" : "#8da36e";
-            ctx.fillRect(at.x - 21, at.y - 94, 42 * health, 4);
-          },
-        });
+              ctx.beginPath();
+              ctx.moveTo(at.x - 6, at.y - 20);
+              ctx.lineTo(at.x + 6, at.y - 20);
+              ctx.stroke();
+            },
+          });
+        }
+        if (state.grave && visible(state.grave.position, 80)) {
+          const at = tileToScreen(state.grave.position);
+          drawables.push({
+            depth: state.grave.position.x + state.grave.position.y + 0.2,
+            draw: () => {
+              ctx.fillStyle = "#68796f";
+              ctx.strokeStyle = "#394d48";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(at.x - 13, at.y);
+              ctx.lineTo(at.x - 10, at.y - 30);
+              ctx.quadraticCurveTo(at.x, at.y - 40, at.x + 10, at.y - 30);
+              ctx.lineTo(at.x + 13, at.y);
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+              ctx.strokeStyle = "#e5ce89";
+              ctx.beginPath();
+              ctx.moveTo(at.x, at.y - 27);
+              ctx.lineTo(at.x, at.y - 9);
+              ctx.moveTo(at.x - 5, at.y - 22);
+              ctx.lineTo(at.x + 5, at.y - 22);
+              ctx.stroke();
+            },
+          });
+        }
       }
-      for (const drop of drops) {
-        if (!visible(drop.position, 80)) continue;
-        const at = tileToScreen(drop.position);
-        drawables.push({
-          depth: drop.position.x + drop.position.y + 0.2,
-          draw: () => {
-            ctx.fillStyle = "#51483944";
-            ctx.beginPath();
-            ctx.ellipse(at.x, at.y, 13, 5, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#b98b52";
-            ctx.strokeStyle = "#564735";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(at.x - 5, at.y - 25);
-            ctx.lineTo(at.x + 5, at.y - 25);
-            ctx.bezierCurveTo(
-              at.x + 3,
-              at.y - 17,
-              at.x + 17,
-              at.y - 5,
-              at.x + 8,
-              at.y - 2,
-            );
-            ctx.quadraticCurveTo(at.x, at.y + 2, at.x - 9, at.y - 3);
-            ctx.quadraticCurveTo(at.x - 15, at.y - 8, at.x - 5, at.y - 25);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(at.x - 6, at.y - 20);
-            ctx.lineTo(at.x + 6, at.y - 20);
-            ctx.stroke();
-          },
-        });
+      drawables.sort((a, b) => a.depth - b.depth).forEach((d) => d.draw());
+      if (!view.overview)
+        for (const actor of people) {
+          const action = actor.action;
+          if (
+            !action ||
+            actor.path.length ||
+            !visible(actor.draw) ||
+            (actor.id !== 0 &&
+              !(selection?.kind === "actor" && selection.id === actor.id))
+          )
+            continue;
+          const at = tileToScreen(actor.draw);
+          const progress = clamp(
+            (action.duration - action.remaining + fraction) /
+              Math.max(1, action.duration),
+            0,
+            1,
+          );
+          const ringY = at.y + 8 / view.zoom,
+            radius = 18 / view.zoom;
+          ctx.strokeStyle = "#273f3ba8";
+          ctx.lineWidth = 4 / view.zoom;
+          ctx.beginPath();
+          ctx.arc(at.x, ringY, radius, 0, Math.PI * 2);
+          ctx.stroke();
+          const target = world.objects.find(
+            (object) => object.id === action.targetId,
+          );
+          ctx.strokeStyle =
+            target?.kind === "rock"
+              ? "#afcce0"
+              : target?.kind === "tree"
+                ? "#bbd09a"
+                : "#edba74";
+          ctx.beginPath();
+          ctx.arc(
+            at.x,
+            ringY,
+            radius,
+            -Math.PI / 2,
+            -Math.PI / 2 + Math.PI * 2 * progress,
+          );
+          ctx.stroke();
+        }
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      for (const [index, entry] of feedback.slice(-8).entries()) {
+        const duration = reduced ? 1000 : 1800,
+          age = time - entry.startedAt;
+        if (age < 0 || age >= duration || view.overview) continue;
+        const at = project(entry.position);
+        ctx.globalAlpha = Math.min(1, (duration - age) / 400);
+        ctx.font = "bold 15px Georgia";
+        ctx.textAlign = "center";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#24362b";
+        ctx.fillStyle =
+          entry.tone === "level"
+            ? "#ffe09a"
+            : entry.tone === "xp"
+              ? "#bbdef0"
+              : "#eff4d3";
+        const y = at.y - 65 - index * 19 - (reduced ? 0 : age / 55);
+        ctx.strokeText(entry.text, at.x, y);
+        ctx.fillText(entry.text, at.x, y);
       }
-      if (state.grave && visible(state.grave.position, 80)) {
-        const at = tileToScreen(state.grave.position);
-        drawables.push({
-          depth: state.grave.position.x + state.grave.position.y + 0.2,
-          draw: () => {
-            ctx.fillStyle = "#68796f";
-            ctx.strokeStyle = "#394d48";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(at.x - 13, at.y);
-            ctx.lineTo(at.x - 10, at.y - 30);
-            ctx.quadraticCurveTo(at.x, at.y - 40, at.x + 10, at.y - 30);
-            ctx.lineTo(at.x + 13, at.y);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            ctx.strokeStyle = "#e5ce89";
-            ctx.beginPath();
-            ctx.moveTo(at.x, at.y - 27);
-            ctx.lineTo(at.x, at.y - 9);
-            ctx.moveTo(at.x - 5, at.y - 22);
-            ctx.lineTo(at.x + 5, at.y - 22);
-            ctx.stroke();
-          },
+      ctx.restore();
+      if (state.player.path.length) {
+        ctx.strokeStyle = "#f7d797";
+        ctx.lineWidth = 2 / view.zoom;
+        ctx.setLineDash([4 / view.zoom, 6 / view.zoom]);
+        ctx.beginPath();
+        [state.player.position, ...state.player.path].forEach((p, i) => {
+          const at = tileToScreen(p);
+          i ? ctx.lineTo(at.x, at.y) : ctx.moveTo(at.x, at.y);
         });
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
-    }
-    drawables.sort((a, b) => a.depth - b.depth).forEach((d) => d.draw());
-    if (state.player.path.length) {
-      ctx.strokeStyle = "#f7d797";
-      ctx.lineWidth = 2 / view.zoom;
-      ctx.setLineDash([4 / view.zoom, 6 / view.zoom]);
-      ctx.beginPath();
-      [state.player.position, ...state.player.path].forEach((p, i) => {
-        const at = tileToScreen(p);
-        i ? ctx.lineTo(at.x, at.y) : ctx.moveTo(at.x, at.y);
-      });
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-    if (selection?.kind === "tile") {
-      const p = tileToScreen(selection.position);
-      diamond(ctx, p.x, p.y);
-      ctx.strokeStyle = "#f8dfa1";
-      ctx.lineWidth = 2 / view.zoom;
-      ctx.stroke();
-    }
-  }, [state, now, camera, size, artVersion]);
+      if (selection?.kind === "tile") {
+        const p = tileToScreen(selection.position);
+        diamond(ctx, p.x, p.y);
+        ctx.strokeStyle = "#f8dfa1";
+        ctx.lineWidth = 2 / view.zoom;
+        ctx.stroke();
+      }
+      frameId = requestAnimationFrame(paint);
+    };
+    frameId = requestAnimationFrame(paint);
+    return () => cancelAnimationFrame(frameId);
+  }, [state, camera, size, artVersion, selection, feedback]);
   function local(p: { x: number; y: number }) {
     const r = root.current!.getBoundingClientRect();
     return { x: p.x - r.left, y: p.y - r.top };
@@ -729,6 +900,9 @@ export default function TileScene({
   const objectButtons = world.objects.filter(
     (o) =>
       visible(o.position, 80) &&
+      (view.zoom >= 0.35 ||
+        o.kind === "landmark" ||
+        (selection?.kind === "object" && selection.id === o.id)) &&
       (!camera.overview ||
         (o.kind === "landmark" &&
           ["oakrest", "briarford", "stonehaven"].includes(o.id))),
@@ -767,6 +941,10 @@ export default function TileScene({
           return (
             <button
               key={o.id}
+              ref={(el) => {
+                if (el) hitElements.current.set(`object-${o.id}`, el);
+                else hitElements.current.delete(`object-${o.id}`);
+              }}
               className={`tile-object ${["tree", "rock"].includes(o.kind) ? "resource" : ""}`}
               aria-label={`Inspect ${o.name}`}
               title={o.name}
@@ -800,6 +978,10 @@ export default function TileScene({
               return (
                 <button
                   key={p.id}
+                  ref={(el) => {
+                    if (el) hitElements.current.set(`actor-${p.id}`, el);
+                    else hitElements.current.delete(`actor-${p.id}`);
+                  }}
                   className="tile-actor"
                   aria-label={`Inspect ${p.name}`}
                   style={{ left: at.x, top: at.y - 35 * view.zoom }}
@@ -821,6 +1003,10 @@ export default function TileScene({
               return (
                 <button
                   key={`enemy-${enemy.id}`}
+                  ref={(el) => {
+                    if (el) hitElements.current.set(`enemy-${enemy.id}`, el);
+                    else hitElements.current.delete(`enemy-${enemy.id}`);
+                  }}
                   className={`tile-enemy ${selected ? "selected" : ""}`}
                   aria-label={`Inspect ${enemy.definition?.name ?? enemy.definitionId}, ${enemy.health} health`}
                   aria-pressed={selected}
@@ -844,6 +1030,10 @@ export default function TileScene({
               return (
                 <button
                   key={`drop-${drop.id}`}
+                  ref={(el) => {
+                    if (el) hitElements.current.set(`drop-${drop.id}`, el);
+                    else hitElements.current.delete(`drop-${drop.id}`);
+                  }}
                   className="tile-drop"
                   aria-label={`Inspect loot bag, ${drop.items.length} item types`}
                   title="Loot bag"
@@ -865,6 +1055,10 @@ export default function TileScene({
             const at = project(state.grave.position);
             return (
               <button
+                ref={(el) => {
+                  if (el) hitElements.current.set("grave", el);
+                  else hitElements.current.delete("grave");
+                }}
                 className="tile-grave"
                 aria-label="Inspect your backpack grave"
                 title="Recover backpack"
@@ -879,6 +1073,43 @@ export default function TileScene({
               </button>
             );
           })()}
+      </div>
+      <div className="tile-progress-accessible">
+        {people
+          .filter(
+            (actor) =>
+              actor.action &&
+              !actor.path.length &&
+              (actor.id === 0 ||
+                (selection?.kind === "actor" && selection.id === actor.id)),
+          )
+          .map((actor) => {
+            const action = actor.action!;
+            const object = world.objects.find((o) => o.id === action.targetId);
+            const label =
+              action.kind === "gather"
+                ? object?.kind === "rock"
+                  ? "Mining"
+                  : object?.kind === "tree"
+                    ? "Woodcutting"
+                    : "Fishing"
+                : action.kind === "craft"
+                  ? action.recipeId?.includes("cook")
+                    ? "Cooking"
+                    : "Crafting"
+                  : action.kind;
+            return (
+              <span
+                key={actor.id}
+                role="progressbar"
+                aria-label={`${label} action progress`}
+                aria-valuemin={0}
+                aria-valuemax={action.duration}
+                aria-valuenow={action.duration - action.remaining}
+                aria-valuetext={`${actor.name}: ${action.duration - action.remaining} of ${action.duration} ticks`}
+              />
+            );
+          })}
       </div>
       <span className="tile-location">
         {camera.overview

@@ -12,6 +12,12 @@ Three quests earn access to frontier anvils, Briarford’s kitchen and a shorter
 
 The world fills the browser. Drag to pan, pinch/wheel or use +/− to zoom. World opens the overview; the town plaque opens destinations, quest givers and wilderness encounters. Follow Alden returns the camera. The tile grid is optional.
 
+Tap a resource to choose a goal such as gathering ore or reaching a Mining level. Alden handles tools, prerequisites, travel, depleted nodes and full backpacks. Direct single actions and queued orders remain available. Circular rings show action cycles; reward floaters show items, XP and level-ups. The dock tracks the latest skill and XP remaining to its next level. Ores, logs and food occupy one backpack slot per item; coins, bait and feathers stack. Bank totals remain aggregated.
+
+Walk/Run shows remaining energy. Running takes up to two legal tile steps and consumes energy; exhaustion switches to walking. Walking, waiting and stationary work restore energy. The chosen movement mode persists across reloads. A new ambition replaces the current action, and pending orders remain editable. Quest visits retain that quest as an ambition. Automatic banking stores spare tools when they obstruct crafting; completed quests show delivered supplies instead of an empty requirement count.
+
+Alden’s planner uses fixed local rules. Skills and progress persist; there is no learned decision policy or connected local narrative LLM in this slice.
+
 Tap ground to travel. Inspect a resource, service or enemy for Do now/Add next. Open Thoughts to choose an ambition and see its steps, reorder/remove up to eight pending orders, or let Alden continue. Wait stops the current action and holds pending orders; Let Alden decide resumes them before autonomous work. Periodic thoughts resolve automatically after about 20 seconds; routine play never waits for a reply. Quest ambitions handle training, tools, gathering, crafting, food and travel.
 
 Skills shows levels, XP and next unlocks. Bag shows all 28 slots, food, equipment, combat style and bank withdrawals. Journal tracks quests and rewards. Shops show stock and prices; Aim for this asks Alden to earn and buy a tool.

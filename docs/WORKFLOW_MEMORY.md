@@ -6,3 +6,4 @@
 - Pages: cudldev/Fable-Crown. Build GITHUB_REPOSITORY=cudldev/Fable-Crown; Playwright DEMO_URL=http://127.0.0.1:4174/Fable-Crown/. Preview inherits base from URL. Verify actual public release after CI.
 - Windows npm certificate fix: NODE_USE_SYSTEM_CA=1; retain TLS. Localhost/git/network may need sandbox escalation. No paid services or reset redemption.
 - V3 key is separate from archived v1 key. Keep old saves untouched/exportable. Sources/prompts in assets/generated/v2,v3; alpha frames merge across versions. Offline query-string reload uses cached index fallback.
+- Zoom regression: visible terrain must fit cache or use the far composite; benchmark close/far/overview. Ore quantities aggregate in saves/bank but occupy separate backpack slots. Replay no historical reward floaters after import/offline resume.
