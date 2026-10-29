@@ -6,6 +6,6 @@ export default defineConfig({
   base:
     process.env.VITE_BASE_PATH ||
     (repo && repo !== `${owner}.github.io` ? `/${repo}/` : "/"),
-  // Keep bounded planner cases from competing with every suite for CPU at once.
-  test: { include: ["tests/**/*.test.ts"], maxWorkers: 4 },
+  // CI has fewer cores: heavy replay/planning suites must not compete for their timeout budget.
+  test: { include: ["tests/**/*.test.ts"], maxWorkers: process.env.CI ? 1 : 4 },
 } as Parameters<typeof defineConfig>[0]);
