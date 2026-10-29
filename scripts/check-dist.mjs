@@ -20,7 +20,9 @@ if (sw.includes('"/assets/') || !sw.includes("./index.html"))
 const art = JSON.parse(await readFile("dist/art/manifest.json", "utf8"));
 if (
   new Set(art.files).size !== art.files.length ||
-  art.files.filter((p) => /^art\/region-[0-8]\.webp$/.test(p)).length !== 9
+  art.files.filter((p) => /^art\/tile-(grass|dirt|stone|water)\.webp$/.test(p))
+    .length !== 4 ||
+  art.files.some((p) => /region-|overview/.test(p))
 )
   throw new Error("Invalid world artwork manifest");
 let bytes = 0;

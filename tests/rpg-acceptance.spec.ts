@@ -229,6 +229,21 @@ test("world assets install to cache and shell reloads offline", async ({
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByTestId("rpg-world")).toBeVisible({ timeout: 15000 });
+  const decoded = await page.evaluate(async () => {
+    const base = new URL("./", location.href);
+    const manifest = await (
+      await fetch(new URL("art/manifest.json", base))
+    ).json();
+    return Promise.all(
+      manifest.files.map(async (path: string) => {
+        const image = new Image();
+        image.src = new URL(path, base).href;
+        await image.decode();
+        return image.naturalWidth > 0;
+      }),
+    );
+  });
+  expect(decoded.every(Boolean)).toBe(true);
   await context.setOffline(false);
 });
 
@@ -273,4 +288,46 @@ test("portrait and landscape fit, controls stay touch sized, and no remote runti
   }
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
+  await expect(page.locator(".doing-now")).not.toContainText("Considering", {
+    timeout: 10000,
+  });
+  if (
+    await page.getByRole("button", { name: "Dismiss notification" }).isVisible()
+  )
+    await page.getByRole("button", { name: "Dismiss notification" }).click();
+  await page.screenshot({ path: "docs/screenshots/rpg-landscape.png" });
+});
+
+test("pending intentions can be reordered, held and resumed through thought controls", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(page.getByTestId("rpg-world")).toBeVisible();
+  const s = fixture();
+  s.control.queue = [
+    {
+      type: "move",
+      position: { ...s.player.position, x: s.player.position.x + 3 },
+    },
+    {
+      type: "move",
+      position: { ...s.player.position, y: s.player.position.y + 3 },
+    },
+  ];
+  await importState(page, s);
+  await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  await page.getByRole("button", { name: "Open thoughts" }).click();
+  await page.getByRole("button", { name: "Move order 2 earlier" }).click();
+  const reordered = await snapshot(page);
+  expect(reordered.control.queue[0]).toEqual(s.control.queue[1]);
+  expect(reordered.control.waiting).toBe(true);
+  await page.getByRole("button", { name: "Open thoughts" }).click();
+  await page.getByRole("button", { name: "Remove order 2" }).click();
+  await expect(
+    page.getByRole("region", { name: "thoughts panel" }),
+  ).toContainText("Next orders · 1/8");
+  await page.getByRole("button", { name: "Let Alden decide" }).click();
+  await expect
+    .poll(async () => (await snapshot(page)).player.position.y)
+    .toBe(s.player.position.y + 3);
 });

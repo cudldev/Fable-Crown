@@ -1,23 +1,29 @@
 # Fable Crown
 
-[Play the demo](https://cudldev.github.io/Fable-Crown/) · [Design](docs/GAME_DESIGN.md) · [Expanded-world release](docs/EXPANDED_WORLD.md)
+[Play the demo](https://cudldev.github.io/Fable-Crown/) · [Tile RPG plan](docs/TILE_RPG_PLAN.md) · [Progress](docs/PROGRESS.md)
 
-A painterly autonomous RPG frontier: 6,600 × 4,440 world units, nine regions, three settlements and 24 characters. Alden and the villagers gather, carry supplies, build a blacksmith workshop and forge tools. Local stores have separate inventories; cross-town supplies travel on foot.
+A painterly autonomous RPG on a 256 × 192 isometric tile world with three settlements and 24 characters. Alden follows persistent ambitions; you guide his thoughts or give direct and queued orders. The Old School RuneScape reference informs tile movement, skills and preparation; the setting, quests and generated art are original.
 
-The world fills the browser. Drag to explore, pinch/wheel or use +/− to zoom, and use World for the overview or the Oakrest plaque for destinations. Follow Alden brings the camera back. Tap ground to travel; tap places for gathering, deposits, withdrawals, construction or forging. Choose Do now or Add next, then edit/reorder/cancel up to eight queued intentions. Wait here pauses Alden; Let Alden decide resumes his queue and autonomy. An empty queue leaves a short thinking window before he finds useful work. Villagers keep gathering and resting independently in their home settlements.
+Nine skills progress separately: Woodcutting, Mining, Smithing, Fishing, Cooking, Attack, Strength, Defence and Hitpoints. Gather trees, ores and fish with appropriate tools; smelt, smith and cook; trade real supplies for bronze/iron/steel equipment. A 28-slot backpack, separate equipment and connected personal bank support longer journeys. Villagers keep their own supplies.
 
-Progress saves in IndexedDB. Export/import a chronicle to transfer it. Original saves migrate to the larger world. Away work advances at 25% speed for at most 24 hours per absence; the calendar follows the device date. Visited artwork is cached automatically. The menu offers the full world artwork download (about 9.1 MiB) for offline exploration.
+Three quests earn access to frontier anvils, Briarford’s kitchen and a shorter river crossing. Moss boars, copper-shell mites and road outlaws provide melee training and loot. Food restores health; defeat preserves equipped gear and XP, leaving all backpack belongings in a recoverable grave without fees or permanent loss.
 
-## Development
+## Playing
 
-Node 22.12+; run `npm ci`, then `npm run dev`. Checks: `npm run typecheck`, `npm test`, `npm run build`, `npm run check:dist`, `npm run test:browser`. Browser tests use installed Chrome locally; CI installs Chromium. Playwright starts the production preview when needed. For repository-subpath checks, set `GITHUB_REPOSITORY=cudldev/Fable-Crown` for both build and preview, and `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/` for browser tests. Restart an existing root preview when changing base.
+The world fills the browser. Drag to pan, pinch/wheel or use +/− to zoom. World opens the overview; the town plaque opens destinations, quest givers and wilderness encounters. Follow Alden returns the camera. The tile grid is optional.
 
-## Hosting
+Tap ground to travel. Inspect a resource, service or enemy for Do now/Add next. Open Thoughts to choose an ambition and see its steps, reorder/remove up to eight pending orders, or let Alden continue. Wait stops the current action and holds pending orders; Let Alden decide resumes them before autonomous work. Periodic thoughts resolve automatically after about 20 seconds; routine play never waits for a reply. Quest ambitions handle training, tools, gathering, crafting, food and travel.
 
-Public GitHub repository; Settings → Pages → Source: **GitHub Actions**. Push to main to test, build and deploy. GITHUB_REPOSITORY derives the project subpath; VITE_BASE_PATH overrides it (use / for a custom domain). The manifest and service worker use relative scope. No secrets, server, paid API, telemetry, external fonts or runtime asset CDN.
+Skills shows levels, XP and next unlocks. Bag shows all 28 slots, food, equipment, combat style and bank withdrawals. Journal tracks quests and rewards. Shops show stock and prices; Aim for this asks Alden to earn and buy a tool.
 
-## Demo boundaries
+Progress saves in IndexedDB. This iteration starts a fresh V3 chapter; earlier village saves remain untouched and exportable from the menu. Export/import transfers the RPG chapter. Offline progress runs at 25% speed for up to 24 hours per absence. The shell and 23 generated assets (7.4 MiB) cache for offline travel; Save world offline confirms the complete download.
 
-Original generated watercolor/ink landscapes and independent character/building cutouts replace the old SVG scenery. [Artwork, sources and prompts](assets/generated/README.md). Characters use limited painted-cutout animation. Detailed needs, conversations, combat, quests, a broader economy and optional browser-local LLM remain deferred. Responsive browser emulation is covered; no physical-device or FPS benchmark is claimed. Use one open game tab per device; saves are local.
+## Development and hosting
 
-React and React DOM are MIT licensed; development dependency licenses accompany npm packages. Concept collages remain references and are not loaded by the game.
+Node 22.12+: `npm ci`, then `npm run dev`. Checks: `npm test`, `npm run typecheck`, `npm run build`, `npm run check:dist`, `npm run test:browser`. Chrome is used locally; CI installs Chromium. Playwright starts production preview. For Pages subpath verification set `GITHUB_REPOSITORY=cudldev/Fable-Crown` when building, and `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/` for browser tests. Rebuild after changing the base; do not share a build directory across concurrent builds.
+
+GitHub Settings → Pages → Source: **GitHub Actions**. Push to main runs the gates and deploys. `GITHUB_REPOSITORY` derives the subpath; `VITE_BASE_PATH` overrides it. PWA scope is relative. No server, secret, API key, telemetry, hosted inference or required third-party runtime call.
+
+The deterministic TypeScript simulation is independent of rendering and uses 600 ms integer ticks. Canvas projects logical tiles into the painterly isometric view. [Original artwork and exact prompts](assets/generated/README.md) remain versioned. Characters use limited painted-cutout animation. Multiplayer, Grand Exchange, advanced combat, detailed social routines and optional browser-local narrative models remain outside this slice. Browser emulation is tested; no physical-device/FPS claim is made. Use one game tab per device.
+
+React/React DOM are MIT licensed; dependency licenses accompany npm packages. Reference collages and older generated backdrops are retained as sources and never loaded by the tile game.

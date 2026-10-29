@@ -105,7 +105,7 @@ export function suggestGoals(s: RpgState): Thought["choices"] {
       choices.push({
         id: `explore-${id}`,
         label: `Visit ${title}`,
-        description: "Follow a legal tile route to a new landmark.",
+        description: "Follow the paths to a new landmark.",
         goal: {
           id: `explore-${id}`,
           kind: "explore",
@@ -129,9 +129,28 @@ export function goalSteps(s: RpgState, goal: Ambition): string[] {
       "Use the improved tool",
     ];
   }
+  if (
+    goal.kind === "skill" &&
+    ["attack", "strength", "defence", "hitpoints"].includes(goal.skill!)
+  )
+    return [
+      "Prepare a weapon and healing meals",
+      "Practice against woodland creatures; eat or retreat when needed",
+      `Reach ${goal.skill} level ${goal.level}`,
+    ];
+  if (goal.kind === "skill" && ["smithing", "cooking"].includes(goal.skill!))
+    return [
+      goal.skill === "smithing"
+        ? "Mine copper and tin, or collect banked ores"
+        : "Catch shrimp, or collect banked fish",
+      goal.skill === "smithing"
+        ? "Smelt bronze at a furnace"
+        : "Cook at an available range",
+      `Reach ${goal.skill} level ${goal.level}`,
+    ];
   if (goal.kind === "skill")
     return [
-      `Gather legal ${goal.skill} resources`,
+      `Choose ${goal.skill} resources suitable for my tools and level`,
       "Bank full backpacks and resume training",
       `Reach level ${goal.level}`,
     ];

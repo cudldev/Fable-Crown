@@ -5,13 +5,11 @@ import { interactionTiles, objectById } from "../src/rpg/world";
 import type { RpgState } from "../src/rpg/types";
 async function restore(page: Page, state: RpgState) {
   await page.getByRole("button", { name: "Open game menu" }).click();
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "rpg.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(state)),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "rpg.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(state)),
+  });
   await expect(page.getByRole("status")).toContainText("Chronicle restored");
   await page.getByRole("button", { name: "Close panel" }).click();
 }
@@ -42,7 +40,7 @@ test("tile chapter preserves the earlier archive and renders a selectable isomet
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("./?chapter=3");
+  await page.goto("./");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   await page.evaluate(
     (value) =>
@@ -99,7 +97,15 @@ test("tile chapter preserves the earlier archive and renders a selectable isomet
     page.getByRole("region", { name: "Object actions" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Close actions" }).click();
-  await page.screenshot({ path: "docs/screenshots/rpg-stage1-desktop.png" });
+  await page.getByRole("button", { name: "Toggle tile grid" }).click();
+  await expect(page.locator(".doing-now")).not.toContainText("Considering", {
+    timeout: 10000,
+  });
+  if (
+    await page.getByRole("button", { name: "Dismiss notification" }).isVisible()
+  )
+    await page.getByRole("button", { name: "Dismiss notification" }).click();
+  await page.screenshot({ path: "docs/screenshots/rpg-desktop.png" });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   expect(
@@ -107,13 +113,13 @@ test("tile chapter preserves the earlier archive and renders a selectable isomet
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.screenshot({ path: "docs/screenshots/rpg-stage1-portrait.png" });
+  await page.screenshot({ path: "docs/screenshots/rpg-portrait.png" });
   expect(errors).toEqual([]);
 });
 test("skills, a real bronze recipe and the 28-slot bag work through the UI", async ({
   page,
 }) => {
-  await page.goto("./?chapter=3");
+  await page.goto("./");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const s = createRpg(Date.now());
   s.control.waiting = true;
@@ -165,7 +171,7 @@ test("skills, a real bronze recipe and the 28-slot bag work through the UI", asy
 test("a shop ambition buys the real usable steel tool rather than granting it", async ({
   page,
 }) => {
-  await page.goto("./?chapter=3");
+  await page.goto("./");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const s = createRpg(Date.now());
   s.control.waiting = true;
