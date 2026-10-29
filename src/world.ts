@@ -197,8 +197,21 @@ export interface Blocker {
   width: number;
   height: number;
 }
+export const GROVES: Blocker[] = [
+  { id: "oakrest-grove-north", x: 680, y: 1880, width: 240, height: 90 },
+  { id: "oakrest-grove-west", x: 600, y: 2450, width: 260, height: 90 },
+  { id: "briar-grove-north", x: 3400, y: 600, width: 240, height: 90 },
+  { id: "briar-grove-east", x: 4400, y: 1300, width: 250, height: 90 },
+  { id: "stone-grove-north", x: 4870, y: 2850, width: 260, height: 90 },
+  { id: "stone-grove-east", x: 5900, y: 3500, width: 240, height: 90 },
+  { id: "mosswood-grove", x: 1000, y: 700, width: 300, height: 100 },
+  { id: "greenmarch-grove", x: 1500, y: 3500, width: 300, height: 100 },
+  { id: "central-grove", x: 3500, y: 2200, width: 300, height: 100 },
+  { id: "highland-grove", x: 5900, y: 1000, width: 300, height: 100 },
+];
 export const BLOCKERS: Blocker[] = [
   ...BUILDINGS,
+  ...GROVES,
   { id: "north-cliff", x: 4500, y: 300, width: 350, height: 220 },
   { id: "east-cliff", x: 5940, y: 2720, width: 360, height: 240 },
   { id: "western-cliff", x: 440, y: 1050, width: 420, height: 180 },

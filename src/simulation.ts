@@ -116,11 +116,30 @@ function bank(s: GameState, p: Person, id: SettlementId): boolean {
     s.stores[id][p.carry.resource] += p.carry.amount;
     p.carry = null;
     p.completed++;
+    begin(p, "Waiting for supplies", 1);
   }
   return true;
 }
+function gatheringSpot(
+  p: Person,
+  resource: Resource,
+  home: SettlementId,
+): Point {
+  const site = place(home, resource === "timber" ? "forest" : "mine");
+  if (p.id === 0) return site;
+  const [dx, dy] = [
+    [-72, 32],
+    [-24, 64],
+    [28, 36],
+    [76, 16],
+    [-62, 86],
+    [55, 78],
+  ][p.id % 6]!;
+  const spot = { x: site.x + dx!, y: site.y + dy! };
+  return isWalkable(spot) ? spot : site;
+}
 function gather(p: Person, resource: Resource, home: SettlementId): void {
-  if (arrive(p, place(home, resource === "timber" ? "forest" : "mine"))) {
+  if (arrive(p, gatheringSpot(p, resource, home))) {
     p.taskResource = resource;
     begin(p, `Gathering ${resource}`, 5 + (p.id % 2));
   }
@@ -137,6 +156,7 @@ function load(
   if (n > 0) {
     s.stores[home][r] -= n;
     p.carry = { resource: r, amount: n };
+    begin(p, "Carrying supplies", 1);
   } else begin(p, "Waiting for supplies", 3);
 }
 function deliverBuild(s: GameState, p: Person): void {
@@ -149,6 +169,7 @@ function deliverBuild(s: GameState, p: Person): void {
     p.carry.amount -= n;
     p.xp += n * 3;
     if (!p.carry.amount) p.carry = null;
+    begin(p, "Waiting for supplies", 1);
   }
 }
 function build(s: GameState, p: Person): void {
@@ -1063,9 +1084,12 @@ export function validateSave(value: unknown): GameState | null {
               : nearestSettlement(p).id
             : p.homeId;
         if (
-          !near(
-            p,
-            place(home, p.taskResource === "timber" ? "forest" : "mine"),
+          !(
+            near(p, gatheringSpot(p, p.taskResource!, home)) ||
+            near(
+              p,
+              place(home, p.taskResource === "timber" ? "forest" : "mine"),
+            )
           ) ||
           (p.carry && p.carry.resource !== p.taskResource)
         )

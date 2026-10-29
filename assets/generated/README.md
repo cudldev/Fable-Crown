@@ -1,6 +1,8 @@
 # Generated artwork
 
-Created with the built-in ImageGen tool, one asset per call; no fallback CLI or paid inference API. Original PNG outputs are preserved here. Runtime WebP counterparts are in public/art/; all 23 assets total approximately 11.9 MiB. No reference collage is cropped into runtime art. Characters, buildings and props retain transparent alpha.
+**Current runtime set: v2/**, rebuilt from the user-approved gameplay style proof with a little further simplification. The PNGs at this directory’s root are the rejected first iteration, retained for audit. Exact built-in ImageGen prompts, reference and output paths are in [v2/prompts.json](v2/prompts.json); source framing measurements are in v2/frames.json. Current runtime artwork is about 9.1 MiB. See docs/ART_AUDIT.md and docs/art-audit/*-v2.png for comparisons.
+
+Created with the built-in ImageGen tool, one asset per call; no fallback CLI or paid inference API. Original PNG outputs are preserved here. Runtime WebP counterparts are in public/art/; the original 23 assets totaled approximately 11.9 MiB. No reference collage is cropped into runtime art. Characters, buildings and props retain transparent alpha.
 
 ## Normalized prompt set
 

@@ -48,11 +48,11 @@
   white-space: nowrap;
   font-size: 12px;
   line-height: 1.25;
-  padding: 4px 8px;
+  padding: 3px 7px;
   border-radius: 4px;
-  background: #f1ead6d9;
-  border: 1px solid #84775166;
-  box-shadow: 0 2px 7px #273b3822;
+  background: #f1ead6ba;
+  border: 1px solid #84775138;
+  box-shadow: 0 2px 7px #273b3814;
   transform: translateY(20px);
   text-shadow: 0 1px #fff8;
 }
@@ -66,6 +66,29 @@
 .fc-world .fc-target-hit.fc-is-selected span {
   background: #f8e8b4;
   border-color: #a68843;
+}
+.fc-world .fc-muted-label span {
+  opacity: 0;
+  pointer-events: none;
+}
+.fc-world .fc-muted-label::before {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  left: calc(50% - 4px);
+  top: calc(50% - 4px);
+  border: 1px solid #eee1b1a6;
+  border-radius: 50%;
+  background: #6c775c8c;
+}
+.fc-world .fc-muted-label:hover span,
+.fc-world .fc-muted-label:focus-visible span {
+  opacity: 1;
+}
+.fc-world .fc-muted-label:hover::before,
+.fc-world .fc-muted-label:focus-visible::before {
+  opacity: 0;
 }
 .fc-world .fc-person-hit span {
   position: absolute;
@@ -116,22 +139,30 @@
   stroke-linejoin: round;
 }
 .fc-road-edge {
-  stroke: #7e81594d;
-  stroke-width: 58;
+  stroke: #d0bb9540;
+  stroke-width: 54;
   stroke-linecap: round;
   stroke-linejoin: round;
   fill: none;
 }
 .fc-road {
-  stroke: #dcc99ec9;
-  stroke-width: 43;
+  stroke: #e1cdab66;
+  stroke-width: 32;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.fc-road-drybrush {
+  stroke: #efe1bf52;
+  stroke-width: 13;
+  stroke-dasharray: 157 37 83 21;
   stroke-linecap: round;
   stroke-linejoin: round;
   fill: none;
 }
 .fc-local-road {
-  stroke: #decca8b0;
-  stroke-width: 24;
+  stroke: #e1cfaa60;
+  stroke-width: 19;
   stroke-linecap: round;
   fill: none;
 }

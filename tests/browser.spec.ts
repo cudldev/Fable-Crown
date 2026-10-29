@@ -112,6 +112,11 @@ test("expanded frontier loads, orders can be queued, and views fit desktop and m
   await page.getByRole("button", { name: "Let Alden decide" }).click();
   await page.getByRole("button", { name: "Open intentions" }).click();
 
+  await expect(
+    page.getByRole("button", {
+      name: /Inspect Mira, woodcutter, Gathering timber/,
+    }),
+  ).toBeVisible({ timeout: 20000 });
   await page.getByRole("button", { name: "World overview" }).click();
   await expect(page.locator(".fc-overview-caption")).toBeVisible();
   await page.screenshot({
@@ -348,13 +353,11 @@ test("drag explores without ordering; ground tap orders and store actions deposi
   saved.control.queue = [];
   saved.control.waiting = true;
   saved.savedAt = Date.now();
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "carrying.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(saved)),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "carrying.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(saved)),
+  });
   await expect(page.getByRole("status")).toContainText("Chronicle restored.");
   await page.getByRole("button", { name: "Open world destinations" }).click();
   await page
@@ -371,4 +374,47 @@ test("drag explores without ordering; ground tap orders and store actions deposi
   ).toContainText("Empty hands");
   await saveNow(page);
   expect((await snapshot(page)).people[0]!.carry).toBeNull();
+});
+
+test("thought choice and autonomous work open the painted blacksmith workshop", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(page.getByTestId("world")).toBeVisible();
+  await page.getByRole("button", { name: /Alden has a thought/ }).click();
+  await page.getByRole("button", { name: /Trade for supplies/ }).click();
+  await saveNow(page);
+  const saved = await snapshot(page);
+  expect(saved.strategy).toBe("trade");
+  expect(saved.coins).toBe(16);
+  saved.savedAt = Date.now() - 3600000;
+  await page
+    .locator("input[type=file]")
+    .setInputFiles({
+      name: "away.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(saved)),
+    });
+  await expect(page.getByRole("status")).toContainText("Chronicle restored.");
+  const completed = await snapshot(page);
+  expect(completed.workshop.complete).toBe(true);
+  expect(completed.workshop.forged).toBeGreaterThan(0);
+  expect(completed.people.some((p) => p.role === "smith")).toBe(true);
+  await page.getByRole("button", { name: "Open world destinations" }).click();
+  await page
+    .getByRole("region", { name: "world panel" })
+    .getByRole("button", { name: /Blacksmith workshop/ })
+    .click();
+  await expect(
+    page.getByRole("region", { name: "Place actions" }),
+  ).toContainText("Forge 10 tools");
+  await expect(
+    page.locator('.fc-landscape image[href$="/art/workshop.webp"]'),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close place actions" }).click();
+  await page.getByRole("button", { name: "Dismiss notification" }).click();
+  await page.screenshot({
+    path: "docs/screenshots/world-workshop-complete.png",
+    fullPage: true,
+  });
 });

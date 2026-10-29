@@ -49,3 +49,9 @@ Live deployment verification is pending this release push. Detailed daily needs/
 Art acceptance correction: user rejected the first generated set. ART_AUDIT.md records inspection of all 23 assets against the primary reference. Release 43fbb82 was pushed before the feedback arrived; cancellation of its in-progress Actions run was requested. Visual acceptance remains incomplete; do not mark the expanded release complete.
 
 Confirmed release hold: workflow 40816403401 is cancelled, with Pages configuration/upload/deploy skipped. A corrected reference-guided gameplay art sample is saved in docs/art-audit/ with its exact built-in ImageGen prompt. It is a direction proof only; replacement runtime assets and visual acceptance are still incomplete.
+
+### Corrected art release
+
+User approved the replacement gameplay proof with a request for slightly simpler treatment. Rebuilt all 23 assets against that visual reference, retaining original v1 PNGs for audit and preserving v2 PNGs plus exact prompts. Current artwork: 9.1 MiB. Added soft overlapping terrain joins, irregular water/road washes, measured cutout base anchors, calmer labels and collision-aware woodland scenery. Gatherers use separate reachable work spots. A hauling transaction could leave remaining=0 at a save boundary; fixed and covered by restoring every tick across 150 ticks.
+
+Final local checks: strict production typecheck/build; 42 unit cases; four complete browser scenarios plus the added full thought-to-workshop/forge scenario pass. Full five-scenario suite will repeat in CI. Current usage: 91% used, about 9% remaining; no reset redemption, purchases or runtime inference API. Corrected live deployment pending push/verification.

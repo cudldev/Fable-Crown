@@ -10,6 +10,7 @@ import type { CameraState, WorldSelection } from "./view-types";
 import {
   BLOCKERS,
   BUILDINGS,
+  GROVES,
   REGIONS,
   ROADS,
   SETTLEMENTS,
@@ -17,6 +18,7 @@ import {
   WORLD,
 } from "./world";
 import "./scene.css";
+import { artFrames } from "./art-frames";
 
 const base = import.meta.env.BASE_URL;
 const limit = (n: number, low: number, high: number) =>
@@ -27,6 +29,17 @@ const mix = (a: Point, b: Point, t: number): Point => ({
   x: a.x + (b.x - a.x) * t,
   y: a.y + (b.y - a.y) * t,
 });
+// These banks stay inside the simulation's blocked river strip. The silhouette
+// breaks up the straight collision boundary without inventing new crossings.
+const riverLeft = Array.from({ length: 22 }, (_, i) => ({
+  x: 2920 + ((i * 13) % 17),
+  y: (i * WORLD.height) / 21,
+}));
+const riverRight = Array.from({ length: 22 }, (_, i) => ({
+  x: 3080 - ((i * 11) % 16),
+  y: (i * WORLD.height) / 21,
+}));
+const riverShape = `${path(riverLeft)} ${path([...riverRight].reverse()).replace("M", "L")}Z`;
 function Art({
   name,
   x,
@@ -42,6 +55,17 @@ function Art({
   height: number;
   opacity?: number;
 }) {
+  const frame = artFrames[name];
+  if (frame) {
+    const scale = Math.min(
+      width / frame.boundsWidth,
+      height / frame.boundsHeight,
+    );
+    x = x + width / 2 - frame.pivotX * scale;
+    y = y + height - frame.pivotY * scale;
+    width = frame.width * scale;
+    height = frame.height * scale;
+  }
   return (
     <image
       href={`${base}art/${name}.webp`}
@@ -301,10 +325,30 @@ export default function Scene({
   }
 
   const scenery: { key: string; y: number; node: ReactNode }[] = [];
+  for (const grove of GROVES)
+    if (visible(grove, 400)) {
+      const foot = grove.y + grove.height;
+      scenery.push({
+        key: grove.id,
+        y: foot,
+        node: (
+          <Art
+            name="forest"
+            x={grove.x - 40}
+            y={foot - 285}
+            width={grove.width + 80}
+            height={285}
+          />
+        ),
+      });
+    }
   for (const b of BUILDINGS) {
     if (!visible(b)) continue;
     const foot = b.y + b.height + 12,
       cx = b.x + b.width / 2;
+    const artWidth =
+      b.kind === "manor" ? 330 : b.kind === "workshop" ? 310 : 300;
+    const artHeight = artWidth - 25;
     const progress = state.workshop.labor / BILL.labor;
     scenery.push({
       key: b.id,
@@ -314,10 +358,10 @@ export default function Scene({
           <ellipse
             cx={cx}
             cy={foot - 8}
-            rx={105}
-            ry={22}
+            rx={artWidth * 0.38}
+            ry={19}
             fill="#354b36"
-            opacity=".14"
+            opacity=".09"
           />
           {b.kind === "workshop" && !state.workshop.complete ? (
             <>
@@ -331,10 +375,10 @@ export default function Scene({
               />
               <Art
                 name="workshop"
-                x={cx - 135}
-                y={foot - 245}
-                width={270}
-                height={250}
+                x={cx - artWidth / 2}
+                y={foot - artHeight + 5}
+                width={artWidth}
+                height={artHeight}
                 opacity={progress * 0.8}
               />
               <path
@@ -346,6 +390,11 @@ export default function Scene({
               />
               <text
                 className="fc-building-progress"
+                visibility={
+                  selection?.kind === "target" && selection.id === b.targetId
+                    ? "visible"
+                    : "hidden"
+                }
                 x={cx}
                 y={foot + 25}
                 textAnchor="middle"
@@ -358,10 +407,10 @@ export default function Scene({
           ) : (
             <Art
               name={b.kind}
-              x={cx - 135}
-              y={foot - 245}
-              width={270}
-              height={250}
+              x={cx - artWidth / 2}
+              y={foot - artHeight + 5}
+              width={artWidth}
+              height={artHeight}
             />
           )}
         </g>
@@ -389,6 +438,8 @@ export default function Scene({
     if (camera.overview || !visible(p, 130)) continue;
     const active = selection?.kind === "person" && selection.id === p.id;
     const moving = p.path.length > 0;
+    const stature = p.id === 0 ? 1 : 0.94 + (p.id % 5) * 0.02;
+    const facing = moving && p.path[0].x < p.x - 2 ? -1 : 1;
     scenery.push({
       key: `person-${p.id}`,
       y: p.y,
@@ -415,9 +466,11 @@ export default function Scene({
             }
             style={{ animationDelay: `${-p.id * 0.13}s` }}
           >
-            <Art name={p.role} x={-55} y={-100} width={110} height={110} />
+            <g transform={`scale(${facing * stature} ${stature})`}>
+              <Art name={p.role} x={-55} y={-110} width={110} height={110} />
+            </g>
           </g>
-          {p.carry && (
+          {p.carry && (active || p.id === 0) && zoom > 0.5 && (
             <g transform="translate(28 -48)">
               <rect
                 x="-3"
@@ -433,6 +486,20 @@ export default function Scene({
               </text>
             </g>
           )}
+          {p.carry && !active && p.id !== 0 && (
+            <path
+              d="M23-39l12-3m-11 8 12-3m-10 8 12-3"
+              stroke={
+                p.carry.resource === "timber"
+                  ? "#93693d"
+                  : p.carry.resource === "iron"
+                    ? "#586a70"
+                    : "#9b9980"
+              }
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+          )}
         </g>
       ),
     });
@@ -441,11 +508,46 @@ export default function Scene({
   const hero = people.find((p) => p.id === 0);
   const destination =
     hero && hero.path.length ? hero.path[hero.path.length - 1] : null;
+  // Keep all native hit targets, but show only labels with room to breathe.
+  const targetLabels = new Set<string>();
+  const occupiedLabels: { x: number; y: number; width: number }[] = [];
+  const labelPriority = (id: string, kind: string) =>
+    selection?.kind === "target" && selection.id === id
+      ? 0
+      : kind === "workshop"
+        ? 1
+        : kind === "store"
+          ? 2
+          : 3;
+  for (const t of [...TARGETS].sort(
+    (a, b) => labelPriority(a.id, a.kind) - labelPriority(b.id, b.kind),
+  )) {
+    if (camera.overview && t.kind !== "settlement" && !t.id.includes("bridge"))
+      continue;
+    if (
+      !camera.overview &&
+      (t.kind === "settlement" || zoom < 0.45) &&
+      !(selection?.kind === "target" && selection.id === t.id)
+    )
+      continue;
+    const at = screen(t),
+      width = t.name.length * 6 + 22;
+    if (
+      occupiedLabels.some(
+        (o) =>
+          Math.abs(at.x - o.x) < (width + o.width) / 2 + 12 &&
+          Math.abs(at.y - o.y) < 34,
+      )
+    )
+      continue;
+    targetLabels.add(t.id);
+    occupiedLabels.push({ ...at, width });
+  }
 
   return (
     <div
       ref={root}
-      className="world fc-world"
+      className={`world fc-world ${camera.overview ? "fc-is-overview" : ""}`}
       data-testid="world"
       onPointerDown={pointerDown}
       onPointerMove={pointerMove}
@@ -468,18 +570,46 @@ export default function Scene({
         role="img"
       >
         <defs>
+          <linearGradient id="fc-feather-x">
+            <stop stopColor="black" />
+            <stop offset=".065" stopColor="white" />
+            <stop offset=".935" stopColor="white" />
+            <stop offset="1" stopColor="black" />
+          </linearGradient>
+          <linearGradient id="fc-feather-y" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="black" />
+            <stop offset=".085" stopColor="white" />
+            <stop offset=".915" stopColor="white" />
+            <stop offset="1" stopColor="black" />
+          </linearGradient>
+          <mask id="fc-soft-x" maskContentUnits="objectBoundingBox">
+            <rect width="1" height="1" fill="url(#fc-feather-x)" />
+          </mask>
+          <mask id="fc-soft-y" maskContentUnits="objectBoundingBox">
+            <rect width="1" height="1" fill="url(#fc-feather-y)" />
+          </mask>
+          <linearGradient id="fc-ground-wash" x1="0" y1="0" x2=".6" y2="1">
+            <stop stopColor="#c7cfb2" />
+            <stop offset=".45" stopColor="#d2cfb1" />
+            <stop offset="1" stopColor="#bbc6a5" />
+          </linearGradient>
           <linearGradient id="fc-river" x1="0" x2="1">
-            <stop stopColor="#81aaa4" />
-            <stop offset=".5" stopColor="#bed1bc" />
-            <stop offset="1" stopColor="#7fa6a2" />
+            <stop stopColor="#7c9d96" />
+            <stop offset=".5" stopColor="#a8bfb1" />
+            <stop offset="1" stopColor="#839e9a" />
           </linearGradient>
         </defs>
-        <rect width={WORLD.width} height={WORLD.height} fill="#cbd2ad" />
+        <rect
+          width={WORLD.width}
+          height={WORLD.height}
+          fill="url(#fc-ground-wash)"
+        />
         <image
           href={`${base}art/overview.webp`}
           width={WORLD.width}
           height={WORLD.height}
           preserveAspectRatio="none"
+          opacity={camera.overview ? 1 : 0.18}
         />
         {!camera.overview &&
           REGIONS.filter(
@@ -489,29 +619,44 @@ export default function Scene({
               r.y < top + size.height / zoom + 320 &&
               r.y + r.height > top - 320,
           ).map((r) => (
-            <image
-              key={r.id}
-              href={`${base}${r.image}`}
-              x={r.x}
-              y={r.y}
-              width={r.width}
-              height={r.height}
-              preserveAspectRatio="none"
-              onError={(e) => {
-                e.currentTarget.style.visibility = "hidden";
-              }}
-            />
+            <g key={r.id} mask="url(#fc-soft-x)">
+              <image
+                href={`${base}${r.image}`}
+                x={r.x - 180}
+                y={r.y - 130}
+                width={r.width + 360}
+                height={r.height + 260}
+                preserveAspectRatio="none"
+                mask="url(#fc-soft-y)"
+                onError={(e) => {
+                  e.currentTarget.style.visibility = "hidden";
+                }}
+              />
+            </g>
           ))}
         <g style={{ display: camera.overview ? "none" : undefined }}>
-          <path d="M3000,0V4440" stroke="#c5d1ad" strokeWidth="202" />
-          <path d="M3000,0V4440" stroke="url(#fc-river)" strokeWidth="160" />
+          <path d={riverShape} fill="url(#fc-river)" opacity=".74" />
+          <path
+            d={path(riverLeft)}
+            stroke="#b5bea04d"
+            strokeWidth="25"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path
+            d={path(riverRight)}
+            stroke="#b6c0a350"
+            strokeWidth="23"
+            fill="none"
+            strokeLinecap="round"
+          />
           {[2940, 2990, 3050].map((x, i) => (
             <path
               key={x}
               d={`M${x},0q${i % 2 ? 25 : -20},250 0,500t0,500t0,500t0,500t0,500t0,500t0,500t0,500t0,500`}
               stroke="#e3e5cb"
-              strokeWidth="3"
-              opacity=".35"
+              strokeWidth="2"
+              opacity=".17"
               fill="none"
             />
           ))}
@@ -519,6 +664,7 @@ export default function Scene({
             <g key={i}>
               <path d={path(road)} className="fc-road-edge" />
               <path d={path(road)} className="fc-road" />
+              <path d={path(road)} className="fc-road-drybrush" />
             </g>
           ))}
           {TARGETS.filter(
@@ -536,23 +682,26 @@ export default function Scene({
           {[1100, 3000].map((y) => (
             <g key={y}>
               <path
-                d={`M2890,${y - 65}h220v130h-220Z`}
-                fill="#c8b596"
-                stroke="#6e7567"
-                strokeWidth="5"
+                d={`M2888,${y - 53}Q3000,${y - 70}3112,${y - 49}L3108,${y + 58}Q3000,${y + 48}2892,${y + 61}Z`}
+                fill="#b6a88c"
+                fillOpacity=".7"
+                stroke="#777c6959"
+                strokeWidth="4"
               />
-              {[-45, -15, 15, 45].map((d) => (
+              {[-35, 0, 32].map((d) => (
                 <path
                   key={d}
                   d={`M2890,${y + d}h220`}
                   stroke="#e6dbc0"
-                  strokeWidth="7"
+                  strokeWidth="4"
+                  opacity=".45"
                 />
               ))}
               <path
                 d={`M2880,${y - 69}h240M2880,${y + 69}h240`}
                 stroke="#706e5d"
-                strokeWidth="10"
+                strokeWidth="6"
+                opacity=".45"
               />
               <Art
                 name="bridge"
@@ -575,14 +724,14 @@ export default function Scene({
                 fill="#606d59"
                 opacity=".3"
               />
-              {[0, 1, 2].map((i) => (
+              {[0, 1].map((i) => (
                 <Art
                   key={i}
                   name="ore"
-                  x={b.x - 60 + (i * b.width) / 3}
-                  y={b.y - 95 + (i % 2) * 45}
-                  width={b.width * 0.7}
-                  height={b.height + 150}
+                  x={b.x - 40 + (i * b.width) / 2}
+                  y={b.y - 75 + i * 46}
+                  width={b.width * (i === 0 ? 0.84 : 0.67)}
+                  height={b.height + (i === 0 ? 130 : 80)}
                 />
               ))}
             </g>
@@ -663,7 +812,7 @@ export default function Scene({
           return (
             <button
               key={t.id}
-              className={`fc-target-hit ${t.kind === "settlement" ? "fc-town-hit" : ""} ${selected ? "fc-is-selected" : ""}`}
+              className={`fc-target-hit ${t.kind === "settlement" ? "fc-town-hit" : ""} ${selected ? "fc-is-selected" : ""} ${targetLabels.has(t.id) || selected ? "" : "fc-muted-label"}`}
               style={{ left: at.x, top: at.y }}
               aria-label={`Inspect ${t.name}`}
               aria-pressed={selected}
@@ -673,9 +822,11 @@ export default function Scene({
               }}
             >
               <span>
-                {t.kind === "workshop" && !state.workshop.complete
-                  ? "Workshop site"
-                  : t.name}
+                {camera.overview && t.kind === "settlement"
+                  ? SETTLEMENTS.find((s) => s.id === t.settlementId)?.name
+                  : t.kind === "workshop" && !state.workshop.complete
+                    ? "Workshop site"
+                    : t.name}
               </span>
             </button>
           );

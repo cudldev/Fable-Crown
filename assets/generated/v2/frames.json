@@ -1,0 +1,106 @@
+{
+  "prince": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 766,
+    "boundsHeight": 957,
+    "pivotX": 761,
+    "pivotY": 986
+  },
+  "woodcutter": {
+    "width": 1312,
+    "height": 1199,
+    "boundsWidth": 674,
+    "boundsHeight": 1118,
+    "pivotX": 816,
+    "pivotY": 1153
+  },
+  "miner": {
+    "width": 1215,
+    "height": 1295,
+    "boundsWidth": 726,
+    "boundsHeight": 1193,
+    "pivotX": 719,
+    "pivotY": 1249
+  },
+  "builder": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 472,
+    "boundsHeight": 984,
+    "pivotX": 654,
+    "pivotY": 1003
+  },
+  "smith": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 515,
+    "boundsHeight": 1003,
+    "pivotX": 691,
+    "pivotY": 1011
+  },
+  "house": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1129,
+    "boundsHeight": 965,
+    "pivotX": 863,
+    "pivotY": 990
+  },
+  "manor": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1190,
+    "boundsHeight": 962,
+    "pivotX": 890,
+    "pivotY": 966
+  },
+  "store": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1255,
+    "boundsHeight": 939,
+    "pivotX": 708,
+    "pivotY": 962
+  },
+  "workshop": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1229,
+    "boundsHeight": 967,
+    "pivotX": 715,
+    "pivotY": 968
+  },
+  "forest": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1484,
+    "boundsHeight": 999,
+    "pivotX": 714,
+    "pivotY": 1010
+  },
+  "ore": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1444,
+    "boundsHeight": 971,
+    "pivotX": 572,
+    "pivotY": 996
+  },
+  "bridge": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1508,
+    "boundsHeight": 690,
+    "pivotX": 1180,
+    "pivotY": 862
+  },
+  "ruins": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1302,
+    "boundsHeight": 999,
+    "pivotX": 806,
+    "pivotY": 1011
+  }
+}

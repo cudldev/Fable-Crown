@@ -233,8 +233,8 @@ select {
 .hero-status img {
   width: 40px;
   height: 56px;
-  object-fit: contain;
-  object-position: bottom;
+  object-fit: cover;
+  object-position: 62% bottom;
 }
 .hero-status strong {
   display: block;

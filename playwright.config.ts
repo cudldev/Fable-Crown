@@ -13,6 +13,11 @@ export default defineConfig({
     ? undefined
     : {
         command: "npm run preview -- --port 4174",
+        env: {
+          VITE_BASE_PATH: new URL(
+            process.env.DEMO_URL || "http://127.0.0.1:4174/",
+          ).pathname,
+        },
         url: process.env.DEMO_URL || "http://127.0.0.1:4174/",
         reuseExistingServer: true,
       },

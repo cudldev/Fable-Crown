@@ -117,6 +117,20 @@ describe("autonomous settlement", () => {
     expect(t).toEqual(s);
     conservation(s);
   });
+  it("gives workers separate reachable spots around a shared gathering site", () => {
+    const s = createGame(NOW);
+    const workers = s.people.filter(
+      (p) => p.role === "woodcutter" && p.homeId === "oakrest",
+    );
+    const destinations = workers.map((p) => p.path.at(-1)!);
+    expect(new Set(destinations.map((p) => `${p.x},${p.y}`)).size).toBe(
+      workers.length,
+    );
+    for (const p of destinations) expect(isWalkable(p)).toBe(true);
+    step(s, 50);
+    conservation(s);
+    expect(validateSave(s)).not.toBeNull();
+  });
   it("rests after finite buffers", () => {
     const s = createGame(NOW);
     step(s, 6000);
@@ -124,6 +138,14 @@ describe("autonomous settlement", () => {
     step(s, 6000);
     expect(s.gathered).toEqual(gathered);
     expect(validateSave(s)).not.toBeNull();
+  });
+  it("can restore every tick around instant loading and delivery boundaries", () => {
+    const s = createGame(NOW);
+    for (let i = 0; i < 150; i++) {
+      step(s);
+      expect(validateSave(s), `tick ${s.tick}`).not.toBeNull();
+    }
+    conservation(s);
   });
 });
 describe("player intentions", () => {

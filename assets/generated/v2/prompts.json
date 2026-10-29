@@ -1,0 +1,186 @@
+[
+  {
+    "name": "prince",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE young prince Alden, tousled brown hair, a clear royal-blue cape with a FEW simple gold accents, cream shirt, practical dark boots. Compact expressive in-game proportions about FOUR heads tall as in the reference's walking prince. Full body with short economical ink marks, face only a few expressive lines. Three-quarter walking/neutral step, looking into the scene, not a fashion-poster pose. No weapon. Standalone cutout, entire figure and cape in frame, no terrain, no cast backdrop, genuine transparent background. Pose readable at 85 pixels tall.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/prince.png",
+    "runtime": "public/art/prince.webp"
+  },
+  {
+    "name": "woodcutter",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE frontier woodcutter villager, compact expressive in-game proportions about FOUR heads tall, earthy green tunic, brown boots, short dark hair, simple axe and a small bundle of cut logs. Three-quarter natural working/walking step matching the reference people, economical ink face and broad painted outfit shapes. Entire figure in frame, standalone reusable cutout with no terrain or backdrop, genuine transparent background. Readable at 85 pixels tall.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/woodcutter.png",
+    "runtime": "public/art/woodcutter.webp"
+  },
+  {
+    "name": "miner",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE sturdy frontier miner villager, compact expressive in-game proportions about FOUR heads tall, slate blue work clothes, ochre leather belt, simple cap, short beard and pickaxe carried on shoulder. Natural three-quarter work/walking pose, economical ink face, broad painted shapes. Entire figure in frame, standalone reusable cutout with no terrain or backdrop, genuine transparent background. Readable at 85 pixels tall.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/miner.png",
+    "runtime": "public/art/miner.webp"
+  },
+  {
+    "name": "builder",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE young frontier carpenter/builder villager, compact expressive in-game proportions about FOUR heads tall, ochre work tunic, rolled cream sleeves, dark trousers, simple wooden mallet and small tool belt. Natural three-quarter walking/work pose, economical ink face, broad watercolor shape groups. Entire figure in frame. Standalone reusable cutout, no terrain/backdrop, genuinely transparent background. Readable at 85px tall.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/builder.png",
+    "runtime": "public/art/builder.webp"
+  },
+  {
+    "name": "smith",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE frontier blacksmith woman, compact expressive in-game proportions about FOUR heads tall, short dark hair tied back, russet shirt and simple dark leather apron, hammer held low, sturdy boots. Natural three-quarter work/step pose, economical expressive face, broad painted clothing/value groups. Entire figure in frame, standalone reusable cutout, no terrain/backdrop, genuinely transparent background. Readable at 85px tall.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/smith.png",
+    "runtime": "public/art/smith.webp"
+  },
+  {
+    "name": "manor",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE modest frontier manor building, cream plaster and timber, warm terracotta roof, a small stone corner tower, one blue banner with a simple gold accent. Read the manor in the attached sample as the visual standard. Painted planar shapes and irregular ink, no every-brick rendering, roof tiles indicated only by a few broad marks. Straightforward welcoming entrance, sparse vines as a few green paint masses. Full building cutout, same elevated camera, no people, NO surrounding landscape/ground island, NO glow, NO backdrop; genuine transparent background. Readable at 240 pixels wide.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/manor.png",
+    "runtime": "public/art/manor.webp"
+  },
+  {
+    "name": "store",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE frontier storehouse/barn building, cream plaster and dark timber frame, terracotta roof, broad double wooden doors, a few simple crates and sacks at entrance to make function recognizable. Architecture matches the attached game square; a FEW ink marks for roof tiles and broad painted wall washes rather than detailed miniature texturing. Full building cutout, elevated three-quarter camera, no people, no ground island, NO glow/backdrop; genuine transparent background. Readable at 240 pixels wide.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/store.png",
+    "runtime": "public/art/store.webp"
+  },
+  {
+    "name": "workshop",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE finished frontier blacksmith workshop building matching the attached sample's LEFT-hand forge: timber canopy over visible warm orange forge, simple anvil outside, broad dark roof shapes, cream stone chimney with a loose brush smoke curl. Keep structure modest and function instantly recognizable. Simplified watercolor/ink shapes with no micro-detail or every-stone rendering. Full building cutout, elevated three-quarter game camera, NO people, NO surrounding ground island, NO glow/backdrop; genuine transparent background. Readable at 240 pixels wide.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/workshop.png",
+    "runtime": "public/art/workshop.webp"
+  },
+  {
+    "name": "house",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE small cozy frontier timber-and-cream-stone cottage, warm terracotta roof, simple doorway, two blue-shadowed windows, one small planter. Match the ATTACHED gameplay sample's broad painted architecture and elevated camera. Simplify the roof to a FEW large tile/brush groupings and wall to broad cream washes; no individually rendered every tile, brick or leaf. Legible ink silhouette, painted ultramarine shadows, slightly irregular handmade lines. No surrounding ground island, no people, no ornamental clutter. Entire building in frame with transparent background. Game-world cutout, not a miniature model.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/house.png",
+    "runtime": "public/art/house.webp"
+  },
+  {
+    "name": "forest",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE reusable cluster of THREE medium deciduous trees for a gatherable woodland game location. Broad moss/olive green painted canopy masses with a few broken ink branches; cream/ochre light, dark blue-green shadow shapes, trunks and roots simply stated. Match the attached reference's simplified tree paint treatment, NOT thousands of individual leaves or photoreal bark. Same elevated camera. Standalone tree cluster cutout, entire silhouettes in frame, NO scenery, NO grass island or soil tile, NO glow/backdrop, genuine transparent background.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/forest.png",
+    "runtime": "public/art/forest.webp"
+  },
+  {
+    "name": "ore",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE small gatherable stone-and-iron outcrop, a few large angular slate/cream rocks with restrained rust-iron seams, a modest timber mine entrance to one side. Broad watercolor planes and a few lively dark ink accents, no crack/noise microtexture. Match the attached scene's rock and wall painting. Same elevated camera, readable simple silhouette. Standalone cutout, NO people, NO landscape tile or ground island, NO glow/backdrop, genuine transparent background.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/ore.png",
+    "runtime": "public/art/ore.webp"
+  },
+  {
+    "name": "bridge",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE short frontier stone bridge, warm cream stone with blue-gray painted shadows and simple timber handrail, low arch, horizontal left-to-right crossing for a game map. Elevated three-quarter camera matching the reference. Broad watercolor/gouache planes, a FEW ink stone joint marks, gently irregular edges, no detailed miniature texturing. Entire bridge visible, NO people, river, riverbanks or surrounding scenery/ground tile. Standalone cutout, NO glow/backdrop, genuinely transparent background.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/bridge.png",
+    "runtime": "public/art/bridge.webp"
+  },
+  {
+    "name": "ruins",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. ONE small ancient frontier shrine/watch ruin: weathered cream-gray stone arch and short broken tower, simple deep-blue cloth remnant, moss as a few broad green washes. Stylized expressive watercolor/ink forms matching the attached game scene, a handful of stone joint accents, not every stone/crack/leaf. Entire ruin silhouette visible in a reusable elevated-three-quarter cutout. NO people, landscape ground island, sky, glow or backdrop; genuinely transparent background.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/ruins.png",
+    "runtime": "public/art/ruins.webp"
+  },
+  {
+    "name": "overview",
+    "prompt": "Original Fable Crown reusable game asset. Match the ATTACHED APPROVED GAMEPLAY SAMPLE's illustration exactly, with a tiny further simplification: broad watercolor/gouache color planes, expressive irregular dark-brown ink contours, muted ultramarine shadows, cream/ochre highlights and terracotta/moss accents. Simplify small details by about 15 percent. Draw and paint, no realistic miniature-model rendering, no phototexture, no glossy 3D, no pixel art, no noise grain filter. Consistent elevated three-quarter gameplay view. No text, captions, UI, border, logo, or collage. A COHERENT WHOLE-WORLD ILLUSTRATED MAP, 3:2 landscape. Hand-drawn ink cartography and broad watercolor landscape masses, slightly simpler than the approved scene, NOT a photographic aerial view or tiny realistic textured model. Geography for the actual playable world: one major north–south river at 45.5% of image width, with ONLY two visible crossings at 25% and 68% image height. Three modest readable settlement silhouettes: Oakrest at (21% width,50% height), Briarford at (59%,23%), Stonehaven at (81%,74%). Thin loose pale roads connect these towns through the two bridges. Forest country northwest, pastoral fields southwest, broad rocky highland masses east. A small shrine at (31%,27%) and watch ruin at (91%,52%). Broad cream/ochre/moss regions, slate-blue ridges and ultramarine river washes, broken confident ink contours, paper showing through light areas. No inset scenes, no title, labels, legend, compass text, UI or border. Avoid microtextured leaves/rock grain; the map must read as painted shapes at phone size. Keep geography clear and continuous across the whole image.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/overview.png",
+    "runtime": "public/art/overview.webp"
+  },
+  {
+    "name": "region-0",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Mosswood forest floor ground: muted moss-green and pale cream earth washes, small broad patches of fallen ochre leaves, a few loosely drawn flat roots or tiny low stones. Low density, atmospheric woodland floor with LARGE open navigable color areas, NOT tree canopy or perimeter framing. No large trees; those are separate cutouts. Compatible cream/moss edges.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-0.png",
+    "runtime": "public/art/region-0.webp"
+  },
+  {
+    "name": "region-1",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Briarford pastoral village country: mostly muted sage/olive grassy ground and pale earth, with a few broad understated patches of harvested stubble and subtle worn earth. Not a field of individually rendered plants. Airy open color masses, compatible cream-earth edges, lower contrast than placed characters/buildings.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-1.png",
+    "runtime": "public/art/region-1.webp"
+  },
+  {
+    "name": "region-2",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Northern upland ground: cool pale cream/gray earth, muted sage grass, a few broad flat rock color patches and sparse ochre leaf brush groups. Airy understated ground, no cliffs, distant mountains or horizon. Lower contrast than actors/props. Compatible cream/moss edges.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-2.png",
+    "runtime": "public/art/region-2.webp"
+  },
+  {
+    "name": "region-3",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Oakrest village ground: predominantly pale warm cream/ochre worn paving with small broad groupings of irregular stones loosely indicated in ink; patches of muted moss grass and open earth gradually merging through the edges. An inhabited village's understated ground support, not an ornate circular plaza. Stone shapes fairly large and economical, painted shadows blue-gray; lower contrast than characters/buildings.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-3.png",
+    "runtime": "public/art/region-3.webp"
+  },
+  {
+    "name": "region-4",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Central Two Bridges countryside ground: pale warm earth merging with muted moss/sage grass in large soft irregular painted shapes, occasional low wildflower marks in restrained cream/ochre. NO river, water, bridges or banks because the engine places those continuously. Open quiet ground across the full canvas, no framed clearing. Compatible cream/moss edges.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-4.png",
+    "runtime": "public/art/region-4.webp"
+  },
+  {
+    "name": "region-5",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Eastern watch-country ground: muted ochre earth and sage grass, broad flat gray/cream rock washes broken by open pale soil, sparse little low plant paint marks. No upright cliff/outcrop/ruin or dramatic hillside perspective. Quiet color masses spread evenly across the whole region, compatible cream/moss edges.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-5.png",
+    "runtime": "public/art/region-5.webp"
+  },
+  {
+    "name": "region-6",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Green marches pastoral ground: pale ochre earth and muted green grass, a few broad flat golden stubble patches and loose low wildflower brush marks. Airy wide ground with subdued detail, no fenced field or borders. Same gameplay scale and compatible cream/moss edges.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-6.png",
+    "runtime": "public/art/region-6.webp"
+  },
+  {
+    "name": "region-7",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Pilgrim road countryside ground: cream/ochre worn earth in broad irregular patches mixed with muted olive grass and a FEW flat stones. No distinct road line baked in: the engine draws connecting roads. Quiet large painted value groups, same scale and compatible cream/moss edges, not a staged clearing.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-7.png",
+    "runtime": "public/art/region-7.webp"
+  },
+  {
+    "name": "region-8",
+    "prompt": "Original Fable Crown continuous-game-world GROUND PAINTING, matching the attached APPROVED gameplay sample, but a tiny bit simpler. Broad watercolor/gouache planes, loose broken dark-brown ink marks, paper-cream highlights, slate/ultramarine shadows, moss/olive green and ochre accents. Elevated three-quarter gameplay ground projection; same scale everywhere. This is ONE flat navigable REGION of a larger continuous map, NOT a framed scene, arena, valley, postcard, diorama or circular clearing. No horizon, sky, mountains, perspective vanishing point or scenic border. Distribute low broad painted ground shapes across the WHOLE canvas; all four edges remain open compatible ground (cream earth mixed with muted moss grass) so neighboring regions can feather together. No walls, forests encircling the image, buildings, people, rivers or bridges. No large rocks or other upright/impassable objects: those are separate game assets. No baked shadows of objects. No UI, text, grid or pixel art. Avoid the rejected dense realistic yellow-green texture/noise and every-blade/every-stone detail. Landscape 3:2. Stonehaven highland village ground: pale cream/gray earth and broad low slate-colored stony patches, muted olive grass in loose groups, just a FEW ink marks for small flat stones. No cliffs, quarry pit or giant boulders, no isolated enclosed clearing. Subtle cooler wash than Oakrest, compatible open cream-earth/moss edges, low contrast.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v2/region-8.png",
+    "runtime": "public/art/region-8.webp"
+  }
+]
