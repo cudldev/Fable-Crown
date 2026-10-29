@@ -131,7 +131,7 @@ describe("autonomous settlement", () => {
     conservation(s);
     expect(validateSave(s)).not.toBeNull();
   });
-  it("rests after finite buffers", () => {
+  it("keeps NPC buffers finite while Alden explores", () => {
     const s = createGame(NOW);
     step(s, 6000);
     const gathered = structuredClone(s.gathered);
@@ -467,3 +467,4 @@ describe("save validation and V1 migration", () => {
 interface PersonLike {
   xp: number;
 }
+

@@ -631,6 +631,11 @@ hr {
 .thought-panel small {
   margin-top: 10px;
 }
+.plan-reason {border-left:2px solid #b89c5e;padding-left:12px;font-style:italic;}
+.thought-panel .plan-choice {padding:12px;}
+.plan-choice strong {display:block;font:600 14px/1.4 Georgia,serif;}
+.plan-choice span {display:block;font:12px/1.45 system-ui;margin-top:5px;opacity:.86;}
+.thought-panel .plan-choice.recommended {background:#284953;color:#f4e8ca;}
 .toast {
   position: absolute;
   top: 97px;

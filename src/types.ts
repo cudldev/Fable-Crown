@@ -60,6 +60,9 @@ export interface ControlState {
   waiting: boolean;
   reason: string;
   nextId: number;
+  /** Optional on older V2 saves; the planner normalizes missing memory. */
+  visited?: string[];
+  lastAutonomous?: string;
 }
 export type PlayerCommand =
   | { type: "order"; intent: IntentDraft; mode: "now" | "next" }

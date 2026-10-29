@@ -20,7 +20,9 @@ import {
   SETTLEMENTS,
   targetById,
   WORLD,
+  TARGETS,
 } from "./world";
+import { suggestIntentions } from "./planner";
 const RESOURCES: Resource[] = ["timber", "stone", "iron"];
 const ROLES: Role[] = ["prince", "woodcutter", "miner", "builder", "smith"];
 const NAMES = [
@@ -63,6 +65,8 @@ const control = (tick = 0): ControlState => ({
   waiting: false,
   reason: "Considering how to help the workshop.",
   nextId: 1,
+  visited: [],
+  lastAutonomous: "",
 });
 export function calendarDate(now: number): string {
   const d = new Date(now);
@@ -177,8 +181,13 @@ function build(s: GameState, p: Person): void {
     if (
       p.carry.resource !== "iron" &&
       s.workshop[p.carry.resource] < BILL[p.carry.resource]
-    )
-      deliverBuild(s, p);
+    ) {
+      const resource = p.carry.resource;
+      const wanted = Math.min(10, BILL[resource] - s.workshop[resource]);
+      if (p.id === 0 && p.carry.amount < wanted && near(p, gatheringSpot(p, resource, "oakrest")))
+        gather(p, resource, "oakrest");
+      else deliverBuild(s, p);
+    }
     else bank(s, p, nearestSettlement(p).id);
     return;
   }
@@ -196,11 +205,14 @@ function forge(s: GameState, p: Person): void {
     bank(s, p, nearestSettlement(p).id);
     return;
   }
+  const wanted = p.id === 0 ? Math.min(10, Math.max(2, (s.control.active?.remaining ?? 1) * 2)) : 2;
   if (!p.carry) {
-    if (s.stores.oakrest.iron >= 2) load(s, p, "oakrest", "iron", 2);
+    if (s.stores.oakrest.iron >= 2) load(s, p, "oakrest", "iron", wanted);
     else if (p.id === 0) gather(p, "iron", "oakrest");
     else begin(p, "Waiting for supplies", 3);
-  } else if (p.carry.amount < 2) bank(s, p, "oakrest");
+  } else if (p.id === 0 && p.carry.amount < wanted && near(p, gatheringSpot(p, "iron", "oakrest"))) gather(p, "iron", "oakrest");
+  else if (p.carry.amount < 2 && p.id === 0) gather(p, "iron", "oakrest");
+  else if (p.carry.amount < 2) bank(s, p, "oakrest");
   else if (arrive(p, place("oakrest", "workshop")))
     begin(p, "Forging tools", 6);
 }
@@ -420,6 +432,8 @@ function complete(s: GameState, p: Person, result?: string): void {
 }
 function prince(s: GameState, p: Person): void {
   const c = s.control;
+  c.visited ??= [];
+  for (const target of TARGETS) if (near(p, target) && !c.visited.includes(target.id)) c.visited.push(target.id);
   if (c.waiting) {
     begin(p, "Waiting for your signal", 1);
     return;
@@ -429,22 +443,21 @@ function prince(s: GameState, p: Person): void {
     else if (s.tick < c.thinkingUntil) {
       begin(p, "Considering intentions", 1);
       return;
-    } else if (!s.workshop.complete)
-      c.active = makeIntent(s, { kind: "build" }, "autonomous");
-    else if (s.workshop.forged < 12)
-      c.active = makeIntent(s, { kind: "forge", quantity: 1 }, "autonomous");
-    else {
-      c.reason = "The workshop and tool buffer are ready; resting in Oakrest.";
-      if (p.carry) bank(s, p, nearestSettlement(p).id);
-      else begin(p, "Resting by the square", 10);
-      return;
+    } else {
+      const suggestion = suggestIntentions(s)[0]!;
+      c.active = makeIntent(s, suggestion.intent, "autonomous");
+      c.lastAutonomous = suggestion.id;
+      c.reason = suggestion.thought;
     }
   }
   const a = c.active,
     target = a.targetId ? targetById(a.targetId) : undefined;
-  c.reason = `${a.source === "player" ? "Following your intention" : "Helping Oakrest"}: ${a.label}.`;
+  if (a.source === "player") c.reason = `Following your intention: ${a.label}.`;
   if (a.kind === "move") {
-    if (arrive(p, a.point ?? target!)) complete(s, p);
+    if (arrive(p, a.point ?? target!)) {
+      if (target) c.visited = [...(c.visited ?? []).filter(id => id !== target.id), target.id];
+      complete(s, p, `Reached ${target?.name ?? "the selected ground"}. Considering useful work nearby.`);
+    }
   } else if (a.kind === "gather") {
     const home = target?.settlementId ?? nearestSettlement(p).id,
       r = a.resource!;
@@ -1049,6 +1062,9 @@ export function validateSave(value: unknown): GameState | null {
       !integer(c.nextId) ||
       c.nextId < 1 ||
       !text(c.reason, 1000) ||
+      (c.visited !== undefined && (!Array.isArray(c.visited) || c.visited.length > TARGETS.length || !c.visited.every(id => typeof id === "string" && targetById(id)) || new Set(c.visited).size !== c.visited.length)) ||
+      (c.lastAutonomous !== undefined && (!text(c.lastAutonomous, 100) || !/^(|finish-workshop|forge-tools|workshop-(timber|stone)|bank-(oakrest|briarford|stonehaven)|supply-(oakrest|briarford|stonehaven)-(timber|stone|iron)|visit-[a-z-]+)$/.test(c.lastAutonomous))) ||
+      (typeof c.lastAutonomous === "string" && c.lastAutonomous.startsWith("visit-") && !targetById(c.lastAutonomous.slice(6))) ||
       (c.active !== null && !validIntent(c.active, s)) ||
       !c.queue.every((a) => validIntent(a, s))
     )
@@ -1096,7 +1112,10 @@ export function validateSave(value: unknown): GameState | null {
           return null;
       }
     }
-    return JSON.parse(JSON.stringify(value)) as GameState;
+    const restored = JSON.parse(JSON.stringify(value)) as GameState;
+    restored.control.visited ??= [];
+    restored.control.lastAutonomous ??= "";
+    return restored;
   } catch {
     return null;
   }

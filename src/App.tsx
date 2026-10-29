@@ -17,6 +17,7 @@ import {
   WORLD,
 } from "./world";
 import type { CameraState, WorldSelection } from "./view-types";
+import { suggestIntentions } from './planner';
 const Scene = lazy(() => import("./Scene"));
 const base = import.meta.env.BASE_URL;
 const strategies: Record<Strategy, string> = {
@@ -119,6 +120,10 @@ export default function App() {
       : undefined;
   const targetStore = selectedTarget?.settlementId || home.id;
   const active = state?.control.active;
+  const ideas=state?suggestIntentions(state):[];
+  const thinking=state&&!active&&!state.control.waiting&&state.control.thinkingUntil>state.tick;
+  const thinkingSeconds=state?Math.max(0,Math.ceil((state.control.thinkingUntil-state.tick)*TICK_MS/1000)):0;
+  function showIdeas(){setThought(!thought);setPanel(null);setSelection(null);}
   const order = (draft: IntentDraft, mode: "now" | "next") => {
     command({ type: "order", intent: draft, mode });
     setSelection(null);
@@ -314,27 +319,34 @@ export default function App() {
           Follow Alden
         </button>
       </div>
-      {!state?.strategy && (
+      {state && (
         <button
           className="thought-peek"
-          onClick={() => {
-            setThought(!thought);
-            setPanel(null);
-            setSelection(null);
-          }}
+          aria-label={state.strategy?"Open Alden's ideas":undefined}
+          aria-expanded={thought}
+          onClick={showIdeas}
         >
-          ✧ Alden has a thought{" "}
+          {state.strategy?'✧ Alden’s ideas':'✧ Alden has a thought'}{" "}
           <span>
-            {state
-              ? Math.max(
+            {!state.strategy
+              ? `${Math.max(
                   0,
                   Math.ceil(((state.decisionAt - state.tick) * TICK_MS) / 1000),
-                )
-              : 20}
-            s
+                )}s`
+              :state.control.waiting?'waiting':thinking?`choosing in ${thinkingSeconds}s`:active?.source==='player'?'following your lead':'thinking ahead'}
           </span>
         </button>
       )}
+      {thought&&state&&state.strategy&&<section className="parchment thought-panel ideas-panel" aria-label="Alden's ideas">
+        <button className="close" aria-label="Close thought" onClick={()=>setThought(false)}>×</button>
+        <span className="eyebrow">ALDEN IS THINKING AHEAD</span>
+        <h2>{state.control.waiting?'Ready when you are':'What shall I do next?'}</h2>
+        <p className="plan-reason" aria-label="Current reasoning">{state.control.reason}</p>
+        <div className="idea-list">{ideas.map((idea,n)=><button className={`choice plan-choice ${n===0?'recommended':''}`} key={idea.id} aria-label={`Choose idea: ${idea.title}`} onClick={()=>{order(idea.intent,'now');setThought(false);}}>
+          <strong>{idea.title}</strong><span>{idea.thought}</span>
+        </button>)}</div>
+        <small>{state.control.waiting?'Alden will wait until you choose an idea or resume his intentions.':active?.source==='player'||state.control.queue.length?'He’ll finish your orders before choosing for himself. Pick an idea to change his current intention.':thinking?`He’ll choose his next action in ${thinkingSeconds}s if you leave it to him.`:'He keeps acting on his own. Pick an idea to guide him, or leave him to his plan.'}</small>
+      </section>}
       {thought && state && !state.strategy && (
         <section
           className="parchment thought-panel"
@@ -835,20 +847,20 @@ export default function App() {
               <span className="doing-now">
                 {state.control.waiting
                   ? "Waiting for your guidance"
-                  : !active && state.control.thinkingUntil > state.tick
-                    ? `Thinking · ${Math.ceil((state.control.thinkingUntil - state.tick) * 0.6)}s`
-                    : hero.action}
+                  : thinking
+                    ? `Next: ${ideas[0]?.title||'Considering a useful task'}`
+                    : hero.action==='Traveling'&&active?active.label:hero.action}
               </span>
             </span>
           </button>
-          <button className="next-intention" onClick={() => open("queue")}>
-            <small>{active ? "INTENTION" : "NEXT"}</small>
+          <button className="next-intention" aria-label="Inspect Alden's plan" onClick={showIdeas}>
+            <small>{active ? active.source==='autonomous'?'ALDEN CHOSE':'YOUR INTENTION' : "NEXT IDEA"}</small>
             <span>
               {active?.label ||
                 state.control.queue[0]?.label ||
                 (state.control.waiting
                   ? "Choose an activity"
-                  : "Letting Alden consider his next step")}
+                  : ideas[0]?.title||"Considering a useful task")}
             </span>
           </button>
           <div className="dock-buttons">
