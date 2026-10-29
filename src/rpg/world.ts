@@ -88,7 +88,7 @@ function buildFrontier(): WorldDefinition {
         for (let dy = -radius; dy <= radius; dy++)
           for (let dx = -1; dx <= 1; dx++) {
             const index = (y + dy) * width + x + dx;
-            if (world.terrain[index] !== "water") world.terrain[index] = "dirt";
+            if (world.terrain[index] !== "water" && !(world.collision[index] & COLLISION.BLOCKED)) world.terrain[index] = "dirt";
           }
       }
     }
@@ -404,6 +404,69 @@ function buildFrontier(): WorldDefinition {
       if (dy === service.height - 1 && dx !== Math.floor(service.width / 2)) world.collision[index] |= COLLISION.SOUTH;
     }
   }
+  // Oakrest is an authored district around the existing services and resource coordinates.
+  // New ground never clears collision walls or removes an individually choppable tree.
+  road([[52, 95], [53, 90], [52, 87]]);
+  road([[52, 95], [59, 101], [63, 103], [68, 109], [64, 115], [52, 119], [48, 128]]);
+  road([[43, 97], [36, 96], [30, 91], [25, 89], [18, 83], [16, 75]]);
+  road([[54, 94], [63, 88], [69, 84], [73, 80], [81, 76], [87, 70]]);
+  road([[64, 115], [79, 118], [94, 112], [105, 105], [109, 95]]);
+  road([[52, 119], [59, 130], [72, 136], [87, 133], [101, 128], [108, 111]]);
+  // The quarry reads as a rocky place, with an uneven margin and its footpaths retained.
+  // Only the painted surface changes; resource footprints and collision remain intact.
+  for (let y = 73; y <= 88; y++) for (let x = 70; x <= 94; x++) {
+    const edge = ((x - 82) / 11) ** 2 + ((y - 80) / 6) ** 2;
+    const index = y * width + x;
+    if (edge < 1 + .12 * Math.sin(x * .8 + y) && world.terrain[index] === "grass")
+      world.terrain[index] = "stone";
+  }
+  const occupied = (x: number, y: number) => world.objects.some((o) => x >= o.position.x && x < o.position.x + o.width && y >= o.position.y && y < o.position.y + o.height);
+  const clearPropTile = (x: number, y: number) => x >= 8 && x <= 119 && y >= 48 && y <= 143 &&
+    world.terrain[y * width + x] !== "water" && world.collision[y * width + x] === 0 && !occupied(x, y) &&
+    !world.spawns.some((p) => p.x === x && p.y === y) && ![[65, 112], [87, 69], [107, 81]].some(([ex, ey]) => x === ex && y === ey);
+  let fence = 0, decoration = 0;
+  const fenceAt = (x: number, y: number, orientation: "x" | "y") => {
+    if (!clearPropTile(x, y)) return;
+    const o = add(`oakrest-fence-${fence++}`, "Timber fence", "fence", x, y, 1, 1, true, "prop-fence"); o.orientation = orientation;
+  };
+  const gateAt = (id: string, name: string, x: number, y: number, orientation: "x" | "y") => {
+    if (!clearPropTile(x, y)) throw Error(`Gate footprint is occupied: ${id}`);
+    const o = add(id, name, "gate", x, y, 1, 1, false, "prop-gate-open"); o.orientation = orientation;
+    o.description = `${name}. An open side passage keeps this plot accessible when the gate is closed.`;
+  };
+  // Manor frontage: the east end remains a second passage around the garden fence.
+  for (const x of [47, 48, 49, 50, 51, 53, 54, 55]) fenceAt(x, 88, "x");
+  for (let y = 82; y <= 87; y++) fenceAt(47, y, "y");
+  gateAt("oakrest-manor-gate", "Manor garden gate", 52, 88, "x");
+  // Workshop yard: the west and lower side stay open for deliveries and bank traffic.
+  for (const y of [100, 101, 102, 103, 105, 106, 109]) fenceAt(64, y, "y");
+  for (let x = 56; x <= 63; x++) fenceAt(x, 110, "x");
+  gateAt("oakrest-workshop-gate", "Workshop yard gate", 64, 104, "y");
+  // Farm plot: a deliberate gap at x56 and its open eastern side provide alternatives.
+  for (const x of [44, 45, 46, 47, 48, 49, 50, 53, 54, 55, 57, 58, 59]) fenceAt(x, 119, "x");
+  for (let y = 120; y <= 125; y++) fenceAt(43, y, "y");
+  for (let x = 44; x <= 49; x++) fenceAt(x, 127, "x");
+  gateAt("oakrest-farm-gate", "Meadow farm gate", 52, 119, "x");
+  for (const [id, name, x, y, description] of [
+    ["oakrest-sign-square", "Oakrest village directions", 48, 99, "Master Ren and the public anvil are northeast of the square. The bank is east; the supplies shop is west."],
+    ["oakrest-sign-manor", "Manor garden notice", 55, 89, "Alden’s manor lies north through the garden. The path around the eastern fence remains open."],
+    ["oakrest-sign-woods", "Mosswood trail sign", 36, 97, "Follow the western path to Mosswood’s individual timber trees. Return east to the village bank and Ren’s workshop."],
+    ["oakrest-sign-quarry", "Quarry trail sign", 68, 86, "The northeastern quarry has copper, tin, iron and coal. Learners can mine copper and tin, then smelt bronze at the village furnace."],
+    ["oakrest-sign-yard", "Workshop yard directions", 62, 101, "The bank is north of this yard. The public furnace and anvil stand farther north beside Ren’s charcoal ledger."],
+    ["oakrest-sign-meadow", "Southern meadow notice", 60, 115, "The farm plot lies southwest. Moss boars roam the eastern meadow; prepare a weapon and healing meals before approaching wildlife."],
+    ["oakrest-sign-bank", "Western riverbank sign", 104, 103, "The river lies east. Fishing spots follow the western shore. The northern and southern bridges cross to Briarford and Stonehaven."],
+    ["oakrest-sign-farm", "Farm footpath sign", 55, 124, "The village is north through the farm gate or the open side passage. The southern footpath curves east toward the river."],
+  ] as const) if (clearPropTile(x, y)) { const o = add(id, name, "sign", x, y, 1, 1, false, "prop-sign"); o.description = description; }
+  for (const [x, y] of [[46, 121], [49, 121], [46, 123], [49, 123], [46, 125], [49, 125], [53, 122], [53, 125]])
+    if (clearPropTile(x, y)) { const o = add(`oakrest-crops-${decoration++}`, "Tended crop bed", "decor", x, y, 1, 1, false, "prop-crops"); o.description = "Tended vegetable beds feed the village through long workdays."; }
+  for (const [x, y, name] of [[62, 104, "Workshop timber stack"], [61, 107, "Prepared workshop supplies"], [45, 100, "Market supply crates"],
+    [71, 81, "Quarry supply rack"], [83, 80, "Quarry sorting baskets"], [31, 94, "Woodcutters’ stacked supplies"], [50, 130, "Farm supply baskets"]] as const)
+    if (clearPropTile(x, y)) add(`oakrest-supplies-${decoration++}`, name, "decor", x, y, 1, 1, false, "prop-supplies");
+  for (const [id, name, x, y] of [["oakrest-workshop-yard", "Ren’s workshop yard", 62, 106], ["oakrest-meadow", "Oakrest southern meadow", 68, 119],
+    ["oakrest-farm", "Oakrest farm plot", 51, 123], ["oakrest-riverbank", "Oakrest western riverbank", 109, 100]] as const)
+    if (clearPropTile(x, y)) add(id, name, "landmark", x, y);
+  const ledger = world.objects.find((o) => o.id === "forge-charcoal")!;
+  ledger.description = "Ren’s charcoal ledger marks six logs from the western woods and six bronze bars, smelted from copper and tin in the northeastern quarry. The public furnace is beside this ledger; the connected bank is just south.";
   return world;
 }
 
@@ -426,25 +489,36 @@ export const FERRIES: Record<string, { name: string; objectId: string; destinati
   "ferry-west": { name: "Willow ferry to the east bank", objectId: "ferry-west", destination: { ...WORLD.objects.find((o) => o.id === "ferry-east")!.position }, cost: 5, questId: "letters" },
   "ferry-east": { name: "Willow ferry to the west bank", objectId: "ferry-east", destination: { ...WORLD.objects.find((o) => o.id === "ferry-west")!.position }, cost: 5, questId: "letters" },
 };
-let roadWorld: WorldDefinition | undefined;
-/** Only the unlocked static variant is cached; shared WORLD is never mutated. */
+export const GATE_IDS = WORLD.objects.filter((object) => object.kind === "gate").map((object) => object.id);
+export const DEFAULT_GATES: Record<string, boolean> = Object.fromEntries(GATE_IDS.map((id) => [id, true]));
+type WorldState = Pick<RpgState, "quests"> & Partial<Pick<RpgState, "gates">>;
+export function worldVariantKey(state: WorldState) {
+  return `${state.quests.road?.complete ? 1 : 0}:${GATE_IDS.map((id) => state.gates?.[id] === false ? "0" : "1").join("")}`;
+}
+const WORLD_VARIANTS = new Map<string, WorldDefinition>();
+/** At most16 immutable road/gate combinations exist; shared WORLD is never mutated. */
 export function worldForState(
-  state: Pick<RpgState, "quests">,
+  state: WorldState,
 ): WorldDefinition {
-  if (!state.quests.road?.complete) return WORLD;
-  if (!roadWorld) {
-    roadWorld = {
+  const key = worldVariantKey(state), allOpen = GATE_IDS.every((id) => state.gates?.[id] !== false);
+  if (!state.quests.road?.complete && allOpen) return WORLD;
+  const cached = WORLD_VARIANTS.get(key); if (cached) return cached;
+  const variant: WorldDefinition = {
       ...WORLD,
       terrain: [...WORLD.terrain],
       collision: [...WORLD.collision],
-      objects: [...WORLD.objects],
+      objects: WORLD.objects.map((object) => object.kind === "gate" ? { ...object, blocks: state.gates?.[object.id] === false,
+        art: state.gates?.[object.id] === false ? "prop-gate-closed" : "prop-gate-open" } : object),
     };
+  for (const gate of WORLD.objects.filter((object) => object.kind === "gate"))
+    if (state.gates?.[gate.id] === false) variant.collision[gate.position.y * WORLD.width + gate.position.x] |= COLLISION.BLOCKED;
+  if (state.quests.road?.complete) {
     for (let y = 94; y <= 96; y++)
       for (let x = 114; x <= 123; x++) {
-        roadWorld.terrain[y * WORLD.width + x] = "stone";
-        roadWorld.collision[y * WORLD.width + x] = 0;
+        variant.terrain[y * WORLD.width + x] = "stone";
+        variant.collision[y * WORLD.width + x] = 0;
       }
-    roadWorld.objects.push({
+    variant.objects.push({
       id: "road-bridge",
       name: "Restored Thorn-Road crossing",
       kind: "bridge",
@@ -455,7 +529,8 @@ export function worldForState(
       art: "bridge",
     });
   }
-  return roadWorld;
+  WORLD_VARIANTS.set(key, variant);
+  return variant;
 }
 export const WORLDS: Record<string, WorldDefinition> = { [WORLD.id]: WORLD };
 export const objectsById: Record<string, WorldObject> = Object.fromEntries(

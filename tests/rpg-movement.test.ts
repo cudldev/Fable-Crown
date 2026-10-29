@@ -28,7 +28,7 @@ describe("authoritative movement traces", () => {
     valid(s);
   });
   it.each([[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]])("records one walking step in direction %i,%i", (dx, dy) => {
-    const s = fresh(); s.player.position = tile(64, 108); s.player.previousPosition = { ...s.player.position };
+    const s = fresh(); s.player.position = tile(70, 108); s.player.previousPosition = { ...s.player.position };
     accept(s, { type: "run", enabled: false }); const start = { ...s.player.position }, destination = tile(start.x + dx, start.y + dy);
     expect(canStep(start, destination)).toBe(true); accept(s, { type: "move", position: destination }); stepRpg(s);
     expect(s.player.movement).toEqual({ tick: 1, mode: "walk", tiles: [start, destination] }); valid(s);

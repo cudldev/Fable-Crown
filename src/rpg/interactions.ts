@@ -5,6 +5,9 @@ import { levelForXp } from "./skills";
 import { FERRIES } from "./world";
 import type { RpgCommand, RpgState, WorldObject } from "./types";
 export function examineObject(s: RpgState, o: WorldObject) {
+  if (o.kind === "gate")
+    return `${o.name} is ${(s.gates[o.id] ?? true) ? "open" : "closed"}. Approach to open or close it. ${o.description ?? "A side passage keeps the village accessible."}`;
+  if (o.description) return o.description;
   if (o.kind === "ferry") {
     const ferry = FERRIES[o.id];
     return ferry && s.quests[ferry.questId]?.complete

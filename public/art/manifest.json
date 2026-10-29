@@ -1,6 +1,6 @@
 {
-  "version": "fd0412fe36be",
-  "bytes": 15360822,
+  "version": "6d1d153b2395",
+  "bytes": 15711852,
   "files": [
     "art/actor-fisher.webp",
     "art/anvil.webp",
@@ -41,8 +41,14 @@
     "art/prince-v5-work-se-cut-mine-proof.webp",
     "art/prince-v5-work-se-fish-smith-corrected.webp",
     "art/prince.webp",
+    "art/prop-crops.webp",
     "art/prop-exhausted-ore.webp",
+    "art/prop-fence.webp",
+    "art/prop-gate-closed.webp",
+    "art/prop-gate-open.webp",
+    "art/prop-sign.webp",
     "art/prop-stump.webp",
+    "art/prop-supplies.webp",
     "art/ruins.webp",
     "art/smith.webp",
     "art/store.webp",

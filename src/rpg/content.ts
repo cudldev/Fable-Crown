@@ -498,7 +498,7 @@ export const QUESTS: Record<string, QuestDefinition> = {
     id: "forge",
     name: "An Honest Forge",
     description:
-      "Bring Master Ren six logs and six bronze bars. The public Oakrest anvil is open to learners; earn access to the frontier towns’ anvils.",
+      "Master Ren needs six logs from the western woods and six bronze bars for Oakrest’s forge. Read his ledger by the northern furnace, mine copper and tin in the northeastern quarry, and use the bank south of the furnace. The public anvil is open to learners; completing the delivery opens the frontier towns’ anvils.",
     giverId: "quest-forge",
     items: [
       { itemId: "logs", quantity: 6 },
@@ -540,9 +540,9 @@ export const QUESTS: Record<string, QuestDefinition> = {
   },
 };
 QUESTS.forge.stages = [
-  { id: "ledger", kind: "inspect", targetId: "forge-charcoal", description: "Inspect Ren’s charcoal ledger." },
-  { id: "supplies", kind: "gather", items: [{ itemId: "logs", quantity: 6 }], description: "Gather six logs for Ren’s charcoal supply." },
-  { id: "bronze", kind: "craft", recipeId: "bronze-bar", quantity: 6, description: "Smelt or collect six bronze bars." },
+  { id: "ledger", kind: "inspect", targetId: "forge-charcoal", description: "Read Ren’s charcoal ledger beside the northern furnace." },
+  { id: "supplies", kind: "gather", items: [{ itemId: "logs", quantity: 6 }], description: "Gather six logs from the western woods, or retrieve banked timber." },
+  { id: "bronze", kind: "craft", recipeId: "bronze-bar", quantity: 6, description: "Mine copper and tin in the northeastern quarry; smelt or collect six bronze bars." },
   { id: "deliver", kind: "deliver", targetId: "quest-forge", items: QUESTS.forge.items, description: "Deliver the timber and bronze to Ren." },
 ];
 QUESTS.supper.stages = [

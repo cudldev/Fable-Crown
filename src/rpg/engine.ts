@@ -27,6 +27,9 @@ import {
   ENEMY_SPAWNS,
   tile,
   FERRIES,
+  DEFAULT_GATES,
+  GATE_IDS,
+  worldVariantKey,
 } from "./world";
 import { startingSkills, levelForXp, XP_THRESHOLDS, skillName } from "./skills";
 import { ITEMS, RESOURCES, RECIPES, SHOPS, ENEMIES, QUESTS } from "./content";
@@ -39,6 +42,7 @@ import {
 } from "./inventory";
 import { goalMet, goalSteps, suggestGoals } from "./planning";
 import { appendGameMessage, appendSimulationEffect } from "./events";
+import { starterChoices } from "./starter";
 
 export const calendarDate = (now: number) => {
   const d = new Date(now);
@@ -117,6 +121,8 @@ export function createRpg(now: number, seed = 1234567): RpgState {
   };
   const s: RpgState = {
     version: 5,
+    worldRevision: 2,
+    gates: { ...DEFAULT_GATES },
     tick: 0,
     savedAt: now,
     calendar: calendarDate(now),
@@ -161,9 +167,9 @@ export function createRpg(now: number, seed = 1234567): RpgState {
       source: null,
       queue: [],
       goal: null,
-      thinkingUntil: 6,
+      thinkingUntil: 1,
       eatReadyAt: 0,
-      reason: "A better pickaxe would help me learn a useful trade.",
+      reason: "Ren needs timber and bronze for Oakrest’s forge. A hunt or village trade are useful alternatives.",
       steps: [],
       style: "attack",
       visited: [],
@@ -180,8 +186,12 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     messages: [],
     messageSequence: 0,
   };
-  s.control.goal = suggestGoals(s)[0].goal;
+  const choices = starterChoices(s);
+  s.control.goal = choices[0].goal;
   s.control.steps = goalSteps(s, s.control.goal);
+  s.control.thought = { id: "starter-oakrest", title: "A first step in Oakrest",
+    body: "Help Ren with the forge, prepare for a woodland hunt, or earn supplies through village trade. Alden will start the forge task while you decide.",
+    choices, expiresAt: 34 };
   return s;
 }
 function random(s: RpgState) {
@@ -201,7 +211,7 @@ const RESOURCE_OBJECTS = WORLD.objects.filter((o) => o.resourceId);
 // The world is immutable. Reuse only routes actually requested, copying before travel consumes them.
 const ROUTES = new Map<string, TilePosition[] | null>();
 function objectRoute(s: RpgState, from: TilePosition, o: WorldObject) {
-  const key = `${!!s.quests.road?.complete}:${from.worldId}:${from.plane}:${from.x}:${from.y}:${o.id}`;
+  const key = `${worldVariantKey(s)}:${from.worldId}:${from.plane}:${from.x}:${from.y}:${o.id}`;
   if (!ROUTES.has(key)) {
     ROUTES.set(key, pathToObject(from, o, worldForState(s)));
     if (ROUTES.size > 1024) ROUTES.delete(ROUTES.keys().next().value!);
@@ -968,9 +978,12 @@ export function repairRpgPositions(s: RpgState) {
     return { ...WORLD.spawns[0] };
   };
   for (const actor of [s.player, ...s.npcs]) {
-    actor.position = repair(actor.position); actor.previousPosition = { ...actor.position };
-    actor.movement = null;
-    actor.path = []; actor.action = null;
+    const position = repair(actor.position);
+    let prior = position;
+    const legalPath = actor.path.every((next) => { const legal = canStep(prior, next, world); prior = next; return legal; });
+    const moved = !samePosition(position, actor.position);
+    if (moved || !legalPath) { actor.position = position; actor.previousPosition = { ...position }; actor.path = []; actor.action = null; actor.movement = null; }
+    else if (!isWalkable(actor.previousPosition, world)) { actor.previousPosition = { ...position }; actor.movement = null; }
   }
   for (const e of s.enemies) { e.home = { ...ENEMY_SPAWNS.find((spawn) => spawn.id === e.id)!.position }; e.position = repair(e.position); }
   for (const drop of s.drops) drop.position = repair(drop.position);
@@ -982,6 +995,24 @@ export function repairRpgPositions(s: RpgState) {
   if (s.control.active && !validOrder(s.control.active, world)) { s.control.active = null; s.control.source = null; }
   s.control.thinkingUntil = s.tick + 1;
   return s;
+}
+function gateOccupied(s: RpgState, target: WorldObject) {
+  return [s.player.position, ...s.npcs.map((actor) => actor.position), ...s.enemies.map((enemy) => enemy.position),
+    ...s.drops.map((drop) => drop.position), ...(s.grave ? [s.grave.position] : [])].some((position) => samePosition(position, target.position));
+}
+function invalidateChangedRoutes(s: RpgState) {
+  const world = worldForState(s);
+  for (const actor of [s.player, ...s.npcs]) {
+    const trace = actor.movement;
+    if (!isWalkable(actor.previousPosition, world) || trace && trace.tiles.some((point, index) =>
+      !isWalkable(point, world) || index > 0 && !canStep(trace.tiles[index - 1], point, world))) {
+      actor.movement = null; actor.previousPosition = { ...actor.position };
+    }
+    let prior = actor.position;
+    if (!actor.path.every((next) => { const legal = canStep(prior, next, world); prior = next; return legal; })) {
+      actor.path = []; actor.action = null;
+    }
+  }
 }
 function advanceStage(s: RpgState, id: string) {
   const q = QUESTS[id], progress = s.quests[id], stage = currentQuestStage(s, id);
@@ -1121,6 +1152,17 @@ function questAction(s: RpgState, id: string) {
 }
 function execute(s: RpgState, order: RpgOrder) {
   const p = s.player;
+  if (order.type === "gate") {
+    const target = objectById(order.objectId)!;
+    if (!order.open && gateOccupied(s, target)) { finish(s, "Cannot close an occupied gate."); return; }
+    if (!route(s, p, target)) return;
+    if (s.gates[target.id] !== order.open) {
+      s.gates = { ...s.gates, [target.id]: order.open }; invalidateChangedRoutes(s);
+      appendGameMessage(s, "event", `gate-${target.id}-${order.open}`, `${order.open ? "Opened" : "Closed"} ${target.name}.`);
+    }
+    finish(s, `${target.name} is ${order.open ? "open" : "closed"}.`);
+    return;
+  }
   if (order.type === "talk-actor") {
     const npc = s.npcs.find((actor) => actor.id === order.actorId), path = actorApproachRoute(s, order.actorId);
     if (!npc || path === null) { finish(s, "That villager is no longer available or reachable."); return; }
@@ -1138,6 +1180,11 @@ function execute(s: RpgState, order: RpgOrder) {
   }
   if (order.type === "interact") {
     const target = objectById(order.objectId)!;
+    if (target.kind === "sign" && order.verb === "inspect") {
+      if (!route(s, p, target)) return;
+      appendGameMessage(s, "dialogue", `sign-${target.id}`, `${target.name}: ${target.description ?? "An old village sign."}`);
+      finish(s, `Read ${target.name}.`); return;
+    }
     if (target.questId && order.verb === "talk" && !s.quests[target.questId].complete && s.control.source === "player") {
       const q = QUESTS[target.questId];
       s.control.goal = { id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name };
@@ -2269,6 +2316,7 @@ function validGoal(v: unknown): v is Ambition {
 function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
   if (!object(v)) return false;
   switch (v.type) {
+    case "gate": return typeof v.objectId === "string" && objectById(v.objectId)?.kind === "gate" && typeof v.open === "boolean";
     case "talk-actor": return positive(v.actorId, WORLD.spawns.length - 1);
     case "unequip-ammo": return true;
     case "interact":
@@ -2352,6 +2400,7 @@ function orderProblem(
   queued = false,
 ): string | null {
   const p = s.player;
+  if (order.type === "gate" && !order.open && gateOccupied(s, objectById(order.objectId)!)) return "Cannot close an occupied gate.";
   if (order.type === "talk-actor" && !s.npcs.some((actor) => actor.id === order.actorId && actor.health > 0))
     return "That villager is not available.";
   if (order.type === "travel-service" && !s.quests[FERRIES[order.objectId].questId]?.complete)
@@ -2462,7 +2511,7 @@ function orderRoute(s: RpgState, order: RpgOrder): TilePosition[] | null {
     ? objectById(order.objectId) : nearest(p, (o) => o.kind === "bank");
   else if (order.type === "buy" || order.type === "sell") target = objectById(order.shopId);
   else if (order.type === "quest") target = objectById(QUESTS[order.questId].giverId);
-  else if (order.type === "interact" || order.type === "travel-service") target = objectById(order.objectId);
+  else if (order.type === "interact" || order.type === "travel-service" || order.type === "gate") target = objectById(order.objectId);
   else return [];
   return target ? adjacent(p, target) ? [] : objectRoute(s, p.position, target) : null;
 }
@@ -2666,6 +2715,11 @@ export function validateRpgSave(v: unknown): RpgState | null {
     const candidate = v as unknown as RpgState;
     if (v.version !== 3 && v.version !== 4 && v.version !== 5) return null;
     const oldVersion = v.version, migrated = oldVersion !== 5;
+    const hasRevision = v.worldRevision !== undefined, hasGates = v.gates !== undefined;
+    if (hasRevision !== hasGates || hasRevision && (v.worldRevision !== 2 || !object(v.gates) ||
+      Object.keys(v.gates).length !== GATE_IDS.length || !GATE_IDS.every((id) => typeof candidate.gates[id] === "boolean"))) return null;
+    const worldMigrated = migrated || !hasRevision;
+    if (!hasRevision) { v.worldRevision = 2; v.gates = { ...DEFAULT_GATES }; }
     if (migrated) {
       v.version = 5; v.effects = []; v.effectSequence = 0; v.messages = []; v.messageSequence = 0;
       if (object(v.control)) delete v.control.directOrderIndex;
@@ -2694,8 +2748,9 @@ export function validateRpgSave(v: unknown): RpgState | null {
         shop.stock = Object.fromEntries(Object.entries(definition.stock).map(([id, entry]) => [id, Object.hasOwn(old, id) ? old[id] : entry.max]));
       }
     }
-    if (migrated) {
+    if (worldMigrated) {
       const actors = [candidate.player, ...candidate.npcs];
+      for (const actor of actors) actor.movement = null;
       const coordinate = (p: TilePosition) => p?.worldId === WORLD.id && p.plane === 0 &&
         Number.isInteger(p.x) && Number.isInteger(p.y) && p.x >= 0 && p.x < WORLD.width && p.y >= 0 && p.y < WORLD.height;
       if (actors.some((actor) => !coordinate(actor.position) || !coordinate(actor.previousPosition) ||
@@ -2711,6 +2766,8 @@ export function validateRpgSave(v: unknown): RpgState | null {
     const w = worldForState(v as unknown as RpgState);
     if (
       v.version !== 5 ||
+      v.worldRevision !== 2 || !object(v.gates) || Object.keys(v.gates).length !== GATE_IDS.length ||
+      !GATE_IDS.every((id) => typeof candidate.gates[id] === "boolean") ||
       !integer(v.tick) ||
       !integer(v.savedAt, 8.64e15) ||
       !integer(v.seed, 4294967295) ||

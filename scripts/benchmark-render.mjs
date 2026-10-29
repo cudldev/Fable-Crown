@@ -7,8 +7,14 @@ const vite = await createServer({
   server: { middlewareMode: true },
   appType: "custom",
 });
-const { createRpg, validateRpgSave, calendarDate } = await vite.ssrLoadModule("/src/rpg/engine.ts");
+const { createRpg, stepRpg, validateRpgSave, calendarDate } = await vite.ssrLoadModule("/src/rpg/engine.ts");
 const fixture = createRpg(Date.now(), 1234567);
+if (process.env.BENCH_ACTIVE === "1") {
+  stepRpg(fixture, 1200);
+  fixture.savedAt = Date.now();
+  fixture.calendar = calendarDate(fixture.savedAt);
+  if (!validateRpgSave(fixture)) throw Error("Active-world benchmark fixture must remain valid");
+}
 let turningFixture;
 if (process.env.BENCH_TURNING === "1") {
   const {tile} = await vite.ssrLoadModule("/src/rpg/world.ts");
@@ -95,6 +101,7 @@ await page.locator("input[type=file]").setInputFiles({
   mimeType: "application/json",
   buffer: Buffer.from(JSON.stringify(fixture)),
 });
+await page.getByRole("status").filter({hasText:"Chronicle restored"}).waitFor();
 await page.getByRole("button", { name: "Close panel" }).click();
 const results = [];
 for (const mode of ["zoom-0.85", "zoom-0.15", "overview", ...(turningFixture ? ["turning-walk", "turning-run"] : [])]) {
@@ -153,6 +160,8 @@ console.log(
       platform: `${os.platform()} ${os.release()} ${os.arch()}`,
       cpu: os.cpus()[0]?.model,
       logicalCpus: os.cpus().length,
+      simulationWarmupTicks: process.env.BENCH_ACTIVE === "1" ? 1200 : 0,
+      npcCompletedAtImport: fixture.npcs.reduce((total,npc)=>total+npc.completed,0),
       viewport:
         "1280x720 DPR1; headless Chrome; no CPU throttling; 3s static/20s walking/10s running warmup; 5s samples; Canvas API instrumentation enabled",
       results,

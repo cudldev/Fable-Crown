@@ -21,6 +21,8 @@ import {
   observeFootstep,
   workStroke,
   resourceArt,
+  districtProp,
+  objectHitTarget,
   type EffectCursor,
   type WorkContactCursor,
   type FootstepCursor,
@@ -84,6 +86,7 @@ const assetNames = [
   "iso-oak",
   "iso-willow",
   "prop-stump", "prop-exhausted-ore",
+  "prop-fence", "prop-gate-closed", "prop-gate-open", "prop-sign", "prop-crops", "prop-supplies",
 ];
 const terrainAsset = {
   grass: "tile-grass",
@@ -599,11 +602,17 @@ export default function TileScene({
         h: number,
         alpha = 1,
         widthOnly = false,
+        flipX = false,
       ) {
         const img = images.current.get(name);
         if (!img) return;
         // The source image is released after baking; frame geometry stays full-size.
         const frame = artFrames[name];
+        if (flipX) {
+          ctx.save();
+          ctx.translate(p.x * 2, 0);
+          ctx.scale(-1, 1);
+        }
         ctx.globalAlpha = alpha;
         if (frame) {
           const scale = widthOnly
@@ -617,6 +626,7 @@ export default function TileScene({
             frame.height * scale,
           );
         } else ctx.drawImage(img, p.x - w / 2, p.y - h, w, h);
+        if (flipX) ctx.restore();
         ctx.globalAlpha = 1;
       }
       function princeFrame(key: string, p: { x: number; y: number }): boolean {
@@ -729,6 +739,8 @@ export default function TileScene({
       for (const o of world.objects) {
         const foot = objectFoot(o);
         const selected = selection?.kind === "object" && selection.id === o.id;
+        const prop = districtProp(o, state.gates);
+        if (prop && distant) continue;
         if ((o.kind === "tree" || o.kind === "rock") && distant && !selected) continue;
         if (!view.overview && !visible(foot, 350)) continue;
         const p = tileToScreen(foot);
@@ -778,7 +790,16 @@ export default function TileScene({
         drawables.push({
           depth: foot.x + foot.y,
           draw: () => {
-            if ((o.kind === "tree" || o.kind === "rock") && distant) {
+            if (prop) {
+              if (selected) {
+                ctx.strokeStyle = "#f3d98c";
+                ctx.lineWidth = 2 / view.zoom;
+                ctx.beginPath();
+                ctx.ellipse(p.x, p.y, 26, 13, 0, 0, Math.PI * 2);
+                ctx.stroke();
+              }
+              art(prop.art, p, prop.width, prop.height, 1, false, prop.flipX);
+            } else if ((o.kind === "tree" || o.kind === "rock") && distant) {
               // Its sprite is already in the composite; selection adds only a ring.
               ctx.strokeStyle = "#f3d98c";
               ctx.lineWidth = 2 / view.zoom;
@@ -1331,12 +1352,7 @@ export default function TileScene({
   const objectButtons = world.objects.filter(
     (o) =>
       visible(objectFoot(o), 80) &&
-      (view.zoom >= 0.35 ||
-        o.kind === "landmark" ||
-        (selection?.kind === "object" && selection.id === o.id)) &&
-      (!camera.overview ||
-        (o.kind === "landmark" &&
-          ["oakrest", "briarford", "stonehaven"].includes(o.id))),
+      objectHitTarget(o, view.zoom, camera.overview, selection?.kind === "object" && selection.id === o.id),
   );
   return (
     <div
@@ -1391,7 +1407,9 @@ export default function TileScene({
                   "furnace",
                   "anvil",
                   "range",
-                ].includes(o.kind) || camera.overview
+                ].includes(o.kind) || camera.overview ||
+                ((o.kind === "sign" || o.kind === "gate") &&
+                  ((selection?.kind === "object" && selection.id === o.id) || view.zoom >= 1.1))
                   ? o.name
                   : ""}
               </span>

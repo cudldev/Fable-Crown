@@ -4,15 +4,19 @@
 
 A painterly autonomous RPG on a 256 × 192 isometric tile world with three settlements and 24 characters. Alden follows persistent ambitions; you guide his thoughts or give direct and queued orders. The Old School RuneScape reference informs tile movement, skills and preparation; the setting, quests and generated art are original.
 
-Nine skills progress separately: Woodcutting, Mining, Smithing, Fishing, Cooking, Attack, Strength, Defence and Hitpoints. Gather trees, ores and fish with appropriate tools; smelt, smith and cook; trade real supplies for bronze/iron/steel equipment. A 28-slot backpack, separate equipment and connected personal bank support longer journeys. Villagers keep their own supplies.
+Ten skills progress separately: Woodcutting, Mining, Smithing, Fishing, Cooking, Attack, Strength, Defence, Hitpoints and Ranged. Gather trees, ores and fish with appropriate tools; smelt, smith and cook; trade real supplies for tools, armour, bows and ammunition. A 28-slot backpack, separate equipment and connected personal bank support longer journeys. Villagers keep their own supplies.
 
-Three quests earn access to frontier anvils, Briarford’s kitchen and a shorter river crossing. Moss boars, copper-shell mites and road outlaws provide melee training and loot. Food restores health; defeat preserves equipped gear and XP, leaving all backpack belongings in a recoverable grave without fees or permanent loss.
+Six original quests introduce the forge, kitchen, river crossing, archery, courier routes and eastern watch. Wildlife and outlaws provide melee/ranged training and loot. Food restores health; defeat preserves equipped gear and XP, leaving backpack belongings in a recoverable grave without fees or permanent loss.
 
 ## Playing
 
 The world fills the browser. Drag to pan, pinch/wheel or use +/− to zoom. World opens the overview; the town plaque opens destinations, quest givers and wilderness encounters. Follow Alden returns the camera. The tile grid is optional.
 
+Oakrest’s paths connect the manor, workshop, woods, quarry, farm and riverbank. Read signs for directions and approach gates to open or close them. Starting thoughts offer the forge, hunting preparation or earning a better pickaxe; Alden begins the forge journey automatically.
+
 Tap a resource to choose a goal such as gathering ore or reaching a Mining level. Alden handles tools, prerequisites, travel, depleted nodes and full backpacks. Direct single actions and queued orders remain available. Circular rings show action cycles; reward floaters show items, XP and level-ups. The dock tracks the latest skill and XP remaining to its next level. Ores, logs and food occupy one backpack slot per item; coins, bait and feathers stack. Bank totals remain aggregated.
+
+Messages expands a persistent history of conversations, quest progress, discoveries, level-ups and important problems. All/Events/Dialogue filters keep it readable. Routine item and XP gains stay in the world. Painted action phases, contact sounds, arrows and hit reactions follow committed simulation results.
 
 Walk/Run shows remaining energy. Running takes up to two legal tile steps and consumes energy; exhaustion switches to walking. Walking, waiting and stationary work restore energy. The chosen movement mode persists across reloads. A new ambition replaces the current action, and pending orders remain editable. Quest visits retain that quest as an ambition. Automatic banking stores spare tools when they obstruct crafting; completed quests show delivered supplies instead of an empty requirement count.
 
@@ -22,7 +26,7 @@ Tap ground to travel. Inspect a resource, service or enemy for Do now/Add next. 
 
 Skills shows levels, XP and next unlocks. Bag shows all 28 slots, food, equipment, combat style and bank withdrawals. Journal tracks quests and rewards. Shops show stock and prices; Aim for this asks Alden to earn and buy a tool.
 
-Progress saves in IndexedDB. This iteration starts a fresh V3 chapter; earlier village saves remain untouched and exportable from the menu. Export/import transfers the RPG chapter. Offline progress runs at 25% speed for up to 24 hours per absence. The shell and 23 generated assets (7.4 MiB) cache for offline travel; Save world offline confirms the complete download.
+Progress saves in IndexedDB. V5 copies existing V4/V3 progress while retaining earlier records as exportable archives. Export/import transfers the RPG chapter. Offline progress runs at 25% speed for up to 24 hours per absence. Save world offline confirms the complete artwork download and shows its size.
 
 ## Development and hosting
 

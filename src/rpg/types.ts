@@ -54,7 +54,14 @@ export interface WorldObject {
     | "bridge"
     | "clue"
     | "target"
-    | "ferry";
+    | "ferry"
+    | "fence"
+    | "gate"
+    | "sign"
+    | "decor";
+  /** Logical tile axis for fences and gates. */
+  orientation?: "x" | "y";
+  description?: string;
   position: TilePosition;
   width: number;
   height: number;
@@ -227,7 +234,8 @@ export type RpgOrder =
       itemId?: string;
     }
   | { type: "travel-service"; objectId: string }
-  | { type: "talk-actor"; actorId: number };
+  | { type: "talk-actor"; actorId: number }
+  | { type: "gate"; objectId: string; open: boolean };
 export type RpgCommand =
   | RpgOrder
   | { type: "enqueue"; order: RpgOrder }
@@ -323,6 +331,10 @@ export interface DialogueState {
 }
 export interface RpgState {
   version: 5;
+  /** Additive geometry migration for earlier V5 chapters. */
+  worldRevision: 2;
+  /** True means open. Earlier archives default to the authored open gates. */
+  gates: Record<string, boolean>;
   tick: number;
   savedAt: number;
   calendar: string;

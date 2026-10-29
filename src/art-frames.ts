@@ -223,5 +223,53 @@ export const artFrames: Record<string,{width:number;height:number;boundsWidth:nu
     "boundsHeight": 712,
     "pivotX": 240,
     "pivotY": 722
+  },
+  "prop-fence": {
+    "width": 434,
+    "height": 362,
+    "boundsWidth": 434,
+    "boundsHeight": 362,
+    "pivotX": 217,
+    "pivotY": 282
+  },
+  "prop-gate-closed": {
+    "width": 445,
+    "height": 359,
+    "boundsWidth": 445,
+    "boundsHeight": 359,
+    "pivotX": 223,
+    "pivotY": 280
+  },
+  "prop-gate-open": {
+    "width": 500,
+    "height": 368,
+    "boundsWidth": 500,
+    "boundsHeight": 368,
+    "pivotX": 250,
+    "pivotY": 287
+  },
+  "prop-sign": {
+    "width": 403,
+    "height": 500,
+    "boundsWidth": 403,
+    "boundsHeight": 500,
+    "pivotX": 202,
+    "pivotY": 490
+  },
+  "prop-crops": {
+    "width": 512,
+    "height": 446,
+    "boundsWidth": 512,
+    "boundsHeight": 446,
+    "pivotX": 256,
+    "pivotY": 375
+  },
+  "prop-supplies": {
+    "width": 475,
+    "height": 397,
+    "boundsWidth": 475,
+    "boundsHeight": 397,
+    "pivotX": 238,
+    "pivotY": 349
   }
 };

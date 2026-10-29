@@ -31,6 +31,7 @@ import { Minimap } from "../render/Minimap";
 import { useGameAudio } from "./useGameAudio";
 import { examineObject, itemUses } from "./interactions";
 import { MessagePanel } from "./MessagePanel";
+import { starterChoices } from "./starter";
 import type { TilePosition } from "./types";
 import type { SkillId, EquipmentSlot, CombatStyle } from "./types";
 import "./rpg.css";
@@ -252,6 +253,8 @@ export default function RpgApp() {
       return FERRIES[o.objectId]?.name ?? "Take the ferry";
     if (o.type === "talk-actor")
       return `Talk to ${state?.npcs.find((actor) => actor.id === o.actorId)?.name ?? "villager"}`;
+    if (o.type === "gate")
+      return `${o.open ? "Open" : "Close"} ${objectById(o.objectId)?.name ?? "gate"}`;
     if (o.type === "unequip-ammo") return "Remove equipped arrows";
     if (o.type === "withdraw")
       return `Withdraw ${o.quantity} ${itemName(o.itemId)}`;
@@ -356,22 +359,28 @@ export default function RpgApp() {
                 type: "travel-service",
                 objectId: selectedObject.id,
               } as RpgOrder)
-            : ["clue", "target"].includes(selectedObject.kind)
+            : selectedObject.kind === "gate"
               ? ({
-                  type: "interact",
+                  type: "gate",
                   objectId: selectedObject.id,
-                  verb:
-                    selectedObject.kind === "target" ? "practice" : "inspect",
+                  open: !(state?.gates[selectedObject.id] ?? true),
                 } as RpgOrder)
-              : ({
-                  type: "move",
-                  position: {
-                    ...(selectedObject.blocks
-                      ? (interactionTiles(selectedObject, world)[0] ??
-                        selectedObject.position)
-                      : selectedObject.position),
-                  },
-                } as RpgOrder)
+              : ["clue", "target", "sign"].includes(selectedObject.kind)
+                ? ({
+                    type: "interact",
+                    objectId: selectedObject.id,
+                    verb:
+                      selectedObject.kind === "target" ? "practice" : "inspect",
+                  } as RpgOrder)
+                : ({
+                    type: "move",
+                    position: {
+                      ...(selectedObject.blocks
+                        ? (interactionTiles(selectedObject, world)[0] ??
+                          selectedObject.position)
+                        : selectedObject.position),
+                    },
+                  } as RpgOrder)
     : null;
   return (
     <main
@@ -567,11 +576,13 @@ export default function RpgApp() {
         >
           ✧ Alden’s thoughts{" "}
           <span>
-            {state.control.waiting
-              ? "waiting"
-              : state.control.goal
-                ? "pursuing a goal"
-                : "thinking ahead"}
+            {state.control.thought?.id === "starter-oakrest"
+              ? "choose a beginning"
+              : state.control.waiting
+                ? "waiting"
+                : state.control.goal
+                  ? "pursuing a goal"
+                  : "thinking ahead"}
           </span>
         </button>
       )}
@@ -636,7 +647,8 @@ export default function RpgApp() {
           <p>
             {selectedObject.resourceId
               ? `${RESOURCES[selectedObject.resourceId].name} · ${skillName(RESOURCES[selectedObject.resourceId].skill)} ${RESOURCES[selectedObject.resourceId].level} · ${(RESOURCES[selectedObject.resourceId].xp / 10).toFixed(1)} XP per success. Bring a ${RESOURCES[selectedObject.resourceId].tool}.`
-              : "A place to visit and use in the frontier."}
+              : (selectedObject.description ??
+                "A place to visit and use in the frontier.")}
           </p>
           {selectedObject.resourceId && (
             <label>
@@ -653,9 +665,15 @@ export default function RpgApp() {
             </label>
           )}
           {selectedObject.kind !== "quest" &&
-            !["building", "landmark", "bridge"].includes(
-              selectedObject.kind,
-            ) && (
+            ![
+              "building",
+              "landmark",
+              "bridge",
+              "gate",
+              "sign",
+              "fence",
+              "decor",
+            ].includes(selectedObject.kind) && (
               <div className="context-goals" aria-label="Goals for this place">
                 {contextGoals(state, selectedObject, quantity).map((choice) => (
                   <button
@@ -718,7 +736,13 @@ export default function RpgApp() {
                 className="primary"
                 onClick={() => order(contextualOrder!)}
               >
-                Do now
+                {selectedObject.kind === "gate"
+                  ? (state.gates[selectedObject.id] ?? true)
+                    ? "Close gate"
+                    : "Open gate"
+                  : selectedObject.kind === "sign"
+                    ? "Read sign"
+                    : "Do now"}
               </button>
               <button onClick={() => order(contextualOrder!, true)}>
                 Add next
@@ -1000,6 +1024,9 @@ export default function RpgApp() {
               <span className="eyebrow">ALDEN’S INTENTIONS</span>
               <h2>{state.control.goal?.title ?? "The road ahead"}</h2>
               <p>{state.control.reason}</p>
+              {state.control.thought?.id === "starter-oakrest" && (
+                <p>{state.control.thought.body}</p>
+              )}
               {state.control.goal?.kind === "gather" &&
                 state.control.goal.resourceId &&
                 (() => {
@@ -1053,7 +1080,7 @@ export default function RpgApp() {
               )}
               {state.control.thought && (
                 <small>
-                  Continues automatically in{" "}
+                  This suggestion closes in{" "}
                   {Math.max(
                     0,
                     Math.ceil(
@@ -1063,6 +1090,25 @@ export default function RpgApp() {
                   s.
                 </small>
               )}
+              {state.control.thought?.id !== "starter-oakrest" &&
+                !state.quests.forge.complete && (
+                  <details className="rpg-starting-choices">
+                    <summary>Ways to begin in Oakrest</summary>
+                    {starterChoices(state).map((choice) => (
+                      <button
+                        className="choice plan-choice full"
+                        key={choice.id}
+                        onClick={() => {
+                          command({ type: "goal", goal: choice.goal });
+                          setPanel(null);
+                        }}
+                      >
+                        <strong>{choice.label}</strong>
+                        <span>{choice.description}</span>
+                      </button>
+                    ))}
+                  </details>
+                )}
               <small>
                 Alden handles the steps. Leave him to his plan, or choose a
                 different ambition. Wait stops the current action and holds your

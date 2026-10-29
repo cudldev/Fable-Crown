@@ -99,7 +99,7 @@ test("inspecting Ren’s charcoal ledger advances the accepted forge to supplies
     .locator(".rpg-quest")
     .filter({ hasText: "An Honest Forge" });
   await expect(forge).toContainText(
-    "Next: Gather six logs for Ren’s charcoal supply.",
+    "Next: Gather six logs from the western woods, or retrieve banked timber.",
   );
   await expect(forge).not.toContainText(/delivered\s*0/i);
   await checkResponsive(page);

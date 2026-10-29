@@ -1,0 +1,6505 @@
+{
+  "version": 5,
+  "tick": 300,
+  "savedAt": 1793275200000,
+  "calendar": "2026-10-29",
+  "offlineRemainder": 0,
+  "seed": 3630009637,
+  "player": {
+    "id": 0,
+    "name": "Alden",
+    "role": "prince",
+    "home": "oakrest",
+    "position": {
+      "worldId": "frontier",
+      "plane": 0,
+      "x": 62,
+      "y": 89
+    },
+    "previousPosition": {
+      "worldId": "frontier",
+      "plane": 0,
+      "x": 62,
+      "y": 89
+    },
+    "movement": null,
+    "path": [],
+    "skills": {
+      "woodcutting": 1500,
+      "mining": 1400,
+      "smithing": 186,
+      "fishing": 0,
+      "cooking": 0,
+      "attack": 0,
+      "strength": 0,
+      "defence": 0,
+      "hitpoints": 11540,
+      "ranged": 0
+    },
+    "inventory": [
+      {
+        "itemId": "coins",
+        "quantity": 25
+      },
+      {
+        "itemId": "bronze-axe",
+        "quantity": 1
+      },
+      {
+        "itemId": "bronze-pickaxe",
+        "quantity": 1
+      },
+      {
+        "itemId": "small-net",
+        "quantity": 1
+      },
+      {
+        "itemId": "hammer",
+        "quantity": 1
+      },
+      {
+        "itemId": "cooked-shrimp",
+        "quantity": 6
+      },
+      {
+        "itemId": "logs",
+        "quantity": 6
+      },
+      {
+        "itemId": "bronze-bar",
+        "quantity": 3
+      },
+      {
+        "itemId": "copper-ore",
+        "quantity": 1
+      },
+      {
+        "itemId": "tin-ore",
+        "quantity": 1
+      }
+    ],
+    "equipment": {
+      "weapon": "bronze-sword",
+      "shield": "bronze-shield",
+      "cape": "prince-cape"
+    },
+    "ammo": null,
+    "health": 10,
+    "runEnergy": 2995,
+    "action": {
+      "kind": "craft",
+      "recipeId": "bronze-bar",
+      "duration": 5,
+      "remaining": 4
+    },
+    "activity": "Smelt bronze bar",
+    "completed": 17,
+    "bank": []
+  },
+  "npcs": [
+    {
+      "id": 1,
+      "name": "Mira",
+      "role": "woodcutter",
+      "home": "oakrest",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 9000,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 12
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 8335,
+      "action": {
+        "kind": "gather",
+        "targetId": "oakrest-tree-77",
+        "duration": 4,
+        "remaining": 3
+      },
+      "activity": "Gathering Mosswood tree",
+      "completed": 36,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Toma",
+      "role": "fisher",
+      "home": "oakrest",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 115,
+        "y": 90
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 115,
+        "y": 90
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 1100,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "raw-shrimp",
+          "quantity": 11
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 945,
+      "action": {
+        "kind": "gather",
+        "targetId": "fish-west-shrimp",
+        "duration": 5,
+        "remaining": 2
+      },
+      "activity": "Gathering Shrimp fishing",
+      "completed": 11,
+      "bank": []
+    },
+    {
+      "id": 3,
+      "name": "Jun",
+      "role": "smith",
+      "home": "oakrest",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 6750,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 3
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 7675,
+      "action": {
+        "kind": "gather",
+        "targetId": "oakrest-tree-77",
+        "duration": 4,
+        "remaining": 3
+      },
+      "activity": "Gathering Mosswood tree",
+      "completed": 27,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Hana",
+      "role": "miner",
+      "home": "oakrest",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 76,
+        "y": 77
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 76,
+        "y": 77
+      },
+      "movement": null,
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 77,
+          "y": 77
+        }
+      ],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 4550,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "copper-ore",
+          "quantity": 2
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 8095,
+      "action": {
+        "kind": "gather",
+        "targetId": "oakrest-ore-0",
+        "duration": 8,
+        "remaining": 8
+      },
+      "activity": "Walking to Tin outcrop",
+      "completed": 26,
+      "bank": [
+        {
+          "itemId": "copper-ore",
+          "quantity": 12
+        },
+        {
+          "itemId": "tin-ore",
+          "quantity": 12
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Ren",
+      "role": "woodcutter",
+      "home": "oakrest",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 6750,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 3
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 8035,
+      "action": {
+        "kind": "gather",
+        "targetId": "oakrest-tree-77",
+        "duration": 4,
+        "remaining": 2
+      },
+      "activity": "Gathering Mosswood tree",
+      "completed": 27,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Edda",
+      "role": "fisher",
+      "home": "oakrest",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 115,
+        "y": 90
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 115,
+        "y": 90
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 1100,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "raw-shrimp",
+          "quantity": 11
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 960,
+      "action": {
+        "kind": "gather",
+        "targetId": "fish-west-shrimp",
+        "duration": 5,
+        "remaining": 2
+      },
+      "activity": "Gathering Shrimp fishing",
+      "completed": 11,
+      "bank": []
+    },
+    {
+      "id": 7,
+      "name": "Bram",
+      "role": "smith",
+      "home": "oakrest",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 40,
+        "y": 84
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 6750,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 3
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 7780,
+      "action": {
+        "kind": "gather",
+        "targetId": "oakrest-tree-77",
+        "duration": 4,
+        "remaining": 2
+      },
+      "activity": "Gathering Mosswood tree",
+      "completed": 27,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Iori",
+      "role": "miner",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 175,
+        "y": 29
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 176,
+        "y": 29
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "run",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 176,
+            "y": 29
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 175,
+            "y": 29
+          }
+        ]
+      },
+      "path": [],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 2625,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "copper-ore",
+          "quantity": 15
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 9940,
+      "action": {
+        "kind": "gather",
+        "targetId": "briarford-ore-1",
+        "duration": 8,
+        "remaining": 1
+      },
+      "activity": "Walking to Copper outcrop",
+      "completed": 15,
+      "bank": []
+    },
+    {
+      "id": 9,
+      "name": "Nell",
+      "role": "woodcutter",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 148,
+        "y": 33
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 146,
+        "y": 33
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "run",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 146,
+            "y": 33
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 147,
+            "y": 33
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 148,
+            "y": 33
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 149,
+          "y": 32
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 150,
+          "y": 31
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 151,
+          "y": 30
+        }
+      ],
+      "skills": {
+        "woodcutting": 8250,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 9
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 9265,
+      "action": {
+        "kind": "gather",
+        "targetId": "briarford-tree-12",
+        "duration": 4,
+        "remaining": 4
+      },
+      "activity": "Walking to Mosswood tree",
+      "completed": 33,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Orin",
+      "role": "fisher",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 118,
+        "y": 48
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 119,
+        "y": 48
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "walk",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 119,
+            "y": 48
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 118,
+            "y": 48
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 117,
+          "y": 48
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 116,
+          "y": 48
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 48
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 49
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 50
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 51
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 52
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 53
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 54
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 55
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 56
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 57
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 58
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 59
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 60
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 61
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 62
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 63
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 64
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 65
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 66
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 67
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 68
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 69
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 70
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 71
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 72
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 73
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 74
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 75
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 76
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 77
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 78
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 79
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 80
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 81
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 82
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 83
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 84
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 85
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 86
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 87
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 88
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 89
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 90
+        }
+      ],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 1800,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "raw-shrimp",
+          "quantity": 18
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 0,
+      "action": {
+        "kind": "gather",
+        "targetId": "fish-north-east-shrimp",
+        "duration": 5,
+        "remaining": 5
+      },
+      "activity": "Walking to Shrimp fishing",
+      "completed": 18,
+      "bank": []
+    },
+    {
+      "id": 11,
+      "name": "Sora",
+      "role": "smith",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 150,
+        "y": 31
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 148,
+        "y": 33
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "run",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 148,
+            "y": 33
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 149,
+            "y": 32
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 150,
+            "y": 31
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 151,
+          "y": 30
+        }
+      ],
+      "skills": {
+        "woodcutting": 7250,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 5
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 8890,
+      "action": {
+        "kind": "gather",
+        "targetId": "briarford-tree-12",
+        "duration": 4,
+        "remaining": 1
+      },
+      "activity": "Walking to Mosswood tree",
+      "completed": 29,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Ada",
+      "role": "miner",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 175,
+        "y": 29
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 176,
+        "y": 29
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "run",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 176,
+            "y": 29
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 175,
+            "y": 29
+          }
+        ]
+      },
+      "path": [],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 2625,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "tin-ore",
+          "quantity": 15
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 9940,
+      "action": {
+        "kind": "gather",
+        "targetId": "briarford-ore-1",
+        "duration": 8,
+        "remaining": 8
+      },
+      "activity": "Walking to Copper outcrop",
+      "completed": 15,
+      "bank": []
+    },
+    {
+      "id": 13,
+      "name": "Fenn",
+      "role": "woodcutter",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 150,
+        "y": 31
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 148,
+        "y": 33
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "run",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 148,
+            "y": 33
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 149,
+            "y": 32
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 150,
+            "y": 31
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 151,
+          "y": 30
+        }
+      ],
+      "skills": {
+        "woodcutting": 6750,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 3
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 7975,
+      "action": {
+        "kind": "gather",
+        "targetId": "briarford-tree-12",
+        "duration": 4,
+        "remaining": 4
+      },
+      "activity": "Walking to Mosswood tree",
+      "completed": 27,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Lio",
+      "role": "fisher",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 118,
+        "y": 48
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 119,
+        "y": 48
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "walk",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 119,
+            "y": 48
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 118,
+            "y": 48
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 117,
+          "y": 48
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 116,
+          "y": 48
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 48
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 49
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 50
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 51
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 52
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 53
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 54
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 55
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 56
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 57
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 58
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 59
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 60
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 61
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 62
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 63
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 64
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 65
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 66
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 67
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 68
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 69
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 70
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 71
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 72
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 73
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 74
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 75
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 76
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 77
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 78
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 79
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 80
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 81
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 82
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 83
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 84
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 85
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 86
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 87
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 88
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 89
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 90
+        }
+      ],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 2200,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "raw-shrimp",
+          "quantity": 22
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 0,
+      "action": {
+        "kind": "gather",
+        "targetId": "fish-north-east-shrimp",
+        "duration": 5,
+        "remaining": 5
+      },
+      "activity": "Walking to Shrimp fishing",
+      "completed": 22,
+      "bank": []
+    },
+    {
+      "id": 15,
+      "name": "Yuna",
+      "role": "smith",
+      "home": "briarford",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 150,
+        "y": 31
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 148,
+        "y": 33
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "run",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 148,
+            "y": 33
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 149,
+            "y": 32
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 150,
+            "y": 31
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 151,
+          "y": 30
+        }
+      ],
+      "skills": {
+        "woodcutting": 6000,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 7975,
+      "action": {
+        "kind": "gather",
+        "targetId": "briarford-tree-12",
+        "duration": 4,
+        "remaining": 2
+      },
+      "activity": "Walking to Mosswood tree",
+      "completed": 24,
+      "bank": [
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Reed",
+      "role": "miner",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 229,
+        "y": 139
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 229,
+        "y": 139
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 2625,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "copper-ore",
+          "quantity": 15
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 9955,
+      "action": {
+        "kind": "gather",
+        "targetId": "stonehaven-ore-0",
+        "duration": 8,
+        "remaining": 7
+      },
+      "activity": "Gathering Copper outcrop",
+      "completed": 15,
+      "bank": []
+    },
+    {
+      "id": 17,
+      "name": "Wren",
+      "role": "woodcutter",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 210,
+        "y": 142
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 208,
+        "y": 140
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "run",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 208,
+            "y": 140
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 209,
+            "y": 141
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 210,
+            "y": 142
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 211,
+          "y": 143
+        }
+      ],
+      "skills": {
+        "woodcutting": 6000,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 24
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 4015,
+      "action": {
+        "kind": "bank",
+        "targetId": "stonehaven-bank",
+        "duration": 1,
+        "remaining": 1
+      },
+      "activity": "Walking to Stonehaven bank",
+      "completed": 24,
+      "bank": []
+    },
+    {
+      "id": 18,
+      "name": "Moss",
+      "role": "fisher",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 121,
+        "y": 129
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 122,
+        "y": 130
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "walk",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 122,
+            "y": 130
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 121,
+            "y": 129
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 120,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 119,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 118,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 117,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 116,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 114,
+          "y": 127
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 114,
+          "y": 126
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 113,
+          "y": 125
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 112,
+          "y": 124
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 111,
+          "y": 123
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 111,
+          "y": 122
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 110,
+          "y": 121
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 109,
+          "y": 120
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 108,
+          "y": 119
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 107,
+          "y": 118
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 107,
+          "y": 117
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 116
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 115
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 114
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 113
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 112
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 111
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 110
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 109
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 108
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 107
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 106
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 105
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 104
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 103
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 102
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 101
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 107,
+          "y": 100
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 108,
+          "y": 99
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 109,
+          "y": 98
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 110,
+          "y": 97
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 111,
+          "y": 96
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 112,
+          "y": 95
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 113,
+          "y": 94
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 114,
+          "y": 93
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 92
+        }
+      ],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 1100,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "raw-shrimp",
+          "quantity": 11
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 0,
+      "action": {
+        "kind": "gather",
+        "targetId": "fish-south-east-shrimp",
+        "duration": 5,
+        "remaining": 5
+      },
+      "activity": "Walking to Shrimp fishing",
+      "completed": 11,
+      "bank": []
+    },
+    {
+      "id": 19,
+      "name": "Finch",
+      "role": "smith",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 205,
+        "y": 130
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 205,
+        "y": 130
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 4750,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 19
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 4690,
+      "action": {
+        "kind": "gather",
+        "targetId": "stonehaven-tree-60",
+        "duration": 4,
+        "remaining": 1
+      },
+      "activity": "Gathering Mosswood tree",
+      "completed": 19,
+      "bank": []
+    },
+    {
+      "id": 20,
+      "name": "Galen",
+      "role": "miner",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 229,
+        "y": 139
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 229,
+        "y": 139
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 2625,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "tin-ore",
+          "quantity": 15
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 9955,
+      "action": {
+        "kind": "gather",
+        "targetId": "stonehaven-ore-0",
+        "duration": 8,
+        "remaining": 7
+      },
+      "activity": "Gathering Copper outcrop",
+      "completed": 15,
+      "bank": []
+    },
+    {
+      "id": 21,
+      "name": "Opal",
+      "role": "woodcutter",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 205,
+        "y": 130
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 205,
+        "y": 130
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 5750,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 23
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 4825,
+      "action": {
+        "kind": "gather",
+        "targetId": "stonehaven-tree-60",
+        "duration": 4,
+        "remaining": 1
+      },
+      "activity": "Gathering Mosswood tree",
+      "completed": 23,
+      "bank": []
+    },
+    {
+      "id": 22,
+      "name": "Pip",
+      "role": "fisher",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 120,
+        "y": 128
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 121,
+        "y": 129
+      },
+      "movement": {
+        "tick": 300,
+        "mode": "walk",
+        "tiles": [
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 121,
+            "y": 129
+          },
+          {
+            "worldId": "frontier",
+            "plane": 0,
+            "x": 120,
+            "y": 128
+          }
+        ]
+      },
+      "path": [
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 119,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 118,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 117,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 116,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 128
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 114,
+          "y": 127
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 114,
+          "y": 126
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 113,
+          "y": 125
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 112,
+          "y": 124
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 111,
+          "y": 123
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 111,
+          "y": 122
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 110,
+          "y": 121
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 109,
+          "y": 120
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 108,
+          "y": 119
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 107,
+          "y": 118
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 107,
+          "y": 117
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 116
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 115
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 114
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 113
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 112
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 111
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 110
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 109
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 108
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 107
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 106
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 105
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 104
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 103
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 102
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 106,
+          "y": 101
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 107,
+          "y": 100
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 108,
+          "y": 99
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 109,
+          "y": 98
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 110,
+          "y": 97
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 111,
+          "y": 96
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 112,
+          "y": 95
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 113,
+          "y": 94
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 114,
+          "y": 93
+        },
+        {
+          "worldId": "frontier",
+          "plane": 0,
+          "x": 115,
+          "y": 92
+        }
+      ],
+      "skills": {
+        "woodcutting": 0,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 800,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "raw-shrimp",
+          "quantity": 8
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 0,
+      "action": {
+        "kind": "gather",
+        "targetId": "fish-south-east-shrimp",
+        "duration": 5,
+        "remaining": 1
+      },
+      "activity": "Walking to Shrimp fishing",
+      "completed": 8,
+      "bank": []
+    },
+    {
+      "id": 23,
+      "name": "Vale",
+      "role": "smith",
+      "home": "stonehaven",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 205,
+        "y": 130
+      },
+      "previousPosition": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 205,
+        "y": 130
+      },
+      "movement": null,
+      "path": [],
+      "skills": {
+        "woodcutting": 5750,
+        "mining": 0,
+        "smithing": 0,
+        "fishing": 0,
+        "cooking": 0,
+        "attack": 0,
+        "strength": 0,
+        "defence": 0,
+        "hitpoints": 11540,
+        "ranged": 0
+      },
+      "inventory": [
+        {
+          "itemId": "bronze-axe",
+          "quantity": 1
+        },
+        {
+          "itemId": "bronze-pickaxe",
+          "quantity": 1
+        },
+        {
+          "itemId": "small-net",
+          "quantity": 1
+        },
+        {
+          "itemId": "hammer",
+          "quantity": 1
+        },
+        {
+          "itemId": "logs",
+          "quantity": 23
+        }
+      ],
+      "equipment": {},
+      "ammo": null,
+      "health": 10,
+      "runEnergy": 4690,
+      "action": {
+        "kind": "gather",
+        "targetId": "stonehaven-tree-60",
+        "duration": 4,
+        "remaining": 4
+      },
+      "activity": "Gathering Mosswood tree",
+      "completed": 23,
+      "bank": []
+    }
+  ],
+  "resources": {
+    "oakrest-tree-0": {
+      "objectId": "oakrest-tree-0",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-1": {
+      "objectId": "oakrest-tree-1",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-2": {
+      "objectId": "oakrest-tree-2",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-3": {
+      "objectId": "oakrest-tree-3",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-4": {
+      "objectId": "oakrest-tree-4",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-5": {
+      "objectId": "oakrest-tree-5",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-6": {
+      "objectId": "oakrest-tree-6",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-7": {
+      "objectId": "oakrest-tree-7",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-8": {
+      "objectId": "oakrest-tree-8",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-9": {
+      "objectId": "oakrest-tree-9",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-10": {
+      "objectId": "oakrest-tree-10",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-11": {
+      "objectId": "oakrest-tree-11",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-12": {
+      "objectId": "oakrest-tree-12",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-13": {
+      "objectId": "oakrest-tree-13",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-14": {
+      "objectId": "oakrest-tree-14",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-15": {
+      "objectId": "oakrest-tree-15",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-16": {
+      "objectId": "oakrest-tree-16",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-17": {
+      "objectId": "oakrest-tree-17",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-18": {
+      "objectId": "oakrest-tree-18",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-19": {
+      "objectId": "oakrest-tree-19",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-20": {
+      "objectId": "oakrest-tree-20",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-21": {
+      "objectId": "oakrest-tree-21",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-22": {
+      "objectId": "oakrest-tree-22",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-23": {
+      "objectId": "oakrest-tree-23",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-24": {
+      "objectId": "oakrest-tree-24",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-25": {
+      "objectId": "oakrest-tree-25",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-26": {
+      "objectId": "oakrest-tree-26",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-27": {
+      "objectId": "oakrest-tree-27",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-28": {
+      "objectId": "oakrest-tree-28",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-29": {
+      "objectId": "oakrest-tree-29",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-30": {
+      "objectId": "oakrest-tree-30",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-31": {
+      "objectId": "oakrest-tree-31",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-32": {
+      "objectId": "oakrest-tree-32",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-33": {
+      "objectId": "oakrest-tree-33",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-34": {
+      "objectId": "oakrest-tree-34",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-35": {
+      "objectId": "oakrest-tree-35",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-36": {
+      "objectId": "oakrest-tree-36",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-37": {
+      "objectId": "oakrest-tree-37",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-38": {
+      "objectId": "oakrest-tree-38",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-39": {
+      "objectId": "oakrest-tree-39",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-40": {
+      "objectId": "oakrest-tree-40",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-41": {
+      "objectId": "oakrest-tree-41",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-42": {
+      "objectId": "oakrest-tree-42",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-43": {
+      "objectId": "oakrest-tree-43",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-44": {
+      "objectId": "oakrest-tree-44",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-45": {
+      "objectId": "oakrest-tree-45",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-46": {
+      "objectId": "oakrest-tree-46",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-47": {
+      "objectId": "oakrest-tree-47",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-48": {
+      "objectId": "oakrest-tree-48",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-49": {
+      "objectId": "oakrest-tree-49",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-50": {
+      "objectId": "oakrest-tree-50",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-51": {
+      "objectId": "oakrest-tree-51",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-52": {
+      "objectId": "oakrest-tree-52",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-53": {
+      "objectId": "oakrest-tree-53",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-54": {
+      "objectId": "oakrest-tree-54",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-55": {
+      "objectId": "oakrest-tree-55",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-56": {
+      "objectId": "oakrest-tree-56",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-57": {
+      "objectId": "oakrest-tree-57",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-58": {
+      "objectId": "oakrest-tree-58",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-59": {
+      "objectId": "oakrest-tree-59",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-60": {
+      "objectId": "oakrest-tree-60",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-61": {
+      "objectId": "oakrest-tree-61",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-62": {
+      "objectId": "oakrest-tree-62",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-63": {
+      "objectId": "oakrest-tree-63",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-64": {
+      "objectId": "oakrest-tree-64",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-65": {
+      "objectId": "oakrest-tree-65",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-66": {
+      "objectId": "oakrest-tree-66",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-67": {
+      "objectId": "oakrest-tree-67",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-68": {
+      "objectId": "oakrest-tree-68",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-69": {
+      "objectId": "oakrest-tree-69",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-70": {
+      "objectId": "oakrest-tree-70",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-71": {
+      "objectId": "oakrest-tree-71",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-72": {
+      "objectId": "oakrest-tree-72",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-73": {
+      "objectId": "oakrest-tree-73",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-74": {
+      "objectId": "oakrest-tree-74",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-75": {
+      "objectId": "oakrest-tree-75",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-76": {
+      "objectId": "oakrest-tree-76",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-77": {
+      "objectId": "oakrest-tree-77",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-78": {
+      "objectId": "oakrest-tree-78",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-tree-79": {
+      "objectId": "oakrest-tree-79",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-0": {
+      "objectId": "oakrest-ore-0",
+      "available": false,
+      "respawnAt": 307
+    },
+    "oakrest-ore-1": {
+      "objectId": "oakrest-ore-1",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-2": {
+      "objectId": "oakrest-ore-2",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-3": {
+      "objectId": "oakrest-ore-3",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-4": {
+      "objectId": "oakrest-ore-4",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-5": {
+      "objectId": "oakrest-ore-5",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-6": {
+      "objectId": "oakrest-ore-6",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-7": {
+      "objectId": "oakrest-ore-7",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-8": {
+      "objectId": "oakrest-ore-8",
+      "available": true,
+      "respawnAt": 0
+    },
+    "oakrest-ore-9": {
+      "objectId": "oakrest-ore-9",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-0": {
+      "objectId": "briarford-tree-0",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-1": {
+      "objectId": "briarford-tree-1",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-2": {
+      "objectId": "briarford-tree-2",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-3": {
+      "objectId": "briarford-tree-3",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-4": {
+      "objectId": "briarford-tree-4",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-5": {
+      "objectId": "briarford-tree-5",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-6": {
+      "objectId": "briarford-tree-6",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-7": {
+      "objectId": "briarford-tree-7",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-8": {
+      "objectId": "briarford-tree-8",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-9": {
+      "objectId": "briarford-tree-9",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-10": {
+      "objectId": "briarford-tree-10",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-11": {
+      "objectId": "briarford-tree-11",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-12": {
+      "objectId": "briarford-tree-12",
+      "available": false,
+      "respawnAt": 306
+    },
+    "briarford-tree-13": {
+      "objectId": "briarford-tree-13",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-14": {
+      "objectId": "briarford-tree-14",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-15": {
+      "objectId": "briarford-tree-15",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-16": {
+      "objectId": "briarford-tree-16",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-17": {
+      "objectId": "briarford-tree-17",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-18": {
+      "objectId": "briarford-tree-18",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-19": {
+      "objectId": "briarford-tree-19",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-20": {
+      "objectId": "briarford-tree-20",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-21": {
+      "objectId": "briarford-tree-21",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-22": {
+      "objectId": "briarford-tree-22",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-23": {
+      "objectId": "briarford-tree-23",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-24": {
+      "objectId": "briarford-tree-24",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-25": {
+      "objectId": "briarford-tree-25",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-26": {
+      "objectId": "briarford-tree-26",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-27": {
+      "objectId": "briarford-tree-27",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-28": {
+      "objectId": "briarford-tree-28",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-29": {
+      "objectId": "briarford-tree-29",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-30": {
+      "objectId": "briarford-tree-30",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-31": {
+      "objectId": "briarford-tree-31",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-32": {
+      "objectId": "briarford-tree-32",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-33": {
+      "objectId": "briarford-tree-33",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-34": {
+      "objectId": "briarford-tree-34",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-35": {
+      "objectId": "briarford-tree-35",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-36": {
+      "objectId": "briarford-tree-36",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-37": {
+      "objectId": "briarford-tree-37",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-38": {
+      "objectId": "briarford-tree-38",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-39": {
+      "objectId": "briarford-tree-39",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-40": {
+      "objectId": "briarford-tree-40",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-41": {
+      "objectId": "briarford-tree-41",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-42": {
+      "objectId": "briarford-tree-42",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-43": {
+      "objectId": "briarford-tree-43",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-44": {
+      "objectId": "briarford-tree-44",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-45": {
+      "objectId": "briarford-tree-45",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-46": {
+      "objectId": "briarford-tree-46",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-47": {
+      "objectId": "briarford-tree-47",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-48": {
+      "objectId": "briarford-tree-48",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-49": {
+      "objectId": "briarford-tree-49",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-50": {
+      "objectId": "briarford-tree-50",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-51": {
+      "objectId": "briarford-tree-51",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-52": {
+      "objectId": "briarford-tree-52",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-53": {
+      "objectId": "briarford-tree-53",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-54": {
+      "objectId": "briarford-tree-54",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-55": {
+      "objectId": "briarford-tree-55",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-56": {
+      "objectId": "briarford-tree-56",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-57": {
+      "objectId": "briarford-tree-57",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-58": {
+      "objectId": "briarford-tree-58",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-59": {
+      "objectId": "briarford-tree-59",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-60": {
+      "objectId": "briarford-tree-60",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-61": {
+      "objectId": "briarford-tree-61",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-62": {
+      "objectId": "briarford-tree-62",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-63": {
+      "objectId": "briarford-tree-63",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-64": {
+      "objectId": "briarford-tree-64",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-65": {
+      "objectId": "briarford-tree-65",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-66": {
+      "objectId": "briarford-tree-66",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-67": {
+      "objectId": "briarford-tree-67",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-68": {
+      "objectId": "briarford-tree-68",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-69": {
+      "objectId": "briarford-tree-69",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-70": {
+      "objectId": "briarford-tree-70",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-71": {
+      "objectId": "briarford-tree-71",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-72": {
+      "objectId": "briarford-tree-72",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-73": {
+      "objectId": "briarford-tree-73",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-74": {
+      "objectId": "briarford-tree-74",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-75": {
+      "objectId": "briarford-tree-75",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-76": {
+      "objectId": "briarford-tree-76",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-77": {
+      "objectId": "briarford-tree-77",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-78": {
+      "objectId": "briarford-tree-78",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-tree-79": {
+      "objectId": "briarford-tree-79",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-0": {
+      "objectId": "briarford-ore-0",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-1": {
+      "objectId": "briarford-ore-1",
+      "available": false,
+      "respawnAt": 306
+    },
+    "briarford-ore-2": {
+      "objectId": "briarford-ore-2",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-3": {
+      "objectId": "briarford-ore-3",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-4": {
+      "objectId": "briarford-ore-4",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-5": {
+      "objectId": "briarford-ore-5",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-6": {
+      "objectId": "briarford-ore-6",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-7": {
+      "objectId": "briarford-ore-7",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-8": {
+      "objectId": "briarford-ore-8",
+      "available": true,
+      "respawnAt": 0
+    },
+    "briarford-ore-9": {
+      "objectId": "briarford-ore-9",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-0": {
+      "objectId": "stonehaven-tree-0",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-1": {
+      "objectId": "stonehaven-tree-1",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-2": {
+      "objectId": "stonehaven-tree-2",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-3": {
+      "objectId": "stonehaven-tree-3",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-4": {
+      "objectId": "stonehaven-tree-4",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-5": {
+      "objectId": "stonehaven-tree-5",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-6": {
+      "objectId": "stonehaven-tree-6",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-7": {
+      "objectId": "stonehaven-tree-7",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-8": {
+      "objectId": "stonehaven-tree-8",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-9": {
+      "objectId": "stonehaven-tree-9",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-10": {
+      "objectId": "stonehaven-tree-10",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-11": {
+      "objectId": "stonehaven-tree-11",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-12": {
+      "objectId": "stonehaven-tree-12",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-13": {
+      "objectId": "stonehaven-tree-13",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-14": {
+      "objectId": "stonehaven-tree-14",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-15": {
+      "objectId": "stonehaven-tree-15",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-16": {
+      "objectId": "stonehaven-tree-16",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-17": {
+      "objectId": "stonehaven-tree-17",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-18": {
+      "objectId": "stonehaven-tree-18",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-19": {
+      "objectId": "stonehaven-tree-19",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-20": {
+      "objectId": "stonehaven-tree-20",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-21": {
+      "objectId": "stonehaven-tree-21",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-22": {
+      "objectId": "stonehaven-tree-22",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-23": {
+      "objectId": "stonehaven-tree-23",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-24": {
+      "objectId": "stonehaven-tree-24",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-25": {
+      "objectId": "stonehaven-tree-25",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-26": {
+      "objectId": "stonehaven-tree-26",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-27": {
+      "objectId": "stonehaven-tree-27",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-28": {
+      "objectId": "stonehaven-tree-28",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-29": {
+      "objectId": "stonehaven-tree-29",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-30": {
+      "objectId": "stonehaven-tree-30",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-31": {
+      "objectId": "stonehaven-tree-31",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-32": {
+      "objectId": "stonehaven-tree-32",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-33": {
+      "objectId": "stonehaven-tree-33",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-34": {
+      "objectId": "stonehaven-tree-34",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-35": {
+      "objectId": "stonehaven-tree-35",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-36": {
+      "objectId": "stonehaven-tree-36",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-37": {
+      "objectId": "stonehaven-tree-37",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-38": {
+      "objectId": "stonehaven-tree-38",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-39": {
+      "objectId": "stonehaven-tree-39",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-40": {
+      "objectId": "stonehaven-tree-40",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-41": {
+      "objectId": "stonehaven-tree-41",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-42": {
+      "objectId": "stonehaven-tree-42",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-43": {
+      "objectId": "stonehaven-tree-43",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-44": {
+      "objectId": "stonehaven-tree-44",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-45": {
+      "objectId": "stonehaven-tree-45",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-46": {
+      "objectId": "stonehaven-tree-46",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-47": {
+      "objectId": "stonehaven-tree-47",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-48": {
+      "objectId": "stonehaven-tree-48",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-49": {
+      "objectId": "stonehaven-tree-49",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-50": {
+      "objectId": "stonehaven-tree-50",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-51": {
+      "objectId": "stonehaven-tree-51",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-52": {
+      "objectId": "stonehaven-tree-52",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-53": {
+      "objectId": "stonehaven-tree-53",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-54": {
+      "objectId": "stonehaven-tree-54",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-55": {
+      "objectId": "stonehaven-tree-55",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-56": {
+      "objectId": "stonehaven-tree-56",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-57": {
+      "objectId": "stonehaven-tree-57",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-58": {
+      "objectId": "stonehaven-tree-58",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-59": {
+      "objectId": "stonehaven-tree-59",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-60": {
+      "objectId": "stonehaven-tree-60",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-61": {
+      "objectId": "stonehaven-tree-61",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-62": {
+      "objectId": "stonehaven-tree-62",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-63": {
+      "objectId": "stonehaven-tree-63",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-64": {
+      "objectId": "stonehaven-tree-64",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-65": {
+      "objectId": "stonehaven-tree-65",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-66": {
+      "objectId": "stonehaven-tree-66",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-67": {
+      "objectId": "stonehaven-tree-67",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-68": {
+      "objectId": "stonehaven-tree-68",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-69": {
+      "objectId": "stonehaven-tree-69",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-70": {
+      "objectId": "stonehaven-tree-70",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-71": {
+      "objectId": "stonehaven-tree-71",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-72": {
+      "objectId": "stonehaven-tree-72",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-73": {
+      "objectId": "stonehaven-tree-73",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-74": {
+      "objectId": "stonehaven-tree-74",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-75": {
+      "objectId": "stonehaven-tree-75",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-76": {
+      "objectId": "stonehaven-tree-76",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-77": {
+      "objectId": "stonehaven-tree-77",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-78": {
+      "objectId": "stonehaven-tree-78",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-tree-79": {
+      "objectId": "stonehaven-tree-79",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-0": {
+      "objectId": "stonehaven-ore-0",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-1": {
+      "objectId": "stonehaven-ore-1",
+      "available": false,
+      "respawnAt": 305
+    },
+    "stonehaven-ore-2": {
+      "objectId": "stonehaven-ore-2",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-3": {
+      "objectId": "stonehaven-ore-3",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-4": {
+      "objectId": "stonehaven-ore-4",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-5": {
+      "objectId": "stonehaven-ore-5",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-6": {
+      "objectId": "stonehaven-ore-6",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-7": {
+      "objectId": "stonehaven-ore-7",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-8": {
+      "objectId": "stonehaven-ore-8",
+      "available": true,
+      "respawnAt": 0
+    },
+    "stonehaven-ore-9": {
+      "objectId": "stonehaven-ore-9",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-west-shrimp": {
+      "objectId": "fish-west-shrimp",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-west-sardine": {
+      "objectId": "fish-west-sardine",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-west-trout": {
+      "objectId": "fish-west-trout",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-north-east-shrimp": {
+      "objectId": "fish-north-east-shrimp",
+      "available": false,
+      "respawnAt": 302
+    },
+    "fish-north-east-sardine": {
+      "objectId": "fish-north-east-sardine",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-north-east-trout": {
+      "objectId": "fish-north-east-trout",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-south-east-shrimp": {
+      "objectId": "fish-south-east-shrimp",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-south-east-sardine": {
+      "objectId": "fish-south-east-sardine",
+      "available": true,
+      "respawnAt": 0
+    },
+    "fish-south-east-trout": {
+      "objectId": "fish-south-east-trout",
+      "available": true,
+      "respawnAt": 0
+    }
+  },
+  "bank": [],
+  "shops": [
+    {
+      "id": "oakrest-shop",
+      "stock": {
+        "small-net": 3,
+        "hammer": 3,
+        "bronze-arrow": 500,
+        "leather-body": 3,
+        "leather-chaps": 3,
+        "leather-cowl": 3,
+        "logs": 30,
+        "copper-ore": 30,
+        "tin-ore": 30,
+        "bronze-bar": 30,
+        "raw-shrimp": 30,
+        "cooked-shrimp": 30,
+        "bronze-axe": 3,
+        "bronze-pickaxe": 3,
+        "bronze-sword": 3,
+        "bronze-med-helm": 3,
+        "bronze-shield": 3,
+        "bronze-body": 3,
+        "bronze-legs": 3,
+        "iron-pickaxe": 3,
+        "steel-pickaxe": 3
+      },
+      "restockAt": 400
+    },
+    {
+      "id": "briarford-shop",
+      "stock": {
+        "bait": 100,
+        "feather": 100,
+        "small-net": 3,
+        "fishing-rod": 3,
+        "fly-fishing-rod": 3,
+        "training-bow": 30,
+        "training-arrow": 100,
+        "shortbow": 3,
+        "oak-shortbow": 3,
+        "willow-shortbow": 3,
+        "bronze-arrow": 500,
+        "iron-arrow": 500,
+        "steel-arrow": 500,
+        "black-axe": 3,
+        "mithril-axe": 3,
+        "logs": 30,
+        "oak-logs": 30,
+        "willow-logs": 30,
+        "raw-shrimp": 30,
+        "cooked-shrimp": 30,
+        "raw-sardine": 30,
+        "cooked-sardine": 30,
+        "raw-trout": 30,
+        "cooked-trout": 30,
+        "bronze-axe": 3,
+        "iron-axe": 3,
+        "steel-axe": 3
+      },
+      "restockAt": 400
+    },
+    {
+      "id": "stonehaven-shop",
+      "stock": {
+        "hammer": 3,
+        "shortbow": 3,
+        "oak-shortbow": 3,
+        "willow-shortbow": 3,
+        "leather-body": 3,
+        "leather-chaps": 3,
+        "leather-cowl": 3,
+        "black-sword": 3,
+        "black-body": 3,
+        "black-pickaxe": 3,
+        "mithril-sword": 3,
+        "mithril-body": 3,
+        "mithril-pickaxe": 3,
+        "copper-ore": 30,
+        "tin-ore": 30,
+        "iron-ore": 30,
+        "coal": 30,
+        "bronze-bar": 30,
+        "iron-bar": 30,
+        "steel-bar": 30,
+        "bronze-pickaxe": 3,
+        "bronze-sword": 3,
+        "bronze-med-helm": 3,
+        "bronze-shield": 3,
+        "bronze-body": 3,
+        "bronze-legs": 3,
+        "iron-pickaxe": 3,
+        "iron-sword": 3,
+        "iron-med-helm": 3,
+        "iron-shield": 3,
+        "iron-body": 3,
+        "iron-legs": 3,
+        "steel-pickaxe": 3,
+        "steel-sword": 3,
+        "steel-med-helm": 3,
+        "steel-shield": 3,
+        "steel-body": 3,
+        "steel-legs": 3
+      },
+      "restockAt": 400
+    },
+    {
+      "id": "briarford-bowyer",
+      "stock": {
+        "shortbow": 3,
+        "oak-shortbow": 3,
+        "willow-shortbow": 3,
+        "bronze-arrow": 100,
+        "iron-arrow": 100,
+        "steel-arrow": 100,
+        "training-bow": 3,
+        "training-arrow": 100,
+        "logs": 3,
+        "oak-logs": 3,
+        "willow-logs": 3
+      },
+      "restockAt": 400
+    },
+    {
+      "id": "watch-quartermaster",
+      "stock": {
+        "black-sword": 3,
+        "black-body": 3,
+        "mithril-sword": 3,
+        "mithril-body": 3,
+        "cooked-shrimp": 3
+      },
+      "restockAt": 400
+    }
+  ],
+  "enemies": [
+    {
+      "id": "boar-0",
+      "definitionId": "boar",
+      "position": {
+        "worldId": "frontier",
+        "x": 65,
+        "y": 112,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 65,
+        "y": 112,
+        "plane": 0
+      },
+      "health": 8,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "boar-1",
+      "definitionId": "boar",
+      "position": {
+        "worldId": "frontier",
+        "x": 141,
+        "y": 63,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 141,
+        "y": 63,
+        "plane": 0
+      },
+      "health": 8,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "boar-2",
+      "definitionId": "boar",
+      "position": {
+        "worldId": "frontier",
+        "x": 196,
+        "y": 155,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 196,
+        "y": 155,
+        "plane": 0
+      },
+      "health": 8,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "rock-mite-0",
+      "definitionId": "rock-mite",
+      "position": {
+        "worldId": "frontier",
+        "x": 87,
+        "y": 69,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 87,
+        "y": 69,
+        "plane": 0
+      },
+      "health": 12,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "rock-mite-1",
+      "definitionId": "rock-mite",
+      "position": {
+        "worldId": "frontier",
+        "x": 183,
+        "y": 24,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 183,
+        "y": 24,
+        "plane": 0
+      },
+      "health": 12,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "rock-mite-2",
+      "definitionId": "rock-mite",
+      "position": {
+        "worldId": "frontier",
+        "x": 239,
+        "y": 148,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 239,
+        "y": 148,
+        "plane": 0
+      },
+      "health": 12,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "bandit-0",
+      "definitionId": "bandit",
+      "position": {
+        "worldId": "frontier",
+        "x": 107,
+        "y": 81,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 107,
+        "y": 81,
+        "plane": 0
+      },
+      "health": 18,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "bandit-1",
+      "definitionId": "bandit",
+      "position": {
+        "worldId": "frontier",
+        "x": 135,
+        "y": 112,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 135,
+        "y": 112,
+        "plane": 0
+      },
+      "health": 18,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "bandit-2",
+      "definitionId": "bandit",
+      "position": {
+        "worldId": "frontier",
+        "x": 216,
+        "y": 119,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 216,
+        "y": 119,
+        "plane": 0
+      },
+      "health": 18,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "captain-kestrel",
+      "definitionId": "captain",
+      "position": {
+        "worldId": "frontier",
+        "x": 226,
+        "y": 124,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 226,
+        "y": 124,
+        "plane": 0
+      },
+      "health": 22,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "ironcoat-0",
+      "definitionId": "armoured-outlaw",
+      "position": {
+        "worldId": "frontier",
+        "x": 224,
+        "y": 128,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 224,
+        "y": 128,
+        "plane": 0
+      },
+      "health": 20,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    },
+    {
+      "id": "reedbow-0",
+      "definitionId": "ranged-outlaw",
+      "position": {
+        "worldId": "frontier",
+        "x": 232,
+        "y": 126,
+        "plane": 0
+      },
+      "home": {
+        "worldId": "frontier",
+        "x": 232,
+        "y": 126,
+        "plane": 0
+      },
+      "health": 16,
+      "respawnAt": 0,
+      "cooldown": 0,
+      "engagedUntil": 0
+    }
+  ],
+  "drops": [],
+  "quests": {
+    "forge": {
+      "accepted": true,
+      "complete": false,
+      "kills": 0,
+      "stageId": "bronze",
+      "counters": {},
+      "choices": {}
+    },
+    "supper": {
+      "accepted": false,
+      "complete": false,
+      "kills": 0,
+      "stageId": "basket",
+      "counters": {},
+      "choices": {}
+    },
+    "road": {
+      "accepted": false,
+      "complete": false,
+      "kills": 0,
+      "stageId": "survey",
+      "counters": {},
+      "choices": {}
+    },
+    "bowyer": {
+      "accepted": false,
+      "complete": false,
+      "kills": 0,
+      "stageId": "supplies",
+      "counters": {},
+      "choices": {}
+    },
+    "letters": {
+      "accepted": false,
+      "complete": false,
+      "kills": 0,
+      "stageId": "reed",
+      "counters": {},
+      "choices": {}
+    },
+    "watch": {
+      "accepted": false,
+      "complete": false,
+      "kills": 0,
+      "stageId": "tracks",
+      "counters": {},
+      "choices": {}
+    }
+  },
+  "grave": null,
+  "control": {
+    "waiting": false,
+    "running": true,
+    "active": {
+      "type": "craft",
+      "recipeId": "bronze-bar",
+      "quantity": 1
+    },
+    "source": "autonomous",
+    "queue": [],
+    "goal": {
+      "id": "quest-forge",
+      "kind": "quest",
+      "title": "An Honest Forge",
+      "questId": "forge"
+    },
+    "thinkingUntil": 291,
+    "eatReadyAt": 0,
+    "reason": "An Honest Forge: Smelt or collect six bronze bars.",
+    "steps": [
+      "Smelt or collect six bronze bars.",
+      "Keep supplies in the personal bank; retrieve them for delivery",
+      "Claim frontier-anvils when the story is complete"
+    ],
+    "style": "attack",
+    "visited": [
+      "oakrest",
+      "oakrest-mine"
+    ],
+    "thought": null,
+    "lastThought": 200,
+    "progress": {
+      "goalId": "quest-forge",
+      "fingerprint": "[[\"small-net\",\"hammer\",\"prince-cape\",\"bronze-axe\",\"bronze-pickaxe\",\"bronze-sword\",\"bronze-shield\"],25,{\"accepted\":true,\"complete\":false,\"kills\":0,\"stageId\":\"bronze\",\"counters\":{},\"choices\":{}},[],[[\"bronze-bar\",3]],[6,0,0,1,1,0,0,0,0,0]]",
+      "tick": 291,
+      "failures": 0,
+      "blockedUntil": 0
+    }
+  },
+  "journal": [
+    "A new chapter begins. Earlier village chronicles remain archived.",
+    "Accepted: An Honest Forge"
+  ],
+  "rewards": [
+    {
+      "id": "reward-1",
+      "tick": 47,
+      "items": [
+        {
+          "itemId": "logs",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "woodcutting": 250
+      }
+    },
+    {
+      "id": "reward-2",
+      "tick": 51,
+      "items": [
+        {
+          "itemId": "logs",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "woodcutting": 250
+      }
+    },
+    {
+      "id": "reward-3",
+      "tick": 87,
+      "items": [
+        {
+          "itemId": "logs",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "woodcutting": 250
+      }
+    },
+    {
+      "id": "reward-4",
+      "tick": 111,
+      "items": [
+        {
+          "itemId": "logs",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "woodcutting": 250
+      }
+    },
+    {
+      "id": "reward-5",
+      "tick": 123,
+      "items": [
+        {
+          "itemId": "logs",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "woodcutting": 250
+      }
+    },
+    {
+      "id": "reward-6",
+      "tick": 127,
+      "items": [
+        {
+          "itemId": "logs",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "woodcutting": 250
+      }
+    },
+    {
+      "id": "reward-7",
+      "tick": 147,
+      "items": [
+        {
+          "itemId": "copper-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    },
+    {
+      "id": "reward-8",
+      "tick": 164,
+      "items": [
+        {
+          "itemId": "tin-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    },
+    {
+      "id": "reward-9",
+      "tick": 178,
+      "items": [
+        {
+          "itemId": "bronze-bar",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "smithing": 62
+      }
+    },
+    {
+      "id": "reward-10",
+      "tick": 196,
+      "items": [
+        {
+          "itemId": "copper-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    },
+    {
+      "id": "reward-11",
+      "tick": 207,
+      "items": [
+        {
+          "itemId": "tin-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    },
+    {
+      "id": "reward-12",
+      "tick": 221,
+      "items": [
+        {
+          "itemId": "bronze-bar",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "smithing": 62
+      }
+    },
+    {
+      "id": "reward-13",
+      "tick": 239,
+      "items": [
+        {
+          "itemId": "copper-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    },
+    {
+      "id": "reward-14",
+      "tick": 250,
+      "items": [
+        {
+          "itemId": "tin-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    },
+    {
+      "id": "reward-15",
+      "tick": 264,
+      "items": [
+        {
+          "itemId": "bronze-bar",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "smithing": 62
+      }
+    },
+    {
+      "id": "reward-16",
+      "tick": 279,
+      "items": [
+        {
+          "itemId": "copper-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    },
+    {
+      "id": "reward-17",
+      "tick": 290,
+      "items": [
+        {
+          "itemId": "tin-ore",
+          "quantity": 1
+        }
+      ],
+      "xp": {
+        "mining": 175
+      }
+    }
+  ],
+  "dialogue": null,
+  "effects": [
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 13,
+      "tick": 48
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 14,
+      "tick": 51
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 15,
+      "tick": 52
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 16,
+      "tick": 55
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 17,
+      "tick": 56
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 18,
+      "tick": 59
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 19,
+      "tick": 60
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 20,
+      "tick": 63
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 21,
+      "tick": 64
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 22,
+      "tick": 67
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 23,
+      "tick": 68
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 24,
+      "tick": 71
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 25,
+      "tick": 72
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 26,
+      "tick": 75
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 27,
+      "tick": 76
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 28,
+      "tick": 79
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 29,
+      "tick": 80
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 30,
+      "tick": 83
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 31,
+      "tick": 84
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 32,
+      "tick": 87
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 33,
+      "tick": 88
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 34,
+      "tick": 91
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 35,
+      "tick": 92
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 36,
+      "tick": 95
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 37,
+      "tick": 96
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 38,
+      "tick": 99
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 39,
+      "tick": 100
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 40,
+      "tick": 103
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 41,
+      "tick": 104
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 42,
+      "tick": 107
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 43,
+      "tick": 108
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 44,
+      "tick": 111
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 45,
+      "tick": 112
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 46,
+      "tick": 115
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 47,
+      "tick": 116
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": false,
+      "amount": 0,
+      "id": 48,
+      "tick": 119
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 49,
+      "tick": 120
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 50,
+      "tick": 123
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 51,
+      "tick": 124
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 52,
+        "y": 75
+      },
+      "targetId": "oakrest-tree-44",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 53,
+        "y": 74,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 52,
+      "tick": 127
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-5",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 53,
+      "tick": 140
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-5",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 54,
+      "tick": 147
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 78
+      },
+      "targetId": "oakrest-ore-1",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 78,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 55,
+      "tick": 151
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-6",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 56,
+      "tick": 157
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-6",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 57,
+      "tick": 164
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 62,
+        "y": 89
+      },
+      "targetId": "oakrest-furnace",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 60,
+        "y": 90,
+        "plane": 0
+      },
+      "actionKind": "craft",
+      "id": 58,
+      "tick": 174
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 62,
+        "y": 89
+      },
+      "targetId": "oakrest-furnace",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 60,
+        "y": 90,
+        "plane": 0
+      },
+      "actionKind": "craft",
+      "success": true,
+      "amount": 1,
+      "id": 59,
+      "tick": 178
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-5",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 60,
+      "tick": 189
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-5",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 61,
+      "tick": 196
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-6",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 62,
+      "tick": 200
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-6",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 63,
+      "tick": 207
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 62,
+        "y": 89
+      },
+      "targetId": "oakrest-furnace",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 60,
+        "y": 90,
+        "plane": 0
+      },
+      "actionKind": "craft",
+      "id": 64,
+      "tick": 217
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 62,
+        "y": 89
+      },
+      "targetId": "oakrest-furnace",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 60,
+        "y": 90,
+        "plane": 0
+      },
+      "actionKind": "craft",
+      "success": true,
+      "amount": 1,
+      "id": 65,
+      "tick": 221
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-5",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 66,
+      "tick": 232
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-5",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 67,
+      "tick": 239
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-6",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 68,
+      "tick": 243
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 81
+      },
+      "targetId": "oakrest-ore-6",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 82,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 69,
+      "tick": 250
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 62,
+        "y": 89
+      },
+      "targetId": "oakrest-furnace",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 60,
+        "y": 90,
+        "plane": 0
+      },
+      "actionKind": "craft",
+      "id": 70,
+      "tick": 260
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 62,
+        "y": 89
+      },
+      "targetId": "oakrest-furnace",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 60,
+        "y": 90,
+        "plane": 0
+      },
+      "actionKind": "craft",
+      "success": true,
+      "amount": 1,
+      "id": 71,
+      "tick": 264
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 77
+      },
+      "targetId": "oakrest-ore-0",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 78,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 72,
+      "tick": 272
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 74,
+        "y": 77
+      },
+      "targetId": "oakrest-ore-0",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 75,
+        "y": 78,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 73,
+      "tick": 279
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 77
+      },
+      "targetId": "oakrest-ore-1",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 78,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "id": 74,
+      "tick": 283
+    },
+    {
+      "kind": "action-result",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 77,
+        "y": 77
+      },
+      "targetId": "oakrest-ore-1",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 78,
+        "y": 78,
+        "plane": 0
+      },
+      "actionKind": "gather",
+      "success": true,
+      "amount": 1,
+      "id": 75,
+      "tick": 290
+    },
+    {
+      "kind": "action-start",
+      "actorId": "player",
+      "position": {
+        "worldId": "frontier",
+        "plane": 0,
+        "x": 62,
+        "y": 89
+      },
+      "targetId": "oakrest-furnace",
+      "targetPosition": {
+        "worldId": "frontier",
+        "x": 60,
+        "y": 90,
+        "plane": 0
+      },
+      "actionKind": "craft",
+      "id": 76,
+      "tick": 300
+    }
+  ],
+  "effectSequence": 76,
+  "messages": [
+    {
+      "id": 1,
+      "tick": 1,
+      "category": "event",
+      "key": "discovery-oakrest",
+      "text": "Discovered Oakrest.",
+      "count": 1
+    },
+    {
+      "id": 2,
+      "tick": 9,
+      "category": "event",
+      "key": "quest-accepted-forge",
+      "text": "Accepted: An Honest Forge.",
+      "count": 1
+    },
+    {
+      "id": 3,
+      "tick": 9,
+      "category": "dialogue",
+      "key": "quest-offer-forge",
+      "text": "Master smith Ren: Bring Master Ren six logs and six bronze bars. The public Oakrest anvil is open to learners; earn access to the frontier towns’ anvils.",
+      "count": 1
+    },
+    {
+      "id": 4,
+      "tick": 15,
+      "category": "event",
+      "key": "quest-stage-forge-ledger",
+      "text": "An Honest Forge: completed — Inspect Ren’s charcoal ledger.",
+      "count": 1
+    },
+    {
+      "id": 5,
+      "tick": 111,
+      "category": "event",
+      "key": "level-woodcutting-2",
+      "text": "Woodcutting reached level 2.",
+      "count": 1
+    },
+    {
+      "id": 6,
+      "tick": 128,
+      "category": "event",
+      "key": "quest-stage-forge-supplies",
+      "text": "An Honest Forge: completed — Gather six logs for Ren’s charcoal supply.",
+      "count": 1
+    },
+    {
+      "id": 7,
+      "tick": 140,
+      "category": "event",
+      "key": "discovery-oakrest-mine",
+      "text": "Discovered Oakrest quarry.",
+      "count": 1
+    },
+    {
+      "id": 8,
+      "tick": 239,
+      "category": "event",
+      "key": "level-mining-2",
+      "text": "Mining reached level 2.",
+      "count": 1
+    }
+  ],
+  "messageSequence": 8
+}

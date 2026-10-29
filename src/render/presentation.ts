@@ -206,6 +206,28 @@ export function resourceArt(kind: WorldObject["kind"], available: boolean, origi
   return available ? original : kind === "tree" ? "prop-stump" : kind === "rock" ? "prop-exhausted-ore" : original;
 }
 
+/** Small authored scenery uses the same ground pivot as a single 64 × 32 tile. */
+export function districtProp(object: WorldObject, gates: Readonly<Record<string, boolean>>) {
+  const flipX = object.orientation === "y";
+  switch (object.kind) {
+    case "fence": return { art: "prop-fence", width: 64, height: 55, flipX, interactive: false };
+    case "gate": return { art: gates[object.id] !== false ? "prop-gate-open" : "prop-gate-closed", width: 64, height: 55, flipX, interactive: true };
+    case "sign": return { art: "prop-sign", width: 52, height: 64, flipX: false, interactive: true };
+    case "decor": {
+      const crops = object.art === "prop-crops";
+      return { art: object.art ?? "prop-supplies", width: crops ? 64 : 58, height: crops ? 55 : 44, flipX: false, interactive: false };
+    }
+    default: return null;
+  }
+}
+
+/** Passive scenery must never intercept a ground walking click. */
+export function objectHitTarget(object: WorldObject, zoom: number, overview: boolean, selected: boolean): boolean {
+  if (object.kind === "fence" || object.kind === "decor") return false;
+  if (overview) return object.kind === "landmark" && ["oakrest", "briarford", "stonehaven"].includes(object.id);
+  return zoom >= 0.35 || object.kind === "landmark" || (selected && object.kind !== "gate" && object.kind !== "sign");
+}
+
 export interface HealthObservation {
   tick: number;
   calendar: string;
