@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: original transparent game character animation sprite atlas.
+Reference image 1 is approved simplified watercolor-and-ink town style ONLY. Reference image 2 is the ORIGINAL CHARACTER IDENTITY: Alden, young prince with tousled brown hair, ultramarine blue cape with gold border/emblems, cream tunic, brown belt/trousers/boots. Keep his identity/colors, simplify detail further for small gameplay size.
+Create ONE 2048x2048 transparent PNG atlas in a STRICT REGULAR 4 columns by 4 rows grid, 16 full-body isolated figures total. Each cell exactly 512x512. NO grid lines, labels, text, background or ground shadow.
+Row 1 ALL northeast (facing up-right, back three-quarter).
+Row 2 ALL southeast (facing down-right, front three-quarter).
+Row 3 ALL southwest (facing down-left, front three-quarter).
+Row 4 ALL northwest (facing up-left, back three-quarter).
+Columns in EVERY row: 1 relaxed standing idle; 2 walking left leg forward/right arm forward; 3 passing-step legs close; 4 walking right leg forward/left arm forward. Clearly distinct arm/leg poses, cape secondary motion, same camera and body size.
+Elevated isometric gameplay camera. Compact expressive young RPG hero proportions, broad paint masses, economical broken dark ink contour, muted watercolor fills, readable boots and hands. Character centered per cell, feet at about y=450 within every cell, head at y=75, keep 40px transparent padding. Cape close enough to body to stay within cell, boots fully visible, no tools or weapons. No decorative borders, no copied reference scene, no pixel art, no 3D gloss. Exact grid and correct direction per row are essential.

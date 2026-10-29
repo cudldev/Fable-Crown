@@ -6,6 +6,8 @@ import { artFrames } from "../art-frames";
 import { tileToScreen, screenToTile } from "./iso";
 import "./tile-scene.css";
 import type { FeedbackFloater } from "./feedback";
+import { actorAtlas, type Facing } from "./actor-atlas";
+import { actorFrameKey, facingFromMotion, observeHealth, observedHits, type ObservedHit } from "./presentation";
 export interface TileCamera {
   x: number;
   y: number;
@@ -27,6 +29,8 @@ interface Props {
   selection: TileSelection | null;
   onSelect: (s: TileSelection) => void;
   feedback?: FeedbackFloater[];
+  previewRoute?: TilePosition[];
+  presentationEpoch?: number;
 }
 const base = import.meta.env.BASE_URL;
 const assetNames = [
@@ -69,6 +73,8 @@ export default function TileScene({
   selection,
   onSelect,
   feedback = [],
+  previewRoute = [],
+  presentationEpoch = 0,
 }: Props) {
   const world = worldForState(state);
   const cachedWorld = useRef(world);
@@ -79,6 +85,18 @@ export default function TileScene({
     hitElements = useRef(new Map<string, HTMLButtonElement>()),
     chunks = useRef(new Map<string, HTMLCanvasElement>()),
     overview = useRef<HTMLCanvasElement | null>(null);
+  const atlasSources = useRef(new Map<string, HTMLImageElement>());
+  const actorFrames = useRef(new Map<string, HTMLCanvasElement>());
+  const facings = useRef(new Map<number, Facing>());
+  const health = useRef(observeHealth(state, presentationEpoch));
+  const hitSplats = useRef<(ObservedHit & { startedAt: number })[]>([]);
+  if (health.current.tick !== state.tick || health.current.epoch !== presentationEpoch) {
+    const next = observeHealth(state, presentationEpoch);
+    const time = performance.now();
+    const continuous = next.epoch === health.current.epoch && next.tick === health.current.tick + 1;
+    hitSplats.current = [...(continuous ? hitSplats.current.filter(hit => time - hit.startedAt < 1200) : []), ...observedHits(health.current, next).map(hit => ({ ...hit, startedAt: time }))].slice(-12);
+    health.current = next;
+  }
   if (cachedWorld.current !== world) {
     cachedWorld.current = world;
     chunks.current.clear();
@@ -108,6 +126,16 @@ export default function TileScene({
   }, []);
   useEffect(() => {
     let alive = true;
+    for (const sheet of new Set(Object.values(actorAtlas).map(frame => frame.sheet))) {
+      const img = new Image();
+      img.onload = () => {
+        if (!alive) return;
+        atlasSources.current.set(sheet, img);
+        actorFrames.current.clear();
+        setArtVersion(v => v + 1);
+      };
+      img.src = `${base}art/${sheet}.webp`;
+    }
     for (const name of assetNames) {
       const img = new Image();
       img.src = `${base}art/${name}.webp`;
@@ -144,6 +172,14 @@ export default function TileScene({
       y: p.previousPosition.y + (p.position.y - p.previousPosition.y) * f,
     },
   }));
+  for (const actor of people) {
+    let facing = facingFromMotion(actor.previousPosition, actor.position, facings.current.get(actor.id));
+    if (!actor.path.length && actor.position.x === actor.previousPosition.x && actor.position.y === actor.previousPosition.y && actor.action?.targetId) {
+      const target = world.objects.find(object => object.id === actor.action?.targetId)?.position ?? state.enemies.find(enemy => enemy.id === actor.action?.targetId)?.position;
+      if (target) facing = facingFromMotion(actor.position, target, facing);
+    }
+    facings.current.set(actor.id, facing);
+  }
   const enemyFrames = useRef({
     tick: state.tick,
     positions: new Map(state.enemies.map((e) => [e.id, e.position])),
@@ -500,6 +536,29 @@ export default function TileScene({
         } else ctx.drawImage(img, p.x - w / 2, p.y - h, w, h);
         ctx.globalAlpha = 1;
       }
+      function princeFrame(key: string, p: { x: number; y: number }): boolean {
+        const frame = actorAtlas[key];
+        const source = frame && atlasSources.current.get(frame.sheet);
+        if (!frame || !source) return false;
+        // Tools may extend above a pose: preserve body size across every cell.
+        const reference = actorAtlas[`${key.split(":")[0]}:idle`];
+        const scale = 90 / (frame.bodyHeight ?? reference?.boundsHeight ?? frame.boundsHeight);
+        let baked = actorFrames.current.get(key);
+        if (baked) {
+          actorFrames.current.delete(key);
+          actorFrames.current.set(key, baked);
+        } else {
+          // Extract the cell before resampling, at twice gameplay scale for close zoom.
+          baked = document.createElement("canvas");
+          baked.width = Math.max(1, Math.ceil(frame.width * scale * 2));
+          baked.height = Math.max(1, Math.ceil(frame.height * scale * 2));
+          baked.getContext("2d")!.drawImage(source, frame.x, frame.y, frame.width, frame.height, 0, 0, baked.width, baked.height);
+          if (actorFrames.current.size >= 48) actorFrames.current.delete(actorFrames.current.keys().next().value!);
+          actorFrames.current.set(key, baked);
+        }
+        ctx.drawImage(baked, p.x - frame.pivotX * scale, p.y - frame.pivotY * scale, frame.width * scale, frame.height * scale);
+        return true;
+      }
       const drawables: { depth: number; draw: () => void }[] = [];
       for (const o of world.objects) {
         const foot = {
@@ -610,7 +669,11 @@ export default function TileScene({
                     : assetNames.includes(p.role)
                       ? p.role
                       : "builder";
-                art(name, at, 90, 90);
+                if (p.id === 0) {
+                  const key = actorFrameKey(p, facings.current.get(p.id) ?? "se", time - stamp.current.at, reduced,
+                    world.objects.find(object => object.id === p.action?.targetId));
+                  if (!princeFrame(key, at)) art("prince", at, 90, 90);
+                } else art(name, at, 90, 90);
               },
             });
           }
@@ -767,6 +830,24 @@ export default function TileScene({
         }
       ctx.save();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      for (const hit of hitSplats.current) {
+        const age = time - hit.startedAt;
+        if (age < 0 || age > 1200 || view.overview) continue;
+        const at = project(hit.position);
+        const y = at.y - 42 - (reduced ? 0 : age / 55);
+        ctx.globalAlpha = Math.min(1, (1200 - age) / 250);
+        ctx.fillStyle = "#923c36";
+        ctx.strokeStyle = "#f7dfbb";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(at.x, y, 14, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#fff0d7";
+        ctx.font = "bold 15px Georgia";
+        ctx.textAlign = "center";
+        ctx.fillText(String(hit.damage), at.x, y + 5);
+      }
+      ctx.globalAlpha = 1;
       for (const [index, entry] of feedback.slice(-8).entries()) {
         const duration = reduced ? 1000 : 1800,
           age = time - entry.startedAt;
@@ -788,6 +869,17 @@ export default function TileScene({
         ctx.fillText(entry.text, at.x, y);
       }
       ctx.restore();
+      if (previewRoute.length) {
+        ctx.strokeStyle = "#8ee1e5";
+        ctx.lineWidth = 3 / view.zoom;
+        ctx.setLineDash([9 / view.zoom, 6 / view.zoom]);
+        ctx.beginPath();
+        [state.player.position, ...previewRoute].forEach((p, i) => {
+          const at = tileToScreen(p);
+          i ? ctx.lineTo(at.x, at.y) : ctx.moveTo(at.x, at.y);
+        });
+        ctx.stroke(); ctx.setLineDash([]);
+      }
       if (state.player.path.length) {
         ctx.strokeStyle = "#f7d797";
         ctx.lineWidth = 2 / view.zoom;
@@ -811,7 +903,7 @@ export default function TileScene({
     };
     frameId = requestAnimationFrame(paint);
     return () => cancelAnimationFrame(frameId);
-  }, [state, camera, size, artVersion, selection, feedback]);
+  }, [state, camera, size, artVersion, selection, feedback, previewRoute, presentationEpoch]);
   function local(p: { x: number; y: number }) {
     const r = root.current!.getBoundingClientRect();
     return { x: p.x - r.left, y: p.y - r.top };

@@ -1,6 +1,6 @@
 // Run against a production preview. Instrumentation is injected only in this browser.
 import { chromium } from "@playwright/test";
-import { createServer } from "vite";
+import { createServer, preview } from "vite";
 import os from "node:os";
 const vite = await createServer({
   optimizeDeps: { noDiscovery: true, entries: [] },
@@ -10,6 +10,8 @@ const vite = await createServer({
 const { createRpg } = await vite.ssrLoadModule("/src/rpg/engine.ts");
 const fixture = createRpg(Date.now(), 1234567);
 await vite.close();
+const benchUrl = new URL(process.env.DEMO_URL || "http://127.0.0.1:4174/Fable-Crown/");
+const previewServer = process.env.BENCH_START_PREVIEW === "1" ? await preview({base:benchUrl.pathname,preview:{host:"127.0.0.1",port:Number(benchUrl.port),strictPort:true}}) : null;
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const page = await browser.newPage({
   viewport: { width: 1280, height: 720 },
@@ -125,3 +127,4 @@ console.log(
   ),
 );
 await browser.close();
+if(previewServer) await new Promise(resolve=>previewServer.httpServer.close(resolve));

@@ -197,6 +197,17 @@
   min-width: 44px;
   min-height: 44px;
 }
+.rpg-dialogue {
+  border-left: 3px solid #b59b5c;
+  background: #e4dcc6;
+  padding: 12px;
+  font: italic 14px/1.6 Georgia;
+}
+.rpg-combat-style input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: #917b46;
+}
 .rpg-shell .camera-controls .rpg-run-control {
   min-width: 88px;
   padding: 6px 9px;

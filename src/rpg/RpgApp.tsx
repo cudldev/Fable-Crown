@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TileScene, {
   type TileCamera,
   type TileSelection,
@@ -9,6 +9,8 @@ import {
   objectById,
   interactionTiles,
   worldForState,
+  findPath,
+  pathToObject,
 } from "./world";
 import { SKILLS, type RpgState, type RpgCommand, type RpgOrder } from "./types";
 import { levelForXp, skillName } from "./skills";
@@ -18,6 +20,10 @@ import { suggestGoals } from "./planning";
 import { useRewardFeedback } from "./useRewardFeedback";
 import { formatXp, xpProgress } from "./reward-feedback";
 import { contextGoals } from "./context-goals";
+import { Minimap } from "../render/Minimap";
+import { useGameAudio } from "./useGameAudio";
+import { examineObject, itemUses } from "./interactions";
+import type { TilePosition } from "./types";
 import type { SkillId, EquipmentSlot } from "./types";
 import "./rpg.css";
 const base = import.meta.env.BASE_URL;
@@ -58,6 +64,12 @@ export default function RpgApp() {
     [bagItem, setBagItem] = useState<string | null>(null);
   const [feedbackEpoch, setFeedbackEpoch] = useState(0);
   const reward = useRewardFeedback(state, feedbackEpoch);
+  const audio = useGameAudio(state, feedbackEpoch);
+  const [mapDestination, setMapDestination] = useState<TilePosition | null>(
+      null,
+    ),
+    [examining, setExamining] = useState(false),
+    [dialogue, setDialogue] = useState<string | null>(null);
   const worker = useRef<Worker | null>(null),
     input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -118,12 +130,17 @@ export default function RpgApp() {
   const order = (o: RpgOrder, next = false) => {
     command(next ? { type: "enqueue", order: o } : o);
     setSelection(null);
+    setMapDestination(null);
+    setDialogue(null);
   };
   const open = (p: string) => {
     setPanel(panel === p ? null : p);
     setSelection(null);
   };
   const select = (s: TileSelection) => {
+    setMapDestination(null);
+    setExamining(false);
+    setDialogue(null);
     setPanel(null);
     if (s.kind === "tile") {
       order({ type: "move", position: s.position });
@@ -135,6 +152,22 @@ export default function RpgApp() {
     selection?.kind === "object"
       ? world.objects.find((o) => o.id === selection.id)
       : undefined;
+  const previewRoute = useMemo(() => {
+    if (!state) return [];
+    return (
+      (mapDestination
+        ? findPath(state.player.position, mapDestination, world)
+        : selectedObject
+          ? pathToObject(state.player.position, selectedObject, world)
+          : []) ?? []
+    );
+  }, [
+    state?.player.position.x,
+    state?.player.position.y,
+    world,
+    mapDestination,
+    selectedObject,
+  ]);
   const person =
     selection?.kind === "actor" && state
       ? [state.player, ...state.npcs].find((p) => p.id === selection.id)
@@ -272,12 +305,32 @@ export default function RpgApp() {
           selection={selection}
           onSelect={select}
           feedback={reward.floaters}
+          presentationEpoch={feedbackEpoch}
+          previewRoute={previewRoute}
         />
       ) : (
         <div className="loading-screen">
           <h1>Fable Crown</h1>
           <p>Opening a new chapter…</p>
         </div>
+      )}
+      {state && (
+        <Minimap
+          state={state}
+          previewRoute={previewRoute}
+          onDestination={(position) => {
+            setMapDestination(position);
+            setSelection(null);
+            setPanel(null);
+            setCamera((c) => ({
+              ...c,
+              x: position.x,
+              y: position.y,
+              follow: false,
+              overview: false,
+            }));
+          }}
+        />
       )}
       <header className="world-header">
         <button
@@ -305,6 +358,44 @@ export default function RpgApp() {
           </button>
         </div>
       </header>
+      {mapDestination && state && (
+        <section
+          className="parchment context-panel"
+          aria-label="Travel preview"
+        >
+          <button
+            className="close"
+            aria-label="Close travel preview"
+            onClick={() => setMapDestination(null)}
+          >
+            ×
+          </button>
+          <span className="eyebrow">ROUTE PREVIEW</span>
+          <h2>Explore the frontier</h2>
+          <p>
+            Tile {mapDestination.x}, {mapDestination.y} ·{" "}
+            {previewRoute.length
+              ? `${previewRoute.length} tile steps`
+              : "Already here or no walkable route"}
+          </p>
+          <div className="order-actions">
+            <button
+              disabled={!previewRoute.length}
+              onClick={() => order({ type: "move", position: mapDestination })}
+            >
+              Travel here
+            </button>
+            <button
+              disabled={!previewRoute.length}
+              onClick={() =>
+                order({ type: "move", position: mapDestination }, true)
+              }
+            >
+              Add next
+            </button>
+          </div>
+        </section>
+      )}
       <div className="camera-controls">
         {state && (
           <button
@@ -400,6 +491,53 @@ export default function RpgApp() {
             {selectedObject.position.y}
           </span>
           <h2>{selectedObject.name}</h2>
+          <div className="order-actions">
+            <button onClick={() => setExamining((v) => !v)}>Examine</button>
+            {selectedObject.questId && (
+              <button
+                onClick={() =>
+                  setDialogue(
+                    state.quests[selectedObject.questId!]?.complete
+                      ? "You have my thanks. The frontier is better for your help."
+                      : (QUESTS[selectedObject.questId!]?.description ??
+                          "There is work worth doing here."),
+                  )
+                }
+              >
+                Talk
+              </button>
+            )}
+          </div>
+          {examining && (
+            <p className="rpg-current-order">
+              {examineObject(state, selectedObject)}
+            </p>
+          )}
+          {dialogue && (
+            <p className="rpg-dialogue" aria-live="polite">
+              “{dialogue}”
+            </p>
+          )}
+          {bagItem && itemCount(state.player.inventory, bagItem) > 0 && (
+            <div className="context-goals" aria-label="Use carried item">
+              <small>Selected: {itemName(bagItem)}</small>
+              {itemUses(state, bagItem, selectedObject).length ? (
+                itemUses(state, bagItem, selectedObject).map((use) => (
+                  <button
+                    key={use.label}
+                    onClick={() => {
+                      command(use.command);
+                      setSelection(null);
+                    }}
+                  >
+                    {use.label}
+                  </button>
+                ))
+              ) : (
+                <small>This item has no use here.</small>
+              )}
+            </div>
+          )}
           <p>
             {selectedObject.resourceId
               ? `${RESOURCES[selectedObject.resourceId].name} · ${skillName(RESOURCES[selectedObject.resourceId].skill)} ${RESOURCES[selectedObject.resourceId].level} · ${(RESOURCES[selectedObject.resourceId].xp / 10).toFixed(1)} XP per success. Bring a ${RESOURCES[selectedObject.resourceId].tool}.`
@@ -517,6 +655,22 @@ export default function RpgApp() {
           </button>
           <span className="eyebrow">{person.role}</span>
           <h2>{person.name}</h2>
+          <button
+            onClick={() =>
+              setDialogue(
+                person.id === 0
+                  ? "There is always another useful path. Guide my next ambition when you like."
+                  : `I make my own living as a ${person.role}. You can find my work around ${person.home}.`,
+              )
+            }
+          >
+            Talk
+          </button>
+          {dialogue && (
+            <p className="rpg-dialogue" aria-live="polite">
+              “{dialogue}”
+            </p>
+          )}
           <p>{person.activity}</p>
           <p>
             Health {person.health} · Run energy{" "}
@@ -969,6 +1123,14 @@ export default function RpgApp() {
                       : ""}
                     {ITEMS[bagItem]?.weight ?? 0} kg
                   </p>
+                  <button
+                    onClick={() => {
+                      setPanel(null);
+                      setMessage(`Select a place to use ${itemName(bagItem)}.`);
+                    }}
+                  >
+                    Use on a place
+                  </button>
                   {ITEMS[bagItem]?.slot && (
                     <button
                       onClick={() =>
@@ -1223,6 +1385,34 @@ export default function RpgApp() {
                 </button>
               </div>
               <hr />
+              <h3>Sound</h3>
+              <button
+                className="full"
+                aria-pressed={!audio.settings.muted}
+                onClick={() => audio.setMuted(!audio.settings.muted)}
+              >
+                {audio.settings.muted ? "Enable sound" : "Mute sound"}
+              </button>
+              <label className="rpg-combat-style">
+                Volume
+                <input
+                  aria-label="Sound volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={Math.round(audio.settings.volume * 100)}
+                  onChange={(e) =>
+                    audio.setVolume(Number(e.target.value) / 100)
+                  }
+                />
+              </label>
+              <small>
+                {!audio.available
+                  ? "Audio is unavailable; gameplay continues."
+                  : audio.unlocked
+                    ? "Original sounds play for actions and gains."
+                    : "Audio starts after a tap or key press."}
+              </small>
               <button
                 className="primary full"
                 disabled={offline.endsWith("%") || offline === "Preparing…"}

@@ -216,6 +216,7 @@ test("Walk recovers energy and Run consumes it while the movement choice persist
   s.player.runEnergy = 5000;
   await importState(page, s);
   await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  await page.getByRole("button",{name:"Close panel"}).click();
   await page.getByRole("button", { name: "Toggle running" }).click();
   await expect(
     page.getByRole("button", { name: "Toggle running" }),

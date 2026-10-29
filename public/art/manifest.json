@@ -1,6 +1,6 @@
 {
-  "version": "6652936b3125",
-  "bytes": 7764184,
+  "version": "9b36d9904001",
+  "bytes": 8915438,
   "files": [
     "art/actor-fisher.webp",
     "art/anvil.webp",
@@ -15,6 +15,8 @@
     "art/manor.webp",
     "art/miner.webp",
     "art/ore.webp",
+    "art/prince-actions.webp",
+    "art/prince-locomotion.webp",
     "art/prince.webp",
     "art/ruins.webp",
     "art/smith.webp",

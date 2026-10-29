@@ -1,0 +1,14 @@
+Use case: stylized-concept. Asset type: original transparent game character action pose atlas.
+Reference image 1 is APPROVED Alden locomotion atlas: match this same original young prince, scale/proportions, painterly ink-wash look and row directions. Reference image 2 is approved Town Life style only.
+Create ONE landscape transparent PNG atlas, STRICT REGULAR 7 columns by 4 rows = EXACTLY 28 isolated full-body figures. Prefer 2800x1600 pixels (400x400 cells). NO grid lines, labels, writing, background or ground shadows.
+Every row same direction: row1 northeast/up-right/back-three-quarter; row2 southeast/down-right/front-three-quarter; row3 southwest/down-left/front-three-quarter; row4 northwest/up-left/back-three-quarter. ALL 7 poses in each row keep that facing.
+Columns in EVERY row:
+1 MINING: feet planted, leaning into a two-handed downward pickaxe strike; pickaxe clearly visible.
+2 WOODCUTTING: twisting torso, two-handed broad wood axe in mid-swing out front.
+3 FISHING: holding long curved fishing rod out front with short visible line, slightly bent knees.
+4 SMITHING: one arm lifting a short smith hammer for a clear downward strike, other hand low holding tongs.
+5 COOKING: leaning slightly forward, hands holding a small pan out front and stirring spoon.
+6 MELEE: lunging with a short sword clearly extended out front, bent front knee, cape trailing.
+7 BOW: planted side-on stance within the row facing, bow arm extended, other hand drawn to cheek with arrow visibly nocked.
+Only hand-held tools, no target objects/anvil/tree/rock/fire/fish. Distinct action silhouettes, dynamic arm/leg changes, boots and all tools completely visible WITHIN each cell. No overlap into adjacent cell. Same character head/body size across 28 cells, centered hips, feet near 88% cell height; reserve margin above for tools.
+Alden has tousled brown hair, blue cape with simple gold trim/emblems, cream tunic, brown belt/trousers/boots. Shorten cape as needed for working arms but retain identity. Compact expressive proportions, broad economical watercolor masses, broken dark ink contours, simplified readable hands/tools, elevated isometric camera. Entire background genuinely transparent; no pixel art, no 3D gloss, no scenery. Do not reuse idle figures; each figure visibly performs its specified action.
