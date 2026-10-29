@@ -24,7 +24,7 @@ async function snapshot(page: Page): Promise<RpgState> {
         const request = indexedDB.open("fable-crown", 1);
         request.onsuccess = () => {
           const db = request.result;
-          const get = db.transaction("saves").objectStore("saves").get("v3");
+          const get = db.transaction("saves").objectStore("saves").get("v4");
           get.onsuccess = () => {
             resolve(get.result);
             db.close();

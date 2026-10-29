@@ -419,6 +419,8 @@ export const ENEMY_SPAWNS = [
   { id: "bandit-1", definitionId: "bandit", position: tile(135, 112) },
   { id: "bandit-2", definitionId: "bandit", position: tile(216, 119) },
   { id: "captain-kestrel", definitionId: "captain", position: tile(226, 124) },
+  { id: "ironcoat-0", definitionId: "armoured-outlaw", position: tile(224, 128) },
+  { id: "reedbow-0", definitionId: "ranged-outlaw", position: tile(232, 126) },
 ];
 export const FERRIES: Record<string, { name: string; objectId: string; destination: TilePosition; cost: number; questId: string }> = {
   "ferry-west": { name: "Willow ferry to the east bank", objectId: "ferry-west", destination: { ...WORLD.objects.find((o) => o.id === "ferry-east")!.position }, cost: 5, questId: "letters" },

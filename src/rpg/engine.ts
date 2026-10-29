@@ -28,7 +28,7 @@ import {
   tile,
   FERRIES,
 } from "./world";
-import { startingSkills, levelForXp } from "./skills";
+import { startingSkills, levelForXp, XP_THRESHOLDS } from "./skills";
 import { ITEMS, RESOURCES, RECIPES, SHOPS, ENEMIES, QUESTS } from "./content";
 import {
   addItems,
@@ -97,6 +97,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
         { itemId: "hammer", quantity: 1 },
       ],
       equipment: {},
+      ammo: null,
       health: 10,
       runEnergy: 10000,
       action: null,
@@ -113,7 +114,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     cape: "prince-cape",
   };
   const s: RpgState = {
-    version: 3,
+    version: 4,
     tick: 0,
     savedAt: now,
     calendar: calendarDate(now),
@@ -496,11 +497,20 @@ function resourceFor(
 function equip(s: RpgState, id: string): boolean {
   const p = s.player,
     item = ITEMS[id];
+  if (item?.ammoTier) {
+    const quantity = itemCount(p.inventory, id);
+    if (!quantity || (p.ammo?.itemId === id && p.ammo.quantity + quantity > 2_000_000_000)) return false;
+    const old = p.ammo;
+    if (!exchangeItems(p.inventory, [{ itemId: id, quantity }], old && old.itemId !== id ? [old] : [])) return false;
+    p.ammo = { itemId: id, quantity: quantity + (old?.itemId === id ? old.quantity : 0) }; return true;
+  }
   if (
     !item?.slot ||
     !itemCount(p.inventory, id) ||
     levelForXp(p.skills.attack) < (item.attackLevel ?? 1) ||
     levelForXp(p.skills.defence) < (item.defenceLevel ?? 1) ||
+    levelForXp(p.skills.ranged) < (item.rangedLevel ?? 1) ||
+    (item.slot === "shield" && ITEMS[p.equipment.weapon ?? ""]?.twoHanded) ||
     (item.skill && levelForXp(p.skills[item.skill]) < (item.level ?? 1))
   )
     return false;
@@ -509,12 +519,20 @@ function equip(s: RpgState, id: string): boolean {
     !exchangeItems(
       p.inventory,
       [{ itemId: id, quantity: 1 }],
-      old ? [{ itemId: old, quantity: 1 }] : [],
+      [...(old ? [{ itemId: old, quantity: 1 }] : []),
+        ...(item.twoHanded && p.equipment.shield ? [{ itemId: p.equipment.shield, quantity: 1 }] : [])],
     )
   )
     return false;
   p.equipment[item.slot] = id;
+  if (item.twoHanded) delete p.equipment.shield;
+  if (item.slot === "weapon") s.control.style = item.weaponType === "bow" ? "accurate" :
+    ["accurate", "rapid", "longrange"].includes(s.control.style) ? "attack" : s.control.style;
   return true;
+}
+export function attackDuration(p: ActorState, style: RpgState["control"]["style"]) {
+  const weapon = ITEMS[p.equipment.weapon ?? ""];
+  return weapon?.weaponType === "bow" ? style === "rapid" ? 3 : 4 : weapon?.attackTicks ?? 4;
 }
 export const maxHealth = (p: ActorState) => levelForXp(p.skills.hitpoints);
 export function stationAvailable(s: RpgState, o: WorldObject) {
@@ -623,29 +641,58 @@ function fight(s: RpgState, id: string) {
     p.activity = "Recovering from the meal before attacking";
     return;
   }
-  if (distance(p.position, e.position) > 1) {
-    const path = findPath(p.position, e.position, worldForState(s));
+  const weapon = ITEMS[p.equipment.weapon ?? ""], bow = weapon?.weaponType === "bow";
+  if (bow && !p.ammo) { finish(s, "Out of arrows. Load carried or banked ammunition before shooting."); return; }
+  const reach = bow ? s.control.style === "longrange" ? 9 : weapon.range ?? 7 : 1;
+  if (distance(p.position, e.position) > reach || !lineOfSight(s, p.position, e.position)) {
+    let path: TilePosition[] | null = null;
+    if (bow) {
+      const candidates: TilePosition[] = [];
+      for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) {
+        const next = { ...e.position, x: e.position.x + dx, y: e.position.y + dy };
+        if ((dx || dy) && isWalkable(next, worldForState(s)) && lineOfSight(s, next, e.position)) candidates.push(next);
+      }
+      candidates.sort((a, b) => distance(a, p.position) - distance(b, p.position) || a.y - b.y || a.x - b.x);
+      for (const next of candidates) { path = findPath(p.position, next, worldForState(s)); if (path) break; }
+    } else {
+      const melee = findPath(p.position, e.position, worldForState(s));
+      path = melee ? melee.length > 1 ? melee.slice(0, -1) : melee : null;
+    }
     if (!path) {
       finish(s, "Cannot reach the enemy");
       return;
     }
-    p.path = path.length > 1 ? path.slice(0, -1) : path;
+    p.path = path;
     p.action = null;
     p.activity = `Approaching ${ENEMIES[e.definitionId].name}`;
     return;
   }
-  const weapon = ITEMS[p.equipment.weapon ?? ""],
-    duration = weapon?.attackTicks ?? 4;
+  const duration = attackDuration(p, s.control.style);
   if (p.action?.kind !== "fight" || p.action.targetId !== id)
     p.action = { kind: "fight", targetId: id, duration, remaining: duration };
   p.activity = `Fighting ${ENEMIES[e.definitionId].name} · ${s.control.style}`;
   if (--p.action.remaining > 0) return;
   p.action = null;
+  let ammunition: typeof ITEMS[string] | undefined;
+  if (bow) {
+    ammunition = ITEMS[p.ammo!.itemId];
+    const arrow = p.ammo!.itemId;
+    if (--p.ammo!.quantity === 0) p.ammo = null;
+    if (random(s) < .8) {
+      const dropId = `arrows-${e.id}`;
+      let drop = s.drops.find((entry) => entry.id === dropId);
+      if (!drop) { drop = { id: dropId, position: { ...e.position }, items: [], expiresAt: 0 }; s.drops.push(drop); }
+      addItems(drop.items, arrow, 1, Infinity);
+    }
+  }
+  const attackingSkill = bow ? "ranged" : "attack";
+  const accuracy = bow ? Object.values(p.equipment).reduce((n, id) => n + (ITEMS[id!]?.rangedAttack ?? 0), 0) +
+    (s.control.style === "accurate" ? 3 : 0) : weapon?.attack ?? 0;
   const chance = Math.min(
     0.95,
     Math.max(
       0.2,
-      (levelForXp(p.skills.attack) + (weapon?.attack ?? 0) + 8) /
+      (levelForXp(p.skills[attackingSkill]) + accuracy + 8) /
         (2 * (ENEMIES[e.definitionId].defence + 8)),
     ),
   );
@@ -653,14 +700,17 @@ function fight(s: RpgState, id: string) {
     const maximum =
       1 +
       Math.floor(
-        ((levelForXp(p.skills.strength) + 8) * ((weapon?.strength ?? 0) + 64)) /
+        ((levelForXp(p.skills[bow ? "ranged" : "strength"]) + 8) *
+          ((bow ? (weapon.rangedStrength ?? 0) + (ammunition?.rangedStrength ?? 0) : weapon?.strength ?? 0) + 64)) /
           640,
       );
     const damage = Math.min(e.health, 1 + Math.floor(random(s) * maximum));
     e.health -= damage;
-    const xp = award(p, s.control.style, damage * 40);
+    const skill: SkillId = bow ? "ranged" : ["attack", "strength", "defence"].includes(s.control.style) ? s.control.style as SkillId : "attack";
+    const xp = award(p, skill, damage * (bow && s.control.style === "longrange" ? 20 : 40));
+    const defenceXp = bow && s.control.style === "longrange" ? award(p, "defence", damage * 20) : 0;
     const hpXp = award(p, "hitpoints", Math.round((damage * 40) / 3));
-    reward(s, p, [], { [s.control.style]: xp, hitpoints: hpXp });
+    reward(s, p, [], { [skill]: xp, ...(defenceXp ? { defence: defenceXp } : {}), hitpoints: hpXp });
   }
   if (e.health === 0) {
     e.respawnAt = s.tick + ENEMIES[e.definitionId].respawnTicks;
@@ -711,7 +761,8 @@ function enemyStep(s: RpgState) {
       if (s.tick % 20 === 0) e.health = Math.min(d.health, e.health + 1);
       continue;
     }
-    if (distance(e.position, p.position) > 1) {
+    const reach = d.combatType === "ranged" ? d.range ?? 6 : 1;
+    if (distance(e.position, p.position) > reach || !lineOfSight(s, e.position, p.position)) {
       const dx = Math.sign(p.position.x - e.position.x),
         dy = Math.sign(p.position.y - e.position.y);
       const choices = [
@@ -871,7 +922,9 @@ export function repairRpgPositions(s: RpgState) {
   for (const e of s.enemies) { e.home = { ...ENEMY_SPAWNS.find((spawn) => spawn.id === e.id)!.position }; e.position = repair(e.position); }
   for (const drop of s.drops) drop.position = repair(drop.position);
   if (s.grave) s.grave.position = repair(s.grave.position);
-  s.control.active = null; s.control.source = null; s.control.queue = []; s.control.thinkingUntil = s.tick + 1;
+  s.control.queue = s.control.queue.filter((order) => validOrder(order, world));
+  if (s.control.active && !validOrder(s.control.active, world)) { s.control.active = null; s.control.source = null; }
+  s.control.thinkingUntil = s.tick + 1;
   return s;
 }
 function advanceStage(s: RpgState, id: string) {
@@ -1088,6 +1141,12 @@ function execute(s: RpgState, order: RpgOrder) {
     } else finish(s, "No equipped item or backpack space");
     return;
   }
+  if (order.type === "unequip-ammo") {
+    if (p.ammo && addItems(p.inventory, p.ammo.itemId, p.ammo.quantity)) {
+      p.ammo = null; finish(s, "Returned equipped ammunition to the backpack.");
+    } else finish(s, "No equipped arrows or backpack space.");
+    return;
+  }
   if (order.type === "gather") {
     let target = objectById(order.objectId)!;
     const problem = gatherProblem(p, RESOURCES[target.resourceId!]);
@@ -1298,7 +1357,49 @@ function autoOrder(s: RpgState): RpgOrder | null {
   }
   s.control.steps = goalSteps(s, goal);
   s.control.reason = goal.title;
+  if (!objectiveProgress(s, goal)) return null;
   return planGoal(s, goal);
+}
+function objectiveFingerprint(s: RpgState, goal: Ambition) {
+  const p = s.player, held = (id: string) => itemCount(p.inventory, id) + itemCount(s.bank, id) +
+    Object.values(p.equipment).filter((item) => item === id).length + (p.ammo?.itemId === id ? p.ammo.quantity : 0);
+  const permanent = Object.values(ITEMS).filter((item) => item.kind === "gear" || item.kind === "tool")
+    .filter((item) => held(item.id)).map((item) => item.id);
+  const base: unknown[] = [permanent, held("coins")];
+  if (goal.kind === "skill") base.push(p.skills[goal.skill!]);
+  if (goal.kind === "gather") {
+    const r = RESOURCES[goal.resourceId!];
+    base.push(Math.min(goal.quantity!, held(r.itemId)), Math.min(XP_THRESHOLDS[r.level - 1], p.skills[r.skill]));
+  }
+  if (goal.kind === "equipment") {
+    const item = ITEMS[goal.itemId!]; base.push(held(item.id));
+    if (item.skill) base.push(Math.min(p.skills[item.skill], XP_THRESHOLDS[(item.level ?? 1) - 1]));
+    if (item.rangedLevel) base.push(Math.min(p.skills.ranged, XP_THRESHOLDS[item.rangedLevel - 1]));
+    base.push(Object.values(RESOURCES).map((r) => Math.min(28, held(r.itemId))));
+  }
+  if (goal.kind === "quest") {
+    const q = QUESTS[goal.questId!], stage = currentQuestStage(s, q.id);
+    base.push(s.quests[q.id], Object.entries(q.requirements ?? {}).map(([skill, level]) =>
+      Math.min(p.skills[skill as SkillId], XP_THRESHOLDS[level! - 1])));
+    const needs = stage?.items ?? (stage?.recipeId ? [{ itemId: RECIPES[stage.recipeId].output.itemId, quantity: stage.quantity ?? 1 }] : q.items);
+    base.push(needs.map((item) => [item.itemId, Math.min(item.quantity, held(item.itemId))]));
+    base.push(Object.values(RESOURCES).map((r) => Math.min(12, held(r.itemId))));
+    if (stage?.kind === "kill") base.push(s.enemies.filter((e) => e.definitionId === stage.enemyId).map((e) => e.health));
+  }
+  if (goal.kind === "explore") base.push(s.control.visited.includes(goal.targetId!));
+  return JSON.stringify(base);
+}
+function objectiveProgress(s: RpgState, goal: Ambition) {
+  const fingerprint = objectiveFingerprint(s, goal), prior = s.control.progress;
+  if (!prior || prior.goalId !== goal.id || prior.fingerprint !== fingerprint) {
+    s.control.progress = { goalId: goal.id, fingerprint, tick: s.tick, failures: 0, blockedUntil: 0 }; return true;
+  }
+  if (s.tick - prior.tick < 1200) return true;
+  prior.failures = Math.min(10000, prior.failures + 1); prior.tick = s.tick;
+  prior.blockedUntil = s.tick + Math.min(600, 100 * prior.failures);
+  finish(s, `Blocked: ${goal.title}. No objective progress; check the required tools, supplies, accessible services and route.`);
+  s.control.thinkingUntil = prior.blockedUntil;
+  return false;
 }
 function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
   const p = s.player;
@@ -1339,7 +1440,7 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
   const skill =
     goal.kind === "skill"
       ? goal.skill!
-      : (ITEMS[goal.itemId!]?.skill ?? "mining");
+      : (ITEMS[goal.itemId!]?.rangedLevel ? "ranged" : ITEMS[goal.itemId!]?.skill ?? "mining");
   if (
     goal.kind === "equipment" &&
     itemCount(s.bank, "coins") &&
@@ -1379,7 +1480,7 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
         (s.shops.find((x) => x.id === o.id)?.stock[item.id] ?? 0) > 0,
     );
     if (!shopObject) return null;
-    if (levelForXp(p.skills[skill]) >= (item.level ?? 1)) {
+    if (levelForXp(p.skills[skill]) >= (item.rangedLevel ?? item.level ?? 1)) {
       if (
         itemCount(p.inventory, "coins") >=
         SHOPS[shopObject.id].stock[item.id].buy
@@ -1423,6 +1524,11 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
           itemId: saved.itemId,
           quantity: Math.min(saved.quantity, 28 - inventorySlots(p.inventory)),
         };
+      const trade = nearest(p, (o) => !!o.resourceId && !gatherProblem(p, RESOURCES[o.resourceId]) &&
+        (SHOPS[shopObject.id].stock[RESOURCES[o.resourceId].itemId]?.sell ?? 0) > 0);
+      if (trade) return { type: "gather", objectId: trade.id, quantity: Math.max(1, Math.min(
+        28 - inventorySlots(p.inventory), Math.ceil((item.value - itemCount(p.inventory, "coins")) /
+          SHOPS[shopObject.id].stock[RESOURCES[trade.resourceId!].itemId].sell))) };
     }
   }
   if (skill === "smithing" || skill === "cooking") {
@@ -1444,7 +1550,7 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
     );
     return target ? { type: "gather", objectId: target.id, quantity: 1 } : null;
   }
-  if (["attack", "strength", "defence", "hitpoints"].includes(skill))
+  if (["attack", "strength", "defence", "hitpoints", "ranged"].includes(skill))
     return combatPlan(s, skill as SkillId);
   if (!["woodcutting", "mining", "fishing"].includes(skill)) return null;
   const clicked = goal.targetId ? objectById(goal.targetId) : undefined;
@@ -1571,7 +1677,8 @@ function prepareResource(
       itemId: surplus.itemId,
       quantity: surplus.quantity,
     };
-  const earn = ["mining", "woodcutting", "fishing"]
+  const earn = (shop ? nearest(p, (o) => !!o.resourceId && !gatherProblem(p, RESOURCES[o.resourceId]) &&
+    (SHOPS[shop.id].stock[RESOURCES[o.resourceId].itemId]?.sell ?? 0) > 0) : undefined) ?? ["mining", "woodcutting", "fishing"]
     .map((skill) => resourceFor(s, p, skill))
     .find(Boolean);
   s.control.reason = `${goal.title}: earn and obtain ${ITEMS[needed].name} first`;
@@ -1700,6 +1807,38 @@ function combatPlan(
   enemyType = "boar",
 ): RpgOrder | null {
   const p = s.player;
+  const ranged = skill === "ranged";
+  if (ranged) {
+    if (inventorySlots(p.inventory) >= 27 && p.inventory.some((i) => ITEMS[i.itemId].kind === "resource")) return { type: "bank" };
+    const bow = Object.values(ITEMS).filter((item) => item.weaponType === "bow" &&
+      levelForXp(p.skills.ranged) >= (item.rangedLevel ?? 1) &&
+      (itemCount(p.inventory, item.id) || p.equipment.weapon === item.id)).sort((a, b) => (b.rangedAttack ?? 0) - (a.rangedAttack ?? 0))[0];
+    if (!bow) {
+      const saved = s.bank.find((stack) => ITEMS[stack.itemId].weaponType === "bow" && levelForXp(p.skills.ranged) >= (ITEMS[stack.itemId].rangedLevel ?? 1));
+      return saved ? { type: "withdraw", itemId: saved.itemId, quantity: 1 } : acquire(s, "shortbow", 1);
+    }
+    if (p.equipment.weapon !== bow.id) return { type: "equip", itemId: bow.id };
+    if (!p.ammo) {
+      const arrows = p.inventory.find((stack) => !!ITEMS[stack.itemId].ammoTier);
+      if (arrows) return { type: "equip", itemId: arrows.itemId };
+      const banked = s.bank.find((stack) => !!ITEMS[stack.itemId].ammoTier);
+      if (banked) return { type: "withdraw", itemId: banked.itemId, quantity: Math.min(40, banked.quantity) };
+      const vendor = nearest(p, (o) => o.kind === "shop" && (!o.serviceId || !!s.quests[o.serviceId]?.complete) &&
+        (s.shops.find((shop) => shop.id === o.id)?.stock["bronze-arrow"] ?? 0) > 0);
+      if (!vendor) { s.control.reason = "No arrows are stocked at an unlocked vendor yet."; return null; }
+      const coins = itemCount(p.inventory, "coins");
+      if (coins) return { type: "buy", shopId: vendor.id, itemId: "bronze-arrow", quantity: Math.min(40, coins) };
+      if (itemCount(s.bank, "coins")) return { type: "withdraw", itemId: "coins", quantity: itemCount(s.bank, "coins") };
+      const sale = p.inventory.find((stack) => ITEMS[stack.itemId].kind === "resource" && (SHOPS[vendor.id].stock[stack.itemId]?.sell ?? 0) > 0);
+      if (sale) return { type: "sell", shopId: vendor.id, itemId: sale.itemId, quantity: sale.quantity };
+      const stores = s.bank.find((stack) => ITEMS[stack.itemId].kind === "resource" && (SHOPS[vendor.id].stock[stack.itemId]?.sell ?? 0) > 0);
+      if (stores) return { type: "withdraw", itemId: stores.itemId, quantity: Math.min(stores.quantity, 28 - inventorySlots(p.inventory)) };
+      const trade = nearest(p, (o) => !!o.resourceId && !gatherProblem(p, RESOURCES[o.resourceId]) &&
+        (SHOPS[vendor.id].stock[RESOURCES[o.resourceId].itemId]?.sell ?? 0) > 0);
+      return trade ? { type: "gather", objectId: trade.id, quantity: 5 } : null;
+    }
+  }
+  if (!ranged) {
   const sword = Object.values(ITEMS)
     .filter(
       (i) =>
@@ -1722,6 +1861,7 @@ function combatPlan(
   if (savedSword && (!p.equipment.weapon || ITEMS[p.equipment.weapon]?.tool))
     return { type: "withdraw", itemId: savedSword.itemId, quantity: 1 };
   if (!p.equipment.weapon) return acquire(s, "bronze-sword", 1);
+  }
   if (enemyType === "bandit" || enemyType === "captain") {
     for (const id of ["bronze-body", "bronze-legs", "bronze-med-helm"]) {
       if (!p.equipment[ITEMS[id].slot!]) {
@@ -1739,7 +1879,7 @@ function combatPlan(
   );
   if (
     (p.health < maxHealth(p) * 0.6 && !meals) ||
-    (enemyType === "bandit" && meals < 4)
+    ((enemyType === "bandit" || enemyType === "captain") && meals < 4) || (ranged && meals < 2)
   ) {
     if (itemCount(s.bank, "cooked-shrimp"))
       return {
@@ -1774,7 +1914,8 @@ function combatPlan(
     return null;
   }
   s.control.style =
-    skill === "strength" || skill === "defence" ? skill : "attack";
+    ranged ? ["accurate", "rapid", "longrange"].includes(s.control.style) ? s.control.style : "accurate" :
+      skill === "strength" || skill === "defence" ? skill : "attack";
   const enemy = s.enemies
     .filter((e) => e.definitionId === enemyType && e.health > 0)
     .sort(
@@ -1999,6 +2140,7 @@ function validGoal(v: unknown): v is Ambition {
 function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
   if (!object(v)) return false;
   switch (v.type) {
+    case "unequip-ammo": return true;
     case "interact":
       return typeof v.objectId === "string" && !!objectById(v.objectId) &&
         ["talk", "inspect", "use", "practice"].includes(v.verb as string) &&
@@ -2043,7 +2185,7 @@ function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
       return (
         typeof v.itemId === "string" &&
         Object.hasOwn(ITEMS, v.itemId) &&
-        !!ITEMS[v.itemId].slot
+        (!!ITEMS[v.itemId].slot || !!ITEMS[v.itemId].ammoTier)
       );
     case "unequip":
       return (
@@ -2058,7 +2200,7 @@ function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
     case "loot":
       return (
         typeof v.dropId === "string" &&
-        ENEMY_SPAWNS.some((e) => `loot-${e.id}` === v.dropId)
+        ENEMY_SPAWNS.some((e) => `loot-${e.id}` === v.dropId || `arrows-${e.id}` === v.dropId)
       );
     case "quest":
       return typeof v.questId === "string" && Object.hasOwn(QUESTS, v.questId);
@@ -2099,6 +2241,8 @@ function orderProblem(
     !s.enemies.some((e) => e.id === order.enemyId && e.health > 0)
   )
     return "That enemy is not currently present.";
+  if (order.type === "attack" && ITEMS[p.equipment.weapon ?? ""]?.weaponType === "bow" && !p.ammo)
+    return "Load carried or banked arrows before shooting.";
   if (order.type === "quest" && s.quests[order.questId].complete)
     return "That quest has already been completed.";
   if (order.type === "gather")
@@ -2111,10 +2255,17 @@ function orderProblem(
     if (
       levelForXp(p.skills.attack) < (item.attackLevel ?? 1) ||
       levelForXp(p.skills.defence) < (item.defenceLevel ?? 1) ||
+      levelForXp(p.skills.ranged) < (item.rangedLevel ?? 1) ||
+      (item.slot === "shield" && ITEMS[p.equipment.weapon ?? ""]?.twoHanded) ||
       (item.skill && levelForXp(p.skills[item.skill]) < (item.level ?? 1))
     )
       return "You do not meet the equipment requirements.";
+    if (item.ammoTier && p.ammo?.itemId === item.id && p.ammo.quantity + itemCount(p.inventory, item.id) > 2_000_000_000)
+      return "The equipped arrow stack is full.";
   }
+  if (order.type === "unequip-ammo" && (!p.ammo ||
+    (inventorySlots(p.inventory) >= 28 && !itemCount(p.inventory, p.ammo.itemId))))
+    return "No equipped arrows or backpack space.";
   if (
     order.type === "unequip" &&
     (!p.equipment[order.slot] || inventorySlots(p.inventory) >= 28)
@@ -2188,9 +2339,10 @@ export function applyRpgCommand(
     return ok("Alden is considering his next intention.");
   }
   if (command.type === "style") {
-    if (!["attack", "strength", "defence"].includes(command.skill))
+    if (!["attack", "strength", "defence", "accurate", "rapid", "longrange"].includes(command.skill))
       return fail("Unknown combat style.");
     s.control.style = command.skill;
+    if (s.player.action?.kind === "fight") s.player.action = null;
     return ok("Combat training style changed.");
   }
   if (command.type === "run") {
@@ -2211,6 +2363,7 @@ export function applyRpgCommand(
     if (!validGoal(command.goal))
       return fail("That ambition is not available.");
     s.control.goal = structuredClone(command.goal);
+    delete s.control.progress;
     s.control.waiting = false;
     s.control.steps = goalSteps(s, command.goal);
     s.control.thought = null;
@@ -2280,18 +2433,27 @@ export function validateRpgSave(v: unknown): RpgState | null {
     v = structuredClone(v);
     if (!object(v) || !object(v.quests)) return null;
     const candidate = v as unknown as RpgState;
-    const legacy = Object.keys(v.quests).length === 3 && ["forge", "supper", "road"].every((id) => object(candidate.quests[id]));
-    // Additive G2 normalization never mutates the archived/public input object.
-    if (legacy || Object.keys(v.quests).length === Object.keys(QUESTS).length)
-      normalizeQuestProgress(candidate);
-    if (legacy && object(v.resources)) for (const o of WORLD.objects.filter((o) => o.resourceId))
-      if (!Object.hasOwn(v.resources, o.id)) v.resources[o.id] = { objectId: o.id, available: true, respawnAt: 0 };
-    if (legacy && Array.isArray(v.enemies) && v.enemies.length === ENEMY_SPAWNS.length - 1 && !v.enemies.some((e) => object(e) && e.id === "captain-kestrel")) {
-      const spawn = ENEMY_SPAWNS.at(-1)!;
-      v.enemies.push({ ...spawn, position: { ...spawn.position }, home: { ...spawn.position },
-        health: ENEMIES[spawn.definitionId].health, respawnAt: 0, cooldown: 0, engagedUntil: 0 });
+    if (v.version !== 3 && v.version !== 4) return null;
+    const migrated = v.version === 3;
+    if (migrated) {
+      v.version = 4;
+      if (!Array.isArray(v.npcs)) return null;
+      for (const actor of [v.player, ...v.npcs]) {
+        if (!object(actor) || !object(actor.skills)) return null;
+        actor.skills.ranged ??= 0; actor.ammo ??= null;
+      }
     }
-    if (legacy && Array.isArray(v.shops)) for (const definition of Object.values(SHOPS)) {
+    // Additive G2 normalization never mutates the archived/public input object.
+    if (migrated)
+      normalizeQuestProgress(candidate);
+    if (migrated && object(v.resources)) for (const o of WORLD.objects.filter((o) => o.resourceId))
+      if (!Object.hasOwn(v.resources, o.id)) v.resources[o.id] = { objectId: o.id, available: true, respawnAt: 0 };
+    if (migrated && Array.isArray(v.enemies)) for (const spawn of ENEMY_SPAWNS) {
+      if (!v.enemies.some((entry) => object(entry) && entry.id === spawn.id))
+        v.enemies.push({ ...spawn, position: { ...spawn.position }, home: { ...spawn.position },
+          health: ENEMIES[spawn.definitionId].health, respawnAt: 0, cooldown: 0, engagedUntil: 0 });
+    }
+    if (migrated && Array.isArray(v.shops)) for (const definition of Object.values(SHOPS)) {
       const shop = v.shops.find((entry) => object(entry) && entry.id === definition.id);
       if (!shop) v.shops.push({ id: definition.id, stock: Object.fromEntries(Object.entries(definition.stock).map(([id, entry]) => [id, entry.max])), restockAt: 100 });
       else if (object(shop) && object(shop.stock)) {
@@ -2299,9 +2461,23 @@ export function validateRpgSave(v: unknown): RpgState | null {
         shop.stock = Object.fromEntries(Object.entries(definition.stock).map(([id, entry]) => [id, Object.hasOwn(old, id) ? old[id] : entry.max]));
       }
     }
+    if (migrated) {
+      const actors = [candidate.player, ...candidate.npcs];
+      const coordinate = (p: TilePosition) => p?.worldId === WORLD.id && p.plane === 0 &&
+        Number.isInteger(p.x) && Number.isInteger(p.y) && p.x >= 0 && p.x < WORLD.width && p.y >= 0 && p.y < WORLD.height;
+      if (actors.some((actor) => !coordinate(actor.position) || !coordinate(actor.previousPosition) ||
+        !Array.isArray(actor.path) || actor.path.some((p) => !coordinate(p)))) return null;
+      const changed = actors.some((actor) => {
+        if (!isWalkable(actor.position, worldForState(candidate)) || !isWalkable(actor.previousPosition, worldForState(candidate))) return true;
+        let prior = actor.position;
+        return actor.path.some((p) => { const legal = canStep(prior, p, worldForState(candidate)); prior = p; return !legal; });
+      }) || [...candidate.enemies.map((e) => e.position), ...candidate.drops.map((d) => d.position),
+        ...(candidate.grave ? [candidate.grave.position] : [])].some((p) => coordinate(p) && !isWalkable(p, worldForState(candidate)));
+      if (changed) repairRpgPositions(candidate);
+    }
     const w = worldForState(v as unknown as RpgState);
     if (
-      v.version !== 3 ||
+      v.version !== 4 ||
       !integer(v.tick) ||
       !integer(v.savedAt, 8.64e15) ||
       !integer(v.seed, 4294967295) ||
@@ -2394,14 +2570,14 @@ export function validateRpgSave(v: unknown): RpgState | null {
       )
         return null;
     }
-    if (!Array.isArray(v.drops) || v.drops.length > ENEMY_SPAWNS.length)
+    if (!Array.isArray(v.drops) || v.drops.length > ENEMY_SPAWNS.length * 2)
       return null;
     const dropIds = new Set<string>();
     for (const d of v.drops) {
       if (
         !object(d) ||
         typeof d.id !== "string" ||
-        !ENEMY_SPAWNS.some((e) => `loot-${e.id}` === d.id) ||
+        !ENEMY_SPAWNS.some((e) => `loot-${e.id}` === d.id || `arrows-${e.id}` === d.id) ||
         dropIds.has(d.id) ||
         !position(d.position, w) ||
         !stacks(d.items) ||
@@ -2409,6 +2585,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
         d.expiresAt !== 0
       )
         return null;
+      if ((d.id as string).startsWith("arrows-") && !(d.items as ItemStack[]).every((item) => !!ITEMS[item.itemId].ammoTier)) return null;
       dropIds.add(d.id);
     }
     if (
@@ -2441,6 +2618,8 @@ export function validateRpgSave(v: unknown): RpgState | null {
         !stacks(p.inventory, 28) ||
         !stacks(p.bank) ||
         !object(p.equipment) ||
+        !(p.ammo === null || object(p.ammo) && typeof p.ammo.itemId === "string" &&
+          !!ITEMS[p.ammo.itemId]?.ammoTier && positive(p.ammo.quantity)) ||
         !positive(p.health, 99) ||
         p.health > levelForXp(p.skills.hitpoints as number) ||
         !integer(p.runEnergy, 10000) ||
@@ -2449,6 +2628,8 @@ export function validateRpgSave(v: unknown): RpgState | null {
       )
         return null;
       let last = p.position;
+      if (ITEMS[(p.equipment as ActorState["equipment"]).weapon ?? ""]?.twoHanded &&
+        (p.equipment as ActorState["equipment"]).shield) return null;
       for (const next of p.path) {
         if (!canStep(last, next, w)) return null;
         last = next;
@@ -2465,6 +2646,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
         if (
           levelForXp(skills.attack) < (item.attackLevel ?? 1) ||
           levelForXp(skills.defence) < (item.defenceLevel ?? 1) ||
+          levelForXp(skills.ranged) < (item.rangedLevel ?? 1) ||
           (item.skill && levelForXp(skills[item.skill]) < (item.level ?? 1))
         )
           return null;
@@ -2489,8 +2671,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
             typeof a.targetId !== "string" ||
             !ENEMY_SPAWNS.some((e) => e.id === a.targetId) ||
             a.duration !==
-              (ITEMS[(p.equipment as ActorState["equipment"]).weapon ?? ""]
-                ?.attackTicks ?? 4))
+              attackDuration(p as unknown as ActorState, candidate.control.style))
         )
           return null;
         if (a.kind === "gather") {
@@ -2525,6 +2706,9 @@ export function validateRpgSave(v: unknown): RpgState | null {
       }
     }
     const c = v.control;
+    if (c.progress !== undefined && (!object(c.progress) || !text(c.progress.goalId, 100) ||
+      !text(c.progress.fingerprint, 10000) || !integer(c.progress.tick, v.tick) ||
+      !integer(c.progress.failures, 10000) || !integer(c.progress.blockedUntil))) return null;
     if (v.dialogue !== undefined && v.dialogue !== null) {
       const d = v.dialogue;
       if (!object(d) || typeof d.questId !== "string" || !Object.hasOwn(QUESTS, d.questId) ||
@@ -2549,7 +2733,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
       c.steps.length > 10 ||
       !c.steps.every((i) => text(i)) ||
       typeof c.style !== "string" ||
-      !["attack", "strength", "defence"].includes(c.style) ||
+      !["attack", "strength", "defence", "accurate", "rapid", "longrange"].includes(c.style) ||
       !Array.isArray(c.visited) ||
       c.visited.length > WORLD.objects.length ||
       !c.visited.every((i) => typeof i === "string" && !!objectById(i)) ||

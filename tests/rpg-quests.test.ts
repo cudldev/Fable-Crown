@@ -135,7 +135,7 @@ describe("original service and route quest chains", () => {
         if (!firstQuest) firstQuest = s.control.goal.questId;
         if (!s.quests[s.control.goal.questId!].complete)
           expect(s.control.goal.questId).toBe(
-            Object.keys(QUESTS).find((id) => !s.quests[id].complete),
+            ["forge", "bowyer", "supper", "letters", "road", "watch"].find((id) => !s.quests[id].complete),
           );
       }
       if (i % 100 === 0)

@@ -21,14 +21,21 @@ async function read(key: string): Promise<unknown> {
   });
 }
 export async function readRpgSave() {
-  return validateRpgSave(await read("v3"));
+  return validateRpgSave(await read("v4")) ?? validateRpgSave(await read("v3"));
 }
-export const readArchivedChapter = () => read("v1");
+export async function readArchivedChapter() {
+  const [village, tileRpg] = await Promise.all([read("v1"), read("v3")]);
+  return village || tileRpg
+    ? { village: village ?? null, tileRpg: tileRpg ?? null }
+    : null;
+}
 export async function writeRpgSave(state: RpgState): Promise<void> {
+  if (state.version !== 4)
+    throw new Error("Only the current chapter may be saved.");
   const d = await db();
   return new Promise((resolve, reject) => {
     const t = d.transaction("saves", "readwrite");
-    t.objectStore("saves").put(state, "v3");
+    t.objectStore("saves").put(state, "v4");
     t.oncomplete = () => resolve();
     t.onerror = () => reject(t.error);
   });

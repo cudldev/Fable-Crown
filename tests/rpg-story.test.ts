@@ -23,7 +23,7 @@ describe("staged original overworld stories", () => {
     expect(itemCount(s.player.inventory, "shortbow") + itemCount(s.bank, "shortbow")).toBe(1);
     expect(s.quests.letters.choices?.route).toBe("supplies");
     expect(s.quests.watch.counters?.captain).toBe(1);
-    expect(Object.keys(s.player.skills)).not.toContain("ranged");
+    expect(s.player.skills.ranged).toBe(0); // This fixture explicitly follows quests without field archery training.
     for (const id of Object.keys(QUESTS)) {
       expect(s.journal.filter((line) => line.startsWith(`Completed: ${QUESTS[id].name}.`))).toHaveLength(1);
       expect(applyRpgCommand(s, { type: "quest", questId: id }).ok).toBe(false);
@@ -50,6 +50,7 @@ describe("staged original overworld stories", () => {
   });
   it("normalizes completed and accepted old quests without duplicating rewards or dropping items", () => {
     const s = createRpg(NOW); s.quests.forge = { accepted: true, complete: true, kills: 0 };
+    (s as unknown as { version: number }).version = 3;
     s.quests.supper = { accepted: true, complete: false, kills: 0 };
     delete s.quests.bowyer; delete s.quests.letters; delete s.quests.watch;
     const bag = structuredClone(s.player.inventory), original = JSON.stringify(s);

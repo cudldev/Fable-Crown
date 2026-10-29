@@ -54,7 +54,8 @@ export function suggestGoals(s: RpgState): Thought["choices"] {
         itemId: tool,
       },
     });
-  const quest = Object.values(QUESTS).find((q) => !s.quests[q.id]?.complete && q.prerequisites?.every((id) => s.quests[id]?.complete) !== false);
+  const questOrder = ["forge", "bowyer", "supper", "letters", "road", "watch"];
+  const quest = questOrder.map((id) => QUESTS[id]).find((q) => !s.quests[q.id]?.complete && q.prerequisites?.every((id) => s.quests[id]?.complete) !== false);
   if (quest) {
     const choice = {
       id: `quest-${quest.id}`,
@@ -67,11 +68,21 @@ export function suggestGoals(s: RpgState): Thought["choices"] {
         questId: quest.id,
       },
     };
-    // Preserve the proven initial iron→steel ambition, then progress through actual quests.
-    if (ownsItem(s, "steel-pickaxe")) choices.unshift(choice);
-    else choices.push(choice);
+    // Stories and their useful services lead the journey; tool upgrades remain explicit alternatives.
+    choices.unshift(choice);
   }
-  for (const skill of [
+  if (s.quests.bowyer?.complete && levelForXp(s.player.skills.ranged) < 5)
+    choices.unshift({ id: "train-ranged-5", label: "Learn field archery", description: "Prepare a bow, arrows and meals; practice on woodland wildlife.",
+      goal: { id: "train-ranged-5", title: "Ranged level 5", kind: "skill", skill: "ranged", level: 5 } });
+  const landmark = [["hill-shrine", "the hill shrine"], ["east-watch", "the eastern watch"], ["north-bridge", "Willow bridge"]]
+    .find(([id]) => !s.control.visited.includes(id));
+  if (landmark && choices.length < 3) {
+    const [id, title] = landmark;
+    const choice = { id: `explore-${id}`, label: `Visit ${title}`, description: "Follow the paths to a new landmark.",
+      goal: { id: `explore-${id}`, kind: "explore" as const, title: `Visit ${title}`, targetId: id } };
+    if (!quest) choices.unshift(choice); else choices.push(choice);
+  }
+  const skills = [
     "mining",
     "woodcutting",
     "fishing",
@@ -81,8 +92,10 @@ export function suggestGoals(s: RpgState): Thought["choices"] {
     "strength",
     "defence",
     "hitpoints",
-  ] as const) {
-    if (choices.length === 3) break;
+    "ranged",
+  ] as const;
+  for (const skill of [...skills].sort((a, b) => levelForXp(s.player.skills[a]) - levelForXp(s.player.skills[b]))) {
+    if (choices.length >= 3) break;
     const level = levelForXp(s.player.skills[skill]);
     if (level === 99) continue;
     const next =
@@ -119,7 +132,7 @@ export function suggestGoals(s: RpgState): Thought["choices"] {
           targetId: id,
         },
       });
-  return choices;
+  return choices.slice(0, 3);
 }
 export function goalSteps(s: RpgState, goal: Ambition): string[] {
   if (goalMet(s, goal)) return ["Ambition achieved"];
@@ -148,10 +161,10 @@ export function goalSteps(s: RpgState, goal: Ambition): string[] {
   }
   if (
     goal.kind === "skill" &&
-    ["attack", "strength", "defence", "hitpoints"].includes(goal.skill!)
+    ["attack", "strength", "defence", "hitpoints", "ranged"].includes(goal.skill!)
   )
     return [
-      "Prepare a weapon and healing meals",
+      goal.skill === "ranged" ? "Prepare a bow, purchased or recovered arrows, and healing meals" : "Prepare a weapon and healing meals",
       "Practice against woodland creatures; eat or retreat when needed",
       `Reach ${goal.skill} level ${goal.level}`,
     ];

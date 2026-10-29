@@ -10,9 +10,10 @@ export const SKILLS = [
   "strength",
   "defence",
   "hitpoints",
+  "ranged",
 ] as const;
 export type SkillId = (typeof SKILLS)[number];
-export type CombatStyle = "attack" | "strength" | "defence";
+export type CombatStyle = "attack" | "strength" | "defence" | "accurate" | "rapid" | "longrange";
 export type Terrain = "grass" | "dirt" | "stone" | "water" | "sand";
 export type ItemId = string;
 export type ResourceId =
@@ -104,6 +105,13 @@ export interface ItemDefinition {
   defence?: number;
   attackTicks?: number;
   heals?: number;
+  weaponType?: "melee" | "bow";
+  rangedLevel?: number;
+  range?: number;
+  twoHanded?: boolean;
+  rangedAttack?: number;
+  rangedStrength?: number;
+  ammoTier?: number;
 }
 export interface ResourceDefinition {
   id: ResourceId;
@@ -166,6 +174,7 @@ export interface ActorState {
   skills: Record<SkillId, number>;
   inventory: ItemStack[];
   equipment: Partial<Record<EquipmentSlot, ItemId>>;
+  ammo: ItemStack | null;
   health: number;
   runEnergy: number;
   action: ActionState | null;
@@ -202,6 +211,7 @@ export type RpgOrder =
   | { type: "buy" | "sell"; shopId: string; itemId: ItemId; quantity: number }
   | { type: "equip"; itemId: ItemId }
   | { type: "unequip"; slot: EquipmentSlot }
+  | { type: "unequip-ammo" }
   | { type: "eat"; itemId: ItemId }
   | { type: "attack"; enemyId: string }
   | { type: "loot"; dropId: string }
@@ -236,6 +246,8 @@ export interface EnemyDefinition {
   aggressive: boolean;
   respawnTicks: number;
   loot: ItemStack[];
+  combatType?: "melee" | "ranged";
+  range?: number;
 }
 export interface EnemyState {
   id: string;
@@ -306,7 +318,7 @@ export interface DialogueState {
   expiresAt: number;
 }
 export interface RpgState {
-  version: 3;
+  version: 4;
   tick: number;
   savedAt: number;
   calendar: string;
@@ -347,6 +359,8 @@ export interface RpgState {
     visited: string[];
     thought: Thought | null;
     lastThought: number;
+    /** Objective progress watchdog; absent in migrated saves until the first autonomous plan. */
+    progress?: { goalId: string; fingerprint: string; tick: number; failures: number; blockedUntil: number };
   };
   journal: string[];
   /** Bounded, deterministic player rewards. Older V3 saves may omit this log. */

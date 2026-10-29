@@ -45,6 +45,16 @@ export function itemUses(
 ): { label: string; command: RpgCommand }[] {
   const item = ITEMS[itemId];
   if (!item || !itemCount(s.player.inventory, itemId)) return [];
+  if (
+    o.kind === "target" &&
+    ["training-bow", "training-arrow"].includes(itemId)
+  )
+    return [
+      {
+        label: "Practise a measured shot",
+        command: { type: "interact", objectId: o.id, verb: "practice" },
+      },
+    ];
   const delivery = Object.values(QUESTS).find((q) => {
     const progress = s.quests[q.id];
     const stage = q.stages?.find((stage) => stage.id === progress?.stageId);

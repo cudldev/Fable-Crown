@@ -25,7 +25,7 @@ import { Minimap } from "../render/Minimap";
 import { useGameAudio } from "./useGameAudio";
 import { examineObject, itemUses } from "./interactions";
 import type { TilePosition } from "./types";
-import type { SkillId, EquipmentSlot } from "./types";
+import type { SkillId, EquipmentSlot, CombatStyle } from "./types";
 import "./rpg.css";
 const base = import.meta.env.BASE_URL;
 const itemName = (id: string) =>
@@ -174,6 +174,11 @@ export default function RpgApp() {
       ? [state.player, ...state.npcs].find((p) => p.id === selection.id)
       : undefined;
   const player = state?.player;
+  const hasBow = ITEMS[player?.equipment.weapon ?? ""]?.weaponType === "bow";
+  const combatSkill: SkillId =
+    state && ["attack", "strength", "defence"].includes(state.control.style)
+      ? (state.control.style as SkillId)
+      : "ranged";
   const enemy =
     selection?.kind === "enemy"
       ? state?.enemies.find((e) => e.id === selection.id)
@@ -195,6 +200,11 @@ export default function RpgApp() {
       return QUESTS[o.questId]?.name ?? "Visit quest giver";
     if (o.type === "attack")
       return `Fight ${ENEMIES[state?.enemies.find((e) => e.id === o.enemyId)?.definitionId ?? ""]?.name ?? "enemy"}`;
+    if (o.type === "interact")
+      return `${o.verb} · ${objectById(o.objectId)?.name ?? o.objectId}`;
+    if (o.type === "travel-service")
+      return FERRIES[o.objectId]?.name ?? "Take the ferry";
+    if (o.type === "unequip-ammo") return "Remove equipped arrows";
     if (o.type === "withdraw")
       return `Withdraw ${o.quantity} ${itemName(o.itemId)}`;
     if (o.type === "equip" || o.type === "eat")
@@ -235,11 +245,18 @@ export default function RpgApp() {
             ? i.attackLevel
             : skill === "defence"
               ? i.defenceLevel
-              : false,
+              : skill === "ranged"
+                ? i.rangedLevel
+                : false,
         )
         .map((i) => ({
           name: i.name,
-          level: skill === "attack" ? i.attackLevel! : i.defenceLevel!,
+          level:
+            skill === "attack"
+              ? i.attackLevel!
+              : skill === "ranged"
+                ? i.rangedLevel!
+                : i.defenceLevel!,
         })),
     ]
       .filter((o) => o.level > level)
@@ -784,12 +801,12 @@ export default function RpgApp() {
                 goal: {
                   id: "train-combat",
                   kind: "skill",
-                  skill: state.control.style,
+                  skill: combatSkill,
                   level: Math.min(
                     99,
-                    levelForXp(state.player.skills[state.control.style]) + 1,
+                    levelForXp(state.player.skills[combatSkill]) + 1,
                   ),
-                  title: `Train ${skillName(state.control.style)}`,
+                  title: `Train ${skillName(combatSkill)}`,
                 },
               });
               setSelection(null);
@@ -1170,6 +1187,10 @@ export default function RpgApp() {
                     {ITEMS[bagItem]?.attackLevel
                       ? `Attack ${ITEMS[bagItem].attackLevel} to wield. `
                       : ""}
+                    {ITEMS[bagItem]?.rangedLevel
+                      ? `Ranged ${ITEMS[bagItem].rangedLevel} to wield. `
+                      : ""}
+                    {ITEMS[bagItem]?.twoHanded ? "Uses both hands. " : ""}
                     {ITEMS[bagItem]?.heals
                       ? `Restores ${ITEMS[bagItem].heals} health. `
                       : ""}
@@ -1183,13 +1204,17 @@ export default function RpgApp() {
                   >
                     Use on a place
                   </button>
-                  {ITEMS[bagItem]?.slot && (
+                  {(ITEMS[bagItem]?.slot ||
+                    (ITEMS[bagItem]?.kind === "supply" &&
+                      ITEMS[bagItem]?.ammoTier)) && (
                     <button
                       onClick={() =>
                         command({ type: "equip", itemId: bagItem })
                       }
                     >
-                      Equip
+                      {ITEMS[bagItem]?.kind === "supply"
+                        ? "Equip arrows"
+                        : "Equip"}
                     </button>
                   )}
                   {ITEMS[bagItem]?.kind === "food" && (
@@ -1205,15 +1230,25 @@ export default function RpgApp() {
               <p>
                 Bonuses:{" "}
                 {Object.values(state.player.equipment).reduce(
-                  (sum, id) => sum + (ITEMS[id]?.attack ?? 0),
+                  (sum, id) =>
+                    sum +
+                    ((hasBow ? ITEMS[id]?.rangedAttack : ITEMS[id]?.attack) ??
+                      0),
                   0,
                 )}{" "}
-                attack ·{" "}
+                {hasBow ? "ranged accuracy" : "attack"} ·{" "}
                 {Object.values(state.player.equipment).reduce(
-                  (sum, id) => sum + (ITEMS[id]?.strength ?? 0),
-                  0,
+                  (sum, id) =>
+                    sum +
+                    ((hasBow
+                      ? ITEMS[id]?.rangedStrength
+                      : ITEMS[id]?.strength) ?? 0),
+                  hasBow
+                    ? (ITEMS[state.player.ammo?.itemId ?? ""]?.rangedStrength ??
+                        0)
+                    : 0,
                 )}{" "}
-                strength ·{" "}
+                {hasBow ? "ranged strength" : "strength"} ·{" "}
                 {Object.values(state.player.equipment).reduce(
                   (sum, id) => sum + (ITEMS[id]?.defence ?? 0),
                   0,
@@ -1228,16 +1263,49 @@ export default function RpgApp() {
                   onChange={(e) =>
                     command({
                       type: "style",
-                      skill: e.target.value as
-                        "attack" | "strength" | "defence",
+                      skill: e.target.value as CombatStyle,
                     })
                   }
                 >
-                  <option value="attack">Attack · accuracy</option>
-                  <option value="strength">Strength · damage</option>
-                  <option value="defence">Defence · protection</option>
+                  {ITEMS[state.player.equipment.weapon ?? ""]?.weaponType ===
+                  "bow" ? (
+                    <>
+                      <option value="accurate">Accurate · Ranged XP</option>
+                      <option value="rapid">Rapid · faster shots</option>
+                      <option value="longrange">
+                        Longrange · Ranged & Defence XP
+                      </option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="attack">Attack · accuracy</option>
+                      <option value="strength">Strength · damage</option>
+                      <option value="defence">Defence · protection</option>
+                    </>
+                  )}
                 </select>
               </label>
+              {ITEMS[state.player.equipment.weapon ?? ""]?.weaponType ===
+                "bow" && (
+                <p>
+                  {state.control.style === "rapid" ? "3" : "4"} ticks per shot ·{" "}
+                  {state.control.style === "longrange" ? "9" : "7"} tile range ·
+                  one arrow per shot. Clear sight required.
+                </p>
+              )}
+              <div className="rpg-bank-row" aria-label="Equipped ammunition">
+                <span>
+                  Arrows:{" "}
+                  {state.player.ammo
+                    ? `${itemName(state.player.ammo.itemId)} ×${state.player.ammo.quantity}`
+                    : "None equipped"}
+                </span>
+                {state.player.ammo && (
+                  <button onClick={() => command({ type: "unequip-ammo" })}>
+                    Remove arrows
+                  </button>
+                )}
+              </div>
               {Object.entries(state.player.equipment).map(([slot, item]) => (
                 <div className="rpg-bank-row" key={slot}>
                   <span>
@@ -1341,6 +1409,22 @@ export default function RpgApp() {
                           .join(", ")}
                       </p>
                     )}
+                    {stage?.kind === "craft" &&
+                      stage.recipeId &&
+                      !progress?.complete && (
+                        <p>
+                          {itemName(RECIPES[stage.recipeId].output.itemId)} ·{" "}
+                          {itemCount(
+                            state.player.inventory,
+                            RECIPES[stage.recipeId].output.itemId,
+                          ) +
+                            itemCount(
+                              state.bank,
+                              RECIPES[stage.recipeId].output.itemId,
+                            )}
+                          /{stage.quantity ?? 1} packed or banked
+                        </p>
+                      )}
                     {!progress?.complete &&
                       state.control.goal?.questId === q.id && (
                         <p className="rpg-current-order">

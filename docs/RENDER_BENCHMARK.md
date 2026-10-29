@@ -15,3 +15,5 @@ Renderer-owned allocations are bounded:24terrain chunks (48MiB), approximately4M
 Reproduce: build with `GITHUB_REPOSITORY=cudldev/Fable-Crown`, start production preview at `/Fable-Crown/`, then run `node scripts/benchmark-render.mjs` with `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/`. Keep the same browser/viewport/instrumentation for comparisons. Final lead integration rerun is recorded in PROGRESS.md.
 
 Final integration repeat, same hardware/settings after shared-grid path and source-image release changes: all three views retained8.3ms median /8.4ms p95. Close/far/overview Canvas API CPU per paint was0.206/0.369/0.268ms; sampled chunk builds3/0/0. These measured results agree with the specialist run above.
+
+Early-game final integration: with240single-tile trees and12enemy spawns, same-host Chrome156/settings above measured median8.3ms,p958.5ms in close/far/overview. Canvas API CPU per paint0.247/0.409/0.261ms; terrain chunk builds0/0/0 during sampled windows. A separate fixed~4MiB tree composite invalidates only world/art/depleted-tree signature changes. Actor atlas cache remains bounded48frames. No physical mobile performance claim.

@@ -44,7 +44,16 @@ item("prince-cape", "Prince’s travelling cape", "gear", 0, {
 });
 item("training-bow", "Reed practice bow", "supply", 8);
 item("training-arrow", "Blunt practice arrow", "supply", 1, { stackable: true });
-item("shortbow", "Mosswood shortbow", "supply", 40);
+for (const [id, name, level, attack, strength, value] of [
+  ["shortbow", "Mosswood shortbow", 1, 8, 3, 40], ["oak-shortbow", "Oak shortbow", 5, 14, 5, 100],
+  ["willow-shortbow", "Willow shortbow", 20, 22, 8, 300],
+] as const) item(id, name, "gear", value, { slot: "weapon", weaponType: "bow", rangedLevel: level,
+  rangedAttack: attack, rangedStrength: strength, range: 7, twoHanded: true, attackTicks: 4 });
+for (const [metal, tier, strength, value] of [["bronze", 1, 1, 1], ["iron", 2, 3, 2], ["steel", 3, 5, 4]] as const)
+  item(`${metal}-arrow`, `${metal} arrow`, "supply", value, { stackable: true, weight: 0, ammoTier: tier, rangedStrength: strength });
+for (const [id, slot, defence, attack, value] of [
+  ["leather-body", "body", 3, 4, 45], ["leather-chaps", "legs", 2, 2, 30], ["leather-cowl", "head", 1, 1, 15],
+] as const) item(id, id.replaceAll("-", " "), "gear", value, { slot, defence, rangedAttack: attack, rangedLevel: 1 });
 item("watch-token", "Eastern watch service token", "supply", 0, { stackable: true });
 for (const [metal, level, tier] of [["black", 10, 4], ["mithril", 20, 5]] as const) {
   item(`${metal}-sword`, `${metal} sword`, "gear", tier * 150, { slot: "weapon", attackLevel: level,
@@ -394,7 +403,7 @@ export const SHOPS: Record<string, ShopDefinition> = Object.fromEntries(
         stock: Object.fromEntries(
           Object.values(ITEMS)
             .filter((i) => i.value > 0 && i.id !== "coins" && (
-              t.id === "oakrest" ? i.id.startsWith("bronze-") || ["iron-pickaxe", "steel-pickaxe", "bronze-axe", "small-net", "hammer", "logs", "copper-ore", "tin-ore", "raw-shrimp", "cooked-shrimp"].includes(i.id) :
+              t.id === "oakrest" ? i.id.startsWith("bronze-") || i.id.startsWith("leather-") || ["iron-pickaxe", "steel-pickaxe", "bronze-axe", "small-net", "hammer", "logs", "copper-ore", "tin-ore", "raw-shrimp", "cooked-shrimp"].includes(i.id) :
                 t.id === "briarford" ? i.tool === "axe" || ["net", "rod", "flyrod"].includes(i.tool ?? "") || /logs|shrimp|sardine|trout|bow|arrow|bait|feather/.test(i.id) :
                   ["pickaxe", "hammer"].includes(i.tool ?? "") || i.kind === "gear" || /ore|coal|bar/.test(i.id)
             ))
@@ -402,7 +411,7 @@ export const SHOPS: Record<string, ShopDefinition> = Object.fromEntries(
               i.id,
               {
                 max:
-                  i.kind === "tool" || i.kind === "gear"
+                  i.ammoTier ? 500 : i.kind === "tool" || i.kind === "gear"
                     ? 3
                     : i.stackable
                       ? 100
@@ -421,11 +430,17 @@ export const SHOPS: Record<string, ShopDefinition> = Object.fromEntries(
   }),
 );
 for (const [id, name, ids] of [
-  ["briarford-bowyer", "Iori’s bowyer", ["shortbow", "training-bow", "training-arrow", "logs", "oak-logs", "willow-logs"]],
+  ["briarford-bowyer", "Iori’s bowyer", ["shortbow", "oak-shortbow", "willow-shortbow", "bronze-arrow", "iron-arrow", "steel-arrow", "training-bow", "training-arrow", "logs", "oak-logs", "willow-logs"]],
   ["watch-quartermaster", "Eastern watch quartermaster", ["black-sword", "black-body", "mithril-sword", "mithril-body", "cooked-shrimp"]],
 ] as const) SHOPS[id] = { id, name, stock: Object.fromEntries(ids.map((itemId) => [itemId,
   { max: ITEMS[itemId].stackable ? 100 : 3, buy: ITEMS[itemId].value, sell: Math.max(1, Math.floor(ITEMS[itemId].value / 2)), restockTicks: 100 }])) };
 export const ENEMIES: Record<string, EnemyDefinition> = {
+  "armoured-outlaw": { id: "armoured-outlaw", name: "Ironcoat outlaw", health: 20, attack: 5, strength: 5, defence: 12,
+    combatType: "melee", attackTicks: 5, maxHit: 3, aggressive: false, respawnTicks: 70,
+    loot: [{ itemId: "coins", quantity: 30 }, { itemId: "iron-arrow", quantity: 6 }] },
+  "ranged-outlaw": { id: "ranged-outlaw", name: "Reedbow outlaw", health: 16, attack: 6, strength: 5, defence: 5,
+    combatType: "ranged", range: 6, attackTicks: 4, maxHit: 2, aggressive: false, respawnTicks: 70,
+    loot: [{ itemId: "coins", quantity: 25 }, { itemId: "bronze-arrow", quantity: 8 }] },
   captain: { id: "captain", name: "Captain Kestrel", health: 22, attack: 6, strength: 6, defence: 6,
     attackTicks: 5, maxHit: 3, aggressive: false, respawnTicks: 100,
     loot: [{ itemId: "coins", quantity: 40 }, { itemId: "cooked-shrimp", quantity: 3 }] },

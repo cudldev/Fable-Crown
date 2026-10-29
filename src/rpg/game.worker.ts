@@ -44,7 +44,7 @@ void (async () => {
     r.ticks
       ? `While you were away: ${r.ticks} ticks at quarter speed.`
       : hasArchive
-        ? "Your earlier chapter is archived. This is a fresh RPG journey."
+        ? "Your journey continues. Earlier chapters remain archived."
         : "A new journey begins in Oakrest.",
     true,
   );
