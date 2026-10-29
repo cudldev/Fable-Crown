@@ -45,3 +45,7 @@ Verification: strict TypeScript build, 40 simulation/navigation tests and four b
 Model routing used supported per-agent parameters: Sol High for simulation/navigation, Sol Medium for rendering, Luna Medium for bounded browser QA; lead integrated UI/art/worker/PWA, reviewed and verified. One specialist at a time. Current usage check: 90% used / about 10% remaining; no scheduled or banked reset used and no purchased credits. Within the 110% ceiling.
 
 Live deployment verification is pending this release push. Detailed daily needs/social interactions, combat/quests/economy expansion, optional local narrative LLM, physical-device and FPS benchmarks remain outside this approved slice. No performance claim is made.
+
+Art acceptance correction: user rejected the first generated set. ART_AUDIT.md records inspection of all 23 assets against the primary reference. Release 43fbb82 was pushed before the feedback arrived; cancellation of its in-progress Actions run was requested. Visual acceptance remains incomplete; do not mark the expanded release complete.
+
+Confirmed release hold: workflow 40816403401 is cancelled, with Pages configuration/upload/deploy skipped. A corrected reference-guided gameplay art sample is saved in docs/art-audit/ with its exact built-in ImageGen prompt. It is a direction proof only; replacement runtime assets and visual acceptance are still incomplete.
