@@ -74,3 +74,73 @@
   display: block;
   text-align: left;
 }
+.rpg-backpack {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 12px 0;
+}
+.rpg-backpack button {
+  height: 55px;
+  min-width: 0;
+  padding: 5px;
+  border-color: #a99a72;
+  background: #e6dcc4;
+}
+.rpg-backpack button[aria-pressed="true"] {
+  outline: 2px solid #97763d;
+  background: #f5e5b9;
+}
+.rpg-backpack span {
+  display: block;
+  font:
+    600 15px Georgia,
+    serif;
+  color: #354b43;
+}
+.rpg-backpack small {
+  display: block;
+  font: 9px system-ui;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rpg-backpack .empty {
+  opacity: 0.4;
+}
+.rpg-backpack .item-resource {
+  background: #d8dac0;
+}
+.rpg-backpack .item-currency {
+  background: #ead899;
+}
+.rpg-backpack .item-food {
+  background: #e8d4ba;
+}
+.rpg-unlock {
+  color: #82682f;
+}
+.rpg-shop-list article {
+  border-bottom: 1px solid #bcab8355;
+  padding: 12px 0;
+}
+.rpg-shop-list strong,
+.rpg-shop-list small {
+  display: block;
+}
+.rpg-shop-list small {
+  font: 11px/1.5 system-ui;
+  margin-top: 4px;
+}
+.rpg-shop-list p {
+  font: 12px/1.5 system-ui;
+  margin: 8px 0;
+}
+.rpg-item-inspect {
+  background: #e4dcc6;
+  padding: 12px;
+  border-radius: 5px;
+}
+.rpg-item-inspect h3 {
+  margin-top: 0 !important;
+}

@@ -142,7 +142,8 @@ export interface ActionState {
     | "sell"
     | "quest"
     | "recover"
-    | "rest";
+    | "rest"
+    | "eat";
   targetId?: string;
   recipeId?: string;
   remaining: number;
@@ -191,6 +192,8 @@ export type RpgOrder =
   | { type: "withdraw"; itemId: ItemId; quantity: number }
   | { type: "buy" | "sell"; shopId: string; itemId: ItemId; quantity: number }
   | { type: "equip"; itemId: ItemId }
+  | { type: "unequip"; slot: EquipmentSlot }
+  | { type: "eat"; itemId: ItemId }
   | { type: "attack"; enemyId: string }
   | { type: "quest"; questId: string }
   | { type: "recover" };
@@ -267,7 +270,7 @@ export interface RpgState {
   control: {
     waiting: boolean;
     active: RpgOrder | null;
-    source?: 'player'|'autonomous'|null;
+    source?: "player" | "autonomous" | null;
     queue: RpgOrder[];
     goal: Ambition | null;
     thinkingUntil: number;

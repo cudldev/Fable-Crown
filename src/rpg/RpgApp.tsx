@@ -3,12 +3,16 @@ import TileScene, {
   type TileCamera,
   type TileSelection,
 } from "../render/TileScene";
-import { WORLD, TOWNS, objectById } from "./world";
+import { WORLD, TOWNS, objectById, interactionTiles } from "./world";
 import { SKILLS, type RpgState, type RpgCommand, type RpgOrder } from "./types";
 import { levelForXp, skillName, XP_THRESHOLDS } from "./skills";
+import { ITEMS, RESOURCES, RECIPES, SHOPS } from "./content";
+import { itemCount, inventorySlots } from "./inventory";
+import type { SkillId, EquipmentSlot } from "./types";
 import "./rpg.css";
 const base = import.meta.env.BASE_URL;
 const itemName = (id: string) =>
+  ITEMS[id]?.name ??
   id
     .split("-")
     .map((w) => w[0]?.toUpperCase() + w.slice(1))
@@ -40,7 +44,8 @@ export default function RpgApp() {
     [storageOkay, setStorageOkay] = useState(true),
     [offline, setOffline] = useState(""),
     [worldSize, setWorldSize] = useState(""),
-    [quantity, setQuantity] = useState(10);
+    [quantity, setQuantity] = useState(10),
+    [bagItem, setBagItem] = useState<string | null>(null);
   const worker = useRef<Worker | null>(null),
     input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -119,6 +124,45 @@ export default function RpgApp() {
       ? [state.player, ...state.npcs].find((p) => p.id === selection.id)
       : undefined;
   const player = state?.player;
+  const bagSlots = player
+    ? player.inventory.flatMap((item) =>
+        Array.from(
+          { length: ITEMS[item.itemId]?.stackable ? 1 : item.quantity },
+          () => ({
+            ...item,
+            quantity: ITEMS[item.itemId]?.stackable ? item.quantity : 1,
+          }),
+        ),
+      )
+    : [];
+  function nextUnlock(skill: SkillId, level: number) {
+    const options = [
+      ...Object.values(RESOURCES)
+        .filter((r) => r.skill === skill)
+        .map((r) => ({ name: r.name, level: r.level })),
+      ...Object.values(RECIPES)
+        .filter((r) => r.skill === skill)
+        .map((r) => ({ name: r.name, level: r.level })),
+      ...Object.values(ITEMS)
+        .filter((i) => i.skill === skill)
+        .map((i) => ({ name: i.name, level: i.level ?? 1 })),
+      ...Object.values(ITEMS)
+        .filter((i) =>
+          skill === "attack"
+            ? i.attackLevel
+            : skill === "defence"
+              ? i.defenceLevel
+              : false,
+        )
+        .map((i) => ({
+          name: i.name,
+          level: skill === "attack" ? i.attackLevel! : i.defenceLevel!,
+        })),
+    ]
+      .filter((o) => o.level > level)
+      .sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+    return options[0];
+  }
   const town = player
     ? TOWNS.reduce((a, b) =>
         Math.hypot(
@@ -161,7 +205,12 @@ export default function RpgApp() {
           ? ({ type: "quest", questId: selectedObject.questId } as RpgOrder)
           : ({
               type: "move",
-              position: { ...selectedObject.position },
+              position: {
+                ...(selectedObject.blocks
+                  ? (interactionTiles(selectedObject)[0] ??
+                    selectedObject.position)
+                  : selectedObject.position),
+              },
             } as RpgOrder)
     : null;
   return (
@@ -282,7 +331,7 @@ export default function RpgApp() {
           <h2>{selectedObject.name}</h2>
           <p>
             {selectedObject.resourceId
-              ? `Harvest ${selectedObject.resourceId} with the right tool and skill level.`
+              ? `${RESOURCES[selectedObject.resourceId].name} · ${skillName(RESOURCES[selectedObject.resourceId].skill)} ${RESOURCES[selectedObject.resourceId].level} · ${(RESOURCES[selectedObject.resourceId].xp / 10).toFixed(1)} XP per success. Bring a ${RESOURCES[selectedObject.resourceId].tool}.`
               : "A place to visit and use in the frontier."}
           </p>
           {selectedObject.resourceId && (
@@ -458,7 +507,9 @@ export default function RpgApp() {
                   const xp = state.player.skills[skill],
                     level = levelForXp(xp),
                     start = XP_THRESHOLDS[level - 1]!,
-                    next = XP_THRESHOLDS[Math.min(98, level)]!;
+                    next = XP_THRESHOLDS[Math.min(98, level)]!,
+                    unlock = nextUnlock(skill, level),
+                    target = unlock?.level ?? Math.min(99, level + 1);
                   return (
                     <button
                       key={skill}
@@ -468,9 +519,9 @@ export default function RpgApp() {
                           goal: {
                             id: `train-${skill}`,
                             kind: "skill",
-                            title: `Train ${skillName(skill)} to ${Math.min(99, level + 1)}`,
+                            title: `Train ${skillName(skill)} to ${target}`,
                             skill,
-                            level: Math.min(99, level + 1),
+                            level: target,
                           },
                         });
                         setPanel(null);
@@ -490,6 +541,11 @@ export default function RpgApp() {
                           ? `${Math.ceil((next - xp) / 10)} to level ${level + 1}`
                           : "Mastered"}
                       </small>
+                      {unlock && (
+                        <small className="rpg-unlock">
+                          Next: {unlock.name} · {unlock.level}
+                        </small>
+                      )}
                     </button>
                   );
                 })}
@@ -500,27 +556,96 @@ export default function RpgApp() {
             <>
               <span className="eyebrow">ALDEN’S PACK</span>
               <h2>Inventory & equipment</h2>
-              <div className="rpg-item-list">
-                {state.player.inventory.map((item) => (
-                  <div key={item.itemId}>
-                    <span>
-                      {itemName(item.itemId)} <b>×{item.quantity}</b>
-                    </span>
+              <p aria-label="Backpack capacity">
+                {inventorySlots(state.player.inventory)} / 28 slots · coins and
+                supplies stack
+              </p>
+              <div className="rpg-backpack" aria-label="Backpack">
+                {Array.from({ length: 28 }, (_, i) => {
+                  const item = bagSlots[i];
+                  return (
+                    <button
+                      key={i}
+                      disabled={!item}
+                      title={item ? itemName(item.itemId) : "Empty slot"}
+                      aria-label={
+                        item
+                          ? `${itemName(item.itemId)}, ${item.quantity}`
+                          : `Empty backpack slot ${i + 1}`
+                      }
+                      aria-pressed={item && bagItem === item.itemId}
+                      className={
+                        item ? `item-${ITEMS[item.itemId]?.kind}` : "empty"
+                      }
+                      onClick={() => setBagItem(item?.itemId ?? null)}
+                    >
+                      {item && (
+                        <>
+                          <span>
+                            {itemName(item.itemId)
+                              .split(" ")
+                              .map((w) => w[0])
+                              .join("")
+                              .slice(0, 3)}
+                          </span>
+                          <small>
+                            {item.quantity > 1
+                              ? item.quantity
+                              : itemName(item.itemId).split(" ").at(-1)}
+                          </small>
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {bagItem && itemCount(state.player.inventory, bagItem) > 0 && (
+                <div className="rpg-item-inspect">
+                  <h3>{itemName(bagItem)}</h3>
+                  <p>
+                    {ITEMS[bagItem]?.skill
+                      ? `${skillName(ITEMS[bagItem].skill!)} ${ITEMS[bagItem].level ?? 1} to use. `
+                      : ""}
+                    {ITEMS[bagItem]?.attackLevel
+                      ? `Attack ${ITEMS[bagItem].attackLevel} to wield. `
+                      : ""}
+                    {ITEMS[bagItem]?.heals
+                      ? `Restores ${ITEMS[bagItem].heals} health. `
+                      : ""}
+                    {ITEMS[bagItem]?.weight ?? 0} kg
+                  </p>
+                  {ITEMS[bagItem]?.slot && (
                     <button
                       onClick={() =>
-                        command({ type: "equip", itemId: item.itemId })
+                        command({ type: "equip", itemId: bagItem })
                       }
                     >
-                      Use / equip
+                      Equip
                     </button>
-                  </div>
-                ))}
-              </div>
+                  )}
+                  {ITEMS[bagItem]?.kind === "food" && (
+                    <button
+                      onClick={() => command({ type: "eat", itemId: bagItem })}
+                    >
+                      Eat
+                    </button>
+                  )}
+                </div>
+              )}
               <h3>Equipped</h3>
               {Object.entries(state.player.equipment).map(([slot, item]) => (
-                <p key={slot}>
-                  {slot}: {itemName(item)}
-                </p>
+                <div className="rpg-bank-row" key={slot}>
+                  <span>
+                    {slot}: {itemName(item)}
+                  </span>
+                  <button
+                    onClick={() =>
+                      command({ type: "unequip", slot: slot as EquipmentSlot })
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
               ))}
               <button className="full" onClick={() => order({ type: "bank" })}>
                 Bank carried items
@@ -619,12 +744,149 @@ export default function RpgApp() {
               </small>
             </>
           )}
-          {(panel.startsWith("shop:") || panel.startsWith("craft:")) && (
+          {panel.startsWith("shop:") &&
+            (() => {
+              const id = panel.slice(5),
+                shop = SHOPS[id],
+                stock = state.shops.find((s) => s.id === id)?.stock ?? {};
+              return (
+                <>
+                  <span className="eyebrow">LOCAL MERCHANT</span>
+                  <h2>{shop?.name ?? "Supplies"}</h2>
+                  <p>
+                    {itemCount(state.player.inventory, "coins")} coins in your
+                    pack. Alden travels to the shop before trading.
+                  </p>
+                  <div className="rpg-shop-list">
+                    {Object.entries(shop?.stock ?? {}).map(([item, price]) => (
+                      <article key={item}>
+                        <strong>{itemName(item)}</strong>
+                        <small>
+                          {stock[item] ?? 0} in stock · {price.buy} coins
+                        </small>
+                        <div className="order-actions">
+                          <button
+                            disabled={
+                              !(stock[item] > 0) ||
+                              itemCount(state.player.inventory, "coins") <
+                                price.buy
+                            }
+                            onClick={() =>
+                              order({
+                                type: "buy",
+                                shopId: id,
+                                itemId: item,
+                                quantity: 1,
+                              })
+                            }
+                          >
+                            Buy 1
+                          </button>
+                          {["tool", "gear"].includes(ITEMS[item]?.kind) && (
+                            <button
+                              onClick={() => {
+                                command({
+                                  type: "goal",
+                                  goal: {
+                                    id: `obtain-${item}`,
+                                    title: `Obtain ${itemName(item)}`,
+                                    kind: "equipment",
+                                    itemId: item,
+                                  },
+                                });
+                                setPanel(null);
+                              }}
+                            >
+                              Aim for this
+                            </button>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                  <h3>Sell from your pack</h3>
+                  {state.player.inventory
+                    .filter(
+                      (i) =>
+                        i.itemId !== "coins" && shop?.stock[i.itemId]?.sell > 0,
+                    )
+                    .map((i) => (
+                      <div className="rpg-bank-row" key={i.itemId}>
+                        <span>
+                          {itemName(i.itemId)} ×{i.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            order({
+                              type: "sell",
+                              shopId: id,
+                              itemId: i.itemId,
+                              quantity: i.quantity,
+                            })
+                          }
+                        >
+                          Sell all · {shop.stock[i.itemId].sell * i.quantity}
+                        </button>
+                      </div>
+                    ))}
+                </>
+              );
+            })()}
+          {panel.startsWith("craft:") && (
             <>
-              <h2>{panel.startsWith("shop:") ? "Supplies" : "Crafting"}</h2>
+              <span className="eyebrow">{panel.slice(6)}</span>
+              <h2>Make something useful</h2>
               <p>
-                Activity definitions are being connected to the new chapter.
+                Recipes use the ingredients in your pack. Take supplies from
+                your bank before crafting.
               </p>
+              <label>
+                Quantity{" "}
+                <select
+                  aria-label="Craft quantity"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                >
+                  {[1, 5, 10, 28].map((n) => (
+                    <option key={n}>{n}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="rpg-shop-list">
+                {Object.values(RECIPES)
+                  .filter((r) => r.station === panel.slice(6))
+                  .map((r) => {
+                    const allowed =
+                      levelForXp(state.player.skills[r.skill]) >= r.level;
+                    return (
+                      <article key={r.id}>
+                        <strong>{r.name}</strong>
+                        <small>
+                          {skillName(r.skill)} {r.level} · {r.xp / 10} XP ·{" "}
+                          {r.ticks * 0.6}s
+                        </small>
+                        <p>
+                          {r.inputs
+                            .map(
+                              (i) =>
+                                `${itemName(i.itemId)} ${itemCount(state.player.inventory, i.itemId)}/${i.quantity}`,
+                            )
+                            .join(" · ")}
+                        </p>
+                        <button
+                          disabled={!allowed}
+                          onClick={() =>
+                            order({ type: "craft", recipeId: r.id, quantity })
+                          }
+                        >
+                          {allowed
+                            ? `Make ${quantity}`
+                            : `Requires level ${r.level}`}
+                        </button>
+                      </article>
+                    );
+                  })}
+              </div>
             </>
           )}
         </section>
