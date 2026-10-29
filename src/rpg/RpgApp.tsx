@@ -31,6 +31,9 @@ import { Minimap } from "../render/Minimap";
 import { useGameAudio } from "./useGameAudio";
 import { examineObject, itemUses } from "./interactions";
 import { MessagePanel } from "./MessagePanel";
+import { IntentionReadout } from "./IntentionReadout";
+import { PlannerPanel, LastDeliberation } from "./PlannerPanel";
+import { explainIntention } from "./intention-explanation";
 import { starterChoices } from "./starter";
 import type { TilePosition } from "./types";
 import type { SkillId, EquipmentSlot, CombatStyle } from "./types";
@@ -116,7 +119,12 @@ export default function RpgApp() {
         });
       setHasArchive(e.data.hasArchive);
       setStorageOkay(e.data.storageOkay);
-      if (e.data.message && !receipt?.accepted) setMessage(e.data.message);
+      if (
+        e.data.message &&
+        !receipt?.accepted &&
+        !/^(A new journey begins|Your journey continues)/.test(e.data.message)
+      )
+        setMessage(e.data.message);
     };
     w.onerror = () => {
       setCommandNotice(null);
@@ -138,6 +146,11 @@ export default function RpgApp() {
     const t = setTimeout(() => setMessage(""), 6000);
     return () => clearTimeout(t);
   }, [message]);
+  useEffect(() => {
+    if (!commandNotice || commandNotice.pending) return;
+    const timer = setTimeout(() => setCommandNotice(null), 4000);
+    return () => clearTimeout(timer);
+  }, [commandNotice]);
   useEffect(() => {
     if (!commandNotice || commandNotice.pending) return;
     const timer = setTimeout(() => setCommandNotice(null), 1800);
@@ -221,6 +234,7 @@ export default function RpgApp() {
       ? [state.player, ...state.npcs].find((p) => p.id === selection.id)
       : undefined;
   const player = state?.player;
+  const intention = state ? explainIntention(state) : null;
   const hasBow = ITEMS[player?.equipment.weapon ?? ""]?.weaponType === "bow";
   const combatSkill: SkillId =
     state && ["attack", "strength", "defence"].includes(state.control.style)
@@ -568,23 +582,32 @@ export default function RpgApp() {
           ▦
         </button>
       </div>
-      {state && (
-        <button
-          className="thought-peek"
-          aria-label="Open thoughts"
-          onClick={() => open("thoughts")}
-        >
-          ✧ Alden’s thoughts{" "}
-          <span>
-            {state.control.thought?.id === "starter-oakrest"
-              ? "choose a beginning"
-              : state.control.waiting
-                ? "waiting"
-                : state.control.goal
-                  ? "pursuing a goal"
-                  : "thinking ahead"}
-          </span>
-        </button>
+      {state && intention && (
+        <IntentionReadout
+          view={intention}
+          waiting={state.control.waiting}
+          onThoughts={() => open("thoughts")}
+          onWait={() =>
+            command({ type: state.control.waiting ? "resume" : "wait" })
+          }
+          onFocus={() => {
+            const target = intention.targetPosition;
+            if (target) {
+              setPanel(null);
+              setSelection(null);
+              setMessagesOpen(false);
+              setMapDestination(null);
+              setCamera((c) => ({
+                ...c,
+                x: target.x,
+                y: target.y,
+                follow: false,
+                overview: false,
+                zoom: Math.max(0.65, c.zoom),
+              }));
+            }
+          }}
+        />
       )}
       {selectedObject && state && (
         <section
@@ -1019,11 +1042,51 @@ export default function RpgApp() {
               </div>
             </>
           )}
+          {panel === "personality" && (
+            <PlannerPanel
+              state={state}
+              onApply={(profile) =>
+                command({ type: "planner-profile", profile })
+              }
+              onChoose={() => {
+                command({ type: "reconsider" });
+                setPanel("thoughts");
+              }}
+            />
+          )}
           {panel === "thoughts" && (
             <>
               <span className="eyebrow">ALDEN’S INTENTIONS</span>
               <h2>{state.control.goal?.title ?? "The road ahead"}</h2>
-              <p>{state.control.reason}</p>
+              {intention && (
+                <section
+                  className="rpg-decision-detail"
+                  aria-label="Current intention explained"
+                >
+                  <p>
+                    <strong>Now:</strong> {intention.title}
+                  </p>
+                  <p>
+                    <strong>Why:</strong> {intention.reason}
+                  </p>
+                  <p>
+                    <strong>Next:</strong> {intention.next}
+                  </p>
+                  <small>
+                    {intention.phase === "wait"
+                      ? "Alden is paused. Villagers continue their routines."
+                      : intention.phase === "blocked"
+                        ? "Alden needs help with this blocker."
+                        : intention.source === "player"
+                          ? "Following your direct instructions."
+                          : "Alden chose this step for his ambition."}
+                  </small>
+                </section>
+              )}
+              <LastDeliberation state={state} />
+              <button className="full" onClick={() => open("personality")}>
+                Personality & priorities
+              </button>
               {state.control.thought?.id === "starter-oakrest" && (
                 <p>{state.control.thought.body}</p>
               )}
@@ -1114,6 +1177,33 @@ export default function RpgApp() {
                 different ambition. Wait stops the current action and holds your
                 queued orders.
               </small>
+              {!!state.control.decisions?.length && (
+                <details
+                  className="rpg-decision-history"
+                  aria-label="Recent plan changes"
+                >
+                  <summary>Recent plan changes</summary>
+                  <ol>
+                    {state.control.decisions
+                      .slice()
+                      .reverse()
+                      .map((decision, i) => (
+                        <li key={`${decision.tick}-${i}`}>
+                          <small>
+                            {decision.source === "player"
+                              ? "Your order"
+                              : "Alden decided"}{" "}
+                            · {Math.floor((state.tick - decision.tick) * 0.6)}s
+                            ago
+                          </small>
+                          <strong>{decision.title}</strong>
+                          <p>{decision.reason}</p>
+                          <p>Next: {decision.next}</p>
+                        </li>
+                      ))}
+                  </ol>
+                </details>
+              )}
               <h3>Next orders · {state.control.queue.length}/8</h3>
               {state.control.queue.length ? (
                 state.control.queue.map((o, i) => (
@@ -1875,7 +1965,9 @@ export default function RpgApp() {
                   HP {player.health}/{levelForXp(player.skills.hitpoints)}
                 </em>
               </strong>
-              <span className="doing-now">{player.activity}</span>
+              <span className="doing-now">
+                {intention?.title ?? player.activity}
+              </span>
               <span
                 className={`rpg-xp-inline ${reward.gain ? "gained" : ""}`}
                 aria-label="Recent skill experience"

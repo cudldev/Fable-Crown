@@ -240,6 +240,8 @@ export type RpgCommand =
   | RpgOrder
   | { type: "enqueue"; order: RpgOrder }
   | { type: "goal"; goal: Ambition }
+  | { type: "planner-profile"; profile: PlannerProfile }
+  | { type: "reconsider" }
   | { type: "style"; skill: CombatStyle }
   | { type: "run"; enabled: boolean }
   | { type: "dialogue-choice"; choiceId: string }
@@ -377,6 +379,11 @@ export interface RpgState {
     visited: string[];
     thought: Thought | null;
     lastThought: number;
+    profile?: PlannerProfile;
+    goalSource?: "player" | "autonomous";
+    deliberation?: PlannerDeliberation;
+    /** Optional, bounded facts about actual intention changes; older V5 saves may omit it. */
+    decisions?: IntentionExplanation[];
     /** Objective progress watchdog; absent in migrated saves until the first autonomous plan. */
     progress?: {
       goalId: string;
@@ -400,6 +407,38 @@ export interface MovementTrace {
   mode: "walk" | "run";
   /** Start position followed by one or two actually traversed tiles. */
   tiles: TilePosition[];
+}
+export interface IntentionExplanation {
+  tick: number;
+  key: string;
+  source: "autonomous" | "player";
+  title: string;
+  reason: string;
+  next: string;
+  goalId?: string;
+  targetId?: string;
+  targetPosition?: TilePosition;
+}
+export interface PlannerProfile {
+  curiosity: number;
+  craftsmanship: number;
+  helpfulness: number;
+  adventurousness: number;
+  caution: number;
+}
+export interface GoalAssessment {
+  goal: Ambition;
+  score: number;
+  reasons: string[];
+}
+export interface PlannerDeliberation {
+  tick: number;
+  chosenId: string;
+  options: GoalAssessment[];
+}
+export interface IntentionView extends IntentionExplanation {
+  phase: "travel" | "work" | "wait" | "blocked" | "ready";
+  progress?: { label: string; value: number; max: number };
 }
 export interface SimulationEffect {
   id: number;

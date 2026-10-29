@@ -40,9 +40,11 @@ import {
   inventorySlots,
   itemCount,
 } from "./inventory";
-import { goalMet, goalSteps, suggestGoals } from "./planning";
+import { evaluateGoals, goalMet, goalSteps, suggestGoals } from "./planning";
 import { appendGameMessage, appendSimulationEffect } from "./events";
 import { starterChoices } from "./starter";
+import { DEFAULT_PLANNER_PROFILE, getPlannerProfile, PLANNER_TRAITS } from "./planner-profile";
+import { explainIntention } from "./intention-explanation";
 
 export const calendarDate = (now: number) => {
   const d = new Date(now);
@@ -167,6 +169,9 @@ export function createRpg(now: number, seed = 1234567): RpgState {
       source: null,
       queue: [],
       goal: null,
+      goalSource: "autonomous",
+      profile: { ...DEFAULT_PLANNER_PROFILE },
+      decisions: [],
       thinkingUntil: 1,
       eatReadyAt: 0,
       reason: "Ren needs timber and bronze for Oakrest’s forge. A hunt or village trade are useful alternatives.",
@@ -188,11 +193,31 @@ export function createRpg(now: number, seed = 1234567): RpgState {
   };
   const choices = starterChoices(s);
   s.control.goal = choices[0].goal;
+  auditGoalChoice(s);
   s.control.steps = goalSteps(s, s.control.goal);
   s.control.thought = { id: "starter-oakrest", title: "A first step in Oakrest",
     body: "Help Ren with the forge, prepare for a woodland hunt, or earn supplies through village trade. Alden will start the forge task while you decide.",
     choices, expiresAt: 34 };
   return s;
+}
+function auditGoalChoice(s: RpgState) {
+  const options = evaluateGoals(s).slice(0, 4);
+  if (!options.length) return null;
+  s.control.deliberation = { tick: s.tick, chosenId: options[0].goal.id, options: structuredClone(options) };
+  return structuredClone(options[0].goal);
+}
+/** Store actual transitions, rather than a new entry for every timer or material count. */
+function recordDecision(s: RpgState, command = false) {
+  const view = explainIntention(s), trail = s.control.decisions ??= [], last = trail.at(-1);
+  if (last?.key === view.key) return;
+  // An instantaneous transaction has already finished. Keep its actual decision until another
+  // action starts, rather than replacing it with the idle gap left by finish().
+  if (!command && !s.control.active && view.phase === "ready") return;
+  if (!command && last?.tick === s.tick && /:(eat|equip|unequip|unequip-ammo):/.test(last.key) && s.control.active?.type === "attack") return;
+  const { phase: _phase, progress: _progress, ...entry } = view;
+  if (last?.tick === s.tick) trail[trail.length - 1] = entry;
+  else trail.push(entry);
+  if (trail.length > 8) trail.splice(0, trail.length - 8);
 }
 function random(s: RpgState) {
   s.seed = (Math.imul(s.seed, 1664525) + 1013904223) >>> 0;
@@ -1188,6 +1213,7 @@ function execute(s: RpgState, order: RpgOrder) {
     if (target.questId && order.verb === "talk" && !s.quests[target.questId].complete && s.control.source === "player") {
       const q = QUESTS[target.questId];
       s.control.goal = { id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name };
+      s.control.goalSource = "player";
       s.control.steps = goalSteps(s, s.control.goal); s.control.thought = null;
     }
     if (target.questId && !s.quests[target.questId].accepted && order.verb === "talk") {
@@ -1229,6 +1255,7 @@ function execute(s: RpgState, order: RpgOrder) {
         questId: q.id,
         title: q.name,
       };
+      s.control.goalSource = "player";
       s.control.steps = goalSteps(s, s.control.goal);
       s.control.thought = null;
     }
@@ -1470,7 +1497,7 @@ function autoOrder(s: RpgState): RpgOrder | null {
       ? { type: "bank" }
       : { type: "recover" };
   const meal = s.player.inventory.find((i) => ITEMS[i.itemId].heals);
-  if (s.player.health <= Math.ceil(maxHealth(s.player) * 0.5) && meal)
+  if (s.player.health <= Math.ceil(maxHealth(s.player) * (0.3 + 0.4 * getPlannerProfile(s).caution / 100)) && meal)
     return { type: "eat", itemId: meal.itemId };
   const drop = s.drops.find(
     (d) =>
@@ -1490,13 +1517,19 @@ function autoOrder(s: RpgState): RpgOrder | null {
       s.journal.push(`Ambition achieved: ${goal.title}`);
       s.journal = s.journal.slice(-60);
     }
-    const next = suggestGoals(s)[0];
+    const previous = goal;
+    const next = auditGoalChoice(s);
     if (!next) {
       s.control.reason = "Every available ambition is complete";
       s.control.thinkingUntil = s.tick + 100;
       return null;
     }
-    goal = s.control.goal = next.goal;
+    goal = s.control.goal = next;
+    s.control.goalSource = "autonomous";
+    if (previous && previous.id !== goal.id) {
+      const why = s.control.deliberation!.options[0].reasons.join(". ");
+      appendGameMessage(s, "event", `autogoal-${goal.id}`, `Finished ${previous.title}; Alden chose ${goal.title}. ${why}.`.slice(0, 1000));
+    }
   }
   s.control.steps = goalSteps(s, goal);
   s.control.reason = goal.title;
@@ -2155,6 +2188,7 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
         const engagement = s.control.active, source = s.control.source;
         s.control.active = shiftOrder(s)!; s.control.source = "player";
         p.path = []; p.action = null;
+        recordDecision(s);
         execute(s, s.control.active);
         s.control.active = engagement; s.control.source = source;
         continue;
@@ -2163,10 +2197,14 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
         p.id === 0 &&
         s.control.source === "autonomous" &&
         s.control.active?.type === "attack" &&
-        p.health <= Math.max(3, Math.ceil(maxHealth(p) * 0.35))
+        p.health <= Math.max(3, Math.ceil(maxHealth(p) * (0.2 + 0.3 * getPlannerProfile(s).caution / 100)))
       ) {
         const meal = p.inventory.find((i) => ITEMS[i.itemId].heals);
         if (meal) {
+          const engagement = s.control.active;
+          s.control.active = { type: "eat", itemId: meal.itemId };
+          recordDecision(s);
+          s.control.active = engagement;
           food(s, meal.itemId);
           p.action = null;
           continue;
@@ -2227,7 +2265,7 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
       if (p.path.length) { travel(s, p); continue; }
       p.runEnergy = Math.min(10000, p.runEnergy + 15);
       const autonomous = s.control.source === "autonomous";
-      if (s.control.active) execute(s, s.control.active);
+      if (s.control.active) { recordDecision(s); execute(s, s.control.active); }
       if (
         autonomous &&
         !s.control.active &&
@@ -2237,6 +2275,7 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
       )
         equip(s, s.control.goal.itemId);
     }
+    recordDecision(s);
   }
   return s;
 }
@@ -2312,6 +2351,10 @@ function validGoal(v: unknown): v is Ambition {
   if (v.kind === "quest")
     return typeof v.questId === "string" && Object.hasOwn(QUESTS, v.questId);
   return false;
+}
+function validPlannerProfile(v: unknown) {
+  return object(v) && Object.keys(v).length === PLANNER_TRAITS.length &&
+    PLANNER_TRAITS.every(({ key }) => integer(v[key], 100));
 }
 function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
   if (!object(v)) return false;
@@ -2527,6 +2570,7 @@ function beginPlayerOrder(s: RpgState, order: RpgOrder, path: TilePosition[]) {
   if (questId && !s.quests[questId].complete) {
     const q = QUESTS[questId];
     s.control.goal = { id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name };
+    s.control.goalSource = "player";
     s.control.steps = goalSteps(s, s.control.goal); s.control.thought = null;
   }
 }
@@ -2534,9 +2578,23 @@ export function applyRpgCommand(
   s: RpgState,
   command: RpgCommand,
 ): { ok: boolean; message: string } {
-  const ok = (message: string) => ({ ok: true, message }),
+  const ok = (message: string) => { recordDecision(s, true); return { ok: true, message }; },
     fail = (message: string) => ({ ok: false, message });
   if (!object(command)) return fail("Invalid command.");
+  if (command.type === "planner-profile") {
+    if (!validPlannerProfile(command.profile)) return fail("Each of the five traits must be a whole number from 0 to 100.");
+    s.control.profile = structuredClone(command.profile);
+    return ok("Preferences saved; the current ambition and accepted orders continue.");
+  }
+  if (command.type === "reconsider") {
+    const next = auditGoalChoice(s);
+    if (!next) return fail("Every available ambition is complete.");
+    finish(s); s.control.goal = next; s.control.goalSource = "autonomous";
+    s.control.waiting = false; delete s.control.progress;
+    s.control.steps = goalSteps(s, next); s.control.thought = null;
+    s.control.reason = s.control.deliberation!.options[0].reasons.join(". ");
+    return ok(`Alden chose ${next.title}. ${s.control.reason}.`);
+  }
   if (command.type === "dialogue-choice") {
     if (!s.dialogue || s.tick >= s.dialogue.expiresAt || typeof command.choiceId !== "string" ||
       !s.dialogue.choices.some((choice) => choice.id === command.choiceId)) return fail("That dialogue choice is no longer available.");
@@ -2604,6 +2662,7 @@ export function applyRpgCommand(
     if (!validGoal(command.goal))
       return fail("That ambition is not available.");
     s.control.goal = structuredClone(command.goal);
+    s.control.goalSource = "player";
     delete s.control.progress;
     s.control.waiting = false;
     s.control.steps = goalSteps(s, command.goal);
@@ -3005,6 +3064,32 @@ export function validateRpgSave(v: unknown): RpgState | null {
       }
     }
     const c = v.control;
+    if ((c.profile !== undefined && !validPlannerProfile(c.profile)) ||
+      (c.goalSource !== undefined && !["player", "autonomous"].includes(c.goalSource as string))) return null;
+    if (c.deliberation !== undefined) {
+      const d = c.deliberation;
+      if (!object(d) || !integer(d.tick, v.tick) || !text(d.chosenId, 100) || !d.chosenId ||
+        !Array.isArray(d.options) || !d.options.length || d.options.length > 4 ||
+        !d.options.every((option) => object(option) && validGoal(option.goal) && integer(option.score, 1000) &&
+          Array.isArray(option.reasons) && option.reasons.length >= 1 && option.reasons.length <= 4 &&
+          option.reasons.every((reason) => text(reason, 200) && !!reason)) ||
+        !d.options.some((option) => (option as { goal: Ambition }).goal.id === d.chosenId) ||
+        new Set(d.options.map((option) => (option as { goal: Ambition }).goal.id)).size !== d.options.length) return null;
+    }
+    if (c.decisions !== undefined) {
+      if (!Array.isArray(c.decisions) || c.decisions.length > 8) return null;
+      let previousTick = -1;
+      for (const decision of c.decisions) {
+        if (!object(decision) || !integer(decision.tick, v.tick) || decision.tick <= previousTick ||
+          !["autonomous", "player"].includes(decision.source as string) ||
+          !text(decision.key, 200) || !decision.key || !text(decision.title, 200) || !decision.title ||
+          !text(decision.reason, 1000) || !decision.reason || !text(decision.next, 500) || !decision.next ||
+          (decision.goalId !== undefined && (!text(decision.goalId, 100) || !decision.goalId)) ||
+          (decision.targetId !== undefined && (!text(decision.targetId, 100) || !decision.targetId)) ||
+          (decision.targetPosition !== undefined && !coordinatePosition(decision.targetPosition))) return null;
+        previousTick = decision.tick;
+      }
+    }
     if (c.progress !== undefined && (!object(c.progress) || !text(c.progress.goalId, 100) ||
       !text(c.progress.fingerprint, 10000) || !integer(c.progress.tick, v.tick) ||
       !integer(c.progress.failures, 10000) || !integer(c.progress.blockedUntil))) return null;

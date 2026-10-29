@@ -1,0 +1,162 @@
+.rpg-shell .intention-readout {
+  display: block;
+  width: 360px;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #b19e69;
+  border-radius: 6px;
+}
+.intention-readout .plan-open {
+  display: block;
+  text-align: left;
+  color: #354945;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 9px 12px 6px;
+  width: 100%;
+  min-height: 44px;
+}
+.intention-readout .plan-source {
+  display: block;
+  font: 9px/1.4 system-ui;
+  letter-spacing: 0.7px;
+  color: #77643c;
+  margin-bottom: 3px;
+}
+.rpg-shell .intention-readout .plan-now,
+.rpg-shell .intention-readout .plan-why,
+.rpg-shell .intention-readout .plan-next {
+  display: block;
+  color: #354945;
+  font: 12px/1.45 system-ui;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 2px 0;
+}
+.intention-readout b {
+  color: #6b5934;
+  margin-right: 4px;
+}
+.plan-source em {
+  float: right;
+  font: 10px/1.4 system-ui;
+  letter-spacing: 0;
+}
+.rpg-shell .intention-readout .plan-now {
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.intention-readout .plan-why {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.rpg-shell .intention-readout .plan-next {
+  white-space: nowrap;
+  font-size: 11px;
+}
+.intention-readout .plan-controls {
+  display: flex;
+  border-top: 1px solid #b19e6955;
+}
+.intention-readout .plan-controls button {
+  color: #4a5849;
+  flex: 1;
+  border: 0;
+  border-radius: 0;
+  min-height: 44px;
+  padding: 5px 8px;
+  font: 11px system-ui;
+  background: #e8dec244;
+}
+.intention-readout button:disabled {
+  opacity: 0.5;
+}
+.plan-progress {
+  display: block;
+}
+.plan-progress progress {
+  width: 100%;
+  height: 4px;
+  accent-color: #8a793b;
+  display: block;
+  margin-top: 5px;
+}
+.intention-readout[data-phase="blocked"] {
+  border-color: #ad6948;
+}
+.rpg-shell[data-panel-open="true"] .intention-readout,
+.rpg-shell[data-messages-open="true"] .intention-readout {
+  width: 270px;
+}
+.rpg-shell[data-panel-open="true"] .intention-readout .plan-source,
+.rpg-shell[data-panel-open="true"] .intention-readout .plan-why,
+.rpg-shell[data-panel-open="true"] .intention-readout .plan-next,
+.rpg-shell[data-panel-open="true"] .intention-readout .plan-controls,
+.rpg-shell[data-panel-open="true"] .intention-readout .plan-progress,
+.rpg-shell[data-messages-open="true"] .intention-readout .plan-next,
+.rpg-shell[data-messages-open="true"] .intention-readout .plan-controls,
+.rpg-shell[data-messages-open="true"] .intention-readout .plan-progress {
+  display: none !important;
+}
+.rpg-decision-detail {
+  padding: 10px 12px;
+  border-left: 3px solid #9b854d;
+  background: #e4dcc6;
+  margin: 10px 0;
+}
+.rpg-decision-detail p {
+  margin: 5px 0;
+  font: 12px/1.5 system-ui;
+}
+.rpg-decision-history summary {
+  min-height: 44px;
+  padding-top: 12px;
+  cursor: pointer;
+}
+.rpg-decision-history ol {
+  padding-left: 18px;
+}
+.rpg-decision-history li {
+  margin-bottom: 12px !important;
+}
+.rpg-decision-history small {
+  display: block;
+  color: #786949;
+}
+.rpg-decision-history p {
+  font: 12px/1.5 system-ui;
+  margin: 3px 0;
+}
+@media (max-width: 760px) {
+  .rpg-shell .intention-readout {
+    padding: 0;
+    width: 280px;
+  }
+  .intention-readout .plan-open {
+    padding: 7px 9px 5px;
+  }
+  .rpg-shell .intention-readout .plan-now,
+  .rpg-shell .intention-readout .plan-why {
+    font-size: 11px;
+  }
+  .rpg-shell[data-panel-open="true"] .thought-peek.intention-readout {
+    left: 10px;
+    right: auto;
+    width: min(270px, calc(100vw - 100px));
+    z-index: 11;
+  }
+}
+@media (max-height: 500px) and (min-width: 761px) {
+  .rpg-shell .intention-readout {
+    width: 360px;
+  }
+  .intention-readout .plan-source {
+    display: none;
+  }
+}

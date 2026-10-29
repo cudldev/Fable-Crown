@@ -1,0 +1,106 @@
+.planner-facts {
+  padding: 9px;
+  background: #e4dcc6;
+  font: 12px/1.5 system-ui;
+  border-radius: 4px;
+}
+.planner-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 12px 0;
+}
+.planner-presets button {
+  min-height: 44px;
+  flex: 1;
+  padding: 7px;
+  font: 12px system-ui;
+}
+.planner-preview {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eee4cc;
+  border: 1px solid #b19e69;
+  padding: 10px;
+  border-radius: 4px;
+}
+.planner-preview strong {
+  display: block;
+  margin: 4px 0;
+  font: 16px/1.4 Georgia;
+}
+.planner-preview small {
+  display: block;
+  font: 10px/1.4 system-ui;
+  color: #6e654e;
+}
+.planner-traits label {
+  display: block;
+  padding: 10px 0;
+  border-bottom: 1px solid #bcab8355;
+}
+.planner-traits label > span {
+  display: flex;
+  justify-content: space-between;
+  font: 14px Georgia;
+}
+.planner-traits .trait-value {
+  font: 12px system-ui;
+  font-variant-numeric: tabular-nums;
+}
+.planner-traits input {
+  width: 100%;
+  min-height: 44px;
+  accent-color: #8c7846;
+}
+.planner-traits small,
+.planner-note {
+  font: 12px/1.5 system-ui;
+  color: #566052;
+}
+.planner-candidates {
+  padding-left: 20px;
+}
+.planner-candidates > li {
+  padding: 9px 0;
+  border-bottom: 1px solid #bcab8355;
+}
+.planner-candidates strong {
+  display: block;
+  font: 14px/1.4 Georgia;
+}
+.planner-candidates small {
+  display: block;
+  color: #80704b;
+  margin: 3px 0;
+  font: 11px system-ui;
+}
+.planner-candidates ul {
+  padding-left: 16px;
+}
+.planner-candidates ul li {
+  font: 12px/1.5 system-ui !important;
+  margin: 3px 0 !important;
+}
+@media (max-width: 760px) {
+  .rpg-shell .drawer[aria-label="personality panel"] {
+    max-height: 60dvh;
+    bottom: 94px;
+  }
+}
+@media (max-height: 500px) {
+  .planner-preview small {
+    display: none;
+  }
+  .planner-preview {
+    padding: 6px;
+  }
+  .planner-preview strong {
+    font-size: 14px;
+    margin: 0 0 4px;
+  }
+  .rpg-shell .drawer[aria-label="personality panel"] {
+    max-height: calc(100dvh - 198px);
+  }
+}

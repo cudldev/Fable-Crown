@@ -137,6 +137,25 @@ test("equip a bow and ammunition, choose ranged styles, hit at seven tiles, and 
     itemId: "bronze-arrow",
     quantity: 50,
   });
+  // Inventory commands resume autonomous play. Establish the range fixture after
+  // the real equipment transactions so their duration cannot move the starting tile.
+  const rangedEnemy = prepared.enemies.find((entry) => entry.id === enemy.id)!;
+  prepared.player.position = {
+    ...rangedEnemy.position,
+    x: rangedEnemy.position.x - 7,
+  };
+  prepared.player.previousPosition = { ...prepared.player.position };
+  prepared.player.path = [];
+  prepared.player.movement = null;
+  prepared.player.action = null;
+  prepared.control.waiting = true;
+  prepared.control.active = null;
+  prepared.control.source = null;
+  prepared.control.goal = null;
+  prepared.control.thinkingUntil = 1_000_000_000;
+  await importState(page, prepared);
+  await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  await page.getByRole("button", { name: "Close panel" }).click();
   expect(
     Math.max(
       Math.abs(prepared.player.position.x - enemy.position.x),

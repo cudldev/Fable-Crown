@@ -20,7 +20,9 @@ Messages expands a persistent history of conversations, quest progress, discover
 
 Walk/Run shows remaining energy. Running takes up to two legal tile steps and consumes energy; exhaustion switches to walking. Walking, waiting and stationary work restore energy. The chosen movement mode persists across reloads. A new ambition replaces the current action, and pending orders remain editable. Quest visits retain that quest as an ambition. Automatic banking stores spare tools when they obstruct crafting; completed quests show delivered supplies instead of an empty requirement count.
 
-Alden’s planner uses fixed local rules. Skills and progress persist; there is no learned decision policy or connected local narrative LLM in this slice.
+Alden compares available stories, upgrades, skill milestones and discoveries using local rules. Open **Thoughts → Personality & priorities** to edit Curiosity, Craftsmanship, Helpfulness, Adventurousness and Caution or choose a preset. Preview shows which goals rise or fall; **Why this ambition?** preserves the actual comparison behind his last choice. Applying traits keeps the current ambition and queued orders; **Let Alden choose a new ambition** explicitly requests another choice. Caution also affects autonomous healing and retreat. Skills and XP remain earned, with no learned policy or connected narrative LLM.
+
+The world card shows **Now / Why / Next**, action progress, destination focus and Alden-only Pause/Resume. Thoughts expands the explanation and the last eight meaningful plan changes. These are grounded in actual actions, supplies and prerequisites.
 
 Tap ground to travel. Inspect a resource, service or enemy for Do now/Add next. Open Thoughts to choose an ambition and see its steps, reorder/remove up to eight pending orders, or let Alden continue. Wait stops the current action and holds pending orders; Let Alden decide resumes them before autonomous work. Periodic thoughts resolve automatically after about 20 seconds; routine play never waits for a reply. Quest ambitions handle training, tools, gathering, crafting, food and travel.
 
