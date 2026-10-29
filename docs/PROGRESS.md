@@ -16,7 +16,9 @@ Strict typecheck, 19 simulation tests, build and built-path/PWA validation pass 
 
 `npm audit`: zero advisories after updating the test runner. No required third-party runtime requests observed. No API keys, paid services, model downloads or reset redemption.
 
-Initial Actions passed install/checks/build, then failed because Pages was not yet enabled. Repository is created, Pages source is now Actions; final deployment verification follows the next push.
+Initial Actions passed install/checks/build, then failed because Pages was not yet enabled. Pages source was configured to Actions. Final code commit `ad28a2a` passed every CI gate and deployed successfully: https://github.com/cudldev/Fable-Crown/actions/runs/40792122171 .
+
+Live verified at https://cudldev.github.io/Fable-Crown/ : world and all16 actors load, autonomous gathering runs, intention selection and tapping Alden’s inspector work. Browser console has no errors. Root and repository-subpath builds are verified. Local suite:19 simulation tests +2 browser scenarios pass; CI repeats them before deployment. Screenshots are in `docs/screenshots/`.
 
 ## Limits and deferred scope
 
@@ -26,4 +28,4 @@ Illustrated placeholders are simpler than production paintings. No physical phon
 
 Lead: contracts, infrastructure, UI, saves, integration, QA/deployment. Simulation specialist: simulation/tests. Art specialist: one bounded scene refinement. No model changes.
 
-Usage read at start:13% weekly remaining; latest:12% remaining. No scheduled/banked reset used. Inside110% planning ceiling. Finish at verified playable Pages demo, then stop.
+Usage read at start:13% weekly remaining; latest:12% remaining. No scheduled/banked reset used. Inside110% planning ceiling. Verified playable Pages slice delivered; stopped. Remaining roadmap intentionally deferred.
