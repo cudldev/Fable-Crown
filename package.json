@@ -10,7 +10,8 @@
     "test": "vitest run",
     "preview": "vite preview --host 127.0.0.1",
     "test:browser": "playwright test",
-    "check:dist": "node scripts/check-dist.mjs"
+    "check:dist": "node scripts/check-dist.mjs",
+    "prebuild": "node scripts/prepare-art.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",

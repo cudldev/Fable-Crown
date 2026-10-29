@@ -29,3 +29,19 @@ Illustrated placeholders are simpler than production paintings. No physical phon
 Lead: contracts, infrastructure, UI, saves, integration, QA/deployment. Simulation specialist: simulation/tests. Art specialist: one bounded scene refinement. No model changes.
 
 Usage read at start:13% weekly remaining; latest:12% remaining. No scheduled/banked reset used. Inside110% planning ceiling. Verified playable Pages slice delivered; stopped. Remaining roadmap intentionally deferred.
+
+## Expanded-world release — 2026-10-29
+
+Implemented the approved follow-up in EXPANDED_WORLD.md: 6600×4440 world (36× original area), nine regions, three populated settlements, 24 characters and 18 destinations. Homes, storehouses and cliffs share navigation footprints; two bridges provide legal river crossings. Regional stores remain independent and supplies travel with their carriers.
+
+The world now fills the browser with close following, pan/pinch/wheel zoom, a world overview and contextual overlays. Players can move, gather 2/10/20 or repeat, deposit/withdraw, build and forge; Do now/Add next, cancel/reorder up to eight queued intentions, Wait here and Let Alden decide are integrated. Empty-queue thinking lasts six ticks; original thought selection remains 34 ticks. Villagers maintain their own local resource buffers and rest once supplied.
+
+Original generated artwork: nine terrain regions, world map, five role cutouts, four buildings and four props. PNG originals and normalized prompt set: assets/generated/; 23 WebPs in public/art/ total 11.9 MiB. Built-in ImageGen used; no paid inference API. Regions load lazily and cache on visit; menu displays the measured full-download size and supports explicit whole-world offline storage.
+
+V2 saves retain queues and migrate V1 XP, resources, time, coins and construction; only legacy actors inside new footprints are moved to nearby safe ground. Interrupted player intentions retain their remaining quantities. Resource conservation, 25% capped catch-up, idempotence, strict imports and zero third-party runtime requirements remain enforced.
+
+Verification: strict TypeScript build, 40 simulation/navigation tests and four browser scenarios pass. Root and /Fable-Crown/ builds checked; all 23 artwork files, measured download bytes, relative manifest scope and shell URLs validated. Browser scenarios cover gathering/queue/wait controls, physical cross-town travel through offline reconciliation, invalid-import protection, all-nine-region download and offline exploration, drag versus ground tap, carried-material deposit, desktop and both phone orientations, 44px HUD targets and no horizontal overflow. Runtime artwork decodes and no external requests/page errors are checked. Screenshots: docs/screenshots/world-*.png. Route caching returns independent waypoints so actors cannot mutate each other’s paths; a repeated-route test timeout found during integration was corrected.
+
+Model routing used supported per-agent parameters: Sol High for simulation/navigation, Sol Medium for rendering, Luna Medium for bounded browser QA; lead integrated UI/art/worker/PWA, reviewed and verified. One specialist at a time. Current usage check: 90% used / about 10% remaining; no scheduled or banked reset used and no purchased credits. Within the 110% ceiling.
+
+Live deployment verification is pending this release push. Detailed daily needs/social interactions, combat/quests/economy expansion, optional local narrative LLM, physical-device and FPS benchmarks remain outside this approved slice. No performance claim is made.

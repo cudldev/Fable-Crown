@@ -1,0 +1,222 @@
+.fc-world {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #c9cdb2;
+  touch-action: none;
+  user-select: none;
+  isolation: isolate;
+}
+.fc-world .fc-landscape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+}
+.fc-hit-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fc-world .fc-hit-layer button {
+  position: absolute;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #3e483c;
+  font-family: Georgia, "Times New Roman", serif;
+  touch-action: none;
+}
+.fc-hit-layer button:focus-visible {
+  outline: 3px solid #fbdd8c;
+  outline-offset: 3px;
+  background: #eee3bd44;
+}
+.fc-world .fc-target-hit span {
+  display: block;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.25;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f1ead6d9;
+  border: 1px solid #84775166;
+  box-shadow: 0 2px 7px #273b3822;
+  transform: translateY(20px);
+  text-shadow: 0 1px #fff8;
+}
+.fc-world .fc-town-hit span {
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  font-weight: bold;
+  background: #eae3cbe8;
+  padding: 6px 12px;
+}
+.fc-world .fc-target-hit.fc-is-selected span {
+  background: #f8e8b4;
+  border-color: #a68843;
+}
+.fc-world .fc-person-hit span {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, -7px);
+  background: #243b39eb;
+  color: #f8efd3;
+  border: 1px solid #c9b77d;
+  border-radius: 5px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.fc-person-hit:hover span,
+.fc-person-hit:focus-visible span,
+.fc-person-hit.fc-is-selected span {
+  opacity: 1;
+}
+.fc-person-hit.fc-hero-hit {
+  z-index: 2;
+}
+.fc-selected-ring {
+  stroke: #f6d782;
+  filter: drop-shadow(0 1px 2px #4c5135);
+}
+.fc-prince-ring {
+  stroke: #f7e2ad;
+  opacity: 0.7;
+}
+.fc-carry-text {
+  font:
+    12px Georgia,
+    serif;
+  fill: #4a4737;
+}
+.fc-building-progress {
+  font:
+    12px Georgia,
+    serif;
+  fill: #423d2f;
+  paint-order: stroke;
+  stroke: #f1e5c8;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.fc-road-edge {
+  stroke: #7e81594d;
+  stroke-width: 58;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.fc-road {
+  stroke: #dcc99ec9;
+  stroke-width: 43;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.fc-local-road {
+  stroke: #decca8b0;
+  stroke-width: 24;
+  stroke-linecap: round;
+  fill: none;
+}
+.fc-map-compass {
+  position: absolute;
+  right: 24px;
+  top: 98px;
+  color: #334c43a8;
+  font:
+    13px Georgia,
+    serif;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 1px #f6efd9;
+}
+.fc-map-compass span {
+  display: block;
+  font-size: 31px;
+  line-height: 1;
+}
+.fc-overview-caption {
+  position: absolute;
+  left: 50%;
+  bottom: 155px;
+  transform: translateX(-50%);
+  font:
+    11px Georgia,
+    serif;
+  letter-spacing: 0.14em;
+  color: #304a40;
+  background: #efe6cfdf;
+  border-radius: 5px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.fc-actor-walk {
+  animation: fc-walk 0.6s ease-in-out infinite;
+  transform-origin: 0 0;
+}
+.fc-actor-work {
+  animation: fc-work 1.8s ease-in-out infinite;
+  transform-origin: 0 0;
+}
+@keyframes fc-walk {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(1.5deg);
+  }
+}
+@keyframes fc-work {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  45% {
+    transform: rotate(2deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fc-actor-walk,
+  .fc-actor-work {
+    animation: none;
+  }
+  .fc-world .fc-person-hit span {
+    transition: none;
+  }
+}
+@media (max-width: 600px) {
+  .fc-map-compass {
+    right: 12px;
+    top: 84px;
+  }
+  .fc-world .fc-target-hit span {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+  .fc-world .fc-town-hit span {
+    font-size: 14px;
+  }
+  .fc-overview-caption {
+    bottom: 170px;
+    font-size: 10px;
+  }
+}

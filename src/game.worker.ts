@@ -5,9 +5,15 @@ import {
   reconcile,
   step,
   validateSave,
+  applyCommand,
 } from "./simulation";
 import { readSave, writeSave } from "./storage";
-import { TICK_MS, type GameState, type Strategy } from "./types";
+import {
+  TICK_MS,
+  type GameState,
+  type Strategy,
+  type PlayerCommand,
+} from "./types";
 let state: GameState;
 let running = false;
 let ready = false;
@@ -50,10 +56,20 @@ async function start() {
 }
 void start();
 self.onmessage = async (
-  e: MessageEvent<{ type: string; strategy?: Strategy; value?: unknown }>,
+  e: MessageEvent<{
+    type: string;
+    strategy?: Strategy;
+    value?: unknown;
+    command?: PlayerCommand;
+  }>,
 ) => {
   if (!ready) return;
   const { type } = e.data;
+  if (type === "player" && e.data.command) {
+    const result = applyCommand(state, e.data.command);
+    await save();
+    emit(result.message);
+  }
   if (type === "choose" && e.data.strategy) {
     chooseStrategy(state, e.data.strategy);
     await save();

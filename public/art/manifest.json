@@ -1,0 +1,29 @@
+{
+  "version": "ef4ae6877c17",
+  "bytes": 12466030,
+  "files": [
+    "art/bridge.webp",
+    "art/builder.webp",
+    "art/forest.webp",
+    "art/house.webp",
+    "art/manor.webp",
+    "art/miner.webp",
+    "art/ore.webp",
+    "art/overview.webp",
+    "art/prince.webp",
+    "art/region-0.webp",
+    "art/region-1.webp",
+    "art/region-2.webp",
+    "art/region-3.webp",
+    "art/region-4.webp",
+    "art/region-5.webp",
+    "art/region-6.webp",
+    "art/region-7.webp",
+    "art/region-8.webp",
+    "art/ruins.webp",
+    "art/smith.webp",
+    "art/store.webp",
+    "art/woodcutter.webp",
+    "art/workshop.webp"
+  ]
+}

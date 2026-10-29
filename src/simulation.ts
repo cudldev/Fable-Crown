@@ -1,14 +1,26 @@
 import {
   BILL,
-  LOCATIONS,
   TICK_MS,
+  type ControlState,
   type GameState,
+  type Intent,
+  type IntentDraft,
   type Person,
+  type PlayerCommand,
+  type Point,
   type Resource,
   type Role,
+  type SettlementId,
   type Strategy,
 } from "./types";
-
+import {
+  findPath,
+  isWalkable,
+  nearestSettlement,
+  SETTLEMENTS,
+  targetById,
+  WORLD,
+} from "./world";
 const RESOURCES: Resource[] = ["timber", "stone", "iron"];
 const ROLES: Role[] = ["prince", "woodcutter", "miner", "builder", "smith"];
 const NAMES = [
@@ -28,6 +40,14 @@ const NAMES = [
   "Fenn",
   "Lio",
   "Yuna",
+  "Reed",
+  "Wren",
+  "Moss",
+  "Finch",
+  "Galen",
+  "Opal",
+  "Pip",
+  "Vale",
 ];
 const TRAITS = [
   "Hopeful and cooperative",
@@ -35,7 +55,675 @@ const TRAITS = [
   "Bold and curious",
   "Practical and kind",
 ];
-const ACTIONS = [
+const zero = (): Record<Resource, number> => ({ timber: 0, stone: 0, iron: 0 });
+const control = (tick = 0): ControlState => ({
+  active: null,
+  queue: [],
+  thinkingUntil: tick + 6,
+  waiting: false,
+  reason: "Considering how to help the workshop.",
+  nextId: 1,
+});
+export function calendarDate(now: number): string {
+  const d = new Date(now);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function note(s: GameState, message: string): void {
+  s.journal.unshift(message);
+  s.journal.length = Math.min(12, s.journal.length);
+}
+function place(id: SettlementId, kind: string): Point {
+  return targetById(`${id}-${kind}`)!;
+}
+const near = (a: Point, b: Point): boolean =>
+  Math.hypot(a.x - b.x, a.y - b.y) < 0.01;
+function begin(p: Person, action: string, duration: number): void {
+  p.action = action;
+  p.remaining = p.duration = duration;
+  p.fromX = p.targetX = p.x;
+  p.fromY = p.targetY = p.y;
+  p.path = [];
+}
+function walk(p: Person, to: Point): boolean {
+  const path = findPath(p, to);
+  if (!path) {
+    begin(p, "Route unavailable", 6);
+    return false;
+  }
+  p.path = path;
+  p.action = "Traveling";
+  p.fromX = p.x;
+  p.fromY = p.y;
+  p.targetX = to.x;
+  p.targetY = to.y;
+  let last: Point = p;
+  let length = 0;
+  for (const v of path) {
+    length += Math.hypot(v.x - last.x, v.y - last.y);
+    last = v;
+  }
+  p.remaining = p.duration = Math.max(1, Math.ceil(length / 36));
+  return true;
+}
+function arrive(p: Person, to: Point): boolean {
+  if (near(p, to)) return true;
+  walk(p, to);
+  return false;
+}
+function bank(s: GameState, p: Person, id: SettlementId): boolean {
+  if (!arrive(p, place(id, "store"))) return false;
+  if (p.carry) {
+    s.stores[id][p.carry.resource] += p.carry.amount;
+    p.carry = null;
+    p.completed++;
+  }
+  return true;
+}
+function gather(p: Person, resource: Resource, home: SettlementId): void {
+  if (arrive(p, place(home, resource === "timber" ? "forest" : "mine"))) {
+    p.taskResource = resource;
+    begin(p, `Gathering ${resource}`, 5 + (p.id % 2));
+  }
+}
+function load(
+  s: GameState,
+  p: Person,
+  home: SettlementId,
+  r: Resource,
+  amount: number,
+): void {
+  if (!arrive(p, place(home, "store"))) return;
+  const n = Math.min(amount, s.stores[home][r], p.id === 0 ? 10 : 2);
+  if (n > 0) {
+    s.stores[home][r] -= n;
+    p.carry = { resource: r, amount: n };
+  } else begin(p, "Waiting for supplies", 3);
+}
+function deliverBuild(s: GameState, p: Person): void {
+  if (!arrive(p, place("oakrest", "workshop"))) return;
+  if (p.carry && p.carry.resource !== "iron") {
+    const r = p.carry.resource,
+      n = Math.min(p.carry.amount, BILL[r] - s.workshop[r]);
+    s.workshop[r] += n;
+    s.spent[r] += n;
+    p.carry.amount -= n;
+    p.xp += n * 3;
+    if (!p.carry.amount) p.carry = null;
+  }
+}
+function build(s: GameState, p: Person): void {
+  if (p.carry) {
+    if (
+      p.carry.resource !== "iron" &&
+      s.workshop[p.carry.resource] < BILL[p.carry.resource]
+    )
+      deliverBuild(s, p);
+    else bank(s, p, nearestSettlement(p).id);
+    return;
+  }
+  const r = (["timber", "stone"] as const).find((r) => s.workshop[r] < BILL[r]);
+  if (r) {
+    if (s.stores.oakrest[r] > 0)
+      load(s, p, "oakrest", r, BILL[r] - s.workshop[r]);
+    else if (p.id === 0) gather(p, r, "oakrest");
+    else begin(p, "Waiting for supplies", 3);
+  } else if (arrive(p, place("oakrest", "workshop")))
+    begin(p, "Building workshop", 2);
+}
+function forge(s: GameState, p: Person): void {
+  if (p.carry?.resource !== "iron" && p.carry) {
+    bank(s, p, nearestSettlement(p).id);
+    return;
+  }
+  if (!p.carry) {
+    if (s.stores.oakrest.iron >= 2) load(s, p, "oakrest", "iron", 2);
+    else if (p.id === 0) gather(p, "iron", "oakrest");
+    else begin(p, "Waiting for supplies", 3);
+  } else if (p.carry.amount < 2) bank(s, p, "oakrest");
+  else if (arrive(p, place("oakrest", "workshop")))
+    begin(p, "Forging tools", 6);
+}
+function totalHeld(s: GameState, r: Resource, home: SettlementId): number {
+  return (
+    s.stores[home][r] +
+    s.people
+      .filter((p) => p.homeId === home)
+      .reduce((n, p) => n + (p.carry?.resource === r ? p.carry.amount : 0), 0)
+  );
+}
+function npc(s: GameState, p: Person): void {
+  if (p.role === "woodcutter" || p.role === "miner") {
+    if (p.carry) {
+      bank(s, p, p.homeId);
+      return;
+    }
+    const r =
+      p.role === "woodcutter"
+        ? "timber"
+        : p.homeId === "oakrest" && s.workshop.stone >= BILL.stone
+          ? "iron"
+          : "stone";
+    const limit = r === "timber" ? 64 : r === "stone" ? 48 : 24;
+    if (totalHeld(s, r, p.homeId) >= limit)
+      begin(p, "Resting by the square", 10);
+    else gather(p, r, p.homeId);
+  } else if (!s.workshop.complete) build(s, p);
+  else if (p.id === 11) {
+    p.role = "smith";
+    if (s.workshop.forged < 12) forge(s, p);
+    else if (p.carry) bank(s, p, "oakrest");
+    else begin(p, "Resting by the square", 10);
+  } else if (p.carry) bank(s, p, p.homeId);
+  else if (
+    arrive(
+      p,
+      SETTLEMENTS.find((t) => t.id === p.homeId)!,
+    )
+  )
+    begin(p, "Resting by the square", 10);
+}
+export function intentLabel(d: IntentDraft): string {
+  const t = d.targetId
+    ? (targetById(d.targetId)?.name ?? d.targetId)
+    : "selected ground";
+  switch (d.kind) {
+    case "move":
+      return `Travel to ${t}`;
+    case "gather":
+      return `Gather ${d.repeat ? "repeated" : (d.quantity ?? 10)} ${d.resource ?? "timber"}`;
+    case "deposit":
+      return `Deposit ${d.quantity ?? 10} ${d.resource ?? "timber"} at ${t}`;
+    case "withdraw":
+      return `Withdraw ${d.quantity ?? 10} ${d.resource ?? "timber"} at ${t}`;
+    case "build":
+      return "Build the blacksmith workshop";
+    case "forge":
+      return `Forge ${d.quantity ?? 1} iron tool${d.quantity === 1 ? "" : "s"}`;
+  }
+}
+function draftError(s: GameState, d: IntentDraft): string | null {
+  if (
+    !d ||
+    !["move", "gather", "deposit", "withdraw", "build", "forge"].includes(
+      d.kind,
+    )
+  )
+    return "Unknown intention.";
+  if (
+    d.quantity !== undefined &&
+    (!Number.isInteger(d.quantity) || d.quantity < 1 || d.quantity > 1000)
+  )
+    return "Quantity must be a whole number from 1 to 1000.";
+  if (d.repeat !== undefined && typeof d.repeat !== "boolean")
+    return "Invalid repeat flag.";
+  if (d.resource !== undefined && !RESOURCES.includes(d.resource))
+    return "Unknown resource.";
+  const t = d.targetId ? targetById(d.targetId) : undefined;
+  if (d.targetId && !t) return "Unknown destination.";
+  if (d.kind === "move") {
+    const p = d.point ?? t;
+    if (!p || !isWalkable(p) || !findPath(s.people[0]!, p))
+      return "That ground is blocked or unreachable.";
+  }
+  if (
+    d.kind === "gather" &&
+    (!d.resource || (t && !t.resources?.includes(d.resource)))
+  )
+    return "Choose a resource available at this gathering site.";
+  if (
+    (d.kind === "deposit" || d.kind === "withdraw") &&
+    (!d.resource || t?.kind !== "store")
+  )
+    return "Choose a storehouse and resource.";
+  if (d.kind === "forge" && !s.workshop.complete)
+    return "The blacksmith workshop must open before tools can be forged.";
+  if (d.kind === "build" && s.workshop.complete)
+    return "The blacksmith workshop is already complete.";
+  return null;
+}
+function makeIntent(
+  s: GameState,
+  d: IntentDraft,
+  source: Intent["source"],
+): Intent {
+  const quantity =
+    d.quantity ??
+    (d.kind === "forge" || d.kind === "build" || d.kind === "move" ? 1 : 10);
+  return {
+    ...d,
+    point: d.point ? { ...d.point } : undefined,
+    id: `intent-${s.control.nextId++}`,
+    quantity,
+    remaining: quantity,
+    repeat: d.repeat ?? false,
+    source,
+    label: intentLabel(d),
+  };
+}
+function interrupt(p: Person): void {
+  begin(p, "Considering intentions", 1);
+  delete p.taskResource;
+}
+export function applyCommand(
+  s: GameState,
+  command: PlayerCommand,
+): { ok: boolean; message: string } {
+  const c = s.control,
+    p = s.people[0]!;
+  if (!command || typeof command !== "object")
+    return { ok: false, message: "Invalid command." };
+  if (command.type === "order") {
+    if (command.mode !== "now" && command.mode !== "next")
+      return { ok: false, message: "Invalid queue mode." };
+    const error = draftError(s, command.intent);
+    if (error) return { ok: false, message: error };
+    if (
+      c.queue.length >= 8 &&
+      (command.mode === "next" || c.active?.source === "player")
+    )
+      return {
+        ok: false,
+        message: "The queue already contains eight intentions.",
+      };
+    const task = makeIntent(s, command.intent, "player");
+    c.waiting = false;
+    if (command.mode === "now") {
+      if (c.active?.source === "player") c.queue.unshift(c.active);
+      c.active = task;
+      interrupt(p);
+    } else {
+      c.queue.push(task);
+      if (!c.active) c.thinkingUntil = s.tick;
+    }
+    c.reason = `${command.mode === "now" ? "Following" : "Queued"}: ${task.label}.`;
+    return { ok: true, message: c.reason };
+  }
+  if (command.type === "cancel") {
+    if (c.active?.id === command.id) {
+      c.active = null;
+      interrupt(p);
+      c.thinkingUntil = s.tick + 6;
+    } else {
+      const i = c.queue.findIndex((t) => t.id === command.id);
+      if (i < 0)
+        return { ok: false, message: "That intention is no longer queued." };
+      c.queue.splice(i, 1);
+    }
+    c.reason = "Intention canceled; carried supplies are retained.";
+    return { ok: true, message: c.reason };
+  }
+  if (command.type === "reorder") {
+    const i = c.queue.findIndex((t) => t.id === command.id),
+      j = i + command.direction;
+    if (
+      ![1, -1].includes(command.direction) ||
+      i < 0 ||
+      j < 0 ||
+      j >= c.queue.length
+    )
+      return {
+        ok: false,
+        message: "That intention cannot move in this direction.",
+      };
+    [c.queue[i], c.queue[j]] = [c.queue[j]!, c.queue[i]!];
+    return { ok: true, message: "Queue order updated." };
+  }
+  if (command.type === "wait") {
+    c.waiting = true;
+    interrupt(p);
+    c.reason = "Waiting here until you resume intentions.";
+    return { ok: true, message: c.reason };
+  }
+  if (command.type === "autonomy") {
+    c.waiting = false;
+    c.reason = "Resuming queued intentions, then independent work.";
+    c.thinkingUntil = s.tick + 6;
+    return { ok: true, message: c.reason };
+  }
+  return { ok: false, message: "Unknown command." };
+}
+function complete(s: GameState, p: Person, result?: string): void {
+  const c = s.control;
+  p.completed++;
+  c.active = null;
+  c.thinkingUntil = s.tick + 6;
+  c.reason =
+    result ??
+    (c.queue.length
+      ? "Taking the next queued intention."
+      : "Considering the next useful task.");
+  if (c.queue.length) {
+    c.active = c.queue.shift()!;
+    prince(s, p);
+  } else begin(p, "Considering intentions", 1);
+}
+function prince(s: GameState, p: Person): void {
+  const c = s.control;
+  if (c.waiting) {
+    begin(p, "Waiting for your signal", 1);
+    return;
+  }
+  if (!c.active) {
+    if (c.queue.length) c.active = c.queue.shift()!;
+    else if (s.tick < c.thinkingUntil) {
+      begin(p, "Considering intentions", 1);
+      return;
+    } else if (!s.workshop.complete)
+      c.active = makeIntent(s, { kind: "build" }, "autonomous");
+    else if (s.workshop.forged < 12)
+      c.active = makeIntent(s, { kind: "forge", quantity: 1 }, "autonomous");
+    else {
+      c.reason = "The workshop and tool buffer are ready; resting in Oakrest.";
+      if (p.carry) bank(s, p, nearestSettlement(p).id);
+      else begin(p, "Resting by the square", 10);
+      return;
+    }
+  }
+  const a = c.active,
+    target = a.targetId ? targetById(a.targetId) : undefined;
+  c.reason = `${a.source === "player" ? "Following your intention" : "Helping Oakrest"}: ${a.label}.`;
+  if (a.kind === "move") {
+    if (arrive(p, a.point ?? target!)) complete(s, p);
+  } else if (a.kind === "gather") {
+    const home = target?.settlementId ?? nearestSettlement(p).id,
+      r = a.resource!;
+    if (
+      p.carry &&
+      (p.carry.resource !== r || p.carry.amount >= 10 || a.remaining <= 0)
+    ) {
+      bank(s, p, home);
+      return;
+    }
+    if (a.remaining <= 0) {
+      if (a.repeat) a.remaining = a.quantity;
+      else {
+        complete(s, p);
+        return;
+      }
+    }
+    gather(p, r, home);
+  } else if (a.kind === "deposit") {
+    if (!p.carry || p.carry.resource !== a.resource) {
+      complete(
+        s,
+        p,
+        "No matching carried supplies to deposit. Considering the next useful task.",
+      );
+      return;
+    }
+    if (arrive(p, target!)) {
+      const n = Math.min(p.carry.amount, a.remaining);
+      s.stores[target!.settlementId][a.resource!] += n;
+      p.carry.amount -= n;
+      if (!p.carry.amount) p.carry = null;
+      a.remaining -= n;
+      complete(s, p, `Deposited ${n} ${a.resource} at ${target!.name}.`);
+    }
+  } else if (a.kind === "withdraw") {
+    if (p.carry && p.carry.resource !== a.resource) {
+      complete(
+        s,
+        p,
+        "Carrying another resource; deposit it before withdrawing.",
+      );
+      return;
+    }
+    if (arrive(p, target!)) {
+      const n = Math.min(
+        10 - (p.carry?.amount ?? 0),
+        a.remaining,
+        s.stores[target!.settlementId][a.resource!],
+      );
+      if (n) {
+        s.stores[target!.settlementId][a.resource!] -= n;
+        p.carry = { resource: a.resource!, amount: (p.carry?.amount ?? 0) + n };
+        a.remaining -= n;
+      }
+      complete(
+        s,
+        p,
+        `Withdrew ${n} ${a.resource} from ${target!.name}; carry limit is 10.`,
+      );
+    }
+  } else if (a.kind === "build") {
+    if (s.workshop.complete) complete(s, p);
+    else build(s, p);
+  } else if (a.kind === "forge") {
+    if (a.remaining <= 0) {
+      if (a.repeat) a.remaining = a.quantity;
+      else {
+        complete(s, p);
+        return;
+      }
+    }
+    if (!s.workshop.complete) {
+      c.reason = "Waiting for the workshop to open.";
+      begin(p, "Waiting for supplies", 3);
+    } else forge(s, p);
+  }
+}
+function finishWork(s: GameState, p: Person): void {
+  if (p.action.startsWith("Gathering ") && p.taskResource) {
+    const a = p.id === 0 ? s.control.active : null,
+      r = p.taskResource;
+    const capacity = (p.id === 0 ? 10 : 2) - (p.carry?.amount ?? 0);
+    const amount = Math.min(
+      2,
+      capacity,
+      a?.kind === "gather" ? a.remaining : 2,
+    );
+    if (amount > 0 && (!p.carry || p.carry.resource === r)) {
+      p.carry = { resource: r, amount: (p.carry?.amount ?? 0) + amount };
+      s.gathered[r] += amount;
+      p.xp += amount * 4;
+      p.completed++;
+      if (a?.kind === "gather") a.remaining -= amount;
+    }
+  } else if (
+    p.action === "Building workshop" &&
+    !s.workshop.complete &&
+    s.workshop.timber === BILL.timber &&
+    s.workshop.stone === BILL.stone
+  ) {
+    s.workshop.labor = Math.min(BILL.labor, s.workshop.labor + 1);
+    p.xp += 3;
+    if (s.workshop.labor === BILL.labor) {
+      s.workshop.complete = true;
+      note(
+        s,
+        "The blacksmith workshop is open. Sora takes up the smith’s hammer.",
+      );
+    }
+  } else if (
+    p.action === "Forging tools" &&
+    s.workshop.complete &&
+    p.carry?.resource === "iron" &&
+    p.carry.amount >= 2
+  ) {
+    p.carry.amount -= 2;
+    if (!p.carry.amount) p.carry = null;
+    s.spent.iron += 2;
+    s.workshop.forged++;
+    p.xp += 12;
+    p.completed++;
+    if (p.id === 0 && s.control.active?.kind === "forge")
+      s.control.active.remaining--;
+    if (s.workshop.forged === 1)
+      note(s, "Our first iron tools are ready. Oakrest has a working forge.");
+  }
+  delete p.taskResource;
+}
+export function createGame(now: number): GameState {
+  if (!Number.isSafeInteger(now) || now < 0 || now > 8.64e15)
+    throw new RangeError("Invalid wall time.");
+  const s: GameState = {
+    version: 2,
+    tick: 0,
+    savedAt: now,
+    calendar: calendarDate(now),
+    offlineRemainder: 0,
+    strategy: null,
+    decisionAt: 34,
+    decisionReason:
+      "Alden will choose local gathering after 20.4 seconds; direct intentions take priority.",
+    people: [],
+    stores: { oakrest: zero(), briarford: zero(), stonehaven: zero() },
+    gathered: zero(),
+    spent: zero(),
+    coins: 40,
+    workshop: { timber: 0, stone: 0, labor: 0, complete: false, forged: 0 },
+    control: control(),
+    journal: ["Alden’s ambition: build a blacksmith workshop for Oakrest."],
+  };
+  s.people = NAMES.map((name, id): Person => {
+    const homeId: SettlementId =
+      id < 16 ? "oakrest" : id < 20 ? "briarford" : "stonehaven";
+    const home = SETTLEMENTS.find((t) => t.id === homeId)!;
+    const role: Role =
+      id === 0
+        ? "prince"
+        : id < 7
+          ? "woodcutter"
+          : id < 11
+            ? "miner"
+            : id < 16
+              ? "builder"
+              : id % 4 < 2
+                ? "woodcutter"
+                : "miner";
+    const x = home.x + ((id % 4) - 2) * 20,
+      y = home.y + Math.floor((id % 16) / 4) * 14;
+    return {
+      id,
+      name,
+      role,
+      personality: TRAITS[id % 4]!,
+      homeId,
+      x,
+      y,
+      fromX: x,
+      fromY: y,
+      targetX: x,
+      targetY: y,
+      path: [],
+      action: "Waiting for supplies",
+      remaining: 1,
+      duration: 1,
+      carry: null,
+      xp: 0,
+      completed: 0,
+    };
+  });
+  s.people.forEach((p) => (p.id === 0 ? prince(s, p) : npc(s, p)));
+  return s;
+}
+export function chooseStrategy(s: GameState, strategy: Strategy): void {
+  if (
+    s.strategy !== null ||
+    !["local", "trade", "careful"].includes(strategy) ||
+    (strategy === "trade" && s.coins < 24)
+  )
+    return;
+  s.strategy = strategy;
+  if (strategy === "trade") {
+    s.coins -= 24;
+    for (const r of ["timber", "stone"] as const) {
+      s.stores.oakrest[r] += 8;
+      s.gathered[r] += 8;
+    }
+    s.decisionReason =
+      "Paid the local merchant 24 coins for 8 timber and 8 stone delivered to Oakrest storage.";
+  } else
+    s.decisionReason =
+      strategy === "careful"
+        ? "Alden chose a measured approach: existing workers supply the same workshop bill."
+        : "Alden chose local gathering, keeping Oakrest’s 40 coins for later.";
+  note(s, s.decisionReason);
+}
+export function step(s: GameState, count = 1): GameState {
+  if (!Number.isInteger(count) || count < 0 || count > 36000)
+    throw new RangeError("Tick count must be between 0 and 36000.");
+  for (let i = 0; i < count; i++) {
+    s.tick++;
+    if (s.strategy === null && s.tick >= s.decisionAt)
+      chooseStrategy(s, "local");
+    for (const p of s.people) {
+      if (p.id === 0 && s.control.waiting) {
+        begin(p, "Waiting for your signal", 1);
+        continue;
+      }
+      if (p.path.length) {
+        let distance = 36;
+        while (distance > 0 && p.path.length) {
+          const to = p.path[0]!,
+            d = Math.hypot(to.x - p.x, to.y - p.y);
+          if (d <= distance) {
+            p.x = to.x;
+            p.y = to.y;
+            p.path.shift();
+            distance -= d;
+          } else {
+            p.x += ((to.x - p.x) / d) * distance;
+            p.y += ((to.y - p.y) / d) * distance;
+            distance = 0;
+          }
+        }
+        p.remaining = Math.max(1, p.remaining - 1);
+        if (p.path.length) continue;
+      } else {
+        p.remaining--;
+        if (p.remaining > 0) continue;
+        finishWork(s, p);
+      }
+      if (p.id === 0) prince(s, p);
+      else npc(s, p);
+    }
+  }
+  return s;
+}
+export function reconcile(
+  s: GameState,
+  now: number,
+): { state: GameState; ticks: number; elapsed: number } {
+  if (!Number.isFinite(now) || now < 0 || now > 8.64e15)
+    throw new RangeError("Invalid wall time.");
+  const elapsed = Math.max(0, now - s.savedAt),
+    effective = Math.min(elapsed, 86400000) * 0.25 + s.offlineRemainder,
+    ticks = Math.floor(effective / TICK_MS);
+  s.offlineRemainder = effective % TICK_MS;
+  step(s, ticks);
+  s.savedAt = Math.max(now, s.savedAt);
+  s.calendar = calendarDate(s.savedAt);
+  if (ticks > 0)
+    note(
+      s,
+      `While you were away: ${ticks} ticks of work at quarter speed. Calendar: ${s.calendar}.`,
+    );
+  return { state: s, ticks, elapsed };
+}
+function object(v: unknown): v is Record<string, unknown> {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+function integer(v: unknown, max = 1e12): v is number {
+  return typeof v === "number" && Number.isSafeInteger(v) && v >= 0 && v <= max;
+}
+function text(v: unknown, max: number): v is string {
+  return typeof v === "string" && v.length <= max;
+}
+function point(v: unknown, legacy = false): v is Point {
+  return (
+    object(v) &&
+    typeof v.x === "number" &&
+    Number.isFinite(v.x) &&
+    typeof v.y === "number" &&
+    Number.isFinite(v.y) &&
+    v.x >= 0 &&
+    v.y >= 0 &&
+    v.x <= (legacy ? 1200 : WORLD.width) &&
+    v.y <= (legacy ? 1200 : WORLD.height)
+  );
+}
+const OLD_ACTIONS = [
   "Walking to forest",
   "Walking to mine",
   "Gathering timber",
@@ -50,433 +738,341 @@ const ACTIONS = [
   "Forging tools",
   "Resting by the square",
 ];
-
-/** Calendar follows the player's local day; ticks remain independent of timezone. */
-export function calendarDate(now: number): string {
-  const date = new Date(now);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const ACTIONS = [
+  ...OLD_ACTIONS,
+  "Traveling",
+  "Route unavailable",
+  "Considering intentions",
+  "Waiting for your signal",
+];
+function validLedger(v: unknown): v is Record<Resource, number> {
+  return object(v) && RESOURCES.every((r) => integer(v[r]));
 }
-
-function note(s: GameState, text: string): void {
-  s.journal.unshift(text);
-  s.journal.length = Math.min(s.journal.length, 12);
-}
-
-function begin(
-  p: Person,
-  action: string,
-  duration: number,
-  target?: { x: number; y: number },
-): void {
-  p.action = action;
-  p.remaining = p.duration = duration;
-  p.fromX = p.x;
-  p.fromY = p.y;
-  p.targetX = target ? target.x + ((p.id % 3) - 1) * 14 : p.x;
-  p.targetY = target ? target.y + ((p.id % 4) - 1) * 12 : p.y;
-}
-
-function walk(
-  p: Person,
-  action: string,
-  target: { x: number; y: number },
-): void {
-  begin(
-    p,
-    action,
-    Math.max(3, Math.ceil(Math.hypot(p.x - target.x, p.y - target.y) / 36)),
-    target,
-  );
-}
-
-function carried(s: GameState, resource: Resource): number {
-  return s.people.reduce(
-    (n, p) => n + (p.carry?.resource === resource ? p.carry.amount : 0),
-    0,
-  );
-}
-
-function nextGather(s: GameState, p: Person): void {
-  const resource: Resource =
-    p.role === "woodcutter"
-      ? "timber"
-      : s.workshop.stone + carried(s, "stone") >= BILL.stone
-        ? "iron"
-        : "stone";
-  const limit = resource === "timber" ? 64 : resource === "stone" ? 48 : 24;
-  if (s.stock[resource] + carried(s, resource) >= limit) {
-    begin(p, "Resting by the square", 8);
-    return;
-  }
-  walk(
-    p,
-    resource === "timber" ? "Walking to forest" : "Walking to mine",
-    resource === "timber" ? LOCATIONS.forest : LOCATIONS.mine,
-  );
-}
-
-function nextBuilder(s: GameState, p: Person): void {
-  if (s.workshop.complete) {
-    if (p.id === 11) {
-      p.role = "smith";
-      walk(p, "Fetching materials", LOCATIONS.storage);
-    } else walk(p, "Resting by the square", LOCATIONS.square);
-    return;
-  }
-  if (s.workshop.timber >= BILL.timber && s.workshop.stone >= BILL.stone) {
-    walk(p, "Building workshop", LOCATIONS.workshop);
-  } else walk(p, "Fetching materials", LOCATIONS.storage);
-}
-
-function finish(s: GameState, p: Person): void {
-  const slower = s.strategy === "careful" ? 2 : 0;
-  if (p.action === "Walking to forest" || p.action === "Walking to mine") {
-    const resource =
-      p.role === "woodcutter"
-        ? "timber"
-        : s.workshop.stone + carried(s, "stone") >= BILL.stone
-          ? "iron"
-          : "stone";
-    begin(p, `Gathering ${resource}`, 5 + slower + (p.id % 3));
-  } else if (p.action.startsWith("Gathering ")) {
-    const resource = p.action.slice(10) as Resource;
-    p.carry = { resource, amount: 2 };
-    s.gathered[resource] += 2;
-    p.xp += 8;
-    p.completed++;
-    walk(p, "Carrying supplies", LOCATIONS.storage);
-  } else if (p.action === "Carrying supplies") {
-    if (p.carry) {
-      s.stock[p.carry.resource] += p.carry.amount;
-      p.carry = null;
-    }
-    nextGather(s, p);
-  } else if (p.action === "Fetching materials") {
-    if (p.role === "smith") {
-      if (s.stock.iron >= 2) {
-        s.stock.iron -= 2;
-        p.carry = { resource: "iron", amount: 2 };
-        walk(p, "Delivering materials", LOCATIONS.workshop);
-      } else begin(p, "Fetching materials", 4);
-      return;
-    }
-    const resource = (["timber", "stone"] as const).find(
-      (r) =>
-        s.workshop[r] +
-          s.people.reduce(
-            (sum, other) =>
-              sum +
-              (other.action === "Delivering materials" &&
-              other.carry?.resource === r
-                ? other.carry.amount
-                : 0),
-            0,
-          ) <
-          BILL[r] && s.stock[r] > 0,
-    );
-    if (resource) {
-      const reserved = s.people.reduce(
-        (sum, other) =>
-          sum +
-          (other.action === "Delivering materials" &&
-          other.carry?.resource === resource
-            ? other.carry.amount
-            : 0),
-        0,
-      );
-      const amount = Math.min(
-        2,
-        s.stock[resource],
-        BILL[resource] - s.workshop[resource] - reserved,
-      );
-      s.stock[resource] -= amount;
-      p.carry = { resource, amount };
-      walk(p, "Delivering materials", LOCATIONS.workshop);
-    } else if (
-      s.workshop.timber >= BILL.timber &&
-      s.workshop.stone >= BILL.stone
-    )
-      nextBuilder(s, p);
-    else begin(p, "Waiting for supplies", 3);
-  } else if (p.action === "Delivering materials") {
-    if (p.role === "smith" && p.carry?.resource === "iron") {
-      begin(p, "Forging tools", 12);
-      return;
-    }
-    if (p.carry && p.carry.resource !== "iron") {
-      s.workshop[p.carry.resource] += p.carry.amount;
-      s.spent[p.carry.resource] += p.carry.amount;
-      p.carry = null;
-      p.xp += 6;
-      p.completed++;
-    }
-    nextBuilder(s, p);
-  } else if (p.action === "Building workshop") {
-    if (
-      !s.workshop.complete &&
-      s.workshop.timber >= BILL.timber &&
-      s.workshop.stone >= BILL.stone
-    ) {
-      s.workshop.labor = Math.min(BILL.labor, s.workshop.labor + 1);
-      p.xp += 3;
-      if (s.workshop.labor === BILL.labor) {
-        s.workshop.complete = true;
-        note(
-          s,
-          "The blacksmith workshop is open. Yuna tends the hearth; Sora takes up the smith’s hammer.",
-        );
-      }
-    }
-    if (s.workshop.complete) nextBuilder(s, p);
-    else begin(p, "Building workshop", 2 + slower);
-  } else if (p.action === "Walking to forge" || p.action === "Forging tools") {
-    if (p.action === "Forging tools" && p.carry) {
-      s.spent.iron += p.carry.amount;
-      p.carry = null;
-      s.workshop.forged++;
-      p.xp += 12;
-      p.completed++;
-      if (s.workshop.forged === 1)
-        note(s, "Our first iron tools are ready. Oakrest has a working forge.");
-    }
-    walk(p, "Fetching materials", LOCATIONS.storage);
-  } else if (p.action === "Waiting for supplies") nextBuilder(s, p);
-  else if (p.role === "woodcutter" || p.role === "miner") nextGather(s, p);
-  else if (p.role === "smith") walk(p, "Fetching materials", LOCATIONS.storage);
-  else if (!s.workshop.complete) nextBuilder(s, p);
-  else begin(p, "Resting by the square", 10);
-}
-
-export function createGame(now: number): GameState {
-  const state: GameState = {
-    version: 1,
-    tick: 0,
-    savedAt: now,
-    calendar: calendarDate(now),
-    offlineRemainder: 0,
-    strategy: null,
-    decisionAt: 34,
-    decisionReason:
-      "Local timber and stone are within reach. Alden will choose local gathering if you leave the thought unanswered.",
-    people: NAMES.map((name, id): Person => {
-      const role: Role =
-        id === 0
-          ? "prince"
-          : id < 7
-            ? "woodcutter"
-            : id < 11
-              ? "miner"
-              : "builder";
-      const x = LOCATIONS.square.x + ((id % 4) - 2) * 20;
-      const y = LOCATIONS.square.y + Math.floor(id / 4) * 14;
-      return {
-        id,
-        name,
-        role,
-        personality: TRAITS[id % TRAITS.length]!,
-        x,
-        y,
-        fromX: x,
-        fromY: y,
-        targetX: x,
-        targetY: y,
-        action: "Waiting for supplies",
-        remaining: 1 + (id % 4),
-        duration: 1 + (id % 4),
-        carry: null,
-        xp: 0,
-        completed: 0,
-      };
-    }),
-    stock: { timber: 0, stone: 0, iron: 0 },
-    gathered: { timber: 0, stone: 0, iron: 0 },
-    spent: { timber: 0, stone: 0, iron: 0 },
-    coins: 40,
-    workshop: { timber: 0, stone: 0, labor: 0, complete: false, forged: 0 },
-    journal: ["Alden’s ambition: build a blacksmith workshop for Oakrest."],
+function validIntent(v: unknown, s: GameState): v is Intent {
+  if (
+    !object(v) ||
+    !text(v.id, 60) ||
+    !/^intent-\d+$/.test(v.id) ||
+    !text(v.label, 200) ||
+    !["player", "autonomous"].includes(String(v.source)) ||
+    !integer(v.quantity, 1000) ||
+    v.quantity < 1 ||
+    !integer(v.remaining, v.quantity) ||
+    typeof v.repeat !== "boolean"
+  )
+    return false;
+  if (v.targetId !== undefined && !text(v.targetId, 80)) return false;
+  if (v.point !== undefined && !point(v.point)) return false;
+  // Completed build/forge intents can remain active for one tick after another actor finishes.
+  const check = {
+    ...s,
+    workshop: {
+      ...s.workshop,
+      complete:
+        v.kind === "forge"
+          ? true
+          : v.kind === "build"
+            ? false
+            : s.workshop.complete,
+    },
   };
-  state.people.forEach((p) =>
-    p.role === "woodcutter" || p.role === "miner"
-      ? nextGather(state, p)
-      : nextBuilder(state, p),
+  return draftError(check, v as unknown as IntentDraft) === null;
+}
+function validCommon(v: Record<string, unknown>): boolean {
+  return (
+    integer(v.tick) &&
+    integer(v.savedAt, 8.64e15) &&
+    text(v.calendar, 10) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(v.calendar) &&
+    Number.isFinite(Date.parse(v.calendar)) &&
+    typeof v.offlineRemainder === "number" &&
+    Number.isFinite(v.offlineRemainder) &&
+    v.offlineRemainder >= 0 &&
+    v.offlineRemainder < TICK_MS &&
+    integer(v.decisionAt) &&
+    text(v.decisionReason, 1000) &&
+    integer(v.coins, 40) &&
+    (v.strategy === null ||
+      ["local", "trade", "careful"].includes(String(v.strategy))) &&
+    Array.isArray(v.journal) &&
+    v.journal.length <= 12 &&
+    v.journal.every((x) => text(x, 1000)) &&
+    validLedger(v.gathered) &&
+    validLedger(v.spent)
   );
-  return state;
 }
-
-export function chooseStrategy(s: GameState, strategy: Strategy): void {
-  if (s.strategy !== null || !["local", "trade", "careful"].includes(strategy))
-    return;
-  if (strategy === "trade" && s.coins < 24) return;
-  s.strategy = strategy;
-  if (strategy === "trade") {
-    s.coins -= 24;
-    for (const r of ["timber", "stone"] as const) {
-      s.stock[r] += 8;
-      s.gathered[r] += 8;
-    }
-    s.decisionReason =
-      "Spent 24 of 40 coins on 8 timber and 8 stone from the local merchant. Villagers deliver the remaining materials.";
-  } else if (strategy === "careful")
-    s.decisionReason =
-      "Alden chose measured work: longer gathering and building actions keep a steady pace while the workshop remains the goal.";
-  else
-    s.decisionReason =
-      "Alden chose local gathering: six woodcutters and four miners can supply the bill without spending the settlement’s 40 coins.";
-  note(s, s.decisionReason);
+function validWorkshop(v: Record<string, unknown>): boolean {
+  const w = v.workshop;
+  return (
+    object(w) &&
+    integer(w.timber, BILL.timber) &&
+    integer(w.stone, BILL.stone) &&
+    integer(w.labor, BILL.labor) &&
+    typeof w.complete === "boolean" &&
+    integer(w.forged) &&
+    w.complete === (w.labor === BILL.labor) &&
+    !(w.labor > 0 && (w.timber !== BILL.timber || w.stone !== BILL.stone)) &&
+    object(v.spent) &&
+    v.spent.timber === w.timber &&
+    v.spent.stone === w.stone &&
+    v.spent.iron === w.forged * 2
+  );
 }
-
-export function step(s: GameState, count = 1): GameState {
-  if (!Number.isInteger(count) || count < 0 || count > 36_000)
-    throw new RangeError("Tick count must be between 0 and 36000.");
-  for (let i = 0; i < count; i++) {
-    s.tick++;
-    if (s.strategy === null && s.tick >= s.decisionAt)
-      chooseStrategy(s, "local");
-    for (const p of s.people) {
-      p.remaining--;
-      const progress = 1 - p.remaining / p.duration;
-      p.x = p.fromX + (p.targetX - p.fromX) * progress;
-      p.y = p.fromY + (p.targetY - p.fromY) * progress;
-      if (p.remaining <= 0) finish(s, p);
-    }
-  }
-  return s;
-}
-
-export function reconcile(
-  s: GameState,
-  now: number,
-): { state: GameState; ticks: number; elapsed: number } {
-  if (!Number.isFinite(now) || now < 0 || now > 8.64e15)
-    throw new RangeError("Invalid wall time.");
-  const elapsed = Math.max(0, now - s.savedAt);
-  const effective = Math.min(elapsed, 86_400_000) * 0.25 + s.offlineRemainder;
-  const ticks = Math.floor(effective / TICK_MS);
-  s.offlineRemainder = effective % TICK_MS;
-  step(s, ticks);
-  s.savedAt = Math.max(s.savedAt, now);
-  s.calendar = calendarDate(s.savedAt);
-  if (ticks > 0)
-    note(
-      s,
-      `While you were away: ${ticks} ticks of work at quarter speed. Calendar: ${s.calendar}.`,
+function validPerson(v: unknown, id: number, legacy: boolean): boolean {
+  if (
+    !object(v) ||
+    v.id !== id ||
+    !text(v.name, 40) ||
+    !text(v.personality, 100) ||
+    !ROLES.includes(v.role as Role) ||
+    !(legacy ? OLD_ACTIONS : ACTIONS).includes(String(v.action)) ||
+    !integer(v.duration, legacy ? 100 : 5000) ||
+    v.duration < 1 ||
+    !integer(v.remaining, v.duration) ||
+    v.remaining < 1 ||
+    !integer(v.xp) ||
+    !integer(v.completed)
+  )
+    return false;
+  if (
+    !["", "from", "target"].every((prefix) =>
+      point(
+        {
+          x: v[prefix ? `${prefix}X` : "x"],
+          y: v[prefix ? `${prefix}Y` : "y"],
+        },
+        legacy,
+      ),
+    )
+  )
+    return false;
+  if (
+    v.carry !== null &&
+    (!object(v.carry) ||
+      !RESOURCES.includes(v.carry.resource as Resource) ||
+      !integer(v.carry.amount, legacy || id !== 0 ? 2 : 10) ||
+      v.carry.amount < 1)
+  )
+    return false;
+  if (id === 0 ? v.role !== "prince" : v.role === "prince") return false;
+  if (legacy) return true;
+  if (
+    !SETTLEMENTS.some((t) => t.id === v.homeId) ||
+    !Array.isArray(v.path) ||
+    v.path.length > 128 ||
+    !v.path.every((p) => point(p) && isWalkable(p)) ||
+    !isWalkable(v as unknown as Point)
+  )
+    return false;
+  if (
+    v.taskResource !== undefined &&
+    !RESOURCES.includes(v.taskResource as Resource)
+  )
+    return false;
+  if (
+    String(v.action).startsWith("Gathering ") &&
+    v.taskResource !== String(v.action).slice(10)
+  )
+    return false;
+  if (v.path.length > 0 && v.action !== "Traveling") return false;
+  let from = v as unknown as Point;
+  for (const dest of v.path as Point[]) {
+    const n = Math.max(
+      1,
+      Math.ceil(Math.hypot(dest.x - from.x, dest.y - from.y) / 10),
     );
-  return { state: s, ticks, elapsed };
+    for (let i = 0; i <= n; i++)
+      if (
+        !isWalkable({
+          x: from.x + ((dest.x - from.x) * i) / n,
+          y: from.y + ((dest.y - from.y) * i) / n,
+        })
+      )
+        return false;
+    from = dest;
+  }
+  return true;
 }
-
-function object(v: unknown): v is Record<string, unknown> {
-  return v !== null && typeof v === "object" && !Array.isArray(v);
+function conserved(v: Record<string, unknown>, legacy: boolean): boolean {
+  if (!Array.isArray(v.people) || !object(v.gathered) || !object(v.spent))
+    return false;
+  return RESOURCES.every((r) => {
+    const held = (v.people as Person[]).reduce(
+      (n, p) => n + (p.carry?.resource === r ? p.carry.amount : 0),
+      0,
+    );
+    const stored = legacy
+      ? (v.stock as Record<Resource, number>)[r]
+      : Object.values(v.stores as GameState["stores"]).reduce(
+          (n, store) => n + store[r],
+          0,
+        );
+    return (
+      (v.gathered as Record<Resource, number>)[r] ===
+      stored + (v.spent as Record<Resource, number>)[r] + held
+    );
+  });
 }
-function integer(v: unknown, max = 1e12): v is number {
-  return typeof v === "number" && Number.isSafeInteger(v) && v >= 0 && v <= max;
-}
-function text(v: unknown, max: number): v is string {
-  return typeof v === "string" && v.length <= max;
-}
-
-/** Reject malformed imports before they can reach authoritative simulation code. */
+/** Validate V1 before migration; V2 imports never bypass inventory and navigation invariants. */
 export function validateSave(value: unknown): GameState | null {
   try {
     if (
       !object(value) ||
-      value.version !== 1 ||
-      !integer(value.tick) ||
-      !integer(value.savedAt, 8.64e15) ||
-      !text(value.calendar, 10) ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(value.calendar) ||
-      !Number.isFinite(Date.parse(value.calendar))
+      ![1, 2].includes(Number(value.version)) ||
+      !validCommon(value) ||
+      !validWorkshop(value) ||
+      !Array.isArray(value.people)
+    )
+      return null;
+    const legacy = value.version === 1;
+    if (
+      (value.version !== 1 && value.version !== 2) ||
+      value.people.length !== (legacy ? 16 : 24) ||
+      !value.people.every((p, id) => validPerson(p, id, legacy))
     )
       return null;
     if (
-      typeof value.offlineRemainder !== "number" ||
-      !Number.isFinite(value.offlineRemainder) ||
-      value.offlineRemainder < 0 ||
-      value.offlineRemainder >= TICK_MS ||
-      !integer(value.decisionAt) ||
-      !text(value.decisionReason, 1000) ||
-      !integer(value.coins, 40)
+      value.people.some(
+        (p) =>
+          object(p) &&
+          p.role === "smith" &&
+          !(value.workshop as GameState["workshop"]).complete,
+      )
     )
       return null;
+    if (legacy) {
+      if (!validLedger(value.stock) || !conserved(value, true)) return null;
+      const s = createGame(value.savedAt as number),
+        copy = JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
+      for (const key of [
+        "tick",
+        "savedAt",
+        "calendar",
+        "offlineRemainder",
+        "strategy",
+        "decisionAt",
+        "decisionReason",
+        "gathered",
+        "spent",
+        "coins",
+        "workshop",
+        "journal",
+      ] as const)
+        (s as unknown as Record<string, unknown>)[key] = copy[key];
+      s.stores.oakrest = copy.stock as Record<Resource, number>;
+      s.people.splice(
+        0,
+        16,
+        ...(copy.people as Person[]).map((p) => ({
+          ...p,
+          homeId: "oakrest" as const,
+          x: p.x + 850,
+          y: p.y + 1800,
+          fromX: p.x + 850,
+          fromY: p.y + 1800,
+          targetX: p.x + 850,
+          targetY: p.y + 1800,
+          path: [],
+          action: "Waiting for supplies",
+          remaining: 1,
+          duration: 1,
+        })),
+      );
+      // Legacy straight-line movement could cross a new building footprint.
+      // Relocate only blocked actors; preserve their work, XP and supplies.
+      for (const p of s.people) {
+        if (isWalkable(p)) continue;
+        let safe: Point | undefined;
+        for (let radius = 10; radius <= 500 && !safe; radius += 10) {
+          for (const [dx, dy] of [
+            [0, radius],
+            [radius, 0],
+            [0, -radius],
+            [-radius, 0],
+          ]) {
+            const candidate = { x: p.x + dx!, y: p.y + dy! };
+            if (isWalkable(candidate)) {
+              safe = candidate;
+              break;
+            }
+          }
+        }
+        if (!safe) return null;
+        Object.assign(p, safe, {
+          fromX: safe.x,
+          fromY: safe.y,
+          targetX: safe.x,
+          targetY: safe.y,
+        });
+      }
+      s.control = control(s.tick);
+      return s;
+    }
     if (
-      value.strategy !== null &&
-      !["local", "trade", "careful"].includes(String(value.strategy))
+      !object(value.stores) ||
+      !SETTLEMENTS.every((t) =>
+        validLedger((value.stores as Record<string, unknown>)[t.id]),
+      ) ||
+      Object.keys(value.stores).length !== 3 ||
+      !conserved(value, false)
     )
       return null;
+    const s = value as unknown as GameState,
+      c = value.control;
     if (
-      !Array.isArray(value.journal) ||
-      value.journal.length > 12 ||
-      !value.journal.every((v) => text(v, 1000))
+      !object(c) ||
+      !Array.isArray(c.queue) ||
+      c.queue.length > 8 ||
+      typeof c.waiting !== "boolean" ||
+      !integer(c.thinkingUntil) ||
+      !integer(c.nextId) ||
+      c.nextId < 1 ||
+      !text(c.reason, 1000) ||
+      (c.active !== null && !validIntent(c.active, s)) ||
+      !c.queue.every((a) => validIntent(a, s))
     )
       return null;
-    if (!Array.isArray(value.people) || value.people.length !== 16) return null;
-    for (const [id, p] of value.people.entries()) {
+    const intents = [c.active, ...c.queue].filter(
+      (v): v is Intent => v !== null,
+    ) as Intent[];
+    if (
+      new Set(intents.map((a) => a.id)).size !== intents.length ||
+      intents.some((a) => Number(a.id.slice(7)) >= (c.nextId as number))
+    )
+      return null;
+    for (const p of s.people) {
       if (
-        !object(p) ||
-        p.id !== id ||
-        !text(p.name, 40) ||
-        !text(p.personality, 100) ||
-        !ROLES.includes(p.role as Role) ||
-        !ACTIONS.includes(String(p.action)) ||
-        !integer(p.duration, 100) ||
-        p.duration < 1 ||
-        !integer(p.remaining, p.duration) ||
-        p.remaining < 1 ||
-        !integer(p.xp) ||
-        !integer(p.completed)
+        p.action === "Building workshop" &&
+        !near(p, place("oakrest", "workshop"))
       )
         return null;
       if (
-        !["x", "y", "fromX", "fromY", "targetX", "targetY"].every(
-          (key) =>
-            typeof p[key] === "number" &&
-            Number.isFinite(p[key]) &&
-            (p[key] as number) >= 0 &&
-            (p[key] as number) <= 1200,
+        p.action === "Forging tools" &&
+        (!s.workshop.complete ||
+          !near(p, place("oakrest", "workshop")) ||
+          p.carry?.resource !== "iron" ||
+          p.carry.amount < 2)
+      )
+        return null;
+      if (p.action.startsWith("Gathering ")) {
+        const active = p.id === 0 ? s.control.active : null;
+        const home =
+          active?.kind === "gather"
+            ? active.targetId
+              ? targetById(active.targetId)!.settlementId
+              : nearestSettlement(p).id
+            : p.homeId;
+        if (
+          !near(
+            p,
+            place(home, p.taskResource === "timber" ? "forest" : "mine"),
+          ) ||
+          (p.carry && p.carry.resource !== p.taskResource)
         )
-      )
-        return null;
-      if (
-        p.carry !== null &&
-        (!object(p.carry) ||
-          !RESOURCES.includes(p.carry.resource as Resource) ||
-          !integer(p.carry.amount, 2) ||
-          p.carry.amount < 1)
-      )
-        return null;
+          return null;
+      }
     }
-    for (const ledger of ["stock", "gathered", "spent"] as const) {
-      const record = value[ledger];
-      if (!object(record) || !RESOURCES.every((r) => integer(record[r])))
-        return null;
-    }
-    const w = value.workshop;
-    if (
-      !object(w) ||
-      !integer(w.timber, BILL.timber) ||
-      !integer(w.stone, BILL.stone) ||
-      !integer(w.labor, BILL.labor) ||
-      typeof w.complete !== "boolean" ||
-      !integer(w.forged) ||
-      w.complete !== (w.labor === BILL.labor) ||
-      (w.labor > 0 && (w.timber !== BILL.timber || w.stone !== BILL.stone))
-    )
-      return null;
-    const s = value as unknown as GameState;
-    if (
-      s.spent.timber !== w.timber ||
-      s.spent.stone !== w.stone ||
-      s.spent.iron !== w.forged * 2 ||
-      !RESOURCES.every(
-        (r) => s.gathered[r] === s.stock[r] + s.spent[r] + carried(s, r),
-      )
-    )
-      return null;
-    if (
-      s.people[0]?.role !== "prince" ||
-      s.people.some((p) => p.role === "smith" && !w.complete)
-    )
-      return null;
-    return JSON.parse(JSON.stringify(s)) as GameState;
+    return JSON.parse(JSON.stringify(value)) as GameState;
   } catch {
     return null;
   }
