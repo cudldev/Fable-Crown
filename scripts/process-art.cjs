@@ -54,9 +54,28 @@ async function main() {
     } catch {}
     frames[name] = frame;
     await fs.writeFile(framePath, JSON.stringify(frames, null, 2) + "\n");
+    const versions = (await fs.readdir("assets/generated"))
+      .filter((name) => /^v\d+$/.test(name))
+      .sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+    const mergedFrames = {};
+    for (const assetVersion of versions) {
+      try {
+        Object.assign(
+          mergedFrames,
+          JSON.parse(
+            await fs.readFile(
+              path.join("assets/generated", assetVersion, "frames.json"),
+              "utf8",
+            ),
+          ),
+        );
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+    }
     await fs.writeFile(
       "src/art-frames.ts",
-      `// Generated alpha bounds and foot anchors; source pixels are unchanged.\nexport const artFrames: Record<string,{width:number;height:number;boundsWidth:number;boundsHeight:number;pivotX:number;pivotY:number}> = ${JSON.stringify(frames, null, 2)};\n`,
+      `// Generated alpha bounds and foot anchors; source pixels are unchanged.\nexport const artFrames: Record<string,{width:number;height:number;boundsWidth:number;boundsHeight:number;pivotX:number;pivotY:number}> = ${JSON.stringify(mergedFrames, null, 2)};\n`,
     );
   }
   await sharp(source)

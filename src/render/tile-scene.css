@@ -33,7 +33,10 @@
 .tile-hit-layer button:focus-visible {
   outline: 2px solid #f6d791;
 }
-.tile-object span {
+.tile-object span,
+.tile-enemy span,
+.tile-drop span,
+.tile-grave span {
   display: block;
   white-space: nowrap;
   transform: translate(-25%, 22px);
@@ -52,6 +55,28 @@
 }
 .tile-actor {
   z-index: 2;
+}
+.tile-enemy,
+.tile-drop,
+.tile-grave {
+  z-index: 3;
+}
+.tile-enemy span {
+  color: #742d28;
+  transform: translate(-25%, -55px);
+  pointer-events: none;
+}
+.tile-enemy.selected span {
+  background: #f6dfb9;
+}
+.tile-drop span,
+.tile-grave span {
+  pointer-events: none;
+}
+.tile-hit-layer button:hover,
+.tile-hit-layer button[aria-pressed="true"] {
+  outline: 2px solid #c9a653aa;
+  border-radius: 50%;
 }
 .tile-location {
   position: absolute;

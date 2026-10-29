@@ -3,11 +3,18 @@ import TileScene, {
   type TileCamera,
   type TileSelection,
 } from "../render/TileScene";
-import { WORLD, TOWNS, objectById, interactionTiles } from "./world";
+import {
+  WORLD,
+  TOWNS,
+  objectById,
+  interactionTiles,
+  worldForState,
+} from "./world";
 import { SKILLS, type RpgState, type RpgCommand, type RpgOrder } from "./types";
 import { levelForXp, skillName, XP_THRESHOLDS } from "./skills";
-import { ITEMS, RESOURCES, RECIPES, SHOPS } from "./content";
+import { ITEMS, RESOURCES, RECIPES, SHOPS, ENEMIES, QUESTS } from "./content";
 import { itemCount, inventorySlots } from "./inventory";
+import { suggestGoals } from "./planning";
 import type { SkillId, EquipmentSlot } from "./types";
 import "./rpg.css";
 const base = import.meta.env.BASE_URL;
@@ -117,13 +124,49 @@ export default function RpgApp() {
       setSelection(s);
     } else setSelection(s);
   };
+  const world = state ? worldForState(state) : WORLD;
   const selectedObject =
-    selection?.kind === "object" ? objectById(selection.id) : undefined;
+    selection?.kind === "object"
+      ? world.objects.find((o) => o.id === selection.id)
+      : undefined;
   const person =
     selection?.kind === "actor" && state
       ? [state.player, ...state.npcs].find((p) => p.id === selection.id)
       : undefined;
   const player = state?.player;
+  const enemy =
+    selection?.kind === "enemy"
+      ? state?.enemies.find((e) => e.id === selection.id)
+      : undefined;
+  const drop =
+    selection?.kind === "drop"
+      ? state?.drops.find((d) => d.id === selection.id)
+      : undefined;
+  const grave = selection?.kind === "grave" ? state?.grave : undefined;
+  const labelOrder = (o: RpgOrder) => {
+    if (o.type === "move") return `Travel to ${o.position.x}, ${o.position.y}`;
+    if (o.type === "gather")
+      return `Gather ${o.quantity} · ${objectById(o.objectId)?.name ?? "resources"}`;
+    if (o.type === "craft")
+      return `Make ${o.quantity} · ${RECIPES[o.recipeId]?.name ?? o.recipeId}`;
+    if (o.type === "buy" || o.type === "sell")
+      return `${o.type === "buy" ? "Buy" : "Sell"} ${o.quantity} ${itemName(o.itemId)}`;
+    if (o.type === "quest")
+      return QUESTS[o.questId]?.name ?? "Visit quest giver";
+    if (o.type === "attack")
+      return `Fight ${ENEMIES[state?.enemies.find((e) => e.id === o.enemyId)?.definitionId ?? ""]?.name ?? "enemy"}`;
+    if (o.type === "withdraw")
+      return `Withdraw ${o.quantity} ${itemName(o.itemId)}`;
+    if (o.type === "equip" || o.type === "eat")
+      return `${o.type} ${itemName(o.itemId)}`;
+    return o.type === "recover"
+      ? "Recover backpack"
+      : o.type === "loot"
+        ? "Collect loot"
+        : o.type === "unequip"
+          ? `Remove ${o.slot}`
+          : "Deposit backpack";
+  };
   const bagSlots = player
     ? player.inventory.flatMap((item) =>
         Array.from(
@@ -207,7 +250,7 @@ export default function RpgApp() {
               type: "move",
               position: {
                 ...(selectedObject.blocks
-                  ? (interactionTiles(selectedObject)[0] ??
+                  ? (interactionTiles(selectedObject, world)[0] ??
                     selectedObject.position)
                   : selectedObject.position),
               },
@@ -348,6 +391,29 @@ export default function RpgApp() {
               </select>
             </label>
           )}
+          {selectedObject.questId && QUESTS[selectedObject.questId] && (
+            <>
+              <p>{QUESTS[selectedObject.questId].description}</p>
+              <button
+                className="full"
+                onClick={() => {
+                  const q = QUESTS[selectedObject.questId!];
+                  command({
+                    type: "goal",
+                    goal: {
+                      id: `quest-${q.id}`,
+                      title: q.name,
+                      kind: "quest",
+                      questId: q.id,
+                    },
+                  });
+                  setSelection(null);
+                }}
+              >
+                Make this my ambition
+              </button>
+            </>
+          )}
           <div className="order-actions">
             <button className="primary" onClick={() => order(contextualOrder!)}>
               Do now
@@ -403,6 +469,102 @@ export default function RpgApp() {
           ))}
         </section>
       )}
+      {enemy && state && (
+        <section className="parchment context-panel" aria-label="Enemy actions">
+          <button
+            className="close"
+            aria-label="Close actions"
+            onClick={() => setSelection(null)}
+          >
+            ×
+          </button>
+          <span className="eyebrow">
+            WILDERNESS · {enemy.position.x}, {enemy.position.y}
+          </span>
+          <h2>{ENEMIES[enemy.definitionId].name}</h2>
+          <p>
+            Health {enemy.health}/{ENEMIES[enemy.definitionId].health} ·{" "}
+            {ENEMIES[enemy.definitionId].aggressive
+              ? "Defends hostile ground"
+              : "Attacks when challenged"}
+          </p>
+          <p>
+            Bring food and suitable equipment. Alden can prepare before
+            training.
+          </p>
+          <div className="order-actions">
+            <button
+              className="primary"
+              disabled={enemy.health <= 0}
+              onClick={() => order({ type: "attack", enemyId: enemy.id })}
+            >
+              Attack now
+            </button>
+            <button
+              disabled={enemy.health <= 0}
+              onClick={() => order({ type: "attack", enemyId: enemy.id }, true)}
+            >
+              Add next
+            </button>
+          </div>
+          <button
+            className="full"
+            onClick={() => {
+              command({
+                type: "goal",
+                goal: {
+                  id: "train-combat",
+                  kind: "skill",
+                  skill: state.control.style,
+                  level: Math.min(
+                    99,
+                    levelForXp(state.player.skills[state.control.style]) + 1,
+                  ),
+                  title: `Train ${skillName(state.control.style)}`,
+                },
+              });
+              setSelection(null);
+            }}
+          >
+            Prepare and train
+          </button>
+        </section>
+      )}
+      {(drop || grave) && (
+        <section
+          className="parchment context-panel"
+          aria-label="Recovery actions"
+        >
+          <button
+            className="close"
+            aria-label="Close actions"
+            onClick={() => setSelection(null)}
+          >
+            ×
+          </button>
+          <span className="eyebrow">
+            {grave ? "YOUR RECOVERABLE BACKPACK" : "GROUND LOOT"}
+          </span>
+          <h2>{grave ? "Alden’s grave" : "Spoils of the road"}</h2>
+          {(drop ?? grave)!.items.map((i) => (
+            <p key={i.itemId}>
+              {itemName(i.itemId)} ×{i.quantity}
+            </p>
+          ))}
+          <button
+            className="primary full"
+            onClick={() =>
+              order(
+                grave
+                  ? { type: "recover" }
+                  : { type: "loot", dropId: drop!.id },
+              )
+            }
+          >
+            {grave ? "Recover backpack" : "Collect loot"}
+          </button>
+        </section>
+      )}
       {panel && state && (
         <section
           className={`parchment drawer ${panel === "thoughts" ? "thought-panel" : ""}`}
@@ -421,7 +583,7 @@ export default function RpgApp() {
               <h2>Paths worth taking</h2>
               <p>256 × 192 tiles · 3 settlements</p>
               <div className="destination-list">
-                {WORLD.objects
+                {world.objects
                   .filter(
                     (o) =>
                       o.kind === "landmark" ||
@@ -452,6 +614,39 @@ export default function RpgApp() {
                       <span>›</span>
                     </button>
                   ))}
+                <h3>Beyond the towns</h3>
+                {Object.keys(ENEMIES).map((type) => {
+                  const e = state.enemies.find(
+                    (e) => e.definitionId === type && e.health > 0,
+                  );
+                  return (
+                    e && (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setSelection({ kind: "enemy", id: e.id });
+                          setPanel(null);
+                          setCamera((c) => ({
+                            ...c,
+                            x: e.position.x,
+                            y: e.position.y,
+                            follow: false,
+                            overview: false,
+                          }));
+                        }}
+                      >
+                        <span>
+                          {ENEMIES[type].name}
+                          <small>
+                            {e.position.x}, {e.position.y} ·{" "}
+                            {ENEMIES[type].aggressive ? "hostile" : "challenge"}
+                          </small>
+                        </span>
+                        <span>›</span>
+                      </button>
+                    )
+                  );
+                })}
               </div>
             </>
           )}
@@ -460,6 +655,12 @@ export default function RpgApp() {
               <span className="eyebrow">ALDEN’S INTENTIONS</span>
               <h2>{state.control.goal?.title ?? "The road ahead"}</h2>
               <p>{state.control.reason}</p>
+              <p className="rpg-current-order">
+                Now:{" "}
+                {state.control.active
+                  ? labelOrder(state.control.active)
+                  : state.player.activity}
+              </p>
               {state.control.steps.length > 0 && (
                 <ol>
                   {state.control.steps.map((step, i) => (
@@ -467,24 +668,87 @@ export default function RpgApp() {
                   ))}
                 </ol>
               )}
-              {state.control.thought?.choices.map((choice) => (
-                <button
-                  className="choice plan-choice full"
-                  key={choice.id}
-                  aria-label={`Choose thought: ${choice.label}`}
-                  onClick={() => {
-                    command({ type: "goal", goal: choice.goal });
-                    setPanel(null);
-                  }}
-                >
-                  <strong>{choice.label}</strong>
-                  <span>{choice.description}</span>
-                </button>
-              ))}
+              {(state.control.thought?.choices ?? suggestGoals(state)).map(
+                (choice) => (
+                  <button
+                    className="choice plan-choice full"
+                    key={choice.id}
+                    aria-label={`Choose thought: ${choice.label}`}
+                    onClick={() => {
+                      command({ type: "goal", goal: choice.goal });
+                      setPanel(null);
+                    }}
+                  >
+                    <strong>{choice.label}</strong>
+                    <span>{choice.description}</span>
+                  </button>
+                ),
+              )}
+              {state.control.thought && (
+                <small>
+                  Continues automatically in{" "}
+                  {Math.max(
+                    0,
+                    Math.ceil(
+                      (state.control.thought.expiresAt - state.tick) * 0.6,
+                    ),
+                  )}
+                  s.
+                </small>
+              )}
               <small>
                 Alden handles the steps. Leave him to his plan, or choose a
-                different ambition.
+                different ambition. Wait stops the current action and holds your
+                queued orders.
               </small>
+              <h3>Next orders · {state.control.queue.length}/8</h3>
+              {state.control.queue.length ? (
+                state.control.queue.map((o, i) => (
+                  <div className="rpg-queued-order" key={`${i}-${o.type}`}>
+                    <span>
+                      {i + 1}. {labelOrder(o)}
+                    </span>
+                    <div>
+                      <button
+                        aria-label={`Move order ${i + 1} earlier`}
+                        disabled={i === 0}
+                        onClick={() =>
+                          command({
+                            type: "reorder-order",
+                            index: i,
+                            direction: -1,
+                          })
+                        }
+                      >
+                        ↑
+                      </button>
+                      <button
+                        aria-label={`Move order ${i + 1} later`}
+                        disabled={i === state.control.queue.length - 1}
+                        onClick={() =>
+                          command({
+                            type: "reorder-order",
+                            index: i,
+                            direction: 1,
+                          })
+                        }
+                      >
+                        ↓
+                      </button>
+                      <button
+                        aria-label={`Remove order ${i + 1}`}
+                        onClick={() =>
+                          command({ type: "cancel-order", index: i })
+                        }
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No queued orders. Alden continues his ambition.</p>
+              )}
               <div className="order-actions">
                 <button onClick={() => command({ type: "wait" })}>
                   Wait here
@@ -604,7 +868,7 @@ export default function RpgApp() {
                   <h3>{itemName(bagItem)}</h3>
                   <p>
                     {ITEMS[bagItem]?.skill
-                      ? `${skillName(ITEMS[bagItem].skill!)} ${ITEMS[bagItem].level ?? 1} to use. `
+                      ? `${skillName(ITEMS[bagItem].skill!)} ${ITEMS[bagItem].level ?? 1} ${ITEMS[bagItem].kind === "food" ? "to make" : "to use"}. `
                       : ""}
                     {ITEMS[bagItem]?.attackLevel
                       ? `Attack ${ITEMS[bagItem].attackLevel} to wield. `
@@ -633,6 +897,42 @@ export default function RpgApp() {
                 </div>
               )}
               <h3>Equipped</h3>
+              <p>
+                Bonuses:{" "}
+                {Object.values(state.player.equipment).reduce(
+                  (sum, id) => sum + (ITEMS[id]?.attack ?? 0),
+                  0,
+                )}{" "}
+                attack ·{" "}
+                {Object.values(state.player.equipment).reduce(
+                  (sum, id) => sum + (ITEMS[id]?.strength ?? 0),
+                  0,
+                )}{" "}
+                strength ·{" "}
+                {Object.values(state.player.equipment).reduce(
+                  (sum, id) => sum + (ITEMS[id]?.defence ?? 0),
+                  0,
+                )}{" "}
+                defence
+              </p>
+              <label className="rpg-combat-style">
+                Train with each hit
+                <select
+                  aria-label="Combat style"
+                  value={state.control.style}
+                  onChange={(e) =>
+                    command({
+                      type: "style",
+                      skill: e.target.value as
+                        "attack" | "strength" | "defence",
+                    })
+                  }
+                >
+                  <option value="attack">Attack · accuracy</option>
+                  <option value="strength">Strength · damage</option>
+                  <option value="defence">Defence · protection</option>
+                </select>
+              </label>
               {Object.entries(state.player.equipment).map(([slot, item]) => (
                 <div className="rpg-bank-row" key={slot}>
                   <span>
@@ -651,6 +951,18 @@ export default function RpgApp() {
                 Bank carried items
               </button>
               <h3>Personal bank</h3>
+              <label className="rpg-combat-style">
+                Withdraw quantity
+                <select
+                  aria-label="Withdraw quantity"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                >
+                  {[1, 5, 10, 28].map((n) => (
+                    <option key={n}>{n}</option>
+                  ))}
+                </select>
+              </label>
               {state.bank.length ? (
                 state.bank.map((item) => (
                   <div className="rpg-bank-row" key={item.itemId}>
@@ -662,11 +974,11 @@ export default function RpgApp() {
                         command({
                           type: "withdraw",
                           itemId: item.itemId,
-                          quantity: Math.min(10, item.quantity),
+                          quantity: Math.min(quantity, item.quantity),
                         })
                       }
                     >
-                      Take 10
+                      Take {Math.min(quantity, item.quantity)}
                     </button>
                   </div>
                 ))
@@ -679,6 +991,89 @@ export default function RpgApp() {
             <>
               <span className="eyebrow">YOUR CHAPTER</span>
               <h2>Chronicle</h2>
+              {Object.values(QUESTS).map((q) => {
+                const progress = state.quests[q.id];
+                return (
+                  <article className="rpg-quest" key={q.id}>
+                    <span className="eyebrow">
+                      {progress?.complete
+                        ? "COMPLETE"
+                        : progress?.accepted
+                          ? "IN PROGRESS"
+                          : "A NEW OPPORTUNITY"}
+                    </span>
+                    <h3>{q.name}</h3>
+                    <p>{q.description}</p>
+                    {q.requirements && (
+                      <small>
+                        Skills:{" "}
+                        {Object.entries(q.requirements)
+                          .map(
+                            ([skill, level]) =>
+                              `${skillName(skill as SkillId)} ${level}`,
+                          )
+                          .join(" · ")}
+                      </small>
+                    )}
+                    {q.items.map((i) => (
+                      <p key={i.itemId}>
+                        {itemName(i.itemId)} ·{" "}
+                        {itemCount(state.player.inventory, i.itemId) +
+                          itemCount(state.bank, i.itemId)}
+                        /{i.quantity} packed or banked
+                      </p>
+                    ))}
+                    {q.kills && (
+                      <p>
+                        {ENEMIES[q.kills.enemyId]?.name ?? q.kills.enemyId} ·{" "}
+                        {progress?.kills ?? 0}/{q.kills.quantity} defeated
+                      </p>
+                    )}
+                    <small>
+                      Reward: {q.reward.coins} coins ·{" "}
+                      {Object.entries(q.reward.xp)
+                        .map(
+                          ([skill, xp]) =>
+                            `${xp! / 10} ${skillName(skill as SkillId)} XP`,
+                        )
+                        .join(" · ")}
+                      <br />
+                      Unlock: {q.reward.unlock.replaceAll("-", " ")}
+                    </small>
+                    {!progress?.complete && (
+                      <button
+                        className="full"
+                        onClick={() => {
+                          command({
+                            type: "goal",
+                            goal: {
+                              id: `quest-${q.id}`,
+                              title: q.name,
+                              kind: "quest",
+                              questId: q.id,
+                            },
+                          });
+                          setPanel(null);
+                        }}
+                      >
+                        Pursue this quest
+                      </button>
+                    )}
+                  </article>
+                );
+              })}
+              {state.grave && (
+                <article className="rpg-quest">
+                  <h3>Your backpack awaits</h3>
+                  <p>
+                    Tile {state.grave.position.x}, {state.grave.position.y}.
+                    Equipment stayed with you. Carried items remain recoverable.
+                  </p>
+                  <button onClick={() => order({ type: "recover" })}>
+                    Recover backpack
+                  </button>
+                </article>
+              )}
               {state.journal.map((line, i) => (
                 <p key={i}>✧ {line}</p>
               ))}

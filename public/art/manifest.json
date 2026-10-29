@@ -1,9 +1,15 @@
 {
-  "version": "79b0ea36610f",
-  "bytes": 11428792,
+  "version": "b8a19f93862b",
+  "bytes": 13063806,
   "files": [
+    "art/actor-fisher.webp",
+    "art/anvil.webp",
     "art/bridge.webp",
     "art/builder.webp",
+    "art/cooking-range.webp",
+    "art/enemy-bandit.webp",
+    "art/enemy-boar.webp",
+    "art/enemy-rock-mite.webp",
     "art/forest.webp",
     "art/house.webp",
     "art/manor.webp",

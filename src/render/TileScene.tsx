@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import type { RpgState, TilePosition, WorldObject } from "../rpg/types";
-import { WORLD } from "../rpg/world";
+import type { RpgState, TilePosition } from "../rpg/types";
+import { worldForState } from "../rpg/world";
+import { ENEMIES } from "../rpg/content";
 import { artFrames } from "../art-frames";
 import { tileToScreen, screenToTile } from "./iso";
 import "./tile-scene.css";
@@ -15,6 +16,8 @@ export interface TileCamera {
 export type TileSelection =
   | { kind: "object"; id: string }
   | { kind: "actor"; id: number }
+  | { kind: "enemy" | "drop"; id: string }
+  | { kind: "grave" }
   | { kind: "tile"; position: TilePosition };
 interface Props {
   state: RpgState;
@@ -30,6 +33,12 @@ const assetNames = [
   "miner",
   "builder",
   "smith",
+  "actor-fisher",
+  "enemy-boar",
+  "enemy-rock-mite",
+  "enemy-bandit",
+  "anvil",
+  "cooking-range",
   "manor",
   "store",
   "house",
@@ -58,11 +67,18 @@ export default function TileScene({
   selection,
   onSelect,
 }: Props) {
+  const world = worldForState(state);
+  const cachedWorld = useRef(world);
   const root = useRef<HTMLDivElement>(null),
     canvas = useRef<HTMLCanvasElement>(null),
     images = useRef(new Map<string, HTMLImageElement>()),
     chunks = useRef(new Map<string, HTMLCanvasElement>()),
     overview = useRef<HTMLCanvasElement | null>(null);
+  if (cachedWorld.current !== world) {
+    cachedWorld.current = world;
+    chunks.current.clear();
+    overview.current = null;
+  }
   const [size, setSize] = useState({ width: 1200, height: 800 }),
     [now, setNow] = useState(0),
     [artVersion, setArtVersion] = useState(0);
@@ -124,16 +140,51 @@ export default function TileScene({
       y: p.previousPosition.y + (p.position.y - p.previousPosition.y) * f,
     },
   }));
+  const enemyFrames = useRef({
+    tick: state.tick,
+    positions: new Map(state.enemies.map((e) => [e.id, e.position])),
+    previous: new Map(state.enemies.map((e) => [e.id, e.position])),
+  });
+  if (enemyFrames.current.tick !== state.tick) {
+    enemyFrames.current = {
+      tick: state.tick,
+      previous: enemyFrames.current.positions,
+      positions: new Map(state.enemies.map((e) => [e.id, e.position])),
+    };
+  }
+  const enemies = state.enemies
+    .filter((e) => e.health > 0)
+    .map((enemy) => {
+      const previous =
+        enemyFrames.current.previous.get(enemy.id) ?? enemy.position;
+      const moving =
+        Math.abs(previous.x - enemy.position.x) +
+          Math.abs(previous.y - enemy.position.y) <=
+        2;
+      return {
+        ...enemy,
+        definition: ENEMIES[enemy.definitionId],
+        draw: moving
+          ? {
+              x: previous.x + (enemy.position.x - previous.x) * f,
+              y: previous.y + (enemy.position.y - previous.y) * f,
+            }
+          : enemy.position,
+      };
+    });
+  const drops = state.drops.filter(
+    (d) => d.expiresAt > state.tick && d.items.length,
+  );
   const hero = people[0]!,
     fit =
       Math.min(
-        size.width / (WORLD.width + WORLD.height) / 32,
-        size.height / (WORLD.width + WORLD.height) / 16,
+        size.width / (world.width + world.height) / 32,
+        size.height / (world.width + world.height) / 16,
       ) * 0.92;
   const view = {
     ...camera,
     ...(camera.overview
-      ? { x: WORLD.width / 2, y: WORLD.height / 2, zoom: fit }
+      ? { x: world.width / 2, y: world.height / 2, zoom: fit }
       : camera.follow
         ? { x: hero.draw.x, y: hero.draw.y + 2 / Math.max(0.2, camera.zoom) }
         : {}),
@@ -190,8 +241,8 @@ export default function TileScene({
         if (ly < 0 || ly >= 32) continue;
         const x = cx * 32 + lx,
           y = cy * 32 + ly;
-        if (x >= WORLD.width || y >= WORLD.height) continue;
-        const terrain = WORLD.terrain[y * WORLD.width + x]!,
+        if (x >= world.width || y >= world.height) continue;
+        const terrain = world.terrain[y * world.width + x]!,
           p = tileToScreen({ x: lx, y: ly });
         ctx.save();
         diamond(ctx, p.x, p.y);
@@ -249,13 +300,13 @@ export default function TileScene({
     if (view.overview) {
       if (!overview.current) {
         const out = document.createElement("canvas");
-        out.width = (WORLD.width + WORLD.height) * 3.2;
-        out.height = (WORLD.width + WORLD.height) * 1.6 + 8;
+        out.width = (world.width + world.height) * 3.2;
+        out.height = (world.width + world.height) * 1.6 + 8;
         const oc = out.getContext("2d")!;
         oc.scale(0.1, 0.1);
-        oc.translate(WORLD.height * 32, 16);
-        for (let cy = 0; cy < WORLD.height / 32; cy++)
-          for (let cx = 0; cx < WORLD.width / 32; cx++) {
+        oc.translate(world.height * 32, 16);
+        for (let cy = 0; cy < world.height / 32; cy++)
+          for (let cx = 0; cx < world.width / 32; cx++) {
             const p = tileToScreen({ x: cx * 32, y: cy * 32 });
             oc.drawImage(groundChunk(cx, cy), p.x - 1024, p.y - 16, 2048, 1024);
           }
@@ -263,7 +314,7 @@ export default function TileScene({
       }
       ctx.drawImage(
         overview.current,
-        -WORLD.height * 32,
+        -world.height * 32,
         -16,
         overview.current.width * 10,
         overview.current.height * 10,
@@ -311,12 +362,12 @@ export default function TileScene({
       ctx.lineWidth = 1 / view.zoom;
       for (
         let y = Math.max(0, Math.floor(view.y - radius));
-        y < Math.min(WORLD.height, view.y + radius);
+        y < Math.min(world.height, view.y + radius);
         y++
       )
         for (
           let x = Math.max(0, Math.floor(view.x - radius));
-          x < Math.min(WORLD.width, view.x + radius);
+          x < Math.min(world.width, view.x + radius);
           x++
         ) {
           const p = tileToScreen({ x, y });
@@ -350,7 +401,7 @@ export default function TileScene({
       ctx.globalAlpha = 1;
     }
     const drawables: { depth: number; draw: () => void }[] = [];
-    for (const o of WORLD.objects) {
+    for (const o of world.objects) {
       const foot = {
         x: o.position.x + (o.width - 1) / 2,
         y: o.position.y + o.height - 1,
@@ -360,7 +411,36 @@ export default function TileScene({
       drawables.push({
         depth: foot.x + foot.y,
         draw: () => {
-          if (o.art) {
+          if (o.kind === "quest") {
+            const name =
+              o.id === "quest-forge"
+                ? "smith"
+                : o.id === "quest-supper"
+                  ? "actor-fisher"
+                  : "builder";
+            art(name, p, 90, 90);
+            ctx.fillStyle = "#f5df9f";
+            ctx.strokeStyle = "#66522f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y - 106, 11, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#493925";
+            ctx.font = "bold 18px Georgia";
+            ctx.textAlign = "center";
+            ctx.fillText("!", p.x, p.y - 100);
+          } else if (
+            (o.kind === "anvil" || o.kind === "range") &&
+            images.current.has(o.kind === "anvil" ? "anvil" : "cooking-range")
+          ) {
+            art(
+              o.kind === "anvil" ? "anvil" : "cooking-range",
+              p,
+              110,
+              o.kind === "anvil" ? 90 : 110,
+            );
+          } else if (o.art) {
             const w =
                 o.kind === "tree"
                   ? 170
@@ -383,12 +463,7 @@ export default function TileScene({
               state.resources[o.id]?.available === false ? 0.4 : 1,
             );
           } else if (o.kind !== "landmark") {
-            ctx.fillStyle =
-              o.kind === "fish"
-                ? "#447d8599"
-                : o.kind === "quest"
-                  ? "#dbb66a"
-                  : "#756c59";
+            ctx.fillStyle = o.kind === "fish" ? "#447d8599" : "#756c59";
             ctx.beginPath();
             ctx.ellipse(
               p.x,
@@ -429,11 +504,122 @@ export default function TileScene({
                 ctx.ellipse(at.x, at.y, 19, 8, 0, 0, Math.PI * 2);
                 ctx.stroke();
               }
-              const name = assetNames.includes(p.role) ? p.role : "builder";
+              const name =
+                p.role === "fisher"
+                  ? "actor-fisher"
+                  : assetNames.includes(p.role)
+                    ? p.role
+                    : "builder";
               art(name, at, 90, 90);
             },
           });
         }
+    if (!view.overview) {
+      for (const enemy of enemies) {
+        if (!visible(enemy.draw)) continue;
+        const at = tileToScreen(enemy.draw);
+        const targeted =
+          (selection?.kind === "enemy" && selection.id === enemy.id) ||
+          (state.control.active?.type === "attack" &&
+            state.control.active.enemyId === enemy.id);
+        drawables.push({
+          depth: enemy.draw.x + enemy.draw.y + 0.1,
+          draw: () => {
+            ctx.fillStyle = "#493b343b";
+            ctx.beginPath();
+            ctx.ellipse(at.x, at.y, 19, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+            if (targeted) {
+              ctx.strokeStyle = "#b14537";
+              ctx.lineWidth = 2 / view.zoom;
+              ctx.stroke();
+            }
+            const name = `enemy-${enemy.definitionId}`;
+            if (images.current.has(name)) art(name, at, 92, 86);
+            else {
+              ctx.fillStyle =
+                enemy.definitionId === "rock-mite" ? "#7b8074" : "#886449";
+              ctx.strokeStyle = "#493c34";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.ellipse(at.x, at.y - 15, 22, 14, -0.12, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+            }
+            const health = clamp(
+              enemy.health / (enemy.definition?.health ?? enemy.health),
+              0,
+              1,
+            );
+            ctx.fillStyle = "#302e29";
+            ctx.fillRect(at.x - 22, at.y - 95, 44, 6);
+            ctx.fillStyle = targeted ? "#db8c68" : "#8da36e";
+            ctx.fillRect(at.x - 21, at.y - 94, 42 * health, 4);
+          },
+        });
+      }
+      for (const drop of drops) {
+        if (!visible(drop.position, 80)) continue;
+        const at = tileToScreen(drop.position);
+        drawables.push({
+          depth: drop.position.x + drop.position.y + 0.2,
+          draw: () => {
+            ctx.fillStyle = "#51483944";
+            ctx.beginPath();
+            ctx.ellipse(at.x, at.y, 13, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#b98b52";
+            ctx.strokeStyle = "#564735";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(at.x - 5, at.y - 25);
+            ctx.lineTo(at.x + 5, at.y - 25);
+            ctx.bezierCurveTo(
+              at.x + 3,
+              at.y - 17,
+              at.x + 17,
+              at.y - 5,
+              at.x + 8,
+              at.y - 2,
+            );
+            ctx.quadraticCurveTo(at.x, at.y + 2, at.x - 9, at.y - 3);
+            ctx.quadraticCurveTo(at.x - 15, at.y - 8, at.x - 5, at.y - 25);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(at.x - 6, at.y - 20);
+            ctx.lineTo(at.x + 6, at.y - 20);
+            ctx.stroke();
+          },
+        });
+      }
+      if (state.grave && visible(state.grave.position, 80)) {
+        const at = tileToScreen(state.grave.position);
+        drawables.push({
+          depth: state.grave.position.x + state.grave.position.y + 0.2,
+          draw: () => {
+            ctx.fillStyle = "#68796f";
+            ctx.strokeStyle = "#394d48";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(at.x - 13, at.y);
+            ctx.lineTo(at.x - 10, at.y - 30);
+            ctx.quadraticCurveTo(at.x, at.y - 40, at.x + 10, at.y - 30);
+            ctx.lineTo(at.x + 13, at.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.strokeStyle = "#e5ce89";
+            ctx.beginPath();
+            ctx.moveTo(at.x, at.y - 27);
+            ctx.lineTo(at.x, at.y - 9);
+            ctx.moveTo(at.x - 5, at.y - 22);
+            ctx.lineTo(at.x + 5, at.y - 22);
+            ctx.stroke();
+          },
+        });
+      }
+    }
     drawables.sort((a, b) => a.depth - b.depth).forEach((d) => d.draw());
     if (state.player.path.length) {
       ctx.strokeStyle = "#f7d797";
@@ -471,8 +657,8 @@ export default function TileScene({
       zoom: z,
       overview: false,
       follow: false,
-      x: clamp(c.x + d.x, 0, WORLD.width),
-      y: clamp(c.y + d.y, 0, WORLD.height),
+      x: clamp(c.x + d.x, 0, world.width),
+      y: clamp(c.y + d.y, 0, world.height),
     });
   }
   const wheel = useRef<(e: WheelEvent) => void>(() => {});
@@ -531,8 +717,8 @@ export default function TileScene({
       ...viewRef.current,
       follow: false,
       overview: false,
-      x: clamp(viewRef.current.x - d.x, 0, WORLD.width),
-      y: clamp(viewRef.current.y - d.y, 0, WORLD.height),
+      x: clamp(viewRef.current.x - d.x, 0, world.width),
+      y: clamp(viewRef.current.y - d.y, 0, world.height),
     });
   }
   function up(e: PointerEvent) {
@@ -540,7 +726,7 @@ export default function TileScene({
     if (pointers.current.size < 2) pinch.current = 0;
     if (e.type === "pointercancel") dragged.current = true;
   }
-  const objectButtons = WORLD.objects.filter(
+  const objectButtons = world.objects.filter(
     (o) =>
       visible(o.position, 80) &&
       (!camera.overview ||
@@ -562,7 +748,7 @@ export default function TileScene({
           onSelect({
             kind: "tile",
             position: {
-              worldId: WORLD.id,
+              worldId: world.id,
               plane: 0,
               x: Math.round(p.x),
               y: Math.round(p.y),
@@ -625,6 +811,74 @@ export default function TileScene({
                 />
               );
             })}
+        {!camera.overview &&
+          enemies
+            .filter((enemy) => visible(enemy.draw, 50))
+            .map((enemy) => {
+              const at = project(enemy.draw);
+              const selected =
+                selection?.kind === "enemy" && selection.id === enemy.id;
+              return (
+                <button
+                  key={`enemy-${enemy.id}`}
+                  className={`tile-enemy ${selected ? "selected" : ""}`}
+                  aria-label={`Inspect ${enemy.definition?.name ?? enemy.definitionId}, ${enemy.health} health`}
+                  aria-pressed={selected}
+                  title={`${enemy.definition?.name ?? enemy.definitionId} · ${enemy.health} health`}
+                  style={{ left: at.x, top: at.y - 30 * view.zoom }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!dragged.current || e.detail === 0)
+                      onSelect({ kind: "enemy", id: enemy.id });
+                  }}
+                >
+                  <span>{enemy.definition?.name ?? enemy.definitionId}</span>
+                </button>
+              );
+            })}
+        {!camera.overview &&
+          drops
+            .filter((drop) => visible(drop.position, 50))
+            .map((drop) => {
+              const at = project(drop.position);
+              return (
+                <button
+                  key={`drop-${drop.id}`}
+                  className="tile-drop"
+                  aria-label={`Inspect loot bag, ${drop.items.length} item types`}
+                  title="Loot bag"
+                  style={{ left: at.x, top: at.y - 10 * view.zoom }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!dragged.current || e.detail === 0)
+                      onSelect({ kind: "drop", id: drop.id });
+                  }}
+                >
+                  <span>Loot</span>
+                </button>
+              );
+            })}
+        {!camera.overview &&
+          state.grave &&
+          visible(state.grave.position, 50) &&
+          (() => {
+            const at = project(state.grave.position);
+            return (
+              <button
+                className="tile-grave"
+                aria-label="Inspect your backpack grave"
+                title="Recover backpack"
+                style={{ left: at.x, top: at.y - 20 * view.zoom }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!dragged.current || e.detail === 0)
+                    onSelect({ kind: "grave" });
+                }}
+              >
+                <span>Backpack grave</span>
+              </button>
+            );
+          })()}
       </div>
       <span className="tile-location">
         {camera.overview

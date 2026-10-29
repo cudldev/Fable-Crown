@@ -4,6 +4,7 @@ import type {
   TilePosition,
   WorldDefinition,
   WorldObject,
+  RpgState,
 } from "./types";
 export { findPath, pathToObject } from "./pathfinding";
 
@@ -347,6 +348,48 @@ function buildFrontier(): WorldDefinition {
 }
 
 export const WORLD = buildFrontier();
+export const ENEMY_SPAWNS = [
+  { id: "boar-0", definitionId: "boar", position: tile(65, 112) },
+  { id: "boar-1", definitionId: "boar", position: tile(141, 63) },
+  { id: "boar-2", definitionId: "boar", position: tile(196, 155) },
+  { id: "rock-mite-0", definitionId: "rock-mite", position: tile(87, 69) },
+  { id: "rock-mite-1", definitionId: "rock-mite", position: tile(183, 24) },
+  { id: "rock-mite-2", definitionId: "rock-mite", position: tile(239, 148) },
+  { id: "bandit-0", definitionId: "bandit", position: tile(107, 81) },
+  { id: "bandit-1", definitionId: "bandit", position: tile(135, 112) },
+  { id: "bandit-2", definitionId: "bandit", position: tile(216, 119) },
+];
+let roadWorld: WorldDefinition | undefined;
+/** Only the unlocked static variant is cached; shared WORLD is never mutated. */
+export function worldForState(
+  state: Pick<RpgState, "quests">,
+): WorldDefinition {
+  if (!state.quests.road?.complete) return WORLD;
+  if (!roadWorld) {
+    roadWorld = {
+      ...WORLD,
+      terrain: [...WORLD.terrain],
+      collision: [...WORLD.collision],
+      objects: [...WORLD.objects],
+    };
+    for (let y = 94; y <= 96; y++)
+      for (let x = 114; x <= 123; x++) {
+        roadWorld.terrain[y * WORLD.width + x] = "stone";
+        roadWorld.collision[y * WORLD.width + x] = 0;
+      }
+    roadWorld.objects.push({
+      id: "road-bridge",
+      name: "Restored Thorn-Road crossing",
+      kind: "bridge",
+      position: tile(114, 94),
+      width: 10,
+      height: 3,
+      blocks: false,
+      art: "bridge",
+    });
+  }
+  return roadWorld;
+}
 export const WORLDS: Record<string, WorldDefinition> = { [WORLD.id]: WORLD };
 export const objectsById: Record<string, WorldObject> = Object.fromEntries(
   WORLD.objects.map((object) => [object.id, object]),

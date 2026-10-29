@@ -1,5 +1,7 @@
 # Fable Crown — Demo-first Scope and Visual Acceptance
 
+> Latest approved iteration: [TILE_RPG_PLAN.md](TILE_RPG_PLAN.md) supersedes the earlier construction-only slice. Keep the same zero-cost, painterly, full-browser and verified-Pages stop rules.
+
 > Latest approved expansion: see [EXPANDED_WORLD.md](EXPANDED_WORLD.md). The demo now uses a full-browser world, three settlements, 24 characters, generated layered artwork and direct contextual intentions/queue controls. This supersedes the earlier one-hamlet and limited-player-control scope below.
 
 ## Primary objective

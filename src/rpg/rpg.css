@@ -144,3 +144,56 @@
 .rpg-item-inspect h3 {
   margin-top: 0 !important;
 }
+.rpg-queued-order {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #bcab8355;
+  font: 12px/1.4 system-ui;
+}
+.rpg-queued-order > div {
+  display: flex;
+  flex-shrink: 0;
+  gap: 3px;
+}
+.rpg-queued-order button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px;
+}
+.rpg-current-order {
+  padding: 10px;
+  background: #e4dcc6;
+  border-radius: 5px;
+}
+.rpg-quest {
+  border-bottom: 1px solid #bcab8388;
+  padding: 16px 0;
+}
+.rpg-quest h3 {
+  margin: 6px 0 !important;
+}
+.rpg-quest small {
+  display: block;
+  font: 11px/1.6 system-ui;
+}
+.rpg-quest button {
+  margin-top: 12px;
+}
+.rpg-combat-style {
+  display: block;
+  font: 12px/1.6 system-ui;
+  margin: 12px 0;
+}
+.rpg-combat-style select {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+}
+.rpg-shell .close {
+  min-width: 44px;
+  min-height: 44px;
+}

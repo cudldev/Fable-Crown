@@ -1,5 +1,7 @@
 # Fable Crown — Game Design (CURRENT)
 
+> Latest approved iteration: [TILE_RPG_PLAN.md](TILE_RPG_PLAN.md). A character-first autonomous RPG on an isometric256×192 tile world, nine skills, tools/gear, personal bank, shops, melee and three original quest chains. It supersedes continuous-coordinate travel and settlement-first progression below. The painterly art direction remains.
+
 > Latest approved expansion: see [EXPANDED_WORLD.md](EXPANDED_WORLD.md). The demo now uses a full-browser world, three settlements, 24 characters, generated layered artwork and direct contextual intentions/queue controls. This supersedes the earlier one-hamlet and limited-player-control scope below.
 
 **Pitch:** A mobile-first, painterly fantasy RPG and autonomous settlement builder. The player influences a young prince's thoughts and intentions as he guides a growing frontier city. Villagers have individual skills, personalities, needs and routines; the prince and villagers carry out decisions autonomously.

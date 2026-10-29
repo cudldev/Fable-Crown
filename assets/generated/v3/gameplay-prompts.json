@@ -1,0 +1,50 @@
+[
+  {
+    "name": "enemy-boar",
+    "prompt": "Use case: stylized-concept. Asset type: single transparent isometric enemy cutout for Fable Crown browser tile RPG. Reference image is STYLE ONLY: match its simplified traditional ink-and-watercolor Japanese fantasy town-life illustration, broad warm color washes and crisp hand-painted silhouette, a tiny bit simpler than the reference. Subject: one squat woodland boar, russet brown with cream tusks, alert but charming, full body three-quarter facing lower left as viewed from above at isometric camera. Simple large shapes, sparse internal detail, clear hooves grounded at bottom, warm earthy palette. Transparent background, isolated subject, no ground patch, no text, no frame, no UI, no pixel art, no 3D render, no photoreal fur, no detailed miniature shading. Subject fills canvas with small margin.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/enemy-boar.png",
+    "runtime": "public/art/enemy-boar.webp"
+  },
+  {
+    "name": "enemy-rock-mite",
+    "prompt": "Use case: stylized-concept. Asset type: one original enemy cutout for isometric Fable Crown tile RPG. Reference image is STYLE ONLY. Match its simplified town-life ink and watercolor illustration, broad pale color washes, dark-brown broken ink contours, small number of clear shapes, slightly simpler still. Subject: a single friendly-looking rock mite, a squat four-legged fantasy creature made of three rounded gray slate boulders with two tiny amber eyes and moss green tufts. Isometric three-quarter view from above facing lower left, feet planted. Very readable silhouette, game token proportions. Full body, small margin. Actual transparent background, no scene, no ground patch, no text, no glow, no pixel art, no 3D, no photorealistic texture or dense detail.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/enemy-rock-mite.png",
+    "runtime": "public/art/enemy-rock-mite.webp"
+  },
+  {
+    "name": "enemy-bandit",
+    "prompt": "Use case: stylized-concept. Asset type: one original human enemy cutout for isometric Fable Crown tile RPG. Reference image STYLE ONLY. Match its simplified traditional ink-and-watercolor town-life illustration: broad warm color washes, sparse broken brown ink contours, clean readable silhouette, a little simpler than reference. Subject: a single road bandit in faded burgundy short tunic, gray trousers, worn brown boots, short weathered cape, cloth headwrap, holding a plain wooden cudgel at his side. Original medieval frontier fantasy design, ordinary human proportions, small game character. Full body three-quarter standing pose facing lower left viewed from above at isometric camera, grounded feet visible, small margin. Actual transparent background, isolated character, no landscape, no ground patch, no glow, no text or frame. Avoid pixel art, 3D, realistic textures, dense detail, anime face closeup, violence.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/enemy-bandit.png",
+    "runtime": "public/art/enemy-bandit.webp"
+  },
+  {
+    "name": "actor-fisher",
+    "prompt": "Use case: stylized-concept. Asset type: single transparent NPC cutout for isometric Fable Crown town-life tile RPG. Reference image STYLE ONLY: match its traditional ink watercolor illustration with broad soft washes and clear painterly shapes, slightly simpler. Subject: a village fisher in muted teal short tunic, cream trousers, straw sunhat and brown boots, carrying a simple long fishing rod and a small creel. Original medieval fantasy craftsperson, short compact gameplay proportions and small readable face, full body three-quarter facing lower left from elevated isometric camera, feet visible. Actual transparent background, isolated single character, small margin. No scene, no ground patch, no glow, no text, no UI, no pixel art, no 3D, no photoreal texture, no tiny decorative details.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/actor-fisher.png",
+    "runtime": "public/art/actor-fisher.webp"
+  },
+  {
+    "name": "anvil",
+    "prompt": "Use case: stylized-concept. Asset type: one transparent small world prop for Fable Crown isometric tile RPG. Reference image STYLE ONLY. Match simplified town-life watercolor gouache and loose brown ink outlines, broad calm colors and hand-painted shapes, slightly simpler than reference. Subject: one chunky dark slate-gray blacksmith anvil standing on a broad cut tree stump, with a single short hammer resting on it. Elevated isometric three-quarter view, full object small margin, warm cream light and muted ochre wood. Clear silhouette and minimal internal detail, no realistic material noise. Actual transparent background, no scene or ground patch, no people, no text, no glow, no pixel art, no 3D render.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/anvil.png",
+    "runtime": "public/art/anvil.webp"
+  },
+  {
+    "name": "cooking-range",
+    "prompt": "Use case: stylized-concept. Asset type: one transparent cooking station world prop for Fable Crown isometric tile RPG. Reference image STYLE ONLY: simplified traditional ink-watercolor fantasy town-life art, broad pale cream and ochre color washes, loose brown contours, readable compact shapes, slightly simpler than reference. Subject: one low village cooking range, a squat cream stone outdoor hearth with small terracotta chimney at rear and a black iron pan over restrained warm embers. Small wooden board and loaf beside the pan, all attached to compact station. Three-quarter elevated isometric view, full object, small margin. Quiet minimal detail. Actual transparent background, no ground patch, no landscape or people, no text, no frame, no glow, no pixel art, no photoreal texture, no 3D.",
+    "mode": "built-in ImageGen",
+    "reference": "docs/art-audit/gameplay-style-proof-v2.png",
+    "output": "assets/generated/v3/cooking-range.png",
+    "runtime": "public/art/cooking-range.webp"
+  }
+]

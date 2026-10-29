@@ -1,0 +1,50 @@
+{
+  "enemy-boar": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1267,
+    "boundsHeight": 1012,
+    "pivotX": 741,
+    "pivotY": 1015
+  },
+  "enemy-rock-mite": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1009,
+    "boundsHeight": 983,
+    "pivotX": 825,
+    "pivotY": 1005
+  },
+  "enemy-bandit": {
+    "width": 1199,
+    "height": 1312,
+    "boundsWidth": 968,
+    "boundsHeight": 1161,
+    "pivotX": 853,
+    "pivotY": 1235
+  },
+  "actor-fisher": {
+    "width": 1263,
+    "height": 1246,
+    "boundsWidth": 874,
+    "boundsHeight": 1149,
+    "pivotX": 469,
+    "pivotY": 1187
+  },
+  "anvil": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 843,
+    "boundsHeight": 907,
+    "pivotX": 760,
+    "pivotY": 968
+  },
+  "cooking-range": {
+    "width": 1536,
+    "height": 1024,
+    "boundsWidth": 1070,
+    "boundsHeight": 1004,
+    "pivotX": 807,
+    "pivotY": 1013
+  }
+}

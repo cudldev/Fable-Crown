@@ -43,4 +43,6 @@ Cutout prompts: a single isolated subject, entire silhouette in frame, transpare
 
 ## Workflow
 
+Tile RPG additions: `v3/prompts.json` records four quiet tile materials; `v3/gameplay-prompts.json` records six transparent gameplay cutouts (three enemies, fisher, anvil and cooking range). All were generated with built-in ImageGen using the approved `docs/art-audit/gameplay-style-proof-v2.png` style reference and a request for simpler shapes. Original PNGs and measured frames remain versioned; runtime uses WebP. `process-art.cjs` merges frame anchors across versions.
+
 Use the built-in image tool, copy each selected result into this directory, then encode the matching public/art WebP. scripts/process-art.cjs is a development helper; supply a locally installed sharp module through FABLE_SHARP_MODULE if it is not installed normally. The production build only needs committed WebPs and Node built-ins. scripts/prepare-art.mjs measures and versions the runtime manifest; scripts/pwa.mjs preloads Oakrest and caches other regions on visit.

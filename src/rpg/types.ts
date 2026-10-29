@@ -195,6 +195,7 @@ export type RpgOrder =
   | { type: "unequip"; slot: EquipmentSlot }
   | { type: "eat"; itemId: ItemId }
   | { type: "attack"; enemyId: string }
+  | { type: "loot"; dropId: string }
   | { type: "quest"; questId: string }
   | { type: "recover" };
 export type RpgCommand =
@@ -202,6 +203,8 @@ export type RpgCommand =
   | { type: "enqueue"; order: RpgOrder }
   | { type: "goal"; goal: Ambition }
   | { type: "style"; skill: CombatStyle }
+  | { type: "cancel-order"; index: number }
+  | { type: "reorder-order"; index: number; direction: -1 | 1 }
   | { type: "wait" | "resume" };
 export interface EnemyDefinition {
   id: string;
@@ -224,6 +227,7 @@ export interface EnemyState {
   health: number;
   respawnAt: number;
   cooldown: number;
+  engagedUntil: number;
 }
 export interface ShopState {
   id: string;
@@ -257,6 +261,12 @@ export interface RpgState {
   bank: ItemStack[];
   shops: ShopState[];
   enemies: EnemyState[];
+  drops: {
+    id: string;
+    position: TilePosition;
+    items: ItemStack[];
+    expiresAt: number;
+  }[];
   quests: Record<
     string,
     { accepted: boolean; complete: boolean; kills: number }
@@ -274,6 +284,7 @@ export interface RpgState {
     queue: RpgOrder[];
     goal: Ambition | null;
     thinkingUntil: number;
+    eatReadyAt: number;
     reason: string;
     steps: string[];
     style: CombatStyle;
