@@ -35,15 +35,15 @@ function finish(s: RpgState, limit = 1000) {
   s.control.thinkingUntil = 1e9;
 }
 describe("seeded melee and survival", () => {
-  it("has nine legal original enemies with bounded spawn definitions", () => {
+  it("has ten legal original enemies including the outdoor captain", () => {
     const s = fresh();
-    expect(s.enemies).toHaveLength(9);
+    expect(s.enemies).toHaveLength(10);
     for (const e of s.enemies) {
       expect(isWalkable(e.home)).toBe(true);
       expect(ENEMIES[e.definitionId]).toBeDefined();
       expect(e.health).toBe(ENEMIES[e.definitionId].health);
     }
-    expect(ENEMY_SPAWNS).toHaveLength(9);
+    expect(ENEMY_SPAWNS).toHaveLength(10);
     expect(validateRpgSave(s)).not.toBeNull();
   });
   it("awards style XP only for actual damage and caps overkill; HP XP stays integer tenths", () => {

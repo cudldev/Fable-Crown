@@ -11,6 +11,7 @@ import {
   worldForState,
   findPath,
   pathToObject,
+  FERRIES,
 } from "./world";
 import { SKILLS, type RpgState, type RpgCommand, type RpgOrder } from "./types";
 import { levelForXp, skillName } from "./skills";
@@ -285,15 +286,27 @@ export default function RpgApp() {
         ? ({ type: "bank", objectId: selectedObject.id } as RpgOrder)
         : selectedObject.questId
           ? ({ type: "quest", questId: selectedObject.questId } as RpgOrder)
-          : ({
-              type: "move",
-              position: {
-                ...(selectedObject.blocks
-                  ? (interactionTiles(selectedObject, world)[0] ??
-                    selectedObject.position)
-                  : selectedObject.position),
-              },
-            } as RpgOrder)
+          : selectedObject.kind === "ferry"
+            ? ({
+                type: "travel-service",
+                objectId: selectedObject.id,
+              } as RpgOrder)
+            : ["clue", "target"].includes(selectedObject.kind)
+              ? ({
+                  type: "interact",
+                  objectId: selectedObject.id,
+                  verb:
+                    selectedObject.kind === "target" ? "practice" : "inspect",
+                } as RpgOrder)
+              : ({
+                  type: "move",
+                  position: {
+                    ...(selectedObject.blocks
+                      ? (interactionTiles(selectedObject, world)[0] ??
+                        selectedObject.position)
+                      : selectedObject.position),
+                  },
+                } as RpgOrder)
     : null;
   return (
     <main className="game-shell rpg-shell" aria-label="Fable Crown RPG">
@@ -496,12 +509,11 @@ export default function RpgApp() {
             {selectedObject.questId && (
               <button
                 onClick={() =>
-                  setDialogue(
-                    state.quests[selectedObject.questId!]?.complete
-                      ? "You have my thanks. The frontier is better for your help."
-                      : (QUESTS[selectedObject.questId!]?.description ??
-                          "There is work worth doing here."),
-                  )
+                  order({
+                    type: "interact",
+                    objectId: selectedObject.id,
+                    verb: "talk",
+                  })
                 }
               >
                 Talk
@@ -600,6 +612,13 @@ export default function RpgApp() {
               </button>
             </>
           )}
+          {selectedObject.kind === "ferry" && FERRIES[selectedObject.id] && (
+            <p>
+              {state.quests[FERRIES[selectedObject.id].questId]?.complete
+                ? `${FERRIES[selectedObject.id].name} · ${FERRIES[selectedObject.id].cost} coins per passage.`
+                : "Complete River Letters to restore this ferry."}
+            </p>
+          )}
           {selectedObject.resourceId ? (
             <details className="rpg-direct-orders">
               <summary>Single action or queued order</summary>
@@ -639,6 +658,39 @@ export default function RpgApp() {
               Craft here
             </button>
           )}
+        </section>
+      )}
+      {state?.dialogue && (
+        <section
+          className="parchment rpg-story-choice"
+          aria-label="Quest conversation"
+          aria-live="polite"
+        >
+          <span className="eyebrow">
+            {QUESTS[state.dialogue.questId]?.name}
+          </span>
+          <p>{state.dialogue.text}</p>
+          <div className="context-goals">
+            {state.dialogue.choices.map((choice) => (
+              <button
+                key={choice.id}
+                onClick={() =>
+                  command({ type: "dialogue-choice", choiceId: choice.id })
+                }
+              >
+                {choice.label}
+              </button>
+            ))}
+          </div>
+          <small>
+            Alden will choose {state.dialogue.choices[0]?.label.toLowerCase()}{" "}
+            in{" "}
+            {Math.max(
+              0,
+              Math.ceil((state.dialogue.expiresAt - state.tick) * 0.6),
+            )}
+            s.
+          </small>
         </section>
       )}
       {person && (
@@ -1246,6 +1298,13 @@ export default function RpgApp() {
               <h2>Chronicle</h2>
               {Object.values(QUESTS).map((q) => {
                 const progress = state.quests[q.id];
+                const stage = q.stages?.find(
+                  (stage) => stage.id === progress?.stageId,
+                );
+                const missingPrerequisites =
+                  q.prerequisites?.filter(
+                    (id) => !state.quests[id]?.complete,
+                  ) ?? [];
                 return (
                   <article className="rpg-quest" key={q.id}>
                     <span className="eyebrow">
@@ -1261,6 +1320,27 @@ export default function RpgApp() {
                         ? "Supplies delivered and rewards claimed."
                         : q.description}
                     </p>
+                    {progress?.accepted && !progress.complete && stage && (
+                      <p className="rpg-current-order">
+                        Next: {stage.description}
+                        {(stage.kind === "practice" ||
+                          stage.kind === "kill") && (
+                          <small>
+                            {" "}
+                            · {progress.counters?.[stage.id] ?? 0}/
+                            {stage.quantity ?? 1}
+                          </small>
+                        )}
+                      </p>
+                    )}
+                    {missingPrerequisites.length > 0 && (
+                      <p>
+                        First complete:{" "}
+                        {missingPrerequisites
+                          .map((id) => QUESTS[id]?.name ?? id)
+                          .join(", ")}
+                      </p>
+                    )}
                     {!progress?.complete &&
                       state.control.goal?.questId === q.id && (
                         <p className="rpg-current-order">
@@ -1278,19 +1358,29 @@ export default function RpgApp() {
                           .join(" · ")}
                       </small>
                     )}
-                    {q.items.map((i) => (
+                    {(progress?.complete
+                      ? q.items
+                      : stage?.kind === "gather" || stage?.kind === "deliver"
+                        ? (stage.items ?? [])
+                        : !progress?.accepted
+                          ? q.items
+                          : []
+                    ).map((i) => (
                       <p key={i.itemId}>
                         {progress?.complete
                           ? `✓ ${i.quantity} ${itemName(i.itemId)} delivered`
                           : `${itemName(i.itemId)} · ${itemCount(state.player.inventory, i.itemId) + itemCount(state.bank, i.itemId)}/${i.quantity} packed or banked`}
                       </p>
                     ))}
-                    {q.kills && (
-                      <p>
-                        {ENEMIES[q.kills.enemyId]?.name ?? q.kills.enemyId} ·{" "}
-                        {progress?.kills ?? 0}/{q.kills.quantity} defeated
-                      </p>
-                    )}
+                    {q.kills &&
+                      (!stage ||
+                        stage.kind === "kill" ||
+                        progress?.complete) && (
+                        <p>
+                          {ENEMIES[q.kills.enemyId]?.name ?? q.kills.enemyId} ·{" "}
+                          {progress?.kills ?? 0}/{q.kills.quantity} defeated
+                        </p>
+                      )}
                     <small>
                       Reward: {q.reward.coins} coins ·{" "}
                       {Object.entries(q.reward.xp)
@@ -1306,6 +1396,7 @@ export default function RpgApp() {
                     {!progress?.complete && (
                       <button
                         className="full"
+                        disabled={missingPrerequisites.length > 0}
                         onClick={() => {
                           command({
                             type: "goal",

@@ -2,8 +2,19 @@ import { ITEMS, RECIPES, RESOURCES, QUESTS } from "./content";
 import { itemCount } from "./inventory";
 import { contextGoals } from "./context-goals";
 import { levelForXp } from "./skills";
+import { FERRIES } from "./world";
 import type { RpgCommand, RpgState, WorldObject } from "./types";
 export function examineObject(s: RpgState, o: WorldObject) {
+  if (o.kind === "ferry") {
+    const ferry = FERRIES[o.id];
+    return ferry && s.quests[ferry.questId]?.complete
+      ? `${ferry.name}. Passage costs ${ferry.cost} coins and crosses the river.`
+      : "The ferry is waiting for repairs. Complete River Letters to restore passage.";
+  }
+  if (o.kind === "clue")
+    return `${o.name}. Approach and inspect this clue to advance a matching quest.`;
+  if (o.kind === "target")
+    return "A reed practice target. Bring Iori’s commissioned bow and arrows for three measured practice cycles.";
   if (o.resourceId) {
     const r = RESOURCES[o.resourceId];
     return `${o.name} provides ${ITEMS[r.itemId].name}. Requires ${r.skill} ${r.level} and a ${r.tool}. ${s.resources[o.id]?.available ? "Ready to harvest." : "Recovering; another nearby node may be available."}`;
@@ -34,6 +45,24 @@ export function itemUses(
 ): { label: string; command: RpgCommand }[] {
   const item = ITEMS[itemId];
   if (!item || !itemCount(s.player.inventory, itemId)) return [];
+  const delivery = Object.values(QUESTS).find((q) => {
+    const progress = s.quests[q.id];
+    const stage = q.stages?.find((stage) => stage.id === progress?.stageId);
+    return (
+      progress?.accepted &&
+      !progress.complete &&
+      stage?.kind === "deliver" &&
+      stage.targetId === o.id &&
+      stage.items?.some((i) => i.itemId === itemId)
+    );
+  });
+  if (delivery)
+    return [
+      {
+        label: `Deliver supplies · ${delivery.name}`,
+        command: { type: "interact", objectId: o.id, verb: "use", itemId },
+      },
+    ];
   if (o.resourceId && item.tool === RESOURCES[o.resourceId].tool) {
     const goal = contextGoals(s, o, 10).find(
       (c) => c.goal.kind === "gather",

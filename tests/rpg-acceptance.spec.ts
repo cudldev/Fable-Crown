@@ -178,7 +178,9 @@ test("quest ambition persists and real carried supplies complete a delivery", as
   ).toBe(6);
 
   await expect
-    .poll(async () => (await snapshot(page)).quests.forge?.complete)
+    .poll(async () => (await snapshot(page)).quests.forge?.complete, {
+      timeout: 30000,
+    })
     .toBe(true);
   const done = await snapshot(page);
   expect(

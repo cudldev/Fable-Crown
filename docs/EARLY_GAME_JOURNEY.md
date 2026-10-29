@@ -2,6 +2,10 @@
 
 Offline-first connected overworld; no dungeons, multiplayer, hosted models or paid services. Retain painterly Town Life art, autonomous Alden/Thoughts,600ms ticks, OSRS XP curve,28-slot bag, personal bank and25% capped offline progress. Build meaningful level1–30 content without requiring every skill30.
 
+Latest world steering: houses/buildings follow the same2:1 isometric axes as tiles. River center/width, roads and settlement edges should meander naturally.240 separately choppable trees, each with one trunk on one logical tile; avoid forest-cluster illustrations and regular tree grids. Preserve legal paths, bridge crossings and real shoreline fishing.
+
+Planned interface follow-up: collapsible bottom game log with All/Events/Dialogue filters for prominent dialogue, quest updates, discoveries, level-ups and important blockers. Exclude routine XP/item gains and action-cycle spam; these stay in world floaters/progress bars. Combine repeated lines and retain a bounded history. Keep the world prominent and actionable Thought choices separate. The current chronicle/notifications do not yet implement this full panel.
+
 Sequential gates: G1 game feel/navigation/interactions; G2 distinct overworld/staged quests/economy; G3 ranged/equipment/autonomy/V4 migration. Each gate must pass unit, strict build, browser/mobile/offline and relevant performance checks before the next begins. Save clean checkpoints; stop if actual allowance is exhausted. No paid/banked reset. Existing playable main remains stable until a gate is verified.
 
 G1: directional idle/walk/run and recognizable mine/cut/fish/craft/melee/shoot poses; rings/reward/XP feedback retained, combat hit splats; original short action/footstep/ambient sounds with consent gesture+mute/volume; minimap services/quests/danger/route and map destination preview; consistent Examine/Talk/Use/context goals. Approve sample art before full batch. Renderer remains interpolated/event-driven; zero steady far-view chunk thrashing.

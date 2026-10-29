@@ -308,6 +308,8 @@ describe("actual deterministic reward events", () => {
     applyRpgCommand(s, { type: "quest", questId: "supper" });
     stepRpg(s);
     expect(s.rewards).toEqual([]);
+    // The staged quest has already completed its basket/supply objectives in this reward fixture.
+    s.quests.supper.stageId = "deliver";
     applyRpgCommand(s, { type: "quest", questId: "supper" });
     stepRpg(s);
     expect(s.rewards).toEqual([

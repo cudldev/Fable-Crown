@@ -54,7 +54,7 @@ export function suggestGoals(s: RpgState): Thought["choices"] {
         itemId: tool,
       },
     });
-  const quest = Object.values(QUESTS).find((q) => !s.quests[q.id]?.complete);
+  const quest = Object.values(QUESTS).find((q) => !s.quests[q.id]?.complete && q.prerequisites?.every((id) => s.quests[id]?.complete) !== false);
   if (quest) {
     const choice = {
       id: `quest-${quest.id}`,
@@ -173,6 +173,16 @@ export function goalSteps(s: RpgState, goal: Ambition): string[] {
     ];
   if (goal.kind === "quest" && goal.questId && QUESTS[goal.questId]) {
     const q = QUESTS[goal.questId];
+    if (q.stages) {
+      const p = s.quests[q.id], stage = q.stages.find((stage) => stage.id === p?.stageId);
+      return [
+        ...(!p?.accepted ? ["Talk to the quest giver and accept"] : []),
+        ...(q.prerequisites ?? []).filter((id) => !s.quests[id]?.complete).map((id) => `Complete ${QUESTS[id].name}`),
+        ...(stage ? [stage.description] : []),
+        "Keep supplies in the personal bank; retrieve them for delivery",
+        `Claim ${q.reward.unlock} when the story is complete`,
+      ];
+    }
     return [
       "Visit the quest giver and accept",
       ...Object.entries(q.requirements ?? {}).map(

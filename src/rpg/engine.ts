@@ -13,6 +13,7 @@ import {
   type ResourceDefinition,
   type EnemyState,
   type SkillId,
+  type QuestStage,
 } from "./types";
 import {
   WORLD,
@@ -25,6 +26,7 @@ import {
   worldForState,
   ENEMY_SPAWNS,
   tile,
+  FERRIES,
 } from "./world";
 import { startingSkills, levelForXp } from "./skills";
 import { ITEMS, RESOURCES, RECIPES, SHOPS, ENEMIES, QUESTS } from "./content";
@@ -145,7 +147,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     quests: Object.fromEntries(
       Object.keys(QUESTS).map((id) => [
         id,
-        { accepted: false, complete: false, kills: 0 },
+        { accepted: false, complete: false, kills: 0, stageId: QUESTS[id].stages?.[0]?.id, counters: {}, choices: {} },
       ]),
     ),
     grave: null,
@@ -169,6 +171,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
       "A new chapter begins. Earlier village chronicles remain archived.",
     ],
     rewards: [],
+    dialogue: null,
   };
   s.control.goal = suggestGoals(s)[0].goal;
   s.control.steps = goalSteps(s, s.control.goal);
@@ -601,6 +604,12 @@ function addLoot(s: RpgState, e: EnemyState) {
   const road = s.quests.road;
   if (e.definitionId === "bandit" && road.accepted && !road.complete)
     road.kills = Math.min(3, road.kills + 1);
+  for (const [id, q] of Object.entries(QUESTS)) {
+    const progress = s.quests[id];
+    if (progress.accepted && !progress.complete) for (const stage of q.stages ?? [])
+      if (stage.kind === "kill" && stage.enemyId === e.definitionId)
+        (progress.counters ??= {})[stage.id] = Math.min(stage.quantity ?? 1, (progress.counters?.[stage.id] ?? 0) + 1);
+  }
 }
 function fight(s: RpgState, id: string) {
   const p = s.player,
@@ -830,6 +839,101 @@ function recover(s: RpgState) {
   grave.retryAt = s.tick + Math.min(200, 20 * grave.attempts);
   finish(s, "No safe recovery route yet; waiting before trying again");
 }
+export function currentQuestStage(s: RpgState, id: string): QuestStage | undefined {
+  const progress = s.quests[id];
+  return progress && !progress.complete ? QUESTS[id]?.stages?.find((stage) => stage.id === progress.stageId) : undefined;
+}
+export function normalizeQuestProgress(s: RpgState) {
+  for (const [id, q] of Object.entries(QUESTS)) {
+    const p = s.quests[id] ??= { accepted: false, complete: false, kills: 0 };
+    p.stageId ??= p.complete ? "complete" : p.accepted && q.stages?.some((stage) => stage.id === "supplies") ? "supplies" : q.stages?.[0]?.id;
+    p.counters ??= {}; p.choices ??= {};
+    if (id === "road" && p.kills) p.counters.outlaws ??= p.kills;
+  }
+  return s;
+}
+/** Explicit migration repair for changed terrain. Keeps every item/XP/quest and replans routes. */
+export function repairRpgPositions(s: RpgState) {
+  const world = worldForState(s);
+  const repair = (p: TilePosition) => {
+    if (isWalkable(p, world)) return { ...p };
+    for (let radius = 1; radius < 64; radius++) for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
+      const candidate = tile(p.x + dx, p.y + dy);
+      if (isWalkable(candidate, world)) return candidate;
+    }
+    return { ...WORLD.spawns[0] };
+  };
+  for (const actor of [s.player, ...s.npcs]) {
+    actor.position = repair(actor.position); actor.previousPosition = { ...actor.position };
+    actor.path = []; actor.action = null;
+  }
+  for (const e of s.enemies) { e.home = { ...ENEMY_SPAWNS.find((spawn) => spawn.id === e.id)!.position }; e.position = repair(e.position); }
+  for (const drop of s.drops) drop.position = repair(drop.position);
+  if (s.grave) s.grave.position = repair(s.grave.position);
+  s.control.active = null; s.control.source = null; s.control.queue = []; s.control.thinkingUntil = s.tick + 1;
+  return s;
+}
+function advanceStage(s: RpgState, id: string) {
+  const q = QUESTS[id], progress = s.quests[id], stage = currentQuestStage(s, id);
+  if (!stage) return;
+  progress.stageId = stage.next ?? q.stages?.[(q.stages?.findIndex((candidate) => candidate.id === stage.id) ?? -1) + 1]?.id ?? "ready";
+  if (s.dialogue?.questId === id) s.dialogue = null;
+  s.control.steps = goalSteps(s, { id: `quest-${id}`, title: q.name, kind: "quest", questId: id });
+}
+function chooseDialogue(s: RpgState, choiceId: string) {
+  const dialogue = s.dialogue;
+  if (!dialogue) return false;
+  const stage = currentQuestStage(s, dialogue.questId), choice = stage?.choices?.find((candidate) => candidate.id === choiceId);
+  if (!choice || stage?.kind !== "choice") return false;
+  const p = s.quests[dialogue.questId];
+  (p.choices ??= {})[stage.id] = choice.id; p.stageId = choice.next;
+  journal(s, `${QUESTS[dialogue.questId].name}: ${choice.label}`); s.dialogue = null;
+  return true;
+}
+function questInteraction(s: RpgState, object: WorldObject, verb: "talk" | "inspect" | "use" | "practice") {
+  const p = s.player;
+  if (!route(s, p, object)) return;
+  for (const [id, progress] of Object.entries(s.quests)) {
+    const stage = currentQuestStage(s, id);
+    if (!progress.accepted || progress.complete || stage?.targetId !== object.id) continue;
+    const legal = stage.kind === "talk" && verb === "talk" || stage.kind === "inspect" && verb === "inspect" ||
+      stage.kind === "visit" || stage.kind === "choice" && verb === "talk" || stage.kind === "practice" && verb === "practice" ||
+      stage.kind === "deliver" && (verb === "talk" || verb === "use");
+    if (!legal) continue;
+    if (stage.kind === "choice") {
+      s.dialogue ??= { id: `${id}-${stage.id}-${s.tick}`, questId: id, targetId: object.id, text: stage.description,
+        choices: stage.choices!.map(({ id: choice, label }) => ({ id: choice, label })), expiresAt: s.tick + 34 };
+      finish(s, stage.description); return;
+    }
+    if (stage.kind === "deliver") {
+      const outputs = id === "bowyer" && stage.id === "commission"
+        ? [{ itemId: "training-bow", quantity: 1 }, { itemId: "training-arrow", quantity: 6 }] : [];
+      if (!exchangeItems(p.inventory, stage.items ?? [], outputs)) {
+        finish(s, "Bring the requested supplies and make room for the commission."); return;
+      }
+      reward(s, p, outputs, {});
+      (progress.counters ??= {})[`delivered-${stage.id}`] = 1;
+    }
+    if (stage.kind === "practice") {
+      if (!itemCount(p.inventory, "training-bow") || !itemCount(p.inventory, "training-arrow")) {
+        finish(s, "Bring the commissioned practice bow and blunt arrows."); return;
+      }
+      if (p.action?.kind !== "practice" || p.action.targetId !== object.id)
+        p.action = { kind: "practice", targetId: object.id, duration: 4, remaining: 4 };
+      p.activity = "Practising a measured bow shot";
+      if (--p.action.remaining > 0) return;
+      p.action = null; p.completed++;
+      (progress.counters ??= {})[stage.id] = (progress.counters?.[stage.id] ?? 0) + 1;
+      if (progress.counters[stage.id] < (stage.quantity ?? 1)) { finish(s, "Practice cycle complete"); return; }
+    }
+    advanceStage(s, id); finish(s, stage.description);
+    if (progress.stageId === "ready") questAction(s, id);
+    return;
+  }
+  if (object.questId && verb === "talk") { questAction(s, object.questId); return; }
+  finish(s, `${verb === "inspect" ? "Examined" : "Visited"} ${object.name}`);
+}
 function questAction(s: RpgState, id: string) {
   const q = QUESTS[id],
     state = s.quests[id],
@@ -840,9 +944,19 @@ function questAction(s: RpgState, id: string) {
   }
   if (!route(s, p, objectById(q.giverId)!)) return;
   if (!state.accepted) {
+    if (q.prerequisites?.some((required) => !s.quests[required]?.complete)) {
+      finish(s, `First complete ${q.prerequisites.map((required) => QUESTS[required].name).join(", ")}.`); return;
+    }
     state.accepted = true;
     journal(s, `Accepted: ${q.name}`);
     finish(s, `Accepted ${q.name}. Gather the requested supplies.`);
+    return;
+  }
+  const stage = currentQuestStage(s, id);
+  if (stage) {
+    if (stage.targetId === q.giverId && ["talk", "deliver", "choice"].includes(stage.kind))
+      questInteraction(s, objectById(q.giverId)!, "talk");
+    else finish(s, stage.description);
     return;
   }
   const requirements = Object.entries(q.requirements ?? {}).every(
@@ -850,30 +964,55 @@ function questAction(s: RpgState, id: string) {
   );
   if (
     !requirements ||
-    q.items.some((i) => itemCount(p.inventory, i.itemId) < i.quantity) ||
+    (!q.stages && q.items.some((i) => itemCount(p.inventory, i.itemId) < i.quantity)) ||
     (q.kills && state.kills < q.kills.quantity)
   ) {
     finish(s, "The quest requirements are not met yet");
     return;
   }
   if (
-    !exchangeItems(p.inventory, q.items, [
+    !exchangeItems(p.inventory, q.stages ? [] : q.items, [
       { itemId: "coins", quantity: q.reward.coins },
+      ...(id === "bowyer" ? [{ itemId: "shortbow", quantity: 1 }] : []),
+      ...(id === "watch" ? [{ itemId: "watch-token", quantity: 1 }] : []),
     ])
   ) {
     finish(s, "Free backpack space for the quest reward");
     return;
   }
   state.complete = true;
+  state.stageId = "complete";
   const gains: Partial<Record<SkillId, number>> = {};
   for (const [skill, xp] of Object.entries(q.reward.xp))
     gains[skill as SkillId] = award(p, skill as SkillId, xp!);
-  reward(s, p, [{ itemId: "coins", quantity: q.reward.coins }], gains);
+  reward(s, p, [{ itemId: "coins", quantity: q.reward.coins },
+    ...(id === "bowyer" ? [{ itemId: "shortbow", quantity: 1 }] : []),
+    ...(id === "watch" ? [{ itemId: "watch-token", quantity: 1 }] : [])], gains);
   journal(s, `Completed: ${q.name}. Unlocked ${q.reward.unlock}.`);
   finish(s, `Completed ${q.name}`);
 }
 function execute(s: RpgState, order: RpgOrder) {
   const p = s.player;
+  if (order.type === "interact") {
+    const target = objectById(order.objectId)!;
+    if (target.questId && order.verb === "talk" && !s.quests[target.questId].complete && s.control.source === "player") {
+      const q = QUESTS[target.questId];
+      s.control.goal = { id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name };
+      s.control.steps = goalSteps(s, s.control.goal); s.control.thought = null;
+    }
+    if (target.questId && !s.quests[target.questId].accepted && order.verb === "talk") {
+      questAction(s, target.questId); return;
+    }
+    questInteraction(s, target, order.verb); return;
+  }
+  if (order.type === "travel-service") {
+    const ferry = FERRIES[order.objectId];
+    if (!s.quests[ferry.questId]?.complete) { finish(s, "Complete River Letters to open this ferry."); return; }
+    if (!route(s, p, objectById(ferry.objectId)!)) return;
+    if (!removeItems(p.inventory, "coins", ferry.cost)) { finish(s, "The ferry fare is five coins."); return; }
+    p.position = { ...ferry.destination }; p.previousPosition = { ...p.position };
+    finish(s, ferry.name); return;
+  }
   if (order.type === "attack") {
     fight(s, order.enemyId);
     return;
@@ -1075,6 +1214,8 @@ function execute(s: RpgState, order: RpgOrder) {
     return;
   }
   if (order.type === "buy" || order.type === "sell") {
+    const service = objectById(order.shopId)?.serviceId;
+    if (service && !s.quests[service]?.complete) { finish(s, "Complete this service’s quest first."); return; }
     const shop = s.shops.find((x) => x.id === order.shopId)!,
       definition = SHOPS[order.shopId].stock[order.itemId],
       target = objectById(order.shopId)!;
@@ -1233,6 +1374,7 @@ function planGoal(s: RpgState, goal: Ambition): RpgOrder | null {
       p,
       (o) =>
         o.kind === "shop" &&
+        (!o.serviceId || !!s.quests[o.serviceId]?.complete) &&
         !!SHOPS[o.id]?.stock[item.id] &&
         (s.shops.find((x) => x.id === o.id)?.stock[item.id] ?? 0) > 0,
     );
@@ -1405,6 +1547,7 @@ function prepareResource(
     p,
     (o) =>
       o.kind === "shop" &&
+      (!o.serviceId || !!s.quests[o.serviceId]?.complete) &&
       !!SHOPS[o.id]?.stock[needed] &&
       (s.shops.find((entry) => entry.id === o.id)?.stock[needed] ?? 0) > 0,
   );
@@ -1507,6 +1650,8 @@ function questPlan(s: RpgState, id: string): RpgOrder | null {
   const q = QUESTS[id],
     progress = s.quests[id],
     p = s.player;
+  for (const required of q.prerequisites ?? [])
+    if (!s.quests[required]?.complete) return questPlan(s, required);
   if (!progress.accepted) return { type: "quest", questId: id };
   for (const [skill, level] of Object.entries(q.requirements ?? {}))
     if (levelForXp(p.skills[skill as SkillId]) < level!)
@@ -1517,22 +1662,36 @@ function questPlan(s: RpgState, id: string): RpgOrder | null {
         skill: skill as SkillId,
         level,
       });
-  for (const item of q.items) {
-    if (itemCount(p.inventory, item.itemId) >= item.quantity) continue;
-    const order = acquire(s, item.itemId, item.quantity);
-    if (order) return order;
-    // Missing supplies are not the same as satisfied supplies. Stay on the prerequisite,
-    // rather than revisiting the giver indefinitely when no legal acquisition is available.
-    const detail =
-      s.control.reason === s.control.goal?.title
-        ? "Bring a usable tool and free backpack space."
-        : s.control.reason;
-    s.control.reason = `${q.name}: need ${item.quantity} ${ITEMS[item.itemId].name} (${itemCount(p.inventory, item.itemId)}/${item.quantity}). ${detail}`;
-    s.control.thinkingUntil = s.tick + 10;
-    return null;
+  const stage = currentQuestStage(s, id);
+  if (stage) {
+    s.control.reason = `${q.name}: ${stage.description}`;
+    if (["gather", "craft", "deliver"].includes(stage.kind)) {
+      const items = stage.items ?? (stage.recipeId ? [{ itemId: RECIPES[stage.recipeId].output.itemId, quantity: stage.quantity ?? 1 }] : []);
+      for (const item of items) if (itemCount(p.inventory, item.itemId) < item.quantity) {
+        if (inventorySlots(p.inventory) >= 28) return { type: "bank" };
+        const order = acquire(s, item.itemId, item.quantity);
+        if (order) return order;
+        s.control.reason = `${q.name}: need ${item.quantity} ${ITEMS[item.itemId].name} (${itemCount(p.inventory, item.itemId)}/${item.quantity}). ${s.control.reason}`;
+        s.control.thinkingUntil = s.tick + 10; return null;
+      }
+      if (stage.kind !== "deliver") { advanceStage(s, id); return questPlan(s, id); }
+    }
+    if (stage.kind === "kill") {
+      if ((progress.counters?.[stage.id] ?? 0) >= (stage.quantity ?? 1)) { advanceStage(s, id); return questPlan(s, id); }
+      return combatPlan(s, "attack", stage.enemyId);
+    }
+    if (stage.kind === "choice" && s.dialogue?.questId === id) return null;
+    if (stage.kind === "practice") {
+      for (const item of ["training-bow", "training-arrow"]) if (!itemCount(p.inventory, item)) {
+        if (inventorySlots(p.inventory) >= 28) return { type: "bank" };
+        if (itemCount(s.bank, item)) return { type: "withdraw", itemId: item, quantity: 1 };
+        s.control.reason = "Recover Iori’s practice bow and arrows from the bank or grave.";
+        return null;
+      }
+    }
+    return { type: "interact", objectId: stage.targetId!, verb: stage.kind === "practice" ? "practice" :
+      stage.kind === "inspect" || stage.kind === "visit" ? "inspect" : "talk" };
   }
-  if (q.kills && progress.kills < q.kills.quantity)
-    return combatPlan(s, "attack", q.kills.enemyId);
   return { type: "quest", questId: id };
 }
 function combatPlan(
@@ -1541,11 +1700,6 @@ function combatPlan(
   enemyType = "boar",
 ): RpgOrder | null {
   const p = s.player;
-  if (
-    inventorySlots(p.inventory) >= 24 &&
-    p.inventory.some((i) => ITEMS[i.itemId].kind === "resource")
-  )
-    return { type: "bank" };
   const sword = Object.values(ITEMS)
     .filter(
       (i) =>
@@ -1565,10 +1719,10 @@ function combatPlan(
       i.itemId.endsWith("-sword") &&
       levelForXp(p.skills.attack) >= (ITEMS[i.itemId].attackLevel ?? 1),
   );
-  if (!p.equipment.weapon && savedSword)
+  if (savedSword && (!p.equipment.weapon || ITEMS[p.equipment.weapon]?.tool))
     return { type: "withdraw", itemId: savedSword.itemId, quantity: 1 };
   if (!p.equipment.weapon) return acquire(s, "bronze-sword", 1);
-  if (enemyType === "bandit") {
+  if (enemyType === "bandit" || enemyType === "captain") {
     for (const id of ["bronze-body", "bronze-legs", "bronze-med-helm"]) {
       if (!p.equipment[ITEMS[id].slot!]) {
         if (itemCount(p.inventory, id)) return { type: "equip", itemId: id };
@@ -1576,6 +1730,9 @@ function combatPlan(
       }
     }
   }
+  // Let equipment funding sell a full bag before banking; otherwise bank→withdraw surplus loops forever.
+  if (inventorySlots(p.inventory) >= 24 && p.inventory.some((i) => ITEMS[i.itemId].kind === "resource"))
+    return { type: "bank" };
   const meals = p.inventory.reduce(
     (n, i) => n + (ITEMS[i.itemId].heals ? i.quantity : 0),
     0,
@@ -1594,6 +1751,7 @@ function combatPlan(
       p,
       (o) =>
         o.kind === "shop" &&
+        (!o.serviceId || !!s.quests[o.serviceId]?.complete) &&
         !!s.shops.find((x) => x.id === o.id)?.stock["cooked-shrimp"],
     );
     if (shop && itemCount(p.inventory, "coins") >= 10)
@@ -1670,6 +1828,7 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
     throw Error("Invalid tick count");
   for (let n = 0; n < count; n++) {
     s.tick++;
+    if (s.dialogue && s.tick >= s.dialogue.expiresAt) chooseDialogue(s, s.dialogue.choices[0].id);
     enemyStep(s);
     if (s.tick % 100 === 0)
       s.player.health = Math.min(maxHealth(s.player), s.player.health + 1);
@@ -1840,6 +1999,11 @@ function validGoal(v: unknown): v is Ambition {
 function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
   if (!object(v)) return false;
   switch (v.type) {
+    case "interact":
+      return typeof v.objectId === "string" && !!objectById(v.objectId) &&
+        ["talk", "inspect", "use", "practice"].includes(v.verb as string) &&
+        (v.itemId === undefined || typeof v.itemId === "string" && Object.hasOwn(ITEMS, v.itemId));
+    case "travel-service": return typeof v.objectId === "string" && Object.hasOwn(FERRIES, v.objectId);
     case "move":
       return position(v.position, w);
     case "gather":
@@ -1916,6 +2080,12 @@ function orderProblem(
   queued = false,
 ): string | null {
   const p = s.player;
+  if (order.type === "travel-service" && !s.quests[FERRIES[order.objectId].questId]?.complete)
+    return "Complete River Letters to open this ferry.";
+  if (order.type === "buy" || order.type === "sell") {
+    const service = objectById(order.shopId)?.serviceId;
+    if (service && !s.quests[service]?.complete) return `Complete ${QUESTS[service].name} to use this service.`;
+  }
   if (order.type === "eat" && !itemCount(p.inventory, order.itemId))
     return "That food is not in the backpack.";
   if (order.type === "eat" && s.tick < s.control.eatReadyAt)
@@ -1979,6 +2149,12 @@ export function applyRpgCommand(
   const ok = (message: string) => ({ ok: true, message }),
     fail = (message: string) => ({ ok: false, message });
   if (!object(command)) return fail("Invalid command.");
+  if (command.type === "dialogue-choice") {
+    if (!s.dialogue || s.tick >= s.dialogue.expiresAt || typeof command.choiceId !== "string" ||
+      !s.dialogue.choices.some((choice) => choice.id === command.choiceId)) return fail("That dialogue choice is no longer available.");
+    if (!chooseDialogue(s, command.choiceId)) return fail("That dialogue choice is not available.");
+    s.control.thinkingUntil = s.tick + 1; return ok("Your choice guides the next stage.");
+  }
   if (command.type === "cancel-order" || command.type === "reorder-order") {
     if (!integer(command.index, 7) || command.index >= s.control.queue.length)
       return fail("That queued intention does not exist.");
@@ -2101,6 +2277,28 @@ const text = (v: unknown, max = 500): v is string =>
 export function validateRpgSave(v: unknown): RpgState | null {
   try {
     if (!object(v) || !object(v.quests)) return null;
+    v = structuredClone(v);
+    if (!object(v) || !object(v.quests)) return null;
+    const candidate = v as unknown as RpgState;
+    const legacy = Object.keys(v.quests).length === 3 && ["forge", "supper", "road"].every((id) => object(candidate.quests[id]));
+    // Additive G2 normalization never mutates the archived/public input object.
+    if (legacy || Object.keys(v.quests).length === Object.keys(QUESTS).length)
+      normalizeQuestProgress(candidate);
+    if (legacy && object(v.resources)) for (const o of WORLD.objects.filter((o) => o.resourceId))
+      if (!Object.hasOwn(v.resources, o.id)) v.resources[o.id] = { objectId: o.id, available: true, respawnAt: 0 };
+    if (legacy && Array.isArray(v.enemies) && v.enemies.length === ENEMY_SPAWNS.length - 1 && !v.enemies.some((e) => object(e) && e.id === "captain-kestrel")) {
+      const spawn = ENEMY_SPAWNS.at(-1)!;
+      v.enemies.push({ ...spawn, position: { ...spawn.position }, home: { ...spawn.position },
+        health: ENEMIES[spawn.definitionId].health, respawnAt: 0, cooldown: 0, engagedUntil: 0 });
+    }
+    if (legacy && Array.isArray(v.shops)) for (const definition of Object.values(SHOPS)) {
+      const shop = v.shops.find((entry) => object(entry) && entry.id === definition.id);
+      if (!shop) v.shops.push({ id: definition.id, stock: Object.fromEntries(Object.entries(definition.stock).map(([id, entry]) => [id, entry.max])), restockAt: 100 });
+      else if (object(shop) && object(shop.stock)) {
+        const old = shop.stock;
+        shop.stock = Object.fromEntries(Object.entries(definition.stock).map(([id, entry]) => [id, Object.hasOwn(old, id) ? old[id] : entry.max]));
+      }
+    }
     const w = worldForState(v as unknown as RpgState);
     if (
       v.version !== 3 ||
@@ -2167,6 +2365,13 @@ export function validateRpgSave(v: unknown): RpgState | null {
         (!q.accepted && q.kills !== 0)
       )
         return null;
+      const definition = QUESTS[id];
+      if (typeof q.stageId !== "string" ||
+        !["ready", "complete", ...(definition.stages ?? []).map((stage) => stage.id)].includes(q.stageId) ||
+        (q.complete && q.stageId !== "complete") || !object(q.counters) || !object(q.choices) ||
+        Object.entries(q.counters).some(([key, value]) => !integer(value, 10000) ||
+          !(definition.stages ?? []).some((stage) => key === stage.id || key === `delivered-${stage.id}`)) ||
+        Object.entries(q.choices).some(([key, value]) => !(definition.stages ?? []).some((stage) => stage.id === key && stage.choices?.some((choice) => choice.id === value)))) return null;
       if (q.complete && q.kills < (QUESTS[id].kills?.quantity ?? 0))
         return null;
     }
@@ -2269,11 +2474,15 @@ export function validateRpgSave(v: unknown): RpgState | null {
         if (
           !object(a) ||
           typeof a.kind !== "string" ||
-          !["gather", "craft", "bank", "rest", "fight"].includes(a.kind) ||
+          !["gather", "craft", "bank", "rest", "fight", "practice"].includes(a.kind) ||
           !positive(a.duration, 100) ||
           !positive(a.remaining, a.duration)
         )
           return null;
+        if (a.kind === "practice" && (index !== 0 || a.targetId !== "bowyer-target" || a.duration !== 4 ||
+          currentQuestStage(candidate, "bowyer")?.kind !== "practice" || !candidate.quests.bowyer.accepted ||
+          !itemCount((p as unknown as ActorState).inventory, "training-bow") ||
+          !itemCount((p as unknown as ActorState).inventory, "training-arrow"))) return null;
         if (
           a.kind === "fight" &&
           (index !== 0 ||
@@ -2316,6 +2525,15 @@ export function validateRpgSave(v: unknown): RpgState | null {
       }
     }
     const c = v.control;
+    if (v.dialogue !== undefined && v.dialogue !== null) {
+      const d = v.dialogue;
+      if (!object(d) || typeof d.questId !== "string" || !Object.hasOwn(QUESTS, d.questId) ||
+        !text(d.id, 100) || !text(d.text) || !integer(d.expiresAt) || d.expiresAt <= v.tick ||
+        typeof d.targetId !== "string" || !objectById(d.targetId) || !Array.isArray(d.choices)) return null;
+      const stage = currentQuestStage(candidate, d.questId);
+      if (stage?.kind !== "choice" || stage.targetId !== d.targetId ||
+        JSON.stringify(d.choices) !== JSON.stringify(stage.choices?.map(({ id, label }) => ({ id, label })))) return null;
+    }
     if (!integer(c.eatReadyAt)) return null;
     if (
       typeof c.waiting !== "boolean" ||
@@ -2352,6 +2570,8 @@ export function validateRpgSave(v: unknown): RpgState | null {
       return null;
     const playerAction = (v.player as ActorState).action;
     if (playerAction && c.active === null) return null;
+    if (playerAction?.kind === "practice" && (!object(c.active) || c.active.type !== "interact" ||
+      c.active.verb !== "practice" || c.active.objectId !== playerAction.targetId)) return null;
     if (
       playerAction?.kind === "gather" &&
       (!object(c.active) ||

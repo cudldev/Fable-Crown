@@ -1,0 +1,58 @@
+{
+  "iso-house": {
+    "width": 556,
+    "height": 572,
+    "boundsWidth": 532,
+    "boundsHeight": 548,
+    "pivotX": 297,
+    "pivotY": 556
+  },
+  "iso-store": {
+    "width": 600,
+    "height": 671,
+    "boundsWidth": 576,
+    "boundsHeight": 647,
+    "pivotX": 280,
+    "pivotY": 654
+  },
+  "iso-workshop": {
+    "width": 624,
+    "height": 591,
+    "boundsWidth": 600,
+    "boundsHeight": 567,
+    "pivotX": 333,
+    "pivotY": 575
+  },
+  "iso-manor": {
+    "width": 609,
+    "height": 658,
+    "boundsWidth": 585,
+    "boundsHeight": 634,
+    "pivotX": 281,
+    "pivotY": 640
+  },
+  "iso-tree": {
+    "width": 540,
+    "height": 719,
+    "boundsWidth": 516,
+    "boundsHeight": 695,
+    "pivotX": 286,
+    "pivotY": 706
+  },
+  "iso-oak": {
+    "width": 729,
+    "height": 749,
+    "boundsWidth": 705,
+    "boundsHeight": 725,
+    "pivotX": 353,
+    "pivotY": 736
+  },
+  "iso-willow": {
+    "width": 541,
+    "height": 736,
+    "boundsWidth": 517,
+    "boundsHeight": 712,
+    "pivotX": 240,
+    "pivotY": 722
+  }
+}

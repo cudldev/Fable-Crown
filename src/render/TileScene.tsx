@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import type { RpgState, TilePosition } from "../rpg/types";
+import type { RpgState, TilePosition, WorldObject } from "../rpg/types";
 import { worldForState } from "../rpg/world";
 import { ENEMIES } from "../rpg/content";
 import { artFrames } from "../art-frames";
@@ -7,7 +7,13 @@ import { tileToScreen, screenToTile } from "./iso";
 import "./tile-scene.css";
 import type { FeedbackFloater } from "./feedback";
 import { actorAtlas, type Facing } from "./actor-atlas";
-import { actorFrameKey, facingFromMotion, observeHealth, observedHits, type ObservedHit } from "./presentation";
+import {
+  actorFrameKey,
+  facingFromMotion,
+  observeHealth,
+  observedHits,
+  type ObservedHit,
+} from "./presentation";
 export interface TileCamera {
   x: number;
   y: number;
@@ -57,6 +63,13 @@ const assetNames = [
   "tile-dirt",
   "tile-stone",
   "tile-water",
+  "iso-house",
+  "iso-store",
+  "iso-workshop",
+  "iso-manor",
+  "iso-tree",
+  "iso-oak",
+  "iso-willow",
 ];
 const terrainAsset = {
   grass: "tile-grass",
@@ -66,6 +79,25 @@ const terrainAsset = {
   water: "tile-water",
 };
 const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n));
+const architectural = (object: WorldObject) =>
+  object.kind === "building" ||
+  object.cutaway ||
+  [
+    "house",
+    "store",
+    "workshop",
+    "manor",
+    "iso-house",
+    "iso-store",
+    "iso-workshop",
+    "iso-manor",
+  ].includes(object.art ?? "");
+const objectFoot = (object: WorldObject) => ({
+  x:
+    object.position.x +
+    (architectural(object) ? object.width - 1 : (object.width - 1) / 2),
+  y: object.position.y + object.height - 1,
+});
 export default function TileScene({
   state,
   camera,
@@ -85,22 +117,50 @@ export default function TileScene({
     hitElements = useRef(new Map<string, HTMLButtonElement>()),
     chunks = useRef(new Map<string, HTMLCanvasElement>()),
     overview = useRef<HTMLCanvasElement | null>(null);
+  const farTrees = useRef<HTMLCanvasElement | null>(null);
+  const farTreeAvailability = useRef("");
+  const depletedTrees = world.objects
+    .filter(
+      (object) =>
+        object.kind === "tree" &&
+        state.resources[object.id]?.available === false,
+    )
+    .map((object) => object.id)
+    .join("|");
+  if (farTreeAvailability.current !== depletedTrees) {
+    farTreeAvailability.current = depletedTrees;
+    farTrees.current = null;
+  }
   const atlasSources = useRef(new Map<string, HTMLImageElement>());
   const actorFrames = useRef(new Map<string, HTMLCanvasElement>());
   const facings = useRef(new Map<number, Facing>());
   const health = useRef(observeHealth(state, presentationEpoch));
   const hitSplats = useRef<(ObservedHit & { startedAt: number })[]>([]);
-  if (health.current.tick !== state.tick || health.current.epoch !== presentationEpoch) {
+  if (
+    health.current.tick !== state.tick ||
+    health.current.epoch !== presentationEpoch
+  ) {
     const next = observeHealth(state, presentationEpoch);
     const time = performance.now();
-    const continuous = next.epoch === health.current.epoch && next.tick === health.current.tick + 1;
-    hitSplats.current = [...(continuous ? hitSplats.current.filter(hit => time - hit.startedAt < 1200) : []), ...observedHits(health.current, next).map(hit => ({ ...hit, startedAt: time }))].slice(-12);
+    const continuous =
+      next.epoch === health.current.epoch &&
+      next.tick === health.current.tick + 1;
+    hitSplats.current = [
+      ...(continuous
+        ? hitSplats.current.filter((hit) => time - hit.startedAt < 1200)
+        : []),
+      ...observedHits(health.current, next).map((hit) => ({
+        ...hit,
+        startedAt: time,
+      })),
+    ].slice(-12);
     health.current = next;
   }
   if (cachedWorld.current !== world) {
     cachedWorld.current = world;
     chunks.current.clear();
     overview.current = null;
+    farTrees.current = null;
   }
   const [size, setSize] = useState({ width: 1200, height: 800 }),
     [artVersion, setArtVersion] = useState(0);
@@ -126,13 +186,15 @@ export default function TileScene({
   }, []);
   useEffect(() => {
     let alive = true;
-    for (const sheet of new Set(Object.values(actorAtlas).map(frame => frame.sheet))) {
+    for (const sheet of new Set(
+      Object.values(actorAtlas).map((frame) => frame.sheet),
+    )) {
       const img = new Image();
       img.onload = () => {
         if (!alive) return;
         atlasSources.current.set(sheet, img);
         actorFrames.current.clear();
-        setArtVersion(v => v + 1);
+        setArtVersion((v) => v + 1);
       };
       img.src = `${base}art/${sheet}.webp`;
     }
@@ -152,6 +214,7 @@ export default function TileScene({
           materials.current.clear();
           chunks.current.clear();
           overview.current = null;
+          farTrees.current = null;
           setArtVersion((v) => v + 1);
         }
       };
@@ -173,9 +236,22 @@ export default function TileScene({
     },
   }));
   for (const actor of people) {
-    let facing = facingFromMotion(actor.previousPosition, actor.position, facings.current.get(actor.id));
-    if (!actor.path.length && actor.position.x === actor.previousPosition.x && actor.position.y === actor.previousPosition.y && actor.action?.targetId) {
-      const target = world.objects.find(object => object.id === actor.action?.targetId)?.position ?? state.enemies.find(enemy => enemy.id === actor.action?.targetId)?.position;
+    let facing = facingFromMotion(
+      actor.previousPosition,
+      actor.position,
+      facings.current.get(actor.id),
+    );
+    if (
+      !actor.path.length &&
+      actor.position.x === actor.previousPosition.x &&
+      actor.position.y === actor.previousPosition.y &&
+      actor.action?.targetId
+    ) {
+      const target =
+        world.objects.find((object) => object.id === actor.action?.targetId)
+          ?.position ??
+        state.enemies.find((enemy) => enemy.id === actor.action?.targetId)
+          ?.position;
       if (target) facing = facingFromMotion(actor.position, target, facing);
     }
     facings.current.set(actor.id, facing);
@@ -372,10 +448,7 @@ export default function TileScene({
       for (const object of world.objects) {
         const el = hitElements.current.get(`object-${object.id}`);
         if (el) {
-          const at = project({
-            x: object.position.x + (object.width - 1) / 2,
-            y: object.position.y + object.height - 1,
-          });
+          const at = project(objectFoot(object));
           el.style.left = `${at.x}px`;
           el.style.top = `${at.y}px`;
         }
@@ -518,6 +591,7 @@ export default function TileScene({
         w: number,
         h: number,
         alpha = 1,
+        widthOnly = false,
       ) {
         const img = images.current.get(name);
         if (!img) return;
@@ -525,7 +599,9 @@ export default function TileScene({
         const frame = artFrames[name];
         ctx.globalAlpha = alpha;
         if (frame) {
-          const scale = Math.min(w / frame.boundsWidth, h / frame.boundsHeight);
+          const scale = widthOnly
+            ? w / frame.boundsWidth
+            : Math.min(w / frame.boundsWidth, h / frame.boundsHeight);
           ctx.drawImage(
             img,
             p.x - frame.pivotX * scale,
@@ -542,7 +618,9 @@ export default function TileScene({
         if (!frame || !source) return false;
         // Tools may extend above a pose: preserve body size across every cell.
         const reference = actorAtlas[`${key.split(":")[0]}:idle`];
-        const scale = 90 / (frame.bodyHeight ?? reference?.boundsHeight ?? frame.boundsHeight);
+        const scale =
+          90 /
+          (frame.bodyHeight ?? reference?.boundsHeight ?? frame.boundsHeight);
         let baked = actorFrames.current.get(key);
         if (baked) {
           actorFrames.current.delete(key);
@@ -552,25 +630,142 @@ export default function TileScene({
           baked = document.createElement("canvas");
           baked.width = Math.max(1, Math.ceil(frame.width * scale * 2));
           baked.height = Math.max(1, Math.ceil(frame.height * scale * 2));
-          baked.getContext("2d")!.drawImage(source, frame.x, frame.y, frame.width, frame.height, 0, 0, baked.width, baked.height);
-          if (actorFrames.current.size >= 48) actorFrames.current.delete(actorFrames.current.keys().next().value!);
+          baked
+            .getContext("2d")!
+            .drawImage(
+              source,
+              frame.x,
+              frame.y,
+              frame.width,
+              frame.height,
+              0,
+              0,
+              baked.width,
+              baked.height,
+            );
+          if (actorFrames.current.size >= 48)
+            actorFrames.current.delete(
+              actorFrames.current.keys().next().value!,
+            );
           actorFrames.current.set(key, baked);
         }
-        ctx.drawImage(baked, p.x - frame.pivotX * scale, p.y - frame.pivotY * scale, frame.width * scale, frame.height * scale);
+        ctx.drawImage(
+          baked,
+          p.x - frame.pivotX * scale,
+          p.y - frame.pivotY * scale,
+          frame.width * scale,
+          frame.height * scale,
+        );
         return true;
+      }
+      const treeArt = (object: WorldObject) => {
+        const name = `iso-${object.resourceId === "oak" ? "oak" : object.resourceId === "willow" ? "willow" : "tree"}`;
+        return images.current.has(name) ? name : (object.art ?? "forest");
+      };
+      const distant = view.overview || view.zoom < 0.35;
+      if (distant) {
+        if (!farTrees.current) {
+          const out = document.createElement("canvas");
+          out.width = Math.ceil((world.width + world.height) * 3.2);
+          out.height = Math.ceil((world.width + world.height) * 1.6 + 8);
+          const oc = out.getContext("2d")!;
+          oc.scale(0.1, 0.1);
+          oc.translate(world.height * 32, 16);
+          for (const object of world.objects.filter(
+            (object) => object.kind === "tree",
+          )) {
+            const name = treeArt(object),
+              img = images.current.get(name),
+              frame = artFrames[name];
+            if (!img || !frame) continue;
+            const at = tileToScreen(objectFoot(object));
+            const variation =
+              0.95 +
+              ((object.position.x * 17 + object.position.y * 31) % 11) / 100;
+            const scale =
+              Math.min(110 / frame.boundsWidth, 130 / frame.boundsHeight) *
+              variation;
+            oc.globalAlpha =
+              state.resources[object.id]?.available === false ? 0.4 : 1;
+            oc.drawImage(
+              img,
+              at.x - frame.pivotX * scale,
+              at.y - frame.pivotY * scale,
+              frame.width * scale,
+              frame.height * scale,
+            );
+          }
+          farTrees.current = out;
+        }
+        ctx.drawImage(
+          farTrees.current,
+          -world.height * 32,
+          -16,
+          farTrees.current.width * 10,
+          farTrees.current.height * 10,
+        );
       }
       const drawables: { depth: number; draw: () => void }[] = [];
       for (const o of world.objects) {
-        const foot = {
-          x: o.position.x + (o.width - 1) / 2,
-          y: o.position.y + o.height - 1,
-        };
+        const foot = objectFoot(o);
+        const selected = selection?.kind === "object" && selection.id === o.id;
+        if (o.kind === "tree" && distant && !selected) continue;
         if (!view.overview && !visible(foot, 350)) continue;
         const p = tileToScreen(foot);
+        const inside =
+          !!o.cutaway &&
+          hero.draw.x >= o.position.x - 0.5 &&
+          hero.draw.x < o.position.x + o.width - 0.5 &&
+          hero.draw.y >= o.position.y - 0.5 &&
+          hero.draw.y < o.position.y + o.height - 0.5;
+        if (inside) {
+          // Interior floors are below actors; the faded shell sorts at its front corner.
+          for (let y = 0; y < o.height; y++)
+            for (let x = 0; x < o.width; x++) {
+              const tile = tileToScreen({
+                x: o.position.x + x,
+                y: o.position.y + y,
+              });
+              diamond(ctx, tile.x, tile.y);
+              ctx.fillStyle = (x + y) % 2 ? "#cbb88c" : "#d7c69e";
+              ctx.fill();
+              ctx.strokeStyle = "#89755088";
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          const interior = tileToScreen({
+            x: o.position.x + (o.width - 1) / 2,
+            y: o.position.y + 0.5,
+          });
+          if (o.kind === "bank" || o.serviceId?.includes("bank")) {
+            ctx.fillStyle = "#a47743";
+            ctx.strokeStyle = "#614c34";
+            ctx.lineWidth = 2;
+            ctx.fillRect(interior.x - 16, interior.y - 20, 32, 20);
+            ctx.strokeRect(interior.x - 16, interior.y - 20, 32, 20);
+            ctx.fillStyle = "#e7cc7c";
+            ctx.fillRect(interior.x - 3, interior.y - 14, 6, 7);
+          } else if (o.art?.includes("workshop"))
+            art("anvil", interior, 65, 65);
+          else if (o.kind === "shop") {
+            ctx.fillStyle = "#8c6d48";
+            ctx.strokeStyle = "#594a35";
+            ctx.lineWidth = 2;
+            ctx.fillRect(interior.x - 25, interior.y - 17, 50, 17);
+            ctx.strokeRect(interior.x - 25, interior.y - 17, 50, 17);
+          }
+        }
         drawables.push({
           depth: foot.x + foot.y,
           draw: () => {
-            if (o.kind === "quest") {
+            if (o.kind === "tree" && distant) {
+              // Its sprite is already in the composite; selection adds only a ring.
+              ctx.strokeStyle = "#f3d98c";
+              ctx.lineWidth = 2 / view.zoom;
+              ctx.beginPath();
+              ctx.ellipse(p.x, p.y, 20, 9, 0, 0, Math.PI * 2);
+              ctx.stroke();
+            } else if (o.kind === "quest") {
               const name =
                 o.id === "quest-forge"
                   ? "smith"
@@ -599,27 +794,98 @@ export default function TileScene({
                 110,
                 o.kind === "anvil" ? 90 : 110,
               );
+            } else if (o.kind === "clue") {
+              ctx.fillStyle = "#f4dfa8";
+              ctx.strokeStyle = "#8d7147";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(p.x - 9, p.y - 20);
+              ctx.lineTo(p.x + 8, p.y - 24);
+              ctx.lineTo(p.x + 11, p.y - 7);
+              ctx.lineTo(p.x - 7, p.y - 3);
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(p.x - 4, p.y - 15);
+              ctx.lineTo(p.x + 4, p.y - 17);
+              ctx.moveTo(p.x - 3, p.y - 10);
+              ctx.lineTo(p.x + 3, p.y - 12);
+              ctx.stroke();
+            } else if (o.kind === "target") {
+              ctx.strokeStyle = "#765c3f";
+              ctx.lineWidth = 7;
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p.x, p.y - 48);
+              ctx.moveTo(p.x - 22, p.y - 30);
+              ctx.lineTo(p.x + 22, p.y - 30);
+              ctx.stroke();
+              ctx.fillStyle = "#bc9b63";
+              ctx.strokeStyle = "#73583c";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.ellipse(p.x, p.y - 43, 17, 24, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+              ctx.strokeStyle = "#9c4d3d";
+              ctx.beginPath();
+              ctx.ellipse(p.x, p.y - 43, 9, 14, 0, 0, Math.PI * 2);
+              ctx.stroke();
+            } else if (o.kind === "ferry") {
+              ctx.fillStyle = "#9b7954";
+              ctx.strokeStyle = "#594d3b";
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.moveTo(p.x - 42, p.y - 12);
+              ctx.quadraticCurveTo(p.x, p.y + 20, p.x + 42, p.y - 12);
+              ctx.quadraticCurveTo(p.x, p.y - 36, p.x - 42, p.y - 12);
+              ctx.fill();
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(p.x - 25, p.y - 13);
+              ctx.lineTo(p.x + 24, p.y - 13);
+              ctx.moveTo(p.x - 12, p.y - 22);
+              ctx.lineTo(p.x - 12, p.y + 1);
+              ctx.moveTo(p.x + 12, p.y - 22);
+              ctx.lineTo(p.x + 12, p.y + 1);
+              ctx.stroke();
             } else if (o.art) {
+              const building = architectural(o);
+              const isoName = o.art.startsWith("iso-") ? o.art : `iso-${o.art}`;
+              const name =
+                o.kind === "tree"
+                  ? treeArt(o)
+                  : images.current.has(isoName)
+                    ? isoName
+                    : o.art;
+              const variation =
+                0.95 + ((o.position.x * 17 + o.position.y * 31) % 11) / 100;
               const w =
                   o.kind === "tree"
-                    ? 170
+                    ? 110 * variation
                     : o.kind === "rock"
                       ? 100
                       : o.kind === "bridge"
                         ? 290
-                        : Math.max(170, (o.width + o.height) * 32),
+                        : (o.width + o.height) * 32,
                 h =
                   o.kind === "tree"
-                    ? 170
+                    ? 130 * variation
                     : o.kind === "rock"
                       ? 90
                       : Math.max(140, w * 0.8);
               art(
-                o.art!,
+                name,
                 p,
                 w,
                 h,
-                state.resources[o.id]?.available === false ? 0.4 : 1,
+                inside
+                  ? 0.18
+                  : state.resources[o.id]?.available === false
+                    ? 0.4
+                    : 1,
+                !!building,
               );
             } else if (o.kind !== "landmark") {
               ctx.fillStyle = o.kind === "fish" ? "#447d8599" : "#756c59";
@@ -670,8 +936,15 @@ export default function TileScene({
                       ? p.role
                       : "builder";
                 if (p.id === 0) {
-                  const key = actorFrameKey(p, facings.current.get(p.id) ?? "se", time - stamp.current.at, reduced,
-                    world.objects.find(object => object.id === p.action?.targetId));
+                  const key = actorFrameKey(
+                    p,
+                    facings.current.get(p.id) ?? "se",
+                    time - stamp.current.at,
+                    reduced,
+                    world.objects.find(
+                      (object) => object.id === p.action?.targetId,
+                    ),
+                  );
                   if (!princeFrame(key, at)) art("prince", at, 90, 90);
                 } else art(name, at, 90, 90);
               },
@@ -841,7 +1114,8 @@ export default function TileScene({
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(at.x, y, 14, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
+        ctx.fill();
+        ctx.stroke();
         ctx.fillStyle = "#fff0d7";
         ctx.font = "bold 15px Georgia";
         ctx.textAlign = "center";
@@ -878,7 +1152,8 @@ export default function TileScene({
           const at = tileToScreen(p);
           i ? ctx.lineTo(at.x, at.y) : ctx.moveTo(at.x, at.y);
         });
-        ctx.stroke(); ctx.setLineDash([]);
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
       if (state.player.path.length) {
         ctx.strokeStyle = "#f7d797";
@@ -903,7 +1178,16 @@ export default function TileScene({
     };
     frameId = requestAnimationFrame(paint);
     return () => cancelAnimationFrame(frameId);
-  }, [state, camera, size, artVersion, selection, feedback, previewRoute, presentationEpoch]);
+  }, [
+    state,
+    camera,
+    size,
+    artVersion,
+    selection,
+    feedback,
+    previewRoute,
+    presentationEpoch,
+  ]);
   function local(p: { x: number; y: number }) {
     const r = root.current!.getBoundingClientRect();
     return { x: p.x - r.left, y: p.y - r.top };
@@ -991,7 +1275,7 @@ export default function TileScene({
   }
   const objectButtons = world.objects.filter(
     (o) =>
-      visible(o.position, 80) &&
+      visible(objectFoot(o), 80) &&
       (view.zoom >= 0.35 ||
         o.kind === "landmark" ||
         (selection?.kind === "object" && selection.id === o.id)) &&
@@ -1026,10 +1310,7 @@ export default function TileScene({
       <canvas ref={canvas} aria-label="The tile-built Fable Crown frontier" />
       <div className="tile-hit-layer">
         {objectButtons.map((o) => {
-          const at = project({
-            x: o.position.x + (o.width - 1) / 2,
-            y: o.position.y + o.height - 1,
-          });
+          const at = project(objectFoot(o));
           return (
             <button
               key={o.id}

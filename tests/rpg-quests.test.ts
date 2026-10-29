@@ -16,7 +16,7 @@ import {
   tile,
 } from "../src/rpg/world";
 import { addItems, itemCount } from "../src/rpg/inventory";
-import { XP_THRESHOLDS } from "../src/rpg/skills";
+import { XP_THRESHOLDS, levelForXp } from "../src/rpg/skills";
 import type { RpgState } from "../src/rpg/types";
 const NOW = Date.UTC(2026, 9, 29);
 function fresh() {
@@ -30,9 +30,16 @@ function at(s: RpgState, id: string) {
   s.player.path = [];
 }
 function quest(s: RpgState, id: string) {
+  const wasAccepted = s.quests[id].accepted;
   expect(applyRpgCommand(s, { type: "quest", questId: id }).ok).toBe(true);
   for (let i = 0; i < 1000 && s.control.active; i++) stepRpg(s);
   expect(s.control.active).toBeNull();
+  const q = QUESTS[id];
+  if (wasAccepted && q.items.every((i) => itemCount(s.player.inventory, i.itemId) >= i.quantity) &&
+    Object.entries(q.requirements ?? {}).every(([skill, level]) => levelForXp(s.player.skills[skill as keyof typeof s.player.skills]) >= level!) &&
+    (!q.kills || s.quests[id].kills >= q.kills.quantity)) {
+    for (let i = 0; i < 2000 && !s.quests[id].complete; i++) stepRpg(s);
+  }
   s.control.thinkingUntil = 1e9;
   expect(validateRpgSave(s)).not.toBeNull();
 }
@@ -96,6 +103,7 @@ describe("original service and route quest chains", () => {
     quest(s, "road");
     expect(s.quests.road.complete).toBe(false);
     s.quests.road.kills = 3;
+    s.quests.road.counters!.outlaws = 3;
     const before = findPath(tile(110, 95), tile(130, 95), WORLD)!;
     const oldCollision = [...WORLD.collision];
     quest(s, "road");

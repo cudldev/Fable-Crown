@@ -49,7 +49,10 @@ export interface WorldObject {
     | "quest"
     | "building"
     | "landmark"
-    | "bridge";
+    | "bridge"
+    | "clue"
+    | "target"
+    | "ferry";
   position: TilePosition;
   width: number;
   height: number;
@@ -58,6 +61,8 @@ export interface WorldObject {
   shopId?: string;
   questId?: string;
   art?: string;
+  cutaway?: boolean;
+  serviceId?: string;
 }
 export interface WorldDefinition {
   id: string;
@@ -143,7 +148,8 @@ export interface ActionState {
     | "quest"
     | "recover"
     | "rest"
-    | "eat";
+    | "eat"
+    | "practice";
   targetId?: string;
   recipeId?: string;
   remaining: number;
@@ -200,13 +206,21 @@ export type RpgOrder =
   | { type: "attack"; enemyId: string }
   | { type: "loot"; dropId: string }
   | { type: "quest"; questId: string }
-  | { type: "recover" };
+  | { type: "recover" }
+  | {
+      type: "interact";
+      objectId: string;
+      verb: "talk" | "inspect" | "use" | "practice";
+      itemId?: string;
+    }
+  | { type: "travel-service"; objectId: string };
 export type RpgCommand =
   | RpgOrder
   | { type: "enqueue"; order: RpgOrder }
   | { type: "goal"; goal: Ambition }
   | { type: "style"; skill: CombatStyle }
   | { type: "run"; enabled: boolean }
+  | { type: "dialogue-choice"; choiceId: string }
   | { type: "cancel-order"; index: number }
   | { type: "reorder-order"; index: number; direction: -1 | 1 }
   | { type: "wait" | "resume" };
@@ -246,11 +260,50 @@ export interface QuestDefinition {
   requirements?: Partial<Record<SkillId, number>>;
   items: ItemStack[];
   kills?: { enemyId: string; quantity: number };
+  prerequisites?: string[];
+  stages?: QuestStage[];
   reward: {
     coins: number;
     xp: Partial<Record<SkillId, number>>;
     unlock: string;
   };
+}
+export interface QuestStage {
+  id: string;
+  description: string;
+  kind:
+    | "talk"
+    | "inspect"
+    | "visit"
+    | "gather"
+    | "craft"
+    | "deliver"
+    | "kill"
+    | "practice"
+    | "choice";
+  targetId?: string;
+  items?: ItemStack[];
+  recipeId?: string;
+  enemyId?: string;
+  quantity?: number;
+  next?: string;
+  choices?: { id: string; label: string; next: string }[];
+}
+export interface QuestProgress {
+  accepted: boolean;
+  complete: boolean;
+  kills: number;
+  stageId?: string;
+  counters?: Record<string, number>;
+  choices?: Record<string, string>;
+}
+export interface DialogueState {
+  id: string;
+  questId: string;
+  targetId: string;
+  text: string;
+  choices: { id: string; label: string }[];
+  expiresAt: number;
 }
 export interface RpgState {
   version: 3;
@@ -271,10 +324,7 @@ export interface RpgState {
     items: ItemStack[];
     expiresAt: number;
   }[];
-  quests: Record<
-    string,
-    { accepted: boolean; complete: boolean; kills: number }
-  >;
+  quests: Record<string, QuestProgress>;
   grave: {
     position: TilePosition;
     items: ItemStack[];
@@ -301,6 +351,7 @@ export interface RpgState {
   journal: string[];
   /** Bounded, deterministic player rewards. Older V3 saves may omit this log. */
   rewards?: RewardEvent[];
+  dialogue?: DialogueState | null;
 }
 export interface RewardEvent {
   id: string;

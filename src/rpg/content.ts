@@ -42,6 +42,18 @@ item("prince-cape", "Prince’s travelling cape", "gear", 0, {
   slot: "cape",
   defence: 1,
 });
+item("training-bow", "Reed practice bow", "supply", 8);
+item("training-arrow", "Blunt practice arrow", "supply", 1, { stackable: true });
+item("shortbow", "Mosswood shortbow", "supply", 40);
+item("watch-token", "Eastern watch service token", "supply", 0, { stackable: true });
+for (const [metal, level, tier] of [["black", 10, 4], ["mithril", 20, 5]] as const) {
+  item(`${metal}-sword`, `${metal} sword`, "gear", tier * 150, { slot: "weapon", attackLevel: level,
+    attack: tier * 4, strength: tier * 3, attackTicks: 4, tier });
+  item(`${metal}-body`, `${metal} body`, "gear", tier * 300, { slot: "body", defenceLevel: level, defence: tier * 10, tier });
+  for (const tool of ["axe", "pickaxe"] as const) item(`${metal}-${tool}`, `${metal} ${tool}`, "tool", tier * 250,
+    { tool, tier, skill: tool === "axe" ? "woodcutting" : "mining", level: level + 1, slot: "weapon", attackLevel: level,
+      attack: tier * 2, strength: tier * 2, attackTicks: 5 });
+}
 item("raw-boar", "Raw moss boar meat", "resource", 5);
 item("cooked-boar", "Roast moss boar", "food", 10, { heals: 3 });
 item("burnt-boar", "Burnt moss boar", "resource", 0);
@@ -381,7 +393,11 @@ export const SHOPS: Record<string, ShopDefinition> = Object.fromEntries(
         name: `${t.name} supplies`,
         stock: Object.fromEntries(
           Object.values(ITEMS)
-            .filter((i) => i.value > 0 && i.id !== "coins")
+            .filter((i) => i.value > 0 && i.id !== "coins" && (
+              t.id === "oakrest" ? i.id.startsWith("bronze-") || ["iron-pickaxe", "steel-pickaxe", "bronze-axe", "small-net", "hammer", "logs", "copper-ore", "tin-ore", "raw-shrimp", "cooked-shrimp"].includes(i.id) :
+                t.id === "briarford" ? i.tool === "axe" || ["net", "rod", "flyrod"].includes(i.tool ?? "") || /logs|shrimp|sardine|trout|bow|arrow|bait|feather/.test(i.id) :
+                  ["pickaxe", "hammer"].includes(i.tool ?? "") || i.kind === "gear" || /ore|coal|bar/.test(i.id)
+            ))
             .map((i) => [
               i.id,
               {
@@ -404,7 +420,15 @@ export const SHOPS: Record<string, ShopDefinition> = Object.fromEntries(
     ];
   }),
 );
+for (const [id, name, ids] of [
+  ["briarford-bowyer", "Iori’s bowyer", ["shortbow", "training-bow", "training-arrow", "logs", "oak-logs", "willow-logs"]],
+  ["watch-quartermaster", "Eastern watch quartermaster", ["black-sword", "black-body", "mithril-sword", "mithril-body", "cooked-shrimp"]],
+] as const) SHOPS[id] = { id, name, stock: Object.fromEntries(ids.map((itemId) => [itemId,
+  { max: ITEMS[itemId].stackable ? 100 : 3, buy: ITEMS[itemId].value, sell: Math.max(1, Math.floor(ITEMS[itemId].value / 2)), restockTicks: 100 }])) };
 export const ENEMIES: Record<string, EnemyDefinition> = {
+  captain: { id: "captain", name: "Captain Kestrel", health: 22, attack: 6, strength: 6, defence: 6,
+    attackTicks: 5, maxHit: 3, aggressive: false, respawnTicks: 100,
+    loot: [{ itemId: "coins", quantity: 40 }, { itemId: "cooked-shrimp", quantity: 3 }] },
   boar: {
     id: "boar",
     name: "Moss boar",
@@ -500,3 +524,55 @@ export const QUESTS: Record<string, QuestDefinition> = {
     },
   },
 };
+QUESTS.forge.stages = [
+  { id: "ledger", kind: "inspect", targetId: "forge-charcoal", description: "Inspect Ren’s charcoal ledger." },
+  { id: "supplies", kind: "gather", items: [{ itemId: "logs", quantity: 6 }], description: "Gather six logs for Ren’s charcoal supply." },
+  { id: "bronze", kind: "craft", recipeId: "bronze-bar", quantity: 6, description: "Smelt or collect six bronze bars." },
+  { id: "deliver", kind: "deliver", targetId: "quest-forge", items: QUESTS.forge.items, description: "Deliver the timber and bronze to Ren." },
+];
+QUESTS.supper.stages = [
+  { id: "basket", kind: "inspect", targetId: "supper-basket", description: "Inspect Hana’s empty fish basket." },
+  { id: "supplies", kind: "gather", items: QUESTS.supper.items, description: "Catch and cook six shrimp, or bring banked meals." },
+  { id: "deliver", kind: "deliver", targetId: "quest-supper", items: QUESTS.supper.items, description: "Bring Hana six cooked shrimp." },
+];
+QUESTS.road.stages = [
+  { id: "survey", kind: "inspect", targetId: "road-survey", description: "Inspect the ruined crossing survey." },
+  { id: "supplies", kind: "gather", items: QUESTS.road.items, description: "Train for the crossing and prepare eight oak logs." },
+  { id: "outlaws", kind: "kill", enemyId: "bandit", quantity: 3, description: "Defeat three outlaws after accepting." },
+  { id: "deliver", kind: "deliver", targetId: "quest-road", items: QUESTS.road.items, description: "Deliver the oak timber to Warden Toma." },
+];
+QUESTS.bowyer = { id: "bowyer", name: "The Bowyer’s Measure", giverId: "quest-bowyer",
+  description: "Commission a practice bow and learn Iori’s three measured practice cycles.",
+  items: [{ itemId: "logs", quantity: 2 }, { itemId: "bronze-bar", quantity: 1 }],
+  stages: [
+    { id: "supplies", kind: "gather", items: [{ itemId: "logs", quantity: 2 }, { itemId: "bronze-bar", quantity: 1 }], description: "Bring two logs and one bronze bar for Iori’s commission." },
+    { id: "commission", kind: "deliver", targetId: "quest-bowyer", items: [{ itemId: "logs", quantity: 2 }, { itemId: "bronze-bar", quantity: 1 }], description: "Commission a reed practice bow." },
+    { id: "practice", kind: "practice", targetId: "bowyer-target", quantity: 3, description: "Complete three measured practice cycles at the reed target." },
+    { id: "report", kind: "talk", targetId: "quest-bowyer", description: "Report your practice to Iori." },
+  ], reward: { coins: 30, xp: { woodcutting: 500 }, unlock: "bowyer" } };
+QUESTS.letters = { id: "letters", name: "River Letters", giverId: "quest-letters", items: [],
+  description: "Follow Nell’s courier markers and choose supplies or scouting to restore the ferry.",
+  stages: [
+    { id: "reed", kind: "inspect", targetId: "letters-reed", description: "Inspect the reed-wrapped letter." },
+    { id: "west", kind: "visit", targetId: "letters-west", description: "Visit the west-bank marker." },
+    { id: "east", kind: "visit", targetId: "letters-east", description: "Visit the east-bank marker." },
+    { id: "route", kind: "choice", targetId: "quest-letters", description: "Nell asks: bring supper for the ferry workers, or scout the courier route?",
+      choices: [{ id: "supplies", label: "Bring six cooked shrimp", next: "supplies" }, { id: "scout", label: "Scout three river markers", next: "scout-reed" }] },
+    { id: "supplies", kind: "gather", items: [{ itemId: "cooked-shrimp", quantity: 6 }], next: "deliver", description: "Prepare six cooked shrimp for the ferry workers." },
+    { id: "deliver", kind: "deliver", targetId: "quest-letters", items: [{ itemId: "cooked-shrimp", quantity: 6 }], next: "report", description: "Deliver the workers’ meals." },
+    { id: "scout-reed", kind: "inspect", targetId: "letters-reed", description: "Scout the reed marker." },
+    { id: "scout-bell", kind: "inspect", targetId: "letters-bell", description: "Scout the old ferry bell." },
+    { id: "scout-stone", kind: "inspect", targetId: "letters-stone", description: "Scout the courier’s river stone.", next: "report" },
+    { id: "report", kind: "talk", targetId: "quest-letters", description: "Report to Nell and open the ferry." },
+  ], reward: { coins: 50, xp: { fishing: 500 }, unlock: "river-ferry" } };
+QUESTS.watch = { id: "watch", name: "The Eastern Watch", giverId: "quest-watch", prerequisites: ["road"],
+  description: "Investigate three clues, prepare for danger, and confront Captain Kestrel’s outdoor camp.",
+  requirements: { attack: 5, strength: 5, defence: 5 }, items: [],
+  stages: [
+    { id: "tracks", kind: "inspect", targetId: "watch-track", description: "Inspect the boot tracks." },
+    { id: "banner", kind: "inspect", targetId: "watch-banner", description: "Inspect the torn watch banner." },
+    { id: "fire", kind: "inspect", targetId: "watch-fire", description: "Inspect the abandoned campfire." },
+    { id: "prepare", kind: "gather", items: [{ itemId: "cooked-shrimp", quantity: 6 }], description: "Prepare six healing meals before approaching the outlaw camp." },
+    { id: "captain", kind: "kill", enemyId: "captain", quantity: 1, description: "Defeat Captain Kestrel at the open-air camp." },
+    { id: "report", kind: "talk", targetId: "quest-watch", description: "Report to Scout Edda and claim watch services." },
+  ], reward: { coins: 180, xp: { defence: 1000 }, unlock: "watch-services" } };

@@ -26,6 +26,13 @@ export const TOWNS = [
   { id: "briarford", name: "Briarford", position: tile(151, 43) },
   { id: "stonehaven", name: "Stonehaven", position: tile(207, 142) },
 ];
+const RIVER_POINTS = [[119, 0], [108, 25], [119, 47], [132, 69], [119, 95], [110, 113], [119, 129], [131, 155], [119, 191]];
+export function riverAt(y: number) {
+  const index = RIVER_POINTS.findIndex((point) => point[1] >= y);
+  const [ax, ay] = RIVER_POINTS[Math.max(0, index - 1)], [bx, by] = RIVER_POINTS[Math.max(0, index)];
+  const t = by === ay ? 0 : (y - ay) / (by - ay), smooth = t * t * (3 - 2 * t);
+  return { center: Math.round(ax + (bx - ax) * smooth), width: 4 + Math.floor((Math.sin(y * .17) + 1) * 1.99) };
+}
 
 function buildFrontier(): WorldDefinition {
   const width = 256,
@@ -57,8 +64,9 @@ function buildFrontier(): WorldDefinition {
       if (highland) paint(x, y, "stone");
       else if ((x * 17 + y * 31 + Math.floor(x / 11) * 7) % 113 < 5)
         paint(x, y, "dirt");
-      if (x >= 114 && x <= 123) paint(x, y, "sand");
-      if (x >= 116 && x <= 121) paint(x, y, "water", true);
+      const river = riverAt(y), left = river.center - Math.floor(river.width / 2);
+      if (x >= left - 2 && x <= left + river.width + 1) paint(x, y, "sand");
+      if (x >= left && x < left + river.width) paint(x, y, "water", true);
       if (
         (x - 29) ** 2 + (y - 150) ** 2 < 45 ||
         (x - 191) ** 2 + (y - 77) ** 2 < 24
@@ -73,9 +81,11 @@ function buildFrontier(): WorldDefinition {
         [bx, by] = points[i];
       const length = Math.max(Math.abs(bx - ax), Math.abs(by - ay));
       for (let j = 0; j <= length; j++) {
-        const x = Math.round(ax + ((bx - ax) * j) / Math.max(1, length));
-        const y = Math.round(ay + ((by - ay) * j) / Math.max(1, length));
-        for (let dy = -1; dy <= 1; dy++)
+        const t = j / Math.max(1, length), bend = Math.sin(t * Math.PI) * Math.min(5, length / 10);
+        const x = Math.round(ax + (bx - ax) * t + (by > ay ? bend : -bend));
+        const y = Math.round(ay + (by - ay) * t + (bx > ax ? bend * .5 : -bend * .5));
+        const radius = j % 9 < 4 ? 1 : 0;
+        for (let dy = -radius; dy <= radius; dy++)
           for (let dx = -1; dx <= 1; dx++) {
             const index = (y + dy) * width + x + dx;
             if (world.terrain[index] !== "water") world.terrain[index] = "dirt";
@@ -137,7 +147,7 @@ function buildFrontier(): WorldDefinition {
     ["south-bridge", "Pilgrim bridge", 129],
   ] as const) {
     for (let dy = -1; dy <= 1; dy++)
-      for (let x = 114; x <= 123; x++) paint(x, y + dy, "stone");
+      for (let x = 112; x <= 125; x++) paint(x, y + dy, "stone");
     add(id, name, "bridge", 114, y - 1, 10, 3, false, "bridge");
     // Parapets block north/south exits along the span, without blocking travel across it.
     for (let x = 116; x <= 121; x++) {
@@ -148,7 +158,8 @@ function buildFrontier(): WorldDefinition {
   for (const town of TOWNS) {
     const { x, y } = town.position;
     for (let dy = -7; dy <= 7; dy++)
-      for (let dx = -9; dx <= 9; dx++) paint(x + dx, y + dy, "dirt");
+      for (let dx = -9; dx <= 9; dx++) if (dx * dx / 90 + dy * dy / 52 < 1 + .13 * Math.sin(dx + dy * .7))
+        paint(x + dx, y + dy, "dirt");
     add(town.id, `${town.name} square`, "landmark", x, y);
     add(
       `${town.id}-bank`,
@@ -170,7 +181,7 @@ function buildFrontier(): WorldDefinition {
       2,
       2,
       true,
-      "workshop",
+      "iso-workshop",
     );
     add(
       `${town.id}-anvil`,
@@ -247,9 +258,12 @@ function buildFrontier(): WorldDefinition {
     ["quest-forge", "Master smith Ren", 0, "forge"],
     ["quest-supper", "Cook Hana", 1, "supper"],
     ["quest-road", "Warden Toma", 2, "road"],
+    ["quest-bowyer", "Bowyer Iori", 1, "bowyer"],
+    ["quest-letters", "Courier Nell", 0, "letters"],
+    ["quest-watch", "Scout Edda", 2, "watch"],
   ] as const) {
     const p = TOWNS[townIndex].position;
-    add(id, name, "quest", p.x + 2, p.y - 1).questId = questId;
+    add(id, name, "quest", p.x + 2 + (questId === "bowyer" || questId === "letters" || questId === "watch" ? 3 : 0), p.y - 1).questId = questId;
   }
   const treeNames = {
     tree: "Mosswood tree",
@@ -286,18 +300,32 @@ function buildFrontier(): WorldDefinition {
       [town.position.x, town.position.y],
       [mx - 2, my + 2],
     ]);
-    for (let i = 0; i < 12; i++) {
+    let treeSeed = 7591 + cluster * 7919;
+    for (let i = 0; i < 80; i++) {
       const resource = (["tree", "tree", "oak", "willow"] as const)[i % 4];
+      let tx = gx, ty = gy;
+      let valid = false;
+      for (let attempt = 0; attempt < 2000; attempt++) {
+        treeSeed = (Math.imul(treeSeed, 1664525) + 1013904223) >>> 0;
+        tx = Math.max(3, Math.min(width - 4, gx + (treeSeed % 45) - 18));
+        treeSeed = (Math.imul(treeSeed, 1664525) + 1013904223) >>> 0;
+        ty = Math.max(3, Math.min(height - 4, gy + (treeSeed % 35) - 13));
+        const near = world.objects.some((o) => Math.abs(o.position.x - tx) <= o.width + 1 && Math.abs(o.position.y - ty) <= o.height + 1) ||
+          tx >= 156 && tx <= 164 && ty >= 33 && ty <= 39;
+        if (!near && world.terrain[ty * width + tx] === "grass" &&
+          !world.spawns.some((p) => Math.max(Math.abs(p.x - tx), Math.abs(p.y - ty)) < 4)) { valid = true; break; }
+      }
+      if (!valid) throw Error(`No legal grove tile for ${town.id}-tree-${i}`);
       add(
         `${town.id}-tree-${i}`,
         treeNames[resource],
         "tree",
-        gx + (i % 4) * 3,
-        gy + Math.floor(i / 4) * 4,
-        2,
-        2,
+        tx,
+        ty,
+        1,
+        1,
         true,
-        "forest",
+        resource === "tree" ? "iso-tree" : `iso-${resource}`,
         resource,
       );
     }
@@ -323,7 +351,7 @@ function buildFrontier(): WorldDefinition {
       );
     }
   }
-  for (const [side, x, y] of [
+  for (const [side, , y] of [
     ["west", 115, 91],
     ["north-east", 122, 57],
     ["south-east", 122, 148],
@@ -334,7 +362,8 @@ function buildFrontier(): WorldDefinition {
         `fish-${side}-${resource}`,
         `${resource[0].toUpperCase()}${resource.slice(1)} fishing`,
         "fish",
-        x,
+        side === "west" ? riverAt(y + i * 3).center - Math.floor(riverAt(y + i * 3).width / 2) - 1 :
+          riverAt(y + i * 3).center - Math.floor(riverAt(y + i * 3).width / 2) + riverAt(y + i * 3).width,
         y + i * 3,
         1,
         1,
@@ -342,6 +371,37 @@ function buildFrontier(): WorldDefinition {
         undefined,
         resource,
       );
+    }
+  }
+  for (const [id, name, x, y] of [
+    ["forge-charcoal", "Ren’s charcoal ledger", 62, 89], ["supper-basket", "Hana’s empty fish basket", 146, 39],
+    ["road-survey", "Warden’s crossing survey", 127, 95], ["letters-west", "West-bank courier marker", 109, 91],
+    ["letters-east", "East-bank courier marker", 132, 103], ["letters-reed", "Reed-wrapped letter", 106, 111],
+    ["letters-bell", "Old ferry bell", 127, 128], ["letters-stone", "Courier’s river stone", 111, 44],
+    ["watch-track", "Boot tracks", 221, 105], ["watch-banner", "Torn watch banner", 229, 113],
+    ["watch-fire", "Abandoned campfire", 237, 121],
+  ] as const) add(id, name, "clue", x, y);
+  add("bowyer-target", "Reed practice target", "target", 162, 49);
+  const bowyer = add("briarford-bowyer", "Iori’s bowyer", "shop", 164, 34, 4, 3, true, "iso-workshop");
+  bowyer.shopId = bowyer.id; bowyer.serviceId = "bowyer";
+  const watch = add("watch-quartermaster", "Watch quartermaster", "shop", 230, 97, 4, 3, true, "iso-store");
+  watch.shopId = watch.id; watch.serviceId = "watch";
+  const ferryRiver = riverAt(111), ferryLeft = ferryRiver.center - Math.floor(ferryRiver.width / 2);
+  add("ferry-west", "Willow ferry west bank", "ferry", ferryLeft - 1, 111).serviceId = "letters";
+  add("ferry-east", "Willow ferry east bank", "ferry", ferryLeft + ferryRiver.width, 111).serviceId = "letters";
+  add("outlaw-camp", "Captain Kestrel’s outdoor camp", "landmark", 225, 123, 2, 2, false, "ruins");
+  road([[207, 142], [217, 134], [225, 123], [235, 99]]);
+  // Same-world service interiors use edge walls and a south-facing doorway.
+  for (const service of world.objects.filter((o) => ["bank", "shop", "building"].includes(o.kind) && o.blocks && o.id !== "east-watch")) {
+    service.cutaway = true; service.blocks = false;
+    if (!service.art?.startsWith("iso-")) service.art = `iso-${service.art ?? "house"}`;
+    for (let dy = 0; dy < service.height; dy++) for (let dx = 0; dx < service.width; dx++) {
+      const index = (service.position.y + dy) * width + service.position.x + dx;
+      world.collision[index] &= ~COLLISION.BLOCKED;
+      if (dy === 0) world.collision[index] |= COLLISION.NORTH;
+      if (dx === 0) world.collision[index] |= COLLISION.WEST;
+      if (dx === service.width - 1) world.collision[index] |= COLLISION.EAST;
+      if (dy === service.height - 1 && dx !== Math.floor(service.width / 2)) world.collision[index] |= COLLISION.SOUTH;
     }
   }
   return world;
@@ -358,7 +418,12 @@ export const ENEMY_SPAWNS = [
   { id: "bandit-0", definitionId: "bandit", position: tile(107, 81) },
   { id: "bandit-1", definitionId: "bandit", position: tile(135, 112) },
   { id: "bandit-2", definitionId: "bandit", position: tile(216, 119) },
+  { id: "captain-kestrel", definitionId: "captain", position: tile(226, 124) },
 ];
+export const FERRIES: Record<string, { name: string; objectId: string; destination: TilePosition; cost: number; questId: string }> = {
+  "ferry-west": { name: "Willow ferry to the east bank", objectId: "ferry-west", destination: { ...WORLD.objects.find((o) => o.id === "ferry-east")!.position }, cost: 5, questId: "letters" },
+  "ferry-east": { name: "Willow ferry to the west bank", objectId: "ferry-east", destination: { ...WORLD.objects.find((o) => o.id === "ferry-west")!.position }, cost: 5, questId: "letters" },
+};
 let roadWorld: WorldDefinition | undefined;
 /** Only the unlocked static variant is cached; shared WORLD is never mutated. */
 export function worldForState(

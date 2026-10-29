@@ -22,6 +22,11 @@ export function contextGoals(
   const choices: Thought["choices"] = [];
   const add = (goal: Ambition, label: string, description: string) =>
     choices.push({ id: goal.id, goal, label, description });
+  if (known.serviceId && QUESTS[known.serviceId] && !s.quests[known.serviceId]?.complete) {
+    const q = QUESTS[known.serviceId];
+    add({ id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name }, q.name, q.description);
+    return choices;
+  }
   const train = (skill: SkillId, level: number, targetId?: string) => {
     if (levelForXp(s.player.skills[skill]) >= level) return;
     add(

@@ -1,6 +1,6 @@
 {
-  "version": "9b36d9904001",
-  "bytes": 8915438,
+  "version": "9c22ec9f4301",
+  "bytes": 9931268,
   "files": [
     "art/actor-fisher.webp",
     "art/anvil.webp",
@@ -12,6 +12,13 @@
     "art/enemy-rock-mite.webp",
     "art/forest.webp",
     "art/house.webp",
+    "art/iso-house.webp",
+    "art/iso-manor.webp",
+    "art/iso-oak.webp",
+    "art/iso-store.webp",
+    "art/iso-tree.webp",
+    "art/iso-willow.webp",
+    "art/iso-workshop.webp",
     "art/manor.webp",
     "art/miner.webp",
     "art/ore.webp",

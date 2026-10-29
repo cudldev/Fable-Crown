@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { RpgState } from "./types";
-import { objectById } from "./world";
+import { objectById, riverAt } from "./world";
 type Settings = { muted: boolean; volume: number };
 const defaults: Settings = { muted: false, volume: 0.15 };
 export function useGameAudio(state: RpgState | null, epoch: number) {
@@ -162,7 +162,7 @@ export function useGameAudio(state: RpgState | null, epoch: number) {
     if (p.health < old.health) tone(130, 0.12, 0, "triangle");
     if (filter.current && ctx.current)
       filter.current.frequency.setTargetAtTime(
-        Math.abs(p.position.x - 119) < 7 ? 700 : 250,
+        Math.abs(p.position.x - riverAt(p.position.y).center) < 7 ? 700 : 250,
         ctx.current.currentTime,
         0.8,
       );

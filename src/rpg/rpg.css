@@ -203,6 +203,25 @@
   padding: 12px;
   font: italic 14px/1.6 Georgia;
 }
+.rpg-story-choice {
+  position: absolute;
+  z-index: 25;
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%);
+  width: min(400px, calc(100vw - 24px));
+  max-height: 65dvh;
+  overflow: auto;
+  padding: 18px;
+  pointer-events: auto;
+}
+.rpg-story-choice p {
+  margin: 8px 0;
+}
+.rpg-story-choice small {
+  display: block;
+  font: 11px/1.4 system-ui;
+}
 .rpg-combat-style input[type="range"] {
   width: 100%;
   min-height: 44px;

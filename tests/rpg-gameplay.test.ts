@@ -64,6 +64,8 @@ describe('tile RPG legal gathering and production', () => {
   });
   it('catches shrimp and consumes bait only for a successful legal sardine catch', () => {
     const s=fresh(); at(s,'fish-west-shrimp'); s.seed=1;
+    // Isolate the seeded catch roll from the newly closer NPC groves.
+    for (const npc of s.npcs) { npc.inventory=[]; npc.action=null; npc.path=[]; }
     expect(applyRpgCommand(s,{type:'gather',objectId:'fish-west-shrimp',quantity:1}).ok).toBe(true); stepRpg(s,5);
     expect(itemCount(s.player.inventory,'raw-shrimp')).toBe(1); expect(s.player.skills.fishing).toBe(100); assertValid(s);
     s.player.skills.fishing=XP_THRESHOLDS[4]; at(s,'fish-west-sardine'); addItems(s.player.inventory,'fishing-rod',1);

@@ -29,7 +29,7 @@ describe('tile frontier geometry', () => {
     expect(new Set(WORLD.spawns.map(s => `${s.x},${s.y}`)).size).toBe(24);
     expect(WORLD.spawns.every(s => isWalkable(s))).toBe(true);
     const resources = WORLD.objects.filter(o => o.resourceId);
-    expect(resources.length).toBeGreaterThanOrEqual(60); expect(resources.length).toBeLessThanOrEqual(100);
+    expect(resources.length).toBe(279);
     expect(new Set(resources.map(o => o.resourceId)).size).toBe(10);
     expect(new Set(WORLD.objects.map(o => o.id)).size).toBe(WORLD.objects.length);
     for (const o of WORLD.objects) {
