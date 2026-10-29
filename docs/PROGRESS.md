@@ -181,3 +181,9 @@ Core specialist:256/256unit tests across24files +strict TypeScript pass, includi
 Active-world benchmark after1200simulationticks/1330private NPC completions, same reference Chrome156 Windows/i9-10850K/1280×720 DPR1: close/far/overview median8.3ms,p958.5/8.4/8.5ms; CanvasAPI CPU0.293/0.333/0.227ms per paint; terrain chunk builds0/0/0, far/overview small-canvas builds0. No physical-phone performance claim. Last actual allowance53%used/about47%remaining. No reset redemption or purchases. Publish/verify public next, then stop.
 
 First GitHub run40965798588 stopped before deployment:5second timeouts in legacy settlement replay, contextual-goal coverage and forward-planner suites under4concurrent workers. CI now uses1test worker (local stays4); timeouts and assertions unchanged. All256tests pass with CI=1 locally in36.88s. Retrying the public release with reduced CPU contention; prior verified demo remains live.
+
+### Planner/personality public verification — stop
+
+Retry release970c38b passed the full GitHub pipeline, including256unit tests and36browser scenarios: https://github.com/cudldev/Fable-Crown/actions/runs/40966471600 . Public index-PncQ09FV.js matches the verified build; unchanged artwork manifest6d1d153b2395 has56files/15,711,852bytes. Seven targeted live checks passed in38.7s against https://cudldev.github.io/Fable-Crown/: new explanation/bank/pause flow, goal-history/phone layouts, personality preview→apply→actual reconsider→reload with no XP/items grants, offline asset installation/reload, manual map movement and real V3/V4 archive preservation. Live screenshots saved under docs/screenshots/.
+
+Final current allowance53%used/about47%remaining, no reset redemption or purchases. Improved deterministic goal comparison and editable planning traits are live; no LLM, learned policy or free skill editing added. Stop at this verified release.
