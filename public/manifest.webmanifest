@@ -1,1 +1,31 @@
-{"name":"Fable Crown","short_name":"Fable Crown","description":"A kingdom grows through its people.","id":"./","start_url":"./","scope":"./","display":"standalone","background_color":"#eee8d8","theme_color":"#192e39","icons":[{"src":"crown.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
+{
+  "name": "Fable Crown",
+  "short_name": "Fable Crown",
+  "description": "A kingdom grows through its people.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eee8d8",
+  "theme_color": "#192e39",
+  "icons": [
+    {
+      "src": "crown-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "crown-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "crown.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,24 +1,586 @@
-import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BILL, TICK_MS, type GameState, type Strategy } from './types';
-import './style.css';
-const Scene=lazy(()=>import('./Scene'));
-const labels:Record<Strategy,string>={local:'Gather from our land',trade:'Trade for a head start',careful:'Build at a gentler pace'};
-const details:Record<Strategy,string>={local:'Use nearby wood and stone · keep our coins',trade:'Spend 24 coins · receive 8 timber + 8 stone',careful:'Longer work cycles · the same shared ambition'};
-function Portrait(){return <svg className="portrait" viewBox="0 0 100 110" aria-label="Prince Alden, in blue and gold"><defs><linearGradient id="portrait-bg"><stop stopColor="#b4b49a"/><stop offset="1" stopColor="#e9ddbc"/></linearGradient></defs><rect width="100" height="110" rx="45" fill="url(#portrait-bg)"/><path d="M7 110q-3-32 29-36l12-6 17 7q34 6 35 35" fill="#355b7c" stroke="#4f523f" strokeWidth="2"/><path d="m14 110 12-24 22 13 29-18 17 29M26 86l19 24m31-29-16 29" fill="none" stroke="#c6aa65" strokeWidth="3"/><path d="M40 61v19l12 13 13-17V60" fill="#d1a577" stroke="#635642"/><path d="M28 34q8-23 36-8l9 20-8 21-15 8-15-8-9-23Z" fill="#e3bc8d" stroke="#67513e" strokeWidth="1.5"/><path d="M23 50q-7-41 23-39 29-6 36 31l-15-9-2 13-10-16-12 13 2-13-19 24Z" fill="#a67745" stroke="#6b553a" strokeWidth="2"/><path d="m29 22 1-13 12 8 9-15 7 15 13-8-2 16" fill="#cfb568" stroke="#76613b"/><path d="m36 49 8-1m13 0 7 1" stroke="#5c5948" strokeWidth="2"/><path d="m48 62 9-1" stroke="#997552" strokeWidth="1.5"/></svg>}
-function App(){const [state,setState]=useState<GameState|null>(null),[selected,setSelected]=useState(0),[tab,setTab]=useState<'intention'|'people'|'journal'>('intention'),[landmark,setLandmark]=useState(''),[message,setMessage]=useState(''),[saved,setSaved]=useState(true),[help,setHelp]=useState(false),[reset,setReset]=useState(false);const worker=useRef<Worker|null>(null);const input=useRef<HTMLInputElement>(null);
-useEffect(()=>{const w=new Worker(new URL('./game.worker.ts',import.meta.url),{type:'module'});worker.current=w;w.onmessage=e=>{setState(e.data.state);setSaved(e.data.storageOkay);if(e.data.message)setMessage(e.data.message);};const visibility=()=>w.postMessage({type:document.hidden?'pause':'resume'});document.addEventListener('visibilitychange',visibility);const pagehide=()=>w.postMessage({type:'pause'});window.addEventListener('pagehide',pagehide);return()=>{document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pagehide',pagehide);w.terminate();};},[]);
-useEffect(()=>{if(!message)return;const t=setTimeout(()=>setMessage(''),6500);return()=>clearTimeout(t);},[message]);
-const command=(type:string,extra={})=>worker.current?.postMessage({type,...extra});
-function exportSave(){if(!state)return;const exported={...state,savedAt:Date.now()};const url=URL.createObjectURL(new Blob([JSON.stringify(exported,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='fable-crown-chronicle.json';a.click();URL.revokeObjectURL(url);setMessage('Chronicle exported. Keep this file to move your village to another device.');}
-const person=state?.people.find(p=>p.id===selected);const seconds=state?Math.max(0,Math.ceil((state.decisionAt-state.tick)*TICK_MS/1000)):20;
-return <><header className="masthead"><a className="brand" href="#" aria-label="Fable Crown home"><img src={`${import.meta.env.BASE_URL}crown.svg`} alt=""/><span>Fable <i>Crown</i><small>A KINGDOM GROWS THROUGH ITS PEOPLE</small></span></a><div className="header-meta"><span className="live-dot"/> A living village <span className="header-date">{state?.calendar||'Awakening…'}</span></div><button className="help" aria-label="How to play" onClick={()=>setHelp(!help)}>?</button></header>
-<main><section className="village-panel"><div className="place-heading"><div><span className="eyebrow">THE FRONTIER · CHAPTER I</span><h1>Oakrest <span>Hope takes root.</span></h1></div><span className="population">♧ <b>16</b> souls</span></div><div className="scene-frame">{state?<Suspense fallback={<div className="loading">Unfolding the map…</div>}><Scene state={state} selected={selected} onSelect={id=>{setSelected(id);setLandmark('');setTab('people');}} onLandmark={id=>{setLandmark(id);setTab('people');}}/></Suspense>:<div className="loading">A new day in Oakrest…</div>}<div className="scene-caption"><span className="live-dot"/>{state?.workshop.complete?'A warm forge. A new beginning.':'Your people are already making a beginning.'}</div></div><div className="resource-strip" aria-label="Village resources">{(['timber','stone','iron'] as const).map((r,i)=><div key={r}><span className="resource-icon">{['♧','◇','⚒'][i]}</span><span><b>{state?.stock[r]??0}</b><small>{r} in store</small></span></div>)}<div><span className="resource-icon gold">◉</span><span><b>{state?.coins??40}</b><small>village coins</small></span></div></div><div className="world-note"><span>600 ms heartbeat · {state?.people.filter(p=>!p.action.startsWith('Resting')).length??16} people at work</span><span>{saved?'Saved on this device':'Storage unavailable · export to keep'}</span></div></section>
-<aside className="story-panel"><section className="ambition"><span className="eyebrow">OUR FIRST AMBITION</span><h2>{state?.workshop.complete?'A fire for the future':'A forge for Oakrest'}</h2><p>{state?.workshop.complete?'The workshop stands. Sora is forging the village’s first iron tools.':'Good tools begin a thriving village. Help Alden’s people raise their first blacksmith workshop.'}</p><div className="bill">{(['timber','stone','labor'] as const).map(r=><div key={r}><div><span>{r==='labor'?'Building work':r==='timber'?'Timber delivered':'Stone delivered'}</span><b>{state?.workshop[r]??0}<em> / {BILL[r]}</em></b></div><progress value={state?.workshop[r]??0} max={BILL[r]} aria-label={r}/></div>)}</div><div className="ambition-status"><span className={state?.workshop.complete?'seal complete':'seal'}>{state?.workshop.complete?'✓':'⌂'}</span><span>{state?.workshop.complete?`Workshop complete · ${state.workshop.forged} tools forged`:state?.workshop.labor?'Raising the workshop':state?.workshop.timber||state?.workshop.stone?'Carrying materials to the site':'Gathering and delivering supplies'}</span></div></section>
-<nav className="tabs" aria-label="Village panels">{(['intention','people','journal'] as const).map(t=><button key={t} aria-selected={tab===t} onClick={()=>{setTab(t);setLandmark('');}}>{t==='intention'?'Thought & Intention':t==='people'?'Villagers':'Chronicle'}{t==='intention'&&!state?.strategy&&<span className="tab-dot"/>}</button>)}</nav>
-<div className="tab-content">{tab==='intention'&&<section className="thought"><div className="speaker"><Portrait/><div><span className="eyebrow">A THOUGHT FROM YOUR PRINCE</span><h3>Alden <span>of Oakrest</span></h3><small>Hopeful · cooperative · learning with his people</small></div></div><blockquote>“{state?.workshop.complete?'A roof, a hearth, and hands willing to learn. This is how a kingdom begins.':state?.strategy?'Let us see this promise through. Every beam carried is a step toward our future.':'Our people have willing hands. A proper workshop would give them better tools. How shall we begin?'}”</blockquote>{!state?.strategy?<><div className="thought-timer"><span>Gently guide his intention</span><b>{seconds}s</b></div><div className="choices">{(['local','trade','careful'] as Strategy[]).map((s,i)=><button key={s} disabled={!state} onClick={()=>command('choose',{strategy:s})}><span className="choice-num">0{i+1}</span><span><b>{labels[s]}</b><small>{details[s]}</small></span><span className="choice-arrow">›</span></button>)}</div><p className="autonomy">Leave it to Alden: he will choose local gathering.<br/>Life in the village continues while he thinks.</p></>:<div className="chosen"><span className="eyebrow">{state.workshop.complete?'A PROMISE KEPT':'INTENTION CHOSEN'}</span><h4>{labels[state.strategy]}</h4><p>{state.decisionReason}</p><span className="autonomy">You influence his intentions. His people do the work.</span></div>}</section>}
-{tab==='people'&&<section className="inspector">{landmark?<><span className="eyebrow">A PLACE IN OAKREST</span><h3>{{forest:'Whispering wood',mine:'Stonefall mine',storage:'Village store',manor:'Alden’s manor',workshop:'Blacksmith workshop'}[landmark]}</h3><p>{{forest:'Six woodcutters gather timber, carry it to the village store, then return to the trees.',mine:'Four miners gather stone for the workshop, then iron for the forge.',storage:'Every gathered supply arrives here before a builder carries it to the workshop. Nothing is built for free.',manor:'A small home for a prince with a large ambition. Alden helps haul supplies and build alongside his people.',workshop:state?.workshop.complete?'The hearth is lit. Sora carries iron from storage and turns it into useful tools.':'The workshop needs 24 timber, 16 stone, and 48 work units. Builders deliver every load before construction begins.'}[landmark]}</p></>:person&&<><div className="person-title"><span className={`person-emblem ${person.role}`}>{person.role==='prince'?'♛':'♧'}</span><div><span className="eyebrow">{person.role}</span><h3>{person.name}</h3></div><b className="level">Lv. {1+Math.floor(person.xp/100)}</b></div><p>{person.personality}</p><div className="activity"><span className="live-dot"/><b>{person.action}</b><small>{person.remaining} ticks until next action</small></div><dl><div><dt>Skill experience</dt><dd>{person.xp} XP</dd></div><div><dt>Carrying</dt><dd>{person.carry?`${person.carry.amount} ${person.carry.resource}`:'Empty hands'}</dd></div><div><dt>Tasks completed</dt><dd>{person.completed}</dd></div></dl></>}<div className="people-list">{state?.people.map(p=><button className={selected===p.id&&!landmark?'selected':''} key={p.id} onClick={()=>{setSelected(p.id);setLandmark('');}}><span className={`person-dot ${p.role}`}/><b>{p.name}</b><span>{p.role}</span></button>)}</div></section>}
-{tab==='journal'&&<section className="journal"><span className="eyebrow">THE STORY SO FAR</span><h3>A village, becoming.</h3>{state?.journal.map((entry,i)=><p key={`${i}-${entry}`}><span>✧</span>{entry}</p>)}<p className="autonomy">Calendar follows real time. Away progress runs at 25%, counting up to 24 hours per absence.</p></section>}</div>
-</aside></main><footer><span>FABLE CROWN <i>·</i> A playable first chapter</span><div><button onClick={()=>command('save')}>Save</button><button onClick={exportSave}>Export</button><button onClick={()=>input.current?.click()}>Import</button><button onClick={()=>setReset(true)}>New chapter</button></div><input ref={input} type="file" accept="application/json,.json" hidden onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>200000)throw new Error();command('import',{value:JSON.parse(await file.text())});}catch{setMessage('That chronicle could not be read. Your village is safe.');}e.target.value='';}}/></footer>{message&&<div className="toast" role="status">{message}<button aria-label="Dismiss notification" onClick={()=>setMessage('')}>×</button></div>}{(help||reset)&&<div className="modal-backdrop"><section role="dialog" aria-modal="true" aria-labelledby="dialog-title"><span className="eyebrow">FABLE CROWN</span><h2 id="dialog-title">{reset?'Begin a new chapter?':'An unseen guiding hand.'}</h2><p>{reset?'Your current device save will be replaced. Export your chronicle first if you want to return to this village.':'Your villagers gather, haul and build on their own. Tap one of Alden’s ideas to influence his approach, or let the timer run out. Watch the material ledger as the workshop comes to life.'}</p>{!reset&&<p>Tap a villager to see their work and skills. Drag the map or use + / − to explore. Your progress saves here automatically; export a chronicle to carry it to another device. No account or AI model is needed to play.</p>}<div className="dialog-actions"><button onClick={()=>{setHelp(false);setReset(false);}}>{reset?'Keep this village':'Back to Oakrest'}</button>{reset&&<button onClick={()=>{command('reset');setReset(false);setTab('intention');}}>Begin again</button>}</div></section></div>}</>}
-createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);
-if('serviceWorker' in navigator && import.meta.env.PROD)window.addEventListener('load',()=>{void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`,{scope:import.meta.env.BASE_URL}).catch(()=>{});});
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { BILL, TICK_MS, type GameState, type Strategy } from "./types";
+import "./style.css";
+const Scene = lazy(() => import("./Scene"));
+const labels: Record<Strategy, string> = {
+  local: "Gather from our land",
+  trade: "Trade for a head start",
+  careful: "Build at a gentler pace",
+};
+const details: Record<Strategy, string> = {
+  local: "Use nearby wood and stone · keep our coins",
+  trade: "Spend 24 coins · receive 8 timber + 8 stone",
+  careful: "Longer work cycles · the same shared ambition",
+};
+function Portrait() {
+  return (
+    <svg
+      className="portrait"
+      viewBox="0 0 100 110"
+      aria-label="Prince Alden, in blue and gold"
+    >
+      <defs>
+        <linearGradient id="portrait-bg">
+          <stop stopColor="#b4b49a" />
+          <stop offset="1" stopColor="#e9ddbc" />
+        </linearGradient>
+      </defs>
+      <rect width="100" height="110" rx="45" fill="url(#portrait-bg)" />
+      <path
+        d="M7 110q-3-32 29-36l12-6 17 7q34 6 35 35"
+        fill="#355b7c"
+        stroke="#4f523f"
+        strokeWidth="2"
+      />
+      <path
+        d="m14 110 12-24 22 13 29-18 17 29M26 86l19 24m31-29-16 29"
+        fill="none"
+        stroke="#c6aa65"
+        strokeWidth="3"
+      />
+      <path d="M40 61v19l12 13 13-17V60" fill="#d1a577" stroke="#635642" />
+      <path
+        d="M28 34q8-23 36-8l9 20-8 21-15 8-15-8-9-23Z"
+        fill="#e3bc8d"
+        stroke="#67513e"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M23 50q-7-41 23-39 29-6 36 31l-15-9-2 13-10-16-12 13 2-13-19 24Z"
+        fill="#a67745"
+        stroke="#6b553a"
+        strokeWidth="2"
+      />
+      <path
+        d="m29 22 1-13 12 8 9-15 7 15 13-8-2 16"
+        fill="#cfb568"
+        stroke="#76613b"
+      />
+      <path d="m36 49 8-1m13 0 7 1" stroke="#5c5948" strokeWidth="2" />
+      <path d="m48 62 9-1" stroke="#997552" strokeWidth="1.5" />
+    </svg>
+  );
+}
+function App() {
+  const [state, setState] = useState<GameState | null>(null),
+    [selected, setSelected] = useState(0),
+    [tab, setTab] = useState<"intention" | "people" | "journal">("intention"),
+    [landmark, setLandmark] = useState(""),
+    [message, setMessage] = useState(""),
+    [saved, setSaved] = useState(true),
+    [help, setHelp] = useState(false),
+    [reset, setReset] = useState(false);
+  const worker = useRef<Worker | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const w = new Worker(new URL("./game.worker.ts", import.meta.url), {
+      type: "module",
+    });
+    worker.current = w;
+    w.onmessage = (e) => {
+      setState(e.data.state);
+      setSaved(e.data.storageOkay);
+      if (e.data.message) setMessage(e.data.message);
+    };
+    const visibility = () =>
+      w.postMessage({ type: document.hidden ? "pause" : "resume" });
+    document.addEventListener("visibilitychange", visibility);
+    const pagehide = () => w.postMessage({ type: "pause" });
+    window.addEventListener("pagehide", pagehide);
+    return () => {
+      document.removeEventListener("visibilitychange", visibility);
+      window.removeEventListener("pagehide", pagehide);
+      w.terminate();
+    };
+  }, []);
+  useEffect(() => {
+    if (!message) return;
+    const t = setTimeout(() => setMessage(""), 6500);
+    return () => clearTimeout(t);
+  }, [message]);
+  const command = (type: string, extra = {}) =>
+    worker.current?.postMessage({ type, ...extra });
+  function exportSave() {
+    if (!state) return;
+    const exported = { ...state, savedAt: Date.now() };
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(exported, null, 2)], {
+        type: "application/json",
+      }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "fable-crown-chronicle.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    setMessage(
+      "Chronicle exported. Keep this file to move your village to another device.",
+    );
+  }
+  const person = state?.people.find((p) => p.id === selected);
+  const seconds = state
+    ? Math.max(0, Math.ceil(((state.decisionAt - state.tick) * TICK_MS) / 1000))
+    : 20;
+  return (
+    <>
+      <header className="masthead">
+        <a className="brand" href="#" aria-label="Fable Crown home">
+          <img src={`${import.meta.env.BASE_URL}crown.svg`} alt="" />
+          <span>
+            Fable <i>Crown</i>
+            <small>A KINGDOM GROWS THROUGH ITS PEOPLE</small>
+          </span>
+        </a>
+        <div className="header-meta">
+          <span className="live-dot" /> A living village{" "}
+          <span className="header-date">{state?.calendar || "Awakening…"}</span>
+        </div>
+        <button
+          className="help"
+          aria-label="How to play"
+          onClick={() => setHelp(!help)}
+        >
+          ?
+        </button>
+      </header>
+      <main>
+        <section className="village-panel">
+          <div className="place-heading">
+            <div>
+              <span className="eyebrow">THE FRONTIER · CHAPTER I</span>
+              <h1>
+                Oakrest <span>Hope takes root.</span>
+              </h1>
+            </div>
+            <span className="population">
+              ♧ <b>16</b> souls
+            </span>
+          </div>
+          <div className="scene-frame">
+            {state ? (
+              <Suspense
+                fallback={<div className="loading">Unfolding the map…</div>}
+              >
+                <Scene
+                  state={state}
+                  selected={selected}
+                  onSelect={(id) => {
+                    setSelected(id);
+                    setLandmark("");
+                    setTab("people");
+                  }}
+                  onLandmark={(id) => {
+                    setLandmark(id);
+                    setTab("people");
+                  }}
+                />
+              </Suspense>
+            ) : (
+              <div className="loading">A new day in Oakrest…</div>
+            )}
+            <div className="scene-caption">
+              <span className="live-dot" />
+              {state?.workshop.complete
+                ? "A warm forge. A new beginning."
+                : "Your people are already making a beginning."}
+            </div>
+          </div>
+          <div className="resource-strip" aria-label="Village resources">
+            {(["timber", "stone", "iron"] as const).map((r, i) => (
+              <div key={r}>
+                <span className="resource-icon">{["♧", "◇", "⚒"][i]}</span>
+                <span>
+                  <b>{state?.stock[r] ?? 0}</b>
+                  <small>{r} in store</small>
+                </span>
+              </div>
+            ))}
+            <div>
+              <span className="resource-icon gold">◉</span>
+              <span>
+                <b>{state?.coins ?? 40}</b>
+                <small>village coins</small>
+              </span>
+            </div>
+          </div>
+          <div className="world-note">
+            <span>
+              600 ms heartbeat ·{" "}
+              {state?.people.filter((p) => !p.action.startsWith("Resting"))
+                .length ?? 16}{" "}
+              people at work
+            </span>
+            <span>
+              {saved
+                ? "Saved on this device"
+                : "Storage unavailable · export to keep"}
+            </span>
+          </div>
+        </section>
+        <aside className="story-panel">
+          <section className="ambition">
+            <span className="eyebrow">OUR FIRST AMBITION</span>
+            <h2>
+              {state?.workshop.complete
+                ? "A fire for the future"
+                : "A forge for Oakrest"}
+            </h2>
+            <p>
+              {state?.workshop.complete
+                ? "The workshop stands. Sora is forging the village’s first iron tools."
+                : "Good tools begin a thriving village. Help Alden’s people raise their first blacksmith workshop."}
+            </p>
+            <div className="bill">
+              {(["timber", "stone", "labor"] as const).map((r) => (
+                <div key={r}>
+                  <div>
+                    <span>
+                      {r === "labor"
+                        ? "Building work"
+                        : r === "timber"
+                          ? "Timber delivered"
+                          : "Stone delivered"}
+                    </span>
+                    <b>
+                      {state?.workshop[r] ?? 0}
+                      <em> / {BILL[r]}</em>
+                    </b>
+                  </div>
+                  <progress
+                    value={state?.workshop[r] ?? 0}
+                    max={BILL[r]}
+                    aria-label={r}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="ambition-status">
+              <span
+                className={state?.workshop.complete ? "seal complete" : "seal"}
+              >
+                {state?.workshop.complete ? "✓" : "⌂"}
+              </span>
+              <span>
+                {state?.workshop.complete
+                  ? `Workshop complete · ${state.workshop.forged} tools forged`
+                  : state?.workshop.labor
+                    ? "Raising the workshop"
+                    : state?.workshop.timber || state?.workshop.stone
+                      ? "Carrying materials to the site"
+                      : "Gathering and delivering supplies"}
+              </span>
+            </div>
+          </section>
+          <nav className="tabs" aria-label="Village panels">
+            {(["intention", "people", "journal"] as const).map((t) => (
+              <button
+                key={t}
+                aria-selected={tab === t}
+                onClick={() => {
+                  setTab(t);
+                  setLandmark("");
+                }}
+              >
+                {t === "intention"
+                  ? "Thought & Intention"
+                  : t === "people"
+                    ? "Villagers"
+                    : "Chronicle"}
+                {t === "intention" && !state?.strategy && (
+                  <span className="tab-dot" />
+                )}
+              </button>
+            ))}
+          </nav>
+          <div className="tab-content">
+            {tab === "intention" && (
+              <section className="thought">
+                <div className="speaker">
+                  <Portrait />
+                  <div>
+                    <span className="eyebrow">A THOUGHT FROM YOUR PRINCE</span>
+                    <h3>
+                      Alden <span>of Oakrest</span>
+                    </h3>
+                    <small>
+                      Hopeful · cooperative · learning with his people
+                    </small>
+                  </div>
+                </div>
+                <blockquote>
+                  “
+                  {state?.workshop.complete
+                    ? "A roof, a hearth, and hands willing to learn. This is how a kingdom begins."
+                    : state?.strategy
+                      ? "Let us see this promise through. Every beam carried is a step toward our future."
+                      : "Our people have willing hands. A proper workshop would give them better tools. How shall we begin?"}
+                  ”
+                </blockquote>
+                {!state?.strategy ? (
+                  <>
+                    <div className="thought-timer">
+                      <span>Gently guide his intention</span>
+                      <b>{seconds}s</b>
+                    </div>
+                    <div className="choices">
+                      {(["local", "trade", "careful"] as Strategy[]).map(
+                        (s, i) => (
+                          <button
+                            key={s}
+                            disabled={!state}
+                            onClick={() => command("choose", { strategy: s })}
+                          >
+                            <span className="choice-num">0{i + 1}</span>
+                            <span>
+                              <b>{labels[s]}</b>
+                              <small>{details[s]}</small>
+                            </span>
+                            <span className="choice-arrow">›</span>
+                          </button>
+                        ),
+                      )}
+                    </div>
+                    <p className="autonomy">
+                      Leave it to Alden: he will choose local gathering.
+                      <br />
+                      Life in the village continues while he thinks.
+                    </p>
+                  </>
+                ) : (
+                  <div className="chosen">
+                    <span className="eyebrow">
+                      {state.workshop.complete
+                        ? "A PROMISE KEPT"
+                        : "INTENTION CHOSEN"}
+                    </span>
+                    <h4>{labels[state.strategy]}</h4>
+                    <p>{state.decisionReason}</p>
+                    <span className="autonomy">
+                      You influence his intentions. His people do the work.
+                    </span>
+                  </div>
+                )}
+              </section>
+            )}
+            {tab === "people" && (
+              <section className="inspector">
+                {landmark ? (
+                  <>
+                    <span className="eyebrow">A PLACE IN OAKREST</span>
+                    <h3>
+                      {
+                        {
+                          forest: "Whispering wood",
+                          mine: "Stonefall mine",
+                          storage: "Village store",
+                          manor: "Alden’s manor",
+                          workshop: "Blacksmith workshop",
+                        }[landmark]
+                      }
+                    </h3>
+                    <p>
+                      {
+                        {
+                          forest:
+                            "Six woodcutters gather timber, carry it to the village store, then return to the trees.",
+                          mine: "Four miners gather stone for the workshop, then iron for the forge.",
+                          storage:
+                            "Every gathered supply arrives here before a builder carries it to the workshop. Nothing is built for free.",
+                          manor:
+                            "A small home for a prince with a large ambition. Alden helps haul supplies and build alongside his people.",
+                          workshop: state?.workshop.complete
+                            ? "The hearth is lit. Sora carries iron from storage and turns it into useful tools."
+                            : "The workshop needs 24 timber, 16 stone, and 48 work units. Builders deliver every load before construction begins.",
+                        }[landmark]
+                      }
+                    </p>
+                  </>
+                ) : (
+                  person && (
+                    <>
+                      <div className="person-title">
+                        <span className={`person-emblem ${person.role}`}>
+                          {person.role === "prince" ? "♛" : "♧"}
+                        </span>
+                        <div>
+                          <span className="eyebrow">{person.role}</span>
+                          <h3>{person.name}</h3>
+                        </div>
+                        <b className="level">
+                          Lv. {1 + Math.floor(person.xp / 100)}
+                        </b>
+                      </div>
+                      <p>{person.personality}</p>
+                      <div className="activity">
+                        <span className="live-dot" />
+                        <b>{person.action}</b>
+                        <small>
+                          {person.remaining} ticks until next action
+                        </small>
+                      </div>
+                      <dl>
+                        <div>
+                          <dt>Skill experience</dt>
+                          <dd>{person.xp} XP</dd>
+                        </div>
+                        <div>
+                          <dt>Carrying</dt>
+                          <dd>
+                            {person.carry
+                              ? `${person.carry.amount} ${person.carry.resource}`
+                              : "Empty hands"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Tasks completed</dt>
+                          <dd>{person.completed}</dd>
+                        </div>
+                      </dl>
+                    </>
+                  )
+                )}
+                <div className="people-list">
+                  {state?.people.map((p) => (
+                    <button
+                      className={
+                        selected === p.id && !landmark ? "selected" : ""
+                      }
+                      key={p.id}
+                      onClick={() => {
+                        setSelected(p.id);
+                        setLandmark("");
+                      }}
+                    >
+                      <span className={`person-dot ${p.role}`} />
+                      <b>{p.name}</b>
+                      <span>{p.role}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+            {tab === "journal" && (
+              <section className="journal">
+                <span className="eyebrow">THE STORY SO FAR</span>
+                <h3>A village, becoming.</h3>
+                {state?.journal.map((entry, i) => (
+                  <p key={`${i}-${entry}`}>
+                    <span>✧</span>
+                    {entry}
+                  </p>
+                ))}
+                <p className="autonomy">
+                  Calendar follows real time. Away progress runs at 25%,
+                  counting up to 24 hours per absence.
+                </p>
+              </section>
+            )}
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>
+          FABLE CROWN <i>·</i> A playable first chapter
+        </span>
+        <div>
+          <button onClick={() => command("save")}>Save</button>
+          <button onClick={exportSave}>Export</button>
+          <button onClick={() => input.current?.click()}>Import</button>
+          <button onClick={() => setReset(true)}>New chapter</button>
+        </div>
+        <input
+          ref={input}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            try {
+              if (file.size > 200000) throw new Error();
+              command("import", { value: JSON.parse(await file.text()) });
+            } catch {
+              setMessage(
+                "That chronicle could not be read. Your village is safe.",
+              );
+            }
+            e.target.value = "";
+          }}
+        />
+      </footer>
+      {message && (
+        <div className="toast" role="status">
+          {message}
+          <button
+            aria-label="Dismiss notification"
+            onClick={() => setMessage("")}
+          >
+            ×
+          </button>
+        </div>
+      )}
+      {(help || reset) && (
+        <div className="modal-backdrop">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dialog-title"
+          >
+            <span className="eyebrow">FABLE CROWN</span>
+            <h2 id="dialog-title">
+              {reset ? "Begin a new chapter?" : "An unseen guiding hand."}
+            </h2>
+            <p>
+              {reset
+                ? "Your current device save will be replaced. Export your chronicle first if you want to return to this village."
+                : "Your villagers gather, haul and build on their own. Tap one of Alden’s ideas to influence his approach, or let the timer run out. Watch the material ledger as the workshop comes to life."}
+            </p>
+            {!reset && (
+              <p>
+                Tap a villager to see their work and skills. Drag the map or use
+                + / − to explore. Your progress saves here automatically; export
+                a chronicle to carry it to another device. No account or AI
+                model is needed to play.
+              </p>
+            )}
+            <div className="dialog-actions">
+              <button
+                onClick={() => {
+                  setHelp(false);
+                  setReset(false);
+                }}
+              >
+                {reset ? "Keep this village" : "Back to Oakrest"}
+              </button>
+              {reset && (
+                <button
+                  onClick={() => {
+                    command("reset");
+                    setReset(false);
+                    setTab("intention");
+                  }}
+                >
+                  Begin again
+                </button>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
+    </>
+  );
+}
+createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+if ("serviceWorker" in navigator && import.meta.env.PROD)
+  window.addEventListener("load", () => {
+    void navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`, {
+        scope: import.meta.env.BASE_URL,
+      })
+      .catch(() => {});
+  });

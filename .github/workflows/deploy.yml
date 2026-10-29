@@ -38,7 +38,14 @@ jobs:
           OWNER="${GITHUB_REPOSITORY%%/*}"
           if [ "$REPO" = "$OWNER.github.io" ]; then BASE="/"; else BASE="/$REPO/"; fi
           echo "Building with Vite base $BASE"
+          echo "DEMO_URL=http://127.0.0.1:4174$BASE" >> "$GITHUB_ENV"
           npm run build -- --base="$BASE"
+      - name: Validate built asset paths and PWA scope
+        run: npm run check:dist
+      - name: Install browser for acceptance checks
+        run: npx playwright install --with-deps chromium
+      - name: Verify playable demo
+        run: npm run test:browser
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site

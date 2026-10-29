@@ -1,5 +1,148 @@
-import { test, expect } from '@playwright/test';
-import type { GameState } from '../src/types';
-async function snapshot(page:import('@playwright/test').Page):Promise<GameState>{return page.evaluate(()=>new Promise((resolve,reject)=>{const request=indexedDB.open('fable-crown',1);request.onsuccess=()=>{const database=request.result;const get=database.transaction('saves').objectStore('saves').get('v1');get.onsuccess=()=>{resolve(get.result);database.close();};get.onerror=()=>reject(get.error);};request.onerror=()=>reject(request.error);}));}
-test('player intention, construction, inspection, save and responsive views',async({page})=>{const errors:string[]=[];const external:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!new URL(r.url()).hostname.match(/^(127\.0\.0\.1|localhost|cudldev\.github\.io)$/))external.push(r.url());});await page.setViewportSize({width:1440,height:1000});await page.goto('./');await expect(page.getByTestId('world')).toBeVisible();await expect(page.getByRole('button',{name:/Trade for a head start/})).toBeEnabled();await page.screenshot({path:'docs/screenshots/desktop.png',fullPage:true});await page.getByRole('button',{name:/Trade for a head start/}).click();await expect(page.getByText('INTENTION CHOSEN',{exact:true})).toBeVisible();await expect(page.getByText(/Workshop complete ·/)).toBeVisible({timeout:120000});await page.getByRole('button',{name:'Villagers',exact:true}).click();await page.getByRole('button',{name:'Inspect Alden, prince'}).click();await expect(page.getByText('Skill experience')).toBeVisible();await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page.getByText('Chronicle saved on this device.')).toBeVisible();const before=await snapshot(page);expect(before.strategy).toBe('trade');expect(before.workshop.complete).toBe(true);await page.reload();await expect(page.getByText(/Workshop complete ·/)).toBeVisible();const after=await snapshot(page);expect(after.tick).toBeGreaterThanOrEqual(before.tick);expect(after.workshop.complete).toBe(true);await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Thought & Intention',exact:true}).click();await page.screenshot({path:'docs/screenshots/portrait.png',fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.setViewportSize({width:844,height:390});await page.screenshot({path:'docs/screenshots/landscape.png',fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(errors).toEqual([]);expect(external).toEqual([]);});
-test('ignored thought, offline installation, bounded catch-up and invalid import',async({page,context})=>{await page.goto('./');await expect(page.getByTestId('world')).toBeVisible();await expect(page.getByText('INTENTION CHOSEN',{exact:true})).toBeVisible({timeout:30000});expect((await snapshot(page)).strategy).toBe('local');await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page.getByText('Chronicle saved on this device.')).toBeVisible();const save=await snapshot(page);save.savedAt=Date.now()-72*3600000;await page.locator('input[type=file]').setInputFiles({name:'chronicle.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(save))});await expect(page.getByText('Chronicle restored.')).toBeVisible();const returned=await snapshot(page);expect(returned.tick-save.tick).toBeGreaterThanOrEqual(36000);expect(returned.tick-save.tick).toBeLessThanOrEqual(36005);await expect(page.getByText(/Workshop complete ·/)).toBeVisible();await page.locator('input[type=file]').setInputFiles({name:'broken.json',mimeType:'application/json',buffer:Buffer.from('{"version":1}')});await expect(page.getByText('That chronicle is invalid. Your current village is safe.')).toBeVisible();await page.evaluate(()=>navigator.serviceWorker.ready.then(()=>true));await page.reload();await expect(page.getByTestId('world')).toBeVisible();await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);await context.setOffline(true);await page.reload();await expect(page.getByTestId('world')).toBeVisible();await expect(page.getByText(/Workshop complete ·/)).toBeVisible();expect((await snapshot(page)).strategy).toBe('local');await context.setOffline(false);});
+import { test, expect } from "@playwright/test";
+import type { GameState } from "../src/types";
+async function snapshot(
+  page: import("@playwright/test").Page,
+): Promise<GameState> {
+  return page.evaluate(
+    () =>
+      new Promise((resolve, reject) => {
+        const request = indexedDB.open("fable-crown", 1);
+        request.onsuccess = () => {
+          const database = request.result;
+          const get = database
+            .transaction("saves")
+            .objectStore("saves")
+            .get("v1");
+          get.onsuccess = () => {
+            resolve(get.result);
+            database.close();
+          };
+          get.onerror = () => reject(get.error);
+        };
+        request.onerror = () => reject(request.error);
+      }),
+  );
+}
+test("player intention, construction, inspection, save and responsive views", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  const external: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("request", (r) => {
+    if (
+      !new URL(r.url()).hostname.match(
+        /^(127\.0\.0\.1|localhost|cudldev\.github\.io)$/,
+      )
+    )
+      external.push(r.url());
+  });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("./");
+  await expect(page.getByTestId("world")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Trade for a head start/ }),
+  ).toBeEnabled();
+  await page.screenshot({
+    path: "docs/screenshots/desktop.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: /Trade for a head start/ }).click();
+  await expect(
+    page.getByText("INTENTION CHOSEN", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(/Workshop complete ·/)).toBeVisible({
+    timeout: 120000,
+  });
+  await page.getByRole("button", { name: "Villagers", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Inspect Alden, prince" })
+    .press("Enter");
+  await expect(page.getByText("Skill experience")).toBeVisible();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Chronicle saved on this device.")).toBeVisible();
+  const before = await snapshot(page);
+  expect(before.strategy).toBe("trade");
+  expect(before.workshop.complete).toBe(true);
+  await page.reload();
+  await expect(page.getByText(/Workshop complete ·/)).toBeVisible();
+  const after = await snapshot(page);
+  expect(after.tick).toBeGreaterThanOrEqual(before.tick);
+  expect(after.workshop.complete).toBe(true);
+  await expect(page.getByTestId("world")).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page
+    .getByRole("button", { name: "Thought & Intention", exact: true })
+    .click();
+  await page.screenshot({
+    path: "docs/screenshots/portrait.png",
+    fullPage: true,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.screenshot({
+    path: "docs/screenshots/landscape.png",
+    fullPage: true,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  expect(errors).toEqual([]);
+  expect(external).toEqual([]);
+});
+test("ignored thought, offline installation, bounded catch-up and invalid import", async ({
+  page,
+  context,
+}) => {
+  page.on("pageerror", (e) => console.log("PAGE ERROR", e.message));
+  page.on("requestfailed", (r) => console.log("FAILED", r.url(), r.failure()));
+  await page.goto("./");
+  await expect(page.getByTestId("world")).toBeVisible();
+  await expect(page.getByText("INTENTION CHOSEN", { exact: true })).toBeVisible(
+    { timeout: 30000 },
+  );
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Chronicle saved on this device.")).toBeVisible();
+  const save = await snapshot(page);
+  save.savedAt = Date.now() - 72 * 3600000;
+  await page
+    .locator("input[type=file]")
+    .setInputFiles({
+      name: "chronicle.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(save)),
+    });
+  await expect(page.getByText("Chronicle restored.")).toBeVisible();
+  const returned = await snapshot(page);
+  expect(returned.tick - save.tick).toBeGreaterThanOrEqual(36000);
+  expect(returned.tick - save.tick).toBeLessThanOrEqual(36005);
+  await expect(page.getByText(/Workshop complete ·/)).toBeVisible();
+  await page
+    .locator("input[type=file]")
+    .setInputFiles({
+      name: "broken.json",
+      mimeType: "application/json",
+      buffer: Buffer.from('{"version":1}'),
+    });
+  await expect(
+    page.getByText("That chronicle is invalid. Your current village is safe."),
+  ).toBeVisible();
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  await page.reload();
+  await expect(page.getByTestId("world")).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
+    .toBe(true);
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByTestId("world")).toBeVisible();
+  await expect(page.getByText(/Workshop complete ·/)).toBeVisible();
+  expect((await snapshot(page)).strategy).toBe("local");
+  await context.setOffline(false);
+});
