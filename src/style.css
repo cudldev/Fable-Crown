@@ -1028,3 +1028,13 @@ footer button:hover {
     transition: none !important;
   }
 }
+
+/* Keep all chrome controls comfortable to tap, including the map overlay. */
+.help,
+.map-tools button {
+  min-height: 44px;
+  min-width: 44px;
+}
+footer button {
+  min-height: 44px;
+}
