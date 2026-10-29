@@ -21,21 +21,33 @@ async function read(key: string): Promise<unknown> {
   });
 }
 export async function readRpgSave() {
-  return validateRpgSave(await read("v4")) ?? validateRpgSave(await read("v3"));
+  return (
+    validateRpgSave(await read("v5")) ??
+    validateRpgSave(await read("v4")) ??
+    validateRpgSave(await read("v3"))
+  );
 }
 export async function readArchivedChapter() {
-  const [village, tileRpg] = await Promise.all([read("v1"), read("v3")]);
-  return village || tileRpg
-    ? { village: village ?? null, tileRpg: tileRpg ?? null }
+  const [village, tileRpg, tileRpgV4] = await Promise.all([
+    read("v1"),
+    read("v3"),
+    read("v4"),
+  ]);
+  return village || tileRpg || tileRpgV4
+    ? {
+        village: village ?? null,
+        tileRpg: tileRpg ?? null,
+        tileRpgV4: tileRpgV4 ?? null,
+      }
     : null;
 }
 export async function writeRpgSave(state: RpgState): Promise<void> {
-  if (state.version !== 4)
+  if (state.version !== 5)
     throw new Error("Only the current chapter may be saved.");
   const d = await db();
   return new Promise((resolve, reject) => {
     const t = d.transaction("saves", "readwrite");
-    t.objectStore("saves").put(state, "v4");
+    t.objectStore("saves").put(state, "v5");
     t.oncomplete = () => resolve();
     t.onerror = () => reject(t.error);
   });

@@ -25,7 +25,7 @@ async function snapshot(page: Page): Promise<RpgState> {
           const get = r.result
             .transaction("saves")
             .objectStore("saves")
-            .get("v4");
+            .get("v5");
           get.onsuccess = () => {
             resolve(get.result);
             r.result.close();
@@ -73,7 +73,7 @@ test("tile chapter preserves the earlier archive and renders a selectable isomet
         r.onsuccess = () => {
           const store = r.result.transaction("saves").objectStore("saves"),
             a = store.get("v1"),
-            b = store.get("v4");
+            b = store.get("v5");
           b.onsuccess = () => {
             resolve({ old: a.result.version, fresh: b.result.version });
             r.result.close();
@@ -82,7 +82,7 @@ test("tile chapter preserves the earlier archive and renders a selectable isomet
         };
       }),
   );
-  expect(data).toEqual({ old: 2, fresh: 4 });
+  expect(data).toEqual({ old: 2, fresh: 5 });
   await page.getByRole("button", { name: "Close panel" }).click();
   await page.getByRole("button", { name: "Toggle tile grid" }).click();
   await expect(

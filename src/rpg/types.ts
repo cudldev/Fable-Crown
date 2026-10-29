@@ -13,7 +13,8 @@ export const SKILLS = [
   "ranged",
 ] as const;
 export type SkillId = (typeof SKILLS)[number];
-export type CombatStyle = "attack" | "strength" | "defence" | "accurate" | "rapid" | "longrange";
+export type CombatStyle =
+  "attack" | "strength" | "defence" | "accurate" | "rapid" | "longrange";
 export type Terrain = "grass" | "dirt" | "stone" | "water" | "sand";
 export type ItemId = string;
 export type ResourceId =
@@ -170,6 +171,8 @@ export interface ActorState {
   home: string;
   position: TilePosition;
   previousPosition: TilePosition;
+  /** The actual legal steps in the latest simulation tick; presentation never invents a shortcut. */
+  movement: MovementTrace | null;
   path: TilePosition[];
   skills: Record<SkillId, number>;
   inventory: ItemStack[];
@@ -318,7 +321,7 @@ export interface DialogueState {
   expiresAt: number;
 }
 export interface RpgState {
-  version: 4;
+  version: 5;
   tick: number;
   savedAt: number;
   calendar: string;
@@ -350,6 +353,8 @@ export interface RpgState {
     active: RpgOrder | null;
     source?: "player" | "autonomous" | null;
     queue: RpgOrder[];
+    /** A direct world order deferred behind accepted inventory transactions; later direct orders replace it. */
+    directOrderIndex?: number;
     goal: Ambition | null;
     thinkingUntil: number;
     eatReadyAt: number;
@@ -360,12 +365,55 @@ export interface RpgState {
     thought: Thought | null;
     lastThought: number;
     /** Objective progress watchdog; absent in migrated saves until the first autonomous plan. */
-    progress?: { goalId: string; fingerprint: string; tick: number; failures: number; blockedUntil: number };
+    progress?: {
+      goalId: string;
+      fingerprint: string;
+      tick: number;
+      failures: number;
+      blockedUntil: number;
+    };
   };
   journal: string[];
   /** Bounded, deterministic player rewards. Older V3 saves may omit this log. */
   rewards?: RewardEvent[];
   dialogue?: DialogueState | null;
+  effects: SimulationEffect[];
+  effectSequence: number;
+  messages: GameMessage[];
+  messageSequence: number;
+}
+export interface MovementTrace {
+  tick: number;
+  mode: "walk" | "run";
+  /** Start position followed by one or two actually traversed tiles. */
+  tiles: TilePosition[];
+}
+export interface SimulationEffect {
+  id: number;
+  tick: number;
+  kind: "action-start" | "action-result" | "projectile" | "hit" | "defeat";
+  /** player, npc-N, or an enemy's stable ID. */
+  actorId: string;
+  position: TilePosition;
+  targetId?: string;
+  targetPosition?: TilePosition;
+  actionKind?: ActionState["kind"];
+  success?: boolean;
+  amount?: number;
+}
+export interface GameMessage {
+  id: number;
+  tick: number;
+  category: "event" | "dialogue";
+  key: string;
+  text: string;
+  count: number;
+}
+export interface CommandReceipt {
+  requestId: string;
+  accepted: boolean;
+  message: string;
+  tick: number;
 }
 export interface RewardEvent {
   id: string;

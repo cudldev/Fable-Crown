@@ -1,0 +1,15 @@
+Use case: stylized-concept. Original transparent 2D game animation atlas: exactly NINE full-body figures of the SAME young prince Alden, all facing SCREEN EAST (directly RIGHT, side view), in a 3 columns by 3 rows regular grid. Camera is fixed elevated orthographic gameplay camera; no turning between frames.
+Reference images establish Alden identity and simplified ink/watercolor style ONLY; do not reproduce their old repeated walking poses.
+Alden: tousled brown hair, ultramarine BLUE cape with simple GOLD border/emblems, cream tunic, brown belt/trousers/boots; compact expressive young hero with economical dark ink contours and broad watercolor fills. Same head/body scale, outfit and anatomy in every cell. No weapons/tools.
+Exact row-major poses:
+Row1 col1 IDLE: upright relaxed standing, both boots on ground.
+Row1 col2 WALK0: LEFT leg straight forward contacting ground heel-first, RIGHT leg trailing; RIGHT arm forward.
+Row1 col3 WALK1: weight over LEFT planted leg, RIGHT knee lifts passing forward, RIGHT arm passing back.
+Row2 col1 WALK2: RIGHT leg straight forward contacting ground heel-first, LEFT leg trailing; LEFT arm forward. Anatomically opposite WALK0, not a duplicate.
+Row2 col2 WALK3: weight over RIGHT planted leg, LEFT knee lifts passing forward, LEFT arm passing back. Opposite WALK1.
+Row2 col3 RUN0: LEFT leg extended forward contact, RIGHT leg bent trailing high, torso inclines slightly forward, arms bent actively swinging, cape lifted.
+Row3 col1 RUN1: RIGHT knee drives high forward, LEFT leg pushes back, lively running passing pose.
+Row3 col2 RUN2: RIGHT leg extended forward contact, LEFT leg bent trailing high, opposite RUN0.
+Row3 col3 RUN3: LEFT knee drives high forward, RIGHT leg pushes back, opposite RUN1.
+Legs must visibly alternate anatomical left/right across the cycle, show both arms/boots clearly. Natural small gait changes in hips/shoulders, no duplicated silhouette or figure translated in space. Walk more upright/shorter stride; run forward lean/bent elbows/longer stride. Same underlying body mass, no exaggerated stretching.
+Keep pelvis centered at same cell-local x; virtual ground baseline at 90% cell height, both feet above that same plane; foot height/airborne variation is deliberate. Entire cape/hair/boots inside each cell with generous transparent gaps and equal padding. Clear true transparent background, no ground/shadow/scenery, no gridlines/labels/text, no speed lines. Target 1536x1536 PNG, each cell512x512. Painterly traditional fantasy, no pixel art, no glossy 3D.

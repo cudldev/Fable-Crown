@@ -7,8 +7,23 @@ const vite = await createServer({
   server: { middlewareMode: true },
   appType: "custom",
 });
-const { createRpg } = await vite.ssrLoadModule("/src/rpg/engine.ts");
+const { createRpg, validateRpgSave, calendarDate } = await vite.ssrLoadModule("/src/rpg/engine.ts");
 const fixture = createRpg(Date.now(), 1234567);
+let turningFixture;
+if (process.env.BENCH_TURNING === "1") {
+  const {tile} = await vite.ssrLoadModule("/src/rpg/world.ts");
+  turningFixture = createRpg(Date.now(), 1234567);
+  const origin = tile(100, 80), path = [];
+  for (let loop = 0; loop < 100; loop++) {
+    let point = {...origin};
+    for (const [dx,dy] of [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1],[1,0],[0,1],[-1,-1]]) {
+      point = {...point,x:point.x+dx,y:point.y+dy}; path.push(point);
+    }
+  }
+  Object.assign(turningFixture.player,{position:{...origin},previousPosition:{...origin},movement:null,path,action:null,runEnergy:10000});
+  Object.assign(turningFixture.control,{active:{type:"move",position:{...origin}},source:"player",waiting:false,goal:null,queue:[],thinkingUntil:1e9});
+  if (!validateRpgSave(turningFixture)) throw Error("Turning benchmark route must be a valid saved legal path");
+}
 await vite.close();
 const benchUrl = new URL(process.env.DEMO_URL || "http://127.0.0.1:4174/Fable-Crown/");
 const previewServer = process.env.BENCH_START_PREVIEW === "1" ? await preview({base:benchUrl.pathname,preview:{host:"127.0.0.1",port:Number(benchUrl.port),strictPort:true}}) : null;
@@ -23,6 +38,7 @@ await page.addInitScript(() => {
     canvasCpu: 0,
     chunks: 0,
     paints: 0,
+    smallCanvases: 0,
     on: false,
   });
   const create = document.createElement.bind(document);
@@ -30,8 +46,13 @@ await page.addInitScript(() => {
     const el = create(...args);
     if (args[0] === "canvas") {
       const context = el.getContext.bind(el);
+      let observed = false;
       el.getContext = function (...a) {
-        if (data.on && el.width === 1024 && el.height === 512) data.chunks++;
+        if (!observed && data.on) {
+          if (el.width === 1024 && el.height === 512) data.chunks++;
+          if (el.width > 0 && el.width <= 256 && el.height > 0 && el.height <= 256) data.smallCanvases++;
+        }
+        observed = true;
         return context(...a);
       };
     }
@@ -76,7 +97,7 @@ await page.locator("input[type=file]").setInputFiles({
 });
 await page.getByRole("button", { name: "Close panel" }).click();
 const results = [];
-for (const mode of ["zoom-0.85", "zoom-0.15", "overview"]) {
+for (const mode of ["zoom-0.85", "zoom-0.15", "overview", ...(turningFixture ? ["turning-walk", "turning-run"] : [])]) {
   if (mode === "zoom-0.15")
     for (let i = 0; i < 8; i++)
       await page.getByRole("button", { name: "Zoom out", exact: true }).click();
@@ -84,11 +105,24 @@ for (const mode of ["zoom-0.85", "zoom-0.15", "overview"]) {
     await page
       .getByRole("button", { name: "World overview", exact: true })
       .click();
-  await page.waitForTimeout(3000);
+  let warmup = 3000;
+  if (mode.startsWith("turning-")) {
+    if (mode === "turning-walk") {
+      await page.reload(); await page.getByTestId("rpg-world").waitFor();
+    }
+    turningFixture.savedAt = Date.now(); turningFixture.calendar = calendarDate(turningFixture.savedAt);
+    turningFixture.control.running = mode === "turning-run";
+    await page.getByRole("button", {name:"Open game menu"}).click();
+    await page.locator("input[type=file]").setInputFiles({name:"turning.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(turningFixture))});
+    await page.getByRole("status").filter({hasText:"Chronicle restored"}).waitFor();
+    await page.getByRole("button", {name:"Close panel"}).click();
+    warmup = mode === "turning-walk" ? 20000 : 10000;
+  }
+  await page.waitForTimeout(warmup);
   await page.evaluate(() => {
     const d = window.__renderBench;
     d.frames = [];
-    d.canvasCpu = d.chunks = d.paints = 0;
+    d.canvasCpu = d.chunks = d.paints = d.smallCanvases = 0;
     d.on = true;
   });
   await page.waitForTimeout(5000);
@@ -105,6 +139,7 @@ for (const mode of ["zoom-0.85", "zoom-0.15", "overview"]) {
         canvasApiCpuMsPerPaint: d.canvasCpu / d.paints,
         paints: d.paints,
         chunkBuilds: d.chunks,
+        smallCanvasBuilds: d.smallCanvases,
         hitButtons: document.querySelectorAll(".tile-hit-layer button").length,
       };
     }, mode),
@@ -119,7 +154,7 @@ console.log(
       cpu: os.cpus()[0]?.model,
       logicalCpus: os.cpus().length,
       viewport:
-        "1280x720 DPR1; headless Chrome; no CPU throttling; 3s warmup/5s sample; Canvas API instrumentation enabled",
+        "1280x720 DPR1; headless Chrome; no CPU throttling; 3s static/20s walking/10s running warmup; 5s samples; Canvas API instrumentation enabled",
       results,
     },
     null,

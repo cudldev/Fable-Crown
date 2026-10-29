@@ -7,7 +7,12 @@ import {
   validateRpgSave,
 } from "./engine";
 import { readArchivedChapter, readRpgSave, writeRpgSave } from "./storage";
-import { TICK_MS, type RpgState, type RpgCommand } from "./types";
+import {
+  TICK_MS,
+  type RpgState,
+  type RpgCommand,
+  type CommandReceipt,
+} from "./types";
 let state: RpgState,
   ready = false,
   running = false,
@@ -15,8 +20,15 @@ let state: RpgState,
   hasArchive = false,
   storageOkay = true,
   saving = Promise.resolve();
-function emit(message = "", resetFeedback = false) {
-  self.postMessage({ state, message, hasArchive, storageOkay, resetFeedback });
+function emit(message = "", resetFeedback = false, receipt?: CommandReceipt) {
+  self.postMessage({
+    state,
+    message,
+    hasArchive,
+    storageOkay,
+    resetFeedback,
+    receipt,
+  });
 }
 function save() {
   state.savedAt = Date.now();
@@ -50,14 +62,29 @@ void (async () => {
   );
 })();
 self.onmessage = async (
-  e: MessageEvent<{ type: string; command?: RpgCommand; value?: unknown }>,
+  e: MessageEvent<{
+    type: string;
+    command?: RpgCommand;
+    requestId?: string;
+    value?: unknown;
+  }>,
 ) => {
   if (!ready) return;
-  const { type, command, value } = e.data;
+  const { type, command, value, requestId } = e.data;
   if (type === "command" && command) {
     const r = applyRpgCommand(state, command);
+    // Acknowledgement means accepted by the simulation, not durably saved or completed.
+    emit(
+      r.message,
+      false,
+      requestId
+        ? { requestId, accepted: r.ok, message: r.message, tick: state.tick }
+        : undefined,
+    );
+    const storageWasOkay = storageOkay;
     await save();
-    emit(r.message);
+    if (storageWasOkay && !storageOkay)
+      emit("Progress could not be saved. Export your chronicle.");
   }
   if (type === "save") {
     await save();

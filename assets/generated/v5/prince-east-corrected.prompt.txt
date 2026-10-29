@@ -1,0 +1,14 @@
+Edit the supplied original Alden EAST-facing 3x3 animation sample. Keep the same original face, young proportions, blue/gold cape, cream tunic, brown clothes, painterly watercolor/ink medium, camera, body scale and transparent background.
+CORRECT THE GAIT. The current contact poses repeat the same limb silhouette. We need genuinely opposite near/far legs and near/far arm swing. All figures still face SCREEN RIGHT.
+Definition: NEAR leg/arm is the foreground limb closest to viewer, drawn IN FRONT of the other limb at overlaps. FAR leg/arm is behind, slightly darker. Use layer overlap to show which leg leads. Keep blue cape behind body and end it just ABOVE KNEES in all cells so BOTH thighs/knees/boots are clearly visible. Outfit stays identical.
+Exact9 frames in row-major3x3:
+1 IDLE upright relaxed, neararm down.
+2 WALK0: NEAR boot far FORWARD to screen right, heel down/toe up, near knee straight; FAR boot far BACK to left. NEAR arm swings BACK to left; FAR arm forward.
+3 WALK1: NEAR leg bears weight straight DOWN beneath hips; FAR knee bent lifted FORWARD to right, far boot near supporting calf. Near arm passes by body.
+4 WALK2: NEAR boot far BACK to screen left/toe down, near knee straight; FAR boot far FORWARD right/heel down. NEAR arm swings FORWARD right, FAR arm backward. This must look like the OPPOSITE contact to frame2.
+5 WALK3: FAR leg bears weight straight DOWN beneath hips; NEAR knee bent lifted FORWARD to right, near boot near supporting calf. Opposite passing to frame3.
+6 RUN0: torso leaning forward, NEAR leg extends FORWARD right to land, FAR knee bends BACK left boot high behind, NEAR elbow pulls BACK left.
+7 RUN1: NEAR leg pushing back/down under hips; FAR knee drives HIGH FORWARD right; NEAR elbow drives FORWARD right.
+8 RUN2: torso leaning forward, NEAR knee bends BACK left with near boot HIGH behind, FAR leg extends FORWARD right to land; NEAR elbow drives FORWARD right. Opposite contact to frame6, with NEAR boot on LEFT and FAR boot on RIGHT.
+9 RUN3: FAR leg pushing back/down under hips; NEAR knee drives HIGH FORWARD right; NEAR elbow pulls BACK left. Opposite passing to frame7.
+Do not copy frame2 into4 or6 into8. Different NEAR knee/boot and NEAR elbow positions are essential. Body mass same, no stretched anatomy. Pelvis centered consistently, stable virtual ground baseline. True transparent background, nine full figures with padding, no labels/grid/props/shadows/background/text.

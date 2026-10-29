@@ -69,7 +69,8 @@ describe("local ranged combat and ammunition", () => {
     const normal = archer("accurate"), target = normal.enemies.find((e) => e.id === "boar-0")!;
     normal.player.position = tile(target.position.x, target.position.y + 9); normal.player.previousPosition = { ...normal.player.position };
     const arrows = normal.player.ammo!.quantity; applyRpgCommand(normal, { type: "attack", enemyId: target.id }); stepRpg(normal);
-    expect(normal.player.path.length).toBeGreaterThan(0); expect(normal.player.ammo!.quantity).toBe(arrows);
+    expect(normal.player.movement).not.toBeNull(); expect(normal.player.ammo!.quantity).toBe(arrows);
+    for (const point of normal.player.movement!.tiles) expect(isWalkable(point)).toBe(true);
     for (const point of normal.player.path) expect(isWalkable(point)).toBe(true);
   });
   it("keeps arrows equipped through defeat and backpack arrows safely recoverable in graves", () => {
@@ -93,7 +94,7 @@ describe("real V3 archive migration", () => {
     expect(isWalkable(migrated.drops[0].position)).toBe(true); expect(isWalkable(migrated.grave!.position)).toBe(true);
     expect(migrated.drops[0].items).toEqual(raw.drops[0].items); expect(migrated.grave!.items).toEqual(raw.grave.items);
   });
-  it("copies the original public save into V4 without overwriting its data or paying rewards again", () => {
+  it("copies the original public save into V5 without overwriting its data or paying rewards again", () => {
     const raw = JSON.parse(readFileSync(new URL("./fixtures/rpg-v3-original.json", import.meta.url), "utf8"));
     expect(Object.keys(raw.resources)).toHaveLength(75); expect(raw.enemies).toHaveLength(9); expect(Object.keys(raw.player.skills)).toHaveLength(9);
     raw.quests.forge = { accepted: true, complete: true, kills: 0 };
@@ -101,7 +102,7 @@ describe("real V3 archive migration", () => {
     raw.control.waiting = true; raw.control.active = null; raw.control.source = null; raw.player.path = []; raw.player.action = null;
     raw.control.queue = [{ type: "gather", objectId: "oakrest-ore-0", quantity: 3 }];
     const before = JSON.stringify(raw), migrated = validateRpgSave(raw)!;
-    expect(migrated).not.toBeNull(); expect(migrated.version).toBe(4); expect(JSON.stringify(raw)).toBe(before);
+    expect(migrated).not.toBeNull(); expect(migrated.version).toBe(5); expect(JSON.stringify(raw)).toBe(before);
     expect(migrated.player.inventory).toEqual(raw.player.inventory); expect(migrated.bank).toEqual(raw.bank);
     expect(migrated.player.equipment).toEqual(raw.player.equipment); expect(migrated.player.position).toEqual(raw.player.position);
     expect(migrated.player.skills.ranged).toBe(0); expect(migrated.player.ammo).toBeNull(); expect(migrated.npcs.every((p) => p.skills.ranged === 0 && p.ammo === null)).toBe(true);
@@ -110,7 +111,7 @@ describe("real V3 archive migration", () => {
     const loaded = validateRpgSave(JSON.parse(JSON.stringify(migrated)))!; expect(loaded).not.toBeNull();
     reconcileRpg(migrated, NOW + 60000); reconcileRpg(loaded, NOW + 60000); expect(loaded).toEqual(migrated);
   });
-  it("rejects malformed V4 ranged skills, ammo, two-handed gear and weapon requirements", () => {
+  it("rejects malformed V5 ranged skills, ammo, two-handed gear and weapon requirements", () => {
     const s = archer();
     for (const mutate of [
       (state: RpgState) => { delete (state.player.skills as Partial<typeof state.player.skills>).ranged; },

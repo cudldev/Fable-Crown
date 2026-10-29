@@ -88,6 +88,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
       home: TOWNS[Math.floor(id / 8)].id,
       position,
       previousPosition: { ...position },
+      movement: null,
       path: [],
       skills: startingSkills(),
       inventory: [
@@ -114,7 +115,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     cape: "prince-cape",
   };
   const s: RpgState = {
-    version: 4,
+    version: 5,
     tick: 0,
     savedAt: now,
     calendar: calendarDate(now),
@@ -173,6 +174,10 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     ],
     rewards: [],
     dialogue: null,
+    effects: [],
+    effectSequence: 0,
+    messages: [],
+    messageSequence: 0,
   };
   s.control.goal = suggestGoals(s)[0].goal;
   s.control.steps = goalSteps(s, s.control.goal);
@@ -223,6 +228,7 @@ function travel(s: RpgState, p: ActorState) {
   if (player && p.runEnergy < 60) s.control.running = false;
   const running = player ? s.control.running !== false : p.runEnergy > 0;
   let steps = running ? 2 : 1;
+  const tiles = [{ ...p.position }];
   if (player && !running) p.runEnergy = Math.min(10000, p.runEnergy + 15);
   while (steps-- && p.path.length) {
     if (player && running && p.runEnergy < 60) break;
@@ -234,6 +240,8 @@ function travel(s: RpgState, p: ActorState) {
       return;
     }
     p.position = { ...next };
+    tiles.push({ ...next });
+    p.movement = { tick: s.tick, mode: running ? "run" : "walk", tiles: [...tiles] };
     p.path.shift();
     if (running && p.runEnergy > 0) p.runEnergy = Math.max(0, p.runEnergy - 60);
   }
@@ -365,7 +373,7 @@ function finish(s: RpgState, message?: string) {
   s.control.source = null;
   s.player.action = null;
   s.player.path = [];
-  s.control.thinkingUntil = s.tick + 2;
+  s.control.thinkingUntil = s.tick + 1;
   if (message) {
     s.control.reason = message;
     s.player.activity = message;
@@ -598,9 +606,11 @@ function defeat(s: RpgState) {
   p.inventory = [];
   p.position = { ...WORLD.spawns[0] };
   p.previousPosition = { ...p.position };
+  p.movement = null;
   p.health = maxHealth(p);
   p.runEnergy = 10000;
   s.control.queue = [];
+  delete s.control.directOrderIndex;
   finish(
     s,
     "Defeated: equipped gear and experience are safe. Recover your backpack.",
@@ -629,6 +639,23 @@ function addLoot(s: RpgState, e: EnemyState) {
         (progress.counters ??= {})[stage.id] = Math.min(stage.quantity ?? 1, (progress.counters?.[stage.id] ?? 0) + 1);
   }
 }
+function attackRoute(s: RpgState, p: ActorState, e: EnemyState): TilePosition[] | null {
+  const weapon = ITEMS[p.equipment.weapon ?? ""], bow = weapon?.weaponType === "bow";
+  const reach = bow ? s.control.style === "longrange" ? 9 : weapon.range ?? 7 : 1;
+  if (distance(p.position, e.position) <= reach && lineOfSight(s, p.position, e.position)) return [];
+  if (!bow) {
+    const path = findPath(p.position, e.position, worldForState(s));
+    return path ? path.length > 1 ? path.slice(0, -1) : path : null;
+  }
+  const candidates: TilePosition[] = [];
+  for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) {
+    const next = { ...e.position, x: e.position.x + dx, y: e.position.y + dy };
+    if ((dx || dy) && isWalkable(next, worldForState(s)) && lineOfSight(s, next, e.position)) candidates.push(next);
+  }
+  candidates.sort((a, b) => distance(a, p.position) - distance(b, p.position) || a.y - b.y || a.x - b.x);
+  for (const next of candidates) { const path = findPath(p.position, next, worldForState(s)); if (path) return path; }
+  return null;
+}
 function fight(s: RpgState, id: string) {
   const p = s.player,
     e = s.enemies.find((e) => e.id === id);
@@ -645,19 +672,7 @@ function fight(s: RpgState, id: string) {
   if (bow && !p.ammo) { finish(s, "Out of arrows. Load carried or banked ammunition before shooting."); return; }
   const reach = bow ? s.control.style === "longrange" ? 9 : weapon.range ?? 7 : 1;
   if (distance(p.position, e.position) > reach || !lineOfSight(s, p.position, e.position)) {
-    let path: TilePosition[] | null = null;
-    if (bow) {
-      const candidates: TilePosition[] = [];
-      for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) {
-        const next = { ...e.position, x: e.position.x + dx, y: e.position.y + dy };
-        if ((dx || dy) && isWalkable(next, worldForState(s)) && lineOfSight(s, next, e.position)) candidates.push(next);
-      }
-      candidates.sort((a, b) => distance(a, p.position) - distance(b, p.position) || a.y - b.y || a.x - b.x);
-      for (const next of candidates) { path = findPath(p.position, next, worldForState(s)); if (path) break; }
-    } else {
-      const melee = findPath(p.position, e.position, worldForState(s));
-      path = melee ? melee.length > 1 ? melee.slice(0, -1) : melee : null;
-    }
+    const path = attackRoute(s, p, e);
     if (!path) {
       finish(s, "Cannot reach the enemy");
       return;
@@ -820,6 +835,23 @@ function takeStacks(target: ItemStack[], source: ItemStack[]) {
       removeItems(source, stack.itemId, amount);
   }
 }
+function recoveryRoute(s: RpgState): TilePosition[] | null {
+  const grave = s.grave, p = s.player;
+  if (!grave) return null;
+  if (distance(p.position, grave.position) <= 7 && lineOfSight(s, p.position, grave.position)) return [];
+  const candidates: TilePosition[] = [];
+  for (let dy = -7; dy <= 7; dy++) for (let dx = -7; dx <= 7; dx++) {
+    const point = { ...grave.position, x: grave.position.x + dx, y: grave.position.y + dy };
+    if (isWalkable(point, worldForState(s)) && lineOfSight(s, point, grave.position) &&
+      !s.enemies.some((e) => e.health && ENEMIES[e.definitionId].aggressive && distance(point, e.home) <= 5)) candidates.push(point);
+  }
+  candidates.sort((a, b) => distance(p.position, a) - distance(p.position, b) || a.y - b.y || a.x - b.x);
+  for (const point of candidates.slice(0, 8)) {
+    const path = findPath(p.position, point, worldForState(s));
+    if (path && !path.some((next) => s.enemies.some((e) => e.health && ENEMIES[e.definitionId].aggressive && distance(next, e.home) <= 3))) return path;
+  }
+  return null;
+}
 function recover(s: RpgState) {
   const grave = s.grave,
     p = s.player;
@@ -842,49 +874,11 @@ function recover(s: RpgState) {
       );
     return;
   }
-  const candidates: TilePosition[] = [];
-  for (let dy = -7; dy <= 7; dy++)
-    for (let dx = -7; dx <= 7; dx++) {
-      const t = {
-        ...grave.position,
-        x: grave.position.x + dx,
-        y: grave.position.y + dy,
-      };
-      if (
-        isWalkable(t, worldForState(s)) &&
-        lineOfSight(s, t, grave.position) &&
-        !s.enemies.some(
-          (e) =>
-            e.health &&
-            ENEMIES[e.definitionId].aggressive &&
-            distance(t, e.home) <= 5,
-        )
-      )
-        candidates.push(t);
-    }
-  candidates.sort(
-    (a, b) =>
-      distance(p.position, a) - distance(p.position, b) ||
-      a.y - b.y ||
-      a.x - b.x,
-  );
-  for (const t of candidates.slice(0, 8)) {
-    const path = findPath(p.position, t, worldForState(s));
-    if (
-      path &&
-      !path.some((n) =>
-        s.enemies.some(
-          (e) =>
-            e.health &&
-            ENEMIES[e.definitionId].aggressive &&
-            distance(n, e.home) <= 3,
-        ),
-      )
-    ) {
-      p.path = path;
-      p.activity = "Approaching the grave from a safe distance";
-      return;
-    }
+  const path = recoveryRoute(s);
+  if (path) {
+    p.path = path;
+    p.activity = "Approaching the grave from a safe distance";
+    return;
   }
   grave.attempts++;
   grave.retryAt = s.tick + Math.min(200, 20 * grave.attempts);
@@ -917,12 +911,16 @@ export function repairRpgPositions(s: RpgState) {
   };
   for (const actor of [s.player, ...s.npcs]) {
     actor.position = repair(actor.position); actor.previousPosition = { ...actor.position };
+    actor.movement = null;
     actor.path = []; actor.action = null;
   }
   for (const e of s.enemies) { e.home = { ...ENEMY_SPAWNS.find((spawn) => spawn.id === e.id)!.position }; e.position = repair(e.position); }
   for (const drop of s.drops) drop.position = repair(drop.position);
   if (s.grave) s.grave.position = repair(s.grave.position);
+  const direct = s.control.directOrderIndex === undefined ? undefined : s.control.queue[s.control.directOrderIndex];
   s.control.queue = s.control.queue.filter((order) => validOrder(order, world));
+  const directIndex = direct ? s.control.queue.indexOf(direct) : -1;
+  if (directIndex >= 0) s.control.directOrderIndex = directIndex; else delete s.control.directOrderIndex;
   if (s.control.active && !validOrder(s.control.active, world)) { s.control.active = null; s.control.source = null; }
   s.control.thinkingUntil = s.tick + 1;
   return s;
@@ -1064,6 +1062,7 @@ function execute(s: RpgState, order: RpgOrder) {
     if (!route(s, p, objectById(ferry.objectId)!)) return;
     if (!removeItems(p.inventory, "coins", ferry.cost)) { finish(s, "The ferry fare is five coins."); return; }
     p.position = { ...ferry.destination }; p.previousPosition = { ...p.position };
+    p.movement = null;
     finish(s, ferry.name); return;
   }
   if (order.type === "attack") {
@@ -1071,6 +1070,7 @@ function execute(s: RpgState, order: RpgOrder) {
     return;
   }
   if (order.type === "eat") {
+    if (s.tick < s.control.eatReadyAt) { p.action = null; p.activity = "Recovering before the next meal"; return; }
     const ate = food(s, order.itemId);
     finish(s, ate ? "Ate a healing meal" : "No edible food in the backpack");
     return;
@@ -1986,8 +1986,21 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
       }
     for (const p of [s.player, ...s.npcs]) {
       p.previousPosition = { ...p.position };
+      p.movement = null;
       if (p.id === 0 && s.control.waiting) {
         p.runEnergy = Math.min(10000, p.runEnergy + 15);
+        continue;
+      }
+      if (p.id === 0 && s.control.active?.type === "attack" && s.control.queue[0] && inventoryOrder(s.control.queue[0])) {
+        // A short inventory transaction pauses, rather than silently discards, the engagement.
+        p.runEnergy = Math.min(10000, p.runEnergy + 15);
+        const next = s.control.queue[0];
+        if (next.type === "eat" && s.tick < s.control.eatReadyAt) continue;
+        const engagement = s.control.active, source = s.control.source;
+        s.control.active = shiftOrder(s)!; s.control.source = "player";
+        p.path = []; p.action = null;
+        execute(s, s.control.active);
+        s.control.active = engagement; s.control.source = source;
         continue;
       }
       if (
@@ -2016,8 +2029,8 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
         travel(s, p);
         continue;
       }
-      p.runEnergy = Math.min(10000, p.runEnergy + 15);
       if (p.id !== 0) {
+        p.runEnergy = Math.min(10000, p.runEnergy + 15);
         npcStep(s, p);
         continue;
       }
@@ -2043,13 +2056,18 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
       }
       if (!s.control.active) {
         if (s.control.queue.length) {
-          s.control.active = s.control.queue.shift()!;
+          s.control.active = shiftOrder(s)!;
           s.control.source = "player";
+          const prepared = orderRoute(s, s.control.active);
+          if (!prepared) { finish(s, "The queued target is no longer reachable."); continue; }
+          beginPlayerOrder(s, s.control.active, prepared);
         } else if (s.tick >= s.control.thinkingUntil) {
           s.control.active = autoOrder(s);
           s.control.source = s.control.active ? "autonomous" : null;
         }
       }
+      if (p.path.length) { travel(s, p); continue; }
+      p.runEnergy = Math.min(10000, p.runEnergy + 15);
       const autonomous = s.control.source === "autonomous";
       if (s.control.active) execute(s, s.control.active);
       if (
@@ -2241,7 +2259,7 @@ function orderProblem(
     !s.enemies.some((e) => e.id === order.enemyId && e.health > 0)
   )
     return "That enemy is not currently present.";
-  if (order.type === "attack" && ITEMS[p.equipment.weapon ?? ""]?.weaponType === "bow" && !p.ammo)
+  if (!queued && order.type === "attack" && ITEMS[p.equipment.weapon ?? ""]?.weaponType === "bow" && !p.ammo)
     return "Load carried or banked arrows before shooting.";
   if (order.type === "quest" && s.quests[order.questId].complete)
     return "That quest has already been completed.";
@@ -2250,24 +2268,24 @@ function orderProblem(
   if (order.type === "craft") return craftProblem(p, order.recipeId, !queued);
   if (order.type === "equip") {
     const item = ITEMS[order.itemId];
-    if (!itemCount(p.inventory, item.id))
+    if (!queued && !itemCount(p.inventory, item.id))
       return "That item is not in your backpack.";
     if (
       levelForXp(p.skills.attack) < (item.attackLevel ?? 1) ||
       levelForXp(p.skills.defence) < (item.defenceLevel ?? 1) ||
       levelForXp(p.skills.ranged) < (item.rangedLevel ?? 1) ||
-      (item.slot === "shield" && ITEMS[p.equipment.weapon ?? ""]?.twoHanded) ||
+      (!queued && item.slot === "shield" && ITEMS[p.equipment.weapon ?? ""]?.twoHanded) ||
       (item.skill && levelForXp(p.skills[item.skill]) < (item.level ?? 1))
     )
       return "You do not meet the equipment requirements.";
     if (item.ammoTier && p.ammo?.itemId === item.id && p.ammo.quantity + itemCount(p.inventory, item.id) > 2_000_000_000)
       return "The equipped arrow stack is full.";
   }
-  if (order.type === "unequip-ammo" && (!p.ammo ||
+  if (!queued && order.type === "unequip-ammo" && (!p.ammo ||
     (inventorySlots(p.inventory) >= 28 && !itemCount(p.inventory, p.ammo.itemId))))
     return "No equipped arrows or backpack space.";
   if (
-    order.type === "unequip" &&
+    !queued && order.type === "unequip" &&
     (!p.equipment[order.slot] || inventorySlots(p.inventory) >= 28)
   )
     return "No equipped item or backpack space.";
@@ -2293,6 +2311,61 @@ function orderProblem(
     return "Not enough coins or shop stock.";
   return null;
 }
+const inventoryOrder = (order: RpgOrder) => ["equip", "unequip", "unequip-ammo", "eat"].includes(order.type);
+function shiftOrder(s: RpgState) {
+  const order = s.control.queue.shift(), index = s.control.directOrderIndex;
+  if (index === 0) delete s.control.directOrderIndex;
+  else if (index !== undefined) s.control.directOrderIndex = index - 1;
+  return order;
+}
+function removeOrder(s: RpgState, index: number) {
+  s.control.queue.splice(index, 1);
+  const direct = s.control.directOrderIndex;
+  if (direct === index) delete s.control.directOrderIndex;
+  else if (direct !== undefined && direct > index) s.control.directOrderIndex = direct - 1;
+}
+/** Prepare movement without performing a transaction, spending RNG or changing the accepted intention. */
+function orderRoute(s: RpgState, order: RpgOrder): TilePosition[] | null {
+  const p = s.player;
+  if (order.type === "move") return findPath(p.position, order.position, worldForState(s));
+  if (order.type === "attack") {
+    const enemy = s.enemies.find((e) => e.id === order.enemyId);
+    return enemy ? attackRoute(s, p, enemy) : null;
+  }
+  if (order.type === "recover") return recoveryRoute(s);
+  if (order.type === "loot") {
+    const drop = s.drops.find((d) => d.id === order.dropId);
+    return drop ? distance(p.position, drop.position) <= 1 ? [] : findPath(p.position, drop.position, worldForState(s)) : null;
+  }
+  let target: WorldObject | undefined;
+  if (order.type === "gather") {
+    target = inventorySlots(p.inventory) === 28 ? nearest(p, (o) => o.kind === "bank") : objectById(order.objectId);
+    if (target?.resourceId && !s.resources[target.id].available)
+      target = nearest(p, (o) => o.resourceId === target!.resourceId && s.resources[o.id].available) ?? target;
+  } else if (order.type === "craft") target = nearest(p, (o) => o.kind === RECIPES[order.recipeId].station && stationAvailable(s, o));
+  else if (order.type === "bank" || order.type === "withdraw") target = order.type === "bank" && order.objectId
+    ? objectById(order.objectId) : nearest(p, (o) => o.kind === "bank");
+  else if (order.type === "buy" || order.type === "sell") target = objectById(order.shopId);
+  else if (order.type === "quest") target = objectById(QUESTS[order.questId].giverId);
+  else if (order.type === "interact" || order.type === "travel-service") target = objectById(order.objectId);
+  else return [];
+  return target ? adjacent(p, target) ? [] : objectRoute(s, p.position, target) : null;
+}
+function beginPlayerOrder(s: RpgState, order: RpgOrder, path: TilePosition[]) {
+  s.control.active = structuredClone(order); s.control.source = "player";
+  s.player.path = path; s.player.action = null;
+  if (order.type === "gather" && inventorySlots(s.player.inventory) === 28) {
+    const bank = nearest(s.player, (o) => o.kind === "bank");
+    if (bank) s.player.action = { kind: "bank", targetId: bank.id, duration: 1, remaining: 1 };
+  }
+  const questId = order.type === "quest" ? order.questId : order.type === "interact" && order.verb === "talk"
+    ? objectById(order.objectId)?.questId : undefined;
+  if (questId && !s.quests[questId].complete) {
+    const q = QUESTS[questId];
+    s.control.goal = { id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name };
+    s.control.steps = goalSteps(s, s.control.goal); s.control.thought = null;
+  }
+}
 export function applyRpgCommand(
   s: RpgState,
   command: RpgCommand,
@@ -2310,7 +2383,7 @@ export function applyRpgCommand(
     if (!integer(command.index, 7) || command.index >= s.control.queue.length)
       return fail("That queued intention does not exist.");
     if (command.type === "cancel-order") {
-      s.control.queue.splice(command.index, 1);
+      removeOrder(s, command.index);
       return ok("Removed queued intention.");
     }
     if (command.direction !== -1 && command.direction !== 1)
@@ -2322,6 +2395,8 @@ export function applyRpgCommand(
       s.control.queue[next],
       s.control.queue[command.index],
     ];
+    if (s.control.directOrderIndex === command.index) s.control.directOrderIndex = next;
+    else if (s.control.directOrderIndex === next) s.control.directOrderIndex = command.index;
     return ok("Reordered queued intention.");
   }
   if (command.type === "wait") {
@@ -2330,12 +2405,14 @@ export function applyRpgCommand(
     s.control.source = null;
     s.player.path = [];
     s.player.action = null;
+    s.player.movement = null;
+    s.player.previousPosition = { ...s.player.position };
     s.player.activity = "Waiting for your guidance";
     return ok("Alden will wait here; queued intentions are held.");
   }
   if (command.type === "resume") {
     s.control.waiting = false;
-    s.control.thinkingUntil = s.tick + 6;
+    s.control.thinkingUntil = s.tick + 1;
     return ok("Alden is considering his next intention.");
   }
   if (command.type === "style") {
@@ -2374,27 +2451,36 @@ export function applyRpgCommand(
   const order = command.type === "enqueue" ? command.order : command;
   if (!validOrder(order, worldForState(s)))
     return fail("This activity or target is not available.");
-  const problem = orderProblem(s, order, command.type === "enqueue");
+  const pendingInventory = s.control.source === "player" && !!s.control.active && inventoryOrder(s.control.active);
+  const keepEngagement = s.control.active?.type === "attack" && inventoryOrder(order);
+  const deferred = command.type === "enqueue" || pendingInventory || keepEngagement;
+  const problem = orderProblem(s, order, deferred);
   if (problem) return fail(problem);
-  if (command.type === "enqueue") {
+  if (deferred) {
+    if (command.type !== "enqueue" && !inventoryOrder(order) && s.control.directOrderIndex !== undefined) {
+      s.control.queue[s.control.directOrderIndex] = structuredClone(order);
+      s.control.waiting = false;
+      return ok("Replaced the pending direct intention; inventory actions remain in order.");
+    }
     if (s.control.queue.length >= 8)
       return fail("The intention queue is full.");
-    s.control.queue.push(structuredClone(order));
-    if (s.control.source === "autonomous") finish(s);
+    if (command.type === "enqueue") s.control.queue.push(structuredClone(order));
+    else {
+      const firstWorld = s.control.queue.findIndex((pending) => !inventoryOrder(pending));
+      const index = firstWorld < 0 ? s.control.queue.length : firstWorld;
+      s.control.queue.splice(index, 0, structuredClone(order));
+      if (s.control.directOrderIndex !== undefined && s.control.directOrderIndex >= index) s.control.directOrderIndex++;
+      if (!inventoryOrder(order)) s.control.directOrderIndex = index;
+    }
+    if (command.type === "enqueue" && s.control.source === "autonomous") finish(s);
     s.control.waiting = false;
     return ok("Added to the intention queue.");
   }
-  const path =
-    order.type === "move"
-      ? findPath(s.player.position, order.position, worldForState(s))
-      : null;
-  if (order.type === "move" && !path)
-    return fail("That tile is blocked or unreachable.");
+  const path = orderRoute(s, order);
+  if (!path) return fail("That target is blocked or unreachable.");
+  if (!inventoryOrder(order) && s.control.directOrderIndex !== undefined) removeOrder(s, s.control.directOrderIndex);
   s.control.waiting = false;
-  s.control.active = structuredClone(order);
-  s.control.source = "player";
-  s.player.path = path ?? [];
-  s.player.action = null;
+  beginPlayerOrder(s, order, path);
   s.control.reason = "Following your direct intention.";
   return ok("Following your intention.");
 }
@@ -2427,20 +2513,52 @@ function stacks(v: unknown, capacity = Infinity): v is ItemStack[] {
 }
 const text = (v: unknown, max = 500): v is string =>
   typeof v === "string" && v.length <= max;
+const coordinatePosition = (v: unknown): v is TilePosition => object(v) && v.worldId === WORLD.id && v.plane === 0 &&
+  integer(v.x, WORLD.width - 1) && integer(v.y, WORLD.height - 1);
+const samePosition = (a: TilePosition, b: TilePosition) => a.worldId === b.worldId && a.plane === b.plane && a.x === b.x && a.y === b.y;
+function validPresentationState(v: Record<string, unknown>) {
+  if (!integer(v.tick) || !integer(v.effectSequence) || !integer(v.messageSequence) ||
+    !Array.isArray(v.effects) || v.effects.length > 64 || !Array.isArray(v.messages) || v.messages.length > 100) return false;
+  const actorId = (id: unknown) => typeof id === "string" && (id === "player" || /^npc-([1-9]|1\d|2[0-3])$/.test(id) || ENEMY_SPAWNS.some((e) => e.id === id));
+  const kinds = ["gather", "craft", "fight", "bank", "buy", "sell", "quest", "recover", "rest", "eat", "practice"];
+  let lastId = 0, lastTick = 0;
+  for (const effect of v.effects) {
+    if (!object(effect) || !positive(effect.id, v.effectSequence) || effect.id <= lastId || !integer(effect.tick, v.tick) || effect.tick < lastTick ||
+      !["action-start", "action-result", "projectile", "hit", "defeat"].includes(effect.kind as string) ||
+      !actorId(effect.actorId) || !coordinatePosition(effect.position) ||
+      (effect.targetId !== undefined && !actorId(effect.targetId) && !(typeof effect.targetId === "string" && !!objectById(effect.targetId))) ||
+      (effect.targetPosition !== undefined && !coordinatePosition(effect.targetPosition)) ||
+      (effect.actionKind !== undefined && !kinds.includes(effect.actionKind as string)) ||
+      (effect.success !== undefined && typeof effect.success !== "boolean") ||
+      (effect.amount !== undefined && !integer(effect.amount, 2_000_000_000))) return false;
+    lastId = effect.id; lastTick = effect.tick;
+  }
+  if (v.effects.length && lastId !== v.effectSequence) return false;
+  lastId = 0; lastTick = 0;
+  for (const message of v.messages) {
+    if (!object(message) || !positive(message.id, v.messageSequence) || message.id <= lastId || !integer(message.tick, v.tick) || message.tick < lastTick ||
+      !["event", "dialogue"].includes(message.category as string) || !text(message.key, 200) || !message.key ||
+      !text(message.text, 1000) || !message.text || !positive(message.count)) return false;
+    lastId = message.id; lastTick = message.tick;
+  }
+  return !v.messages.length || lastId === v.messageSequence;
+}
 export function validateRpgSave(v: unknown): RpgState | null {
   try {
     if (!object(v) || !object(v.quests)) return null;
     v = structuredClone(v);
     if (!object(v) || !object(v.quests)) return null;
     const candidate = v as unknown as RpgState;
-    if (v.version !== 3 && v.version !== 4) return null;
-    const migrated = v.version === 3;
+    if (v.version !== 3 && v.version !== 4 && v.version !== 5) return null;
+    const oldVersion = v.version, migrated = oldVersion !== 5;
     if (migrated) {
-      v.version = 4;
+      v.version = 5; v.effects = []; v.effectSequence = 0; v.messages = []; v.messageSequence = 0;
+      if (object(v.control)) delete v.control.directOrderIndex;
       if (!Array.isArray(v.npcs)) return null;
       for (const actor of [v.player, ...v.npcs]) {
         if (!object(actor) || !object(actor.skills)) return null;
-        actor.skills.ranged ??= 0; actor.ammo ??= null;
+        if (oldVersion === 3) { actor.skills.ranged ??= 0; actor.ammo ??= null; }
+        actor.movement = null;
       }
     }
     // Additive G2 normalization never mutates the archived/public input object.
@@ -2477,7 +2595,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
     }
     const w = worldForState(v as unknown as RpgState);
     if (
-      v.version !== 4 ||
+      v.version !== 5 ||
       !integer(v.tick) ||
       !integer(v.savedAt, 8.64e15) ||
       !integer(v.seed, 4294967295) ||
@@ -2501,7 +2619,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
       Object.keys(v.quests).length !== Object.keys(QUESTS).length ||
       !Array.isArray(v.journal) ||
       v.journal.length > 60 ||
-      !v.journal.every((i) => text(i))
+      !v.journal.every((i) => text(i)) || !validPresentationState(v)
     )
       return null;
     if (v.rewards !== undefined) {
@@ -2628,6 +2746,15 @@ export function validateRpgSave(v: unknown): RpgState | null {
       )
         return null;
       let last = p.position;
+      if (p.movement !== null) {
+        const movement = p.movement, actor = p as unknown as ActorState;
+        if (!object(movement) || !positive(movement.tick, v.tick) || movement.tick !== v.tick ||
+          !["walk", "run"].includes(movement.mode as string) || !Array.isArray(movement.tiles) ||
+          movement.tiles.length < 2 || movement.tiles.length > (movement.mode === "walk" ? 2 : 3) ||
+          !movement.tiles.every((point) => position(point, w)) ||
+          !samePosition(movement.tiles[0], actor.previousPosition) || !samePosition(movement.tiles.at(-1)!, actor.position)) return null;
+        for (let i = 1; i < movement.tiles.length; i++) if (!canStep(movement.tiles[i - 1], movement.tiles[i], w)) return null;
+      }
       if (ITEMS[(p.equipment as ActorState["equipment"]).weapon ?? ""]?.twoHanded &&
         (p.equipment as ActorState["equipment"]).shield) return null;
       for (const next of p.path) {
@@ -2725,6 +2852,7 @@ export function validateRpgSave(v: unknown): RpgState | null {
       !Array.isArray(c.queue) ||
       c.queue.length > 8 ||
       !c.queue.every((o) => validOrder(o, w)) ||
+      (c.directOrderIndex !== undefined && (!integer(c.directOrderIndex, c.queue.length - 1) || inventoryOrder(c.queue[c.directOrderIndex] as RpgOrder))) ||
       !(c.active === null || validOrder(c.active, w)) ||
       !(c.goal === null || validGoal(c.goal)) ||
       !integer(c.thinkingUntil) ||

@@ -4,24 +4,24 @@ import { tile } from "../src/rpg/world";
 import { actionPose, actorFrameKey, facingFromMotion, observedHits, observeHealth } from "../src/render/presentation";
 
 describe("actor presentation never controls the simulation", () => {
-  it("projects tile movement to four headings and keeps an idle heading", () => {
+  it("projects tile movement to eight screen headings and keeps an idle heading", () => {
     expect(facingFromMotion(tile(0, 0), tile(1, 0))).toBe("se");
     expect(facingFromMotion(tile(0, 0), tile(0, 1))).toBe("sw");
     expect(facingFromMotion(tile(1, 0), tile(0, 0))).toBe("nw");
     expect(facingFromMotion(tile(0, 1), tile(0, 0))).toBe("ne");
+    expect(facingFromMotion(tile(0, 0), tile(1, -1))).toBe("e");
+    expect(facingFromMotion(tile(0, 0), tile(1, 1))).toBe("s");
+    expect(facingFromMotion(tile(0, 0), tile(-1, 1))).toBe("w");
+    expect(facingFromMotion(tile(0, 0), tile(-1, -1))).toBe("n");
     expect(facingFromMotion(tile(0, 0), tile(0, 0), "nw")).toBe("nw");
   });
-  it("cycles three walking frames faster for a two-tile run, then rests", () => {
+  it("requires observed legal motion rather than inferring movement from an endpoint", () => {
     const actor = createRpg(0).player;
     actor.previousPosition = tile(10, 10); actor.position = tile(11, 10);
-    expect(actorFrameKey(actor, "se", 0, false)).toBe("se:walk:0");
-    expect(actorFrameKey(actor, "se", 180, false)).toBe("se:walk:1");
-    expect(actorFrameKey(actor, "se", 350, false)).toBe("se:walk:2");
+    expect(actorFrameKey(actor, "se", 0, false)).toBe("se:idle");
     actor.position = tile(12, 10);
-    expect(actorFrameKey(actor, "se", 180, false)).toBe("se:walk:1");
-    expect(actorFrameKey(actor, "se", 210, false)).toBe("se:walk:2");
     expect(actorFrameKey(actor, "se", 700, false)).toBe("se:idle");
-    expect(actorFrameKey(actor, "se", 350, true)).toBe("se:walk:0");
+    expect(actorFrameKey(actor, "se", 350, true)).toBe("se:idle");
   });
   it("uses the real action target and only animates work after travel", () => {
     const actor = createRpg(0).player;

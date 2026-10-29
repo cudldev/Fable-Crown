@@ -51,7 +51,8 @@ describe("original service and route quest chains", () => {
     stepRpg(s);
     expect(s.quests.forge.accepted).toBe(false);
     expect(s.player.path.length).toBeGreaterThan(0);
-    expect(s.player.position).toEqual(start);
+    expect(s.player.position).not.toEqual(start);
+    expect(s.player.movement?.tiles[0]).toEqual(start);
     at(s, "quest-forge");
     quest(s, "forge");
     expect(s.quests.forge.accepted).toBe(true);

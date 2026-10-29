@@ -32,7 +32,7 @@ async function storedState(page: Page): Promise<RpgState> {
         const request = indexedDB.open("fable-crown", 1);
         request.onsuccess = () => {
           const db = request.result;
-          const get = db.transaction("saves").objectStore("saves").get("v4");
+          const get = db.transaction("saves").objectStore("saves").get("v5");
           get.onsuccess = () => {
             resolve(get.result);
             db.close();
@@ -194,7 +194,7 @@ test("two-handed bow equip is rejected atomically when the shield cannot fit in 
   await mobileFit(page);
 });
 
-test("original V3 saves migrate to V4, remain playable, and preserve the V3 record", async ({
+test("original V3 saves migrate to V5, remain playable, and preserve the V3 record", async ({
   page,
 }) => {
   await page.goto("./?chapter=3");
@@ -223,7 +223,7 @@ test("original V3 saves migrate to V4, remain playable, and preserve the V3 reco
     });
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction("saves", "readwrite");
-      tx.objectStore("saves").delete("v4");
+      tx.objectStore("saves").delete("v5");
       tx.objectStore("saves").put(oldSave, "v3");
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
@@ -233,7 +233,7 @@ test("original V3 saves migrate to V4, remain playable, and preserve the V3 reco
   await page.reload();
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const migrated = await storedState(page);
-  expect(migrated.version).toBe(4);
+  expect(migrated.version).toBe(5);
   expect(migrated.player.skills.ranged).toBe(0);
   expect(migrated.player.ammo).toBeNull();
   expect(migrated.quests.forge.complete).toBe(true);
@@ -252,7 +252,7 @@ test("original V3 saves migrate to V4, remain playable, and preserve the V3 reco
   await page.reload();
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const afterReload = await storedState(page);
-  expect(afterReload.version).toBe(4);
+  expect(afterReload.version).toBe(5);
   expect(afterReload.quests.forge.complete).toBe(true);
   expect(
     afterReload.player.inventory.find((item) => item.itemId === "coins")
@@ -267,7 +267,7 @@ test("original V3 saves migrate to V4, remain playable, and preserve the V3 reco
           const db = request.result;
           const tx = db.transaction("saves");
           const oldRequest = tx.objectStore("saves").get("v3");
-          const newRequest = tx.objectStore("saves").get("v4");
+          const newRequest = tx.objectStore("saves").get("v5");
           tx.oncomplete = () => {
             resolve({ old: oldRequest.result, current: newRequest.result });
             db.close();
@@ -278,6 +278,6 @@ test("original V3 saves migrate to V4, remain playable, and preserve the V3 reco
       }),
   );
   expect(records.old).toEqual(legacy);
-  expect(records.current).toMatchObject({ version: 4 });
+  expect(records.current).toMatchObject({ version: 5 });
   await mobileFit(page);
 });

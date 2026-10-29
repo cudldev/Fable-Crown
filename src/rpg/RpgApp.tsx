@@ -13,7 +13,13 @@ import {
   pathToObject,
   FERRIES,
 } from "./world";
-import { SKILLS, type RpgState, type RpgCommand, type RpgOrder } from "./types";
+import {
+  SKILLS,
+  type RpgState,
+  type RpgCommand,
+  type RpgOrder,
+  type CommandReceipt,
+} from "./types";
 import { levelForXp, skillName } from "./skills";
 import { ITEMS, RESOURCES, RECIPES, SHOPS, ENEMIES, QUESTS } from "./content";
 import { itemCount, inventorySlots, stackLimitFor } from "./inventory";
@@ -64,6 +70,12 @@ export default function RpgApp() {
     [quantity, setQuantity] = useState(10),
     [bagItem, setBagItem] = useState<string | null>(null);
   const [feedbackEpoch, setFeedbackEpoch] = useState(0);
+  const [commandNotice, setCommandNotice] = useState<{
+    text: string;
+    pending: boolean;
+  } | null>(null);
+  const requestSequence = useRef(0),
+    latestRequest = useRef("");
   const reward = useRewardFeedback(state, feedbackEpoch);
   const audio = useGameAudio(state, feedbackEpoch);
   const [mapDestination, setMapDestination] = useState<TilePosition | null>(
@@ -85,13 +97,25 @@ export default function RpgApp() {
         return;
       }
       setState(e.data.state);
-      if (e.data.resetFeedback) setFeedbackEpoch((value) => value + 1);
+      if (e.data.resetFeedback) {
+        setFeedbackEpoch((value) => value + 1);
+        setCommandNotice(null);
+        latestRequest.current = "";
+      }
+      const receipt = e.data.receipt as CommandReceipt | undefined;
+      if (receipt && receipt.requestId === latestRequest.current)
+        setCommandNotice({
+          text: `${receipt.accepted ? "Accepted" : "Rejected"} · ${receipt.message}`,
+          pending: false,
+        });
       setHasArchive(e.data.hasArchive);
       setStorageOkay(e.data.storageOkay);
       if (e.data.message) setMessage(e.data.message);
     };
-    w.onerror = () =>
+    w.onerror = () => {
+      setCommandNotice(null);
       setMessage("The RPG chapter could not start. Reload to try again.");
+    };
     const visibility = () =>
         w.postMessage({ type: document.hidden ? "pause" : "resume" }),
       hide = () => w.postMessage({ type: "pause" });
@@ -108,6 +132,11 @@ export default function RpgApp() {
     const t = setTimeout(() => setMessage(""), 6000);
     return () => clearTimeout(t);
   }, [message]);
+  useEffect(() => {
+    if (!commandNotice || commandNotice.pending) return;
+    const timer = setTimeout(() => setCommandNotice(null), 1800);
+    return () => clearTimeout(timer);
+  }, [commandNotice]);
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -127,7 +156,18 @@ export default function RpgApp() {
   }, [panel, worldSize]);
   const send = (type: string, extra = {}) =>
     worker.current?.postMessage({ type, ...extra });
-  const command = (command: RpgCommand) => send("command", { command });
+  const command = (command: RpgCommand) => {
+    const requestId = `request-${++requestSequence.current}`;
+    latestRequest.current = requestId;
+    const label =
+      command.type === "goal"
+        ? command.goal.title
+        : command.type === "enqueue"
+          ? `Queue ${command.order.type}`
+          : command.type.replaceAll("-", " ");
+    setCommandNotice({ text: `Requested · ${label}`, pending: true });
+    send("command", { command, requestId });
+  };
   const order = (o: RpgOrder, next = false) => {
     command(next ? { type: "enqueue", order: o } : o);
     setSelection(null);
@@ -1798,7 +1838,13 @@ export default function RpgApp() {
             aria-label="Inspect current ambition"
             onClick={() => open("thoughts")}
           >
-            <small>AMBITION</small>
+            <small
+              aria-label="Command acknowledgement"
+              data-pending={commandNotice?.pending ?? false}
+              aria-live="polite"
+            >
+              {commandNotice?.text ?? "AMBITION"}
+            </small>
             <span>{state.control.goal?.title ?? state.control.reason}</span>
           </button>
           <div className="dock-buttons">

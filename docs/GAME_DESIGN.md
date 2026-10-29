@@ -1,5 +1,7 @@
 # Fable Crown — Game Design (CURRENT)
 
+> Current approved release: [FEEL_AND_OAKREST.md](FEEL_AND_OAKREST.md). Gameplay feel, natural movement and an authored starter district follow the completed early-game journey. It governs the next implementation; the larger roadmap remains staged.
+
 > Latest approved iteration: [TILE_RPG_PLAN.md](TILE_RPG_PLAN.md). A character-first autonomous RPG on an isometric256×192 tile world, nine skills, tools/gear, personal bank, shops, melee and three original quest chains. It supersedes continuous-coordinate travel and settlement-first progression below. The painterly art direction remains.
 
 > Latest approved expansion: see [EXPANDED_WORLD.md](EXPANDED_WORLD.md). The demo now uses a full-browser world, three settlements, 24 characters, generated layered artwork and direct contextual intentions/queue controls. This supersedes the earlier one-hamlet and limited-player-control scope below.

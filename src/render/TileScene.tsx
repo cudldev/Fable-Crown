@@ -9,7 +9,12 @@ import type { FeedbackFloater } from "./feedback";
 import { actorAtlas, type Facing } from "./actor-atlas";
 import {
   actorFrameKey,
+  actorFrameGeometry,
   facingFromMotion,
+  observeActorMotion,
+  sampleActorMotion,
+  resolveActorFrameKey,
+  type MotionTimeline,
   observeHealth,
   observedHits,
   type ObservedHit,
@@ -134,6 +139,7 @@ export default function TileScene({
   const atlasSources = useRef(new Map<string, HTMLImageElement>());
   const actorFrames = useRef(new Map<string, HTMLCanvasElement>());
   const facings = useRef(new Map<number, Facing>());
+  const motionTimelines = useRef(new Map<number, MotionTimeline>());
   const health = useRef(observeHealth(state, presentationEpoch));
   const hitSplats = useRef<(ObservedHit & { startedAt: number })[]>([]);
   if (
@@ -228,23 +234,20 @@ export default function TileScene({
     typeof matchMedia !== "undefined" &&
     matchMedia("(prefers-reduced-motion: reduce)").matches;
   const f = reduced ? 1 : clamp((now - stamp.current.at) / 600, 0, 1);
-  const people = [state.player, ...state.npcs].map((p) => ({
-    ...p,
-    draw: {
-      x: p.previousPosition.x + (p.position.x - p.previousPosition.x) * f,
-      y: p.previousPosition.y + (p.position.y - p.previousPosition.y) * f,
-    },
-  }));
-  for (const actor of people) {
-    let facing = facingFromMotion(
-      actor.previousPosition,
-      actor.position,
-      facings.current.get(actor.id),
-    );
+  const people = [state.player, ...state.npcs].map((p) => {
+    const timeline = observeActorMotion(p, state.tick, presentationEpoch, now, motionTimelines.current.get(p.id));
+    motionTimelines.current.set(p.id, timeline);
+    const motion = sampleActorMotion(timeline, now, reduced);
+    return { ...p, timeline, motion, draw: { x: motion.position.x, y: motion.position.y } };
+  });
+  function samplePerson(actor: (typeof people)[number], time: number) {
+    actor.motion = sampleActorMotion(actor.timeline, time, reduced);
+    actor.draw.x = actor.motion.position.x;
+    actor.draw.y = actor.motion.position.y;
+    let facing = actor.timeline.segments.length ? actor.motion.facing : facings.current.get(actor.id) ?? actor.motion.facing;
     if (
       !actor.path.length &&
-      actor.position.x === actor.previousPosition.x &&
-      actor.position.y === actor.previousPosition.y &&
+      !actor.motion.moving &&
       actor.action?.targetId
     ) {
       const target =
@@ -254,8 +257,10 @@ export default function TileScene({
           ?.position;
       if (target) facing = facingFromMotion(actor.position, target, facing);
     }
+    actor.motion.facing = facing;
     facings.current.set(actor.id, facing);
   }
+  for (const actor of people) samplePerson(actor, now);
   const enemyFrames = useRef({
     tick: state.tick,
     positions: new Map(state.enemies.map((e) => [e.id, e.position])),
@@ -412,12 +417,7 @@ export default function TileScene({
         ? 1
         : clamp((time - stamp.current.at) / 600, 0, 1);
       for (const actor of people) {
-        actor.draw.x =
-          actor.previousPosition.x +
-          (actor.position.x - actor.previousPosition.x) * fraction;
-        actor.draw.y =
-          actor.previousPosition.y +
-          (actor.position.y - actor.previousPosition.y) * fraction;
+        samplePerson(actor, time);
       }
       for (const enemy of enemies) {
         const previous =
@@ -613,14 +613,13 @@ export default function TileScene({
         ctx.globalAlpha = 1;
       }
       function princeFrame(key: string, p: { x: number; y: number }): boolean {
+        key = resolveActorFrameKey(key, actorAtlas);
         const frame = actorAtlas[key];
         const source = frame && atlasSources.current.get(frame.sheet);
         if (!frame || !source) return false;
         // Tools may extend above a pose: preserve body size across every cell.
         const reference = actorAtlas[`${key.split(":")[0]}:idle`];
-        const scale =
-          90 /
-          (frame.bodyHeight ?? reference?.boundsHeight ?? frame.boundsHeight);
+        const geometry = actorFrameGeometry(frame, reference?.bodyHeight ?? reference?.boundsHeight);
         let baked = actorFrames.current.get(key);
         if (baked) {
           actorFrames.current.delete(key);
@@ -628,11 +627,14 @@ export default function TileScene({
         } else {
           // Extract the cell before resampling, at twice gameplay scale for close zoom.
           baked = document.createElement("canvas");
-          baked.width = Math.max(1, Math.ceil(frame.width * scale * 2));
-          baked.height = Math.max(1, Math.ceil(frame.height * scale * 2));
-          baked
-            .getContext("2d")!
-            .drawImage(
+          baked.width = geometry.bakeWidth;
+          baked.height = geometry.bakeHeight;
+          const bakeContext = baked.getContext("2d")!;
+          if (geometry.flipX) {
+            bakeContext.translate(baked.width, 0);
+            bakeContext.scale(-1, 1);
+          }
+          bakeContext.drawImage(
               source,
               frame.x,
               frame.y,
@@ -643,7 +645,7 @@ export default function TileScene({
               baked.width,
               baked.height,
             );
-          if (actorFrames.current.size >= 48)
+          if (actorFrames.current.size >= 96)
             actorFrames.current.delete(
               actorFrames.current.keys().next().value!,
             );
@@ -651,10 +653,10 @@ export default function TileScene({
         }
         ctx.drawImage(
           baked,
-          p.x - frame.pivotX * scale,
-          p.y - frame.pivotY * scale,
-          frame.width * scale,
-          frame.height * scale,
+          p.x + geometry.x,
+          p.y + geometry.y,
+          geometry.width,
+          geometry.height,
         );
         return true;
       }
@@ -944,6 +946,7 @@ export default function TileScene({
                     world.objects.find(
                       (object) => object.id === p.action?.targetId,
                     ),
+                    p.motion,
                   );
                   if (!princeFrame(key, at)) art("prince", at, 90, 90);
                 } else art(name, at, 90, 90);

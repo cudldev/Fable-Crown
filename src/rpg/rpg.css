@@ -313,6 +313,11 @@
   gap: 7px;
   margin: 12px 0;
 }
+.rpg-shell .next-intention small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .context-goals button {
   text-align: left;
   padding: 10px;

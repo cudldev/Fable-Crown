@@ -6,5 +6,6 @@ export default defineConfig({
   base:
     process.env.VITE_BASE_PATH ||
     (repo && repo !== `${owner}.github.io` ? `/${repo}/` : "/"),
-  test: { include: ["tests/**/*.test.ts"] },
+  // Keep bounded planner cases from competing with every suite for CPU at once.
+  test: { include: ["tests/**/*.test.ts"], maxWorkers: 4 },
 } as Parameters<typeof defineConfig>[0]);

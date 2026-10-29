@@ -1,6 +1,6 @@
 {
-  "version": "9c22ec9f4301",
-  "bytes": 9931268,
+  "version": "80f0a690136a",
+  "bytes": 12770278,
   "files": [
     "art/actor-fisher.webp",
     "art/anvil.webp",
@@ -24,6 +24,13 @@
     "art/ore.webp",
     "art/prince-actions.webp",
     "art/prince-locomotion.webp",
+    "art/prince-v5-e.webp",
+    "art/prince-v5-n.webp",
+    "art/prince-v5-nw.webp",
+    "art/prince-v5-s.webp",
+    "art/prince-v5-se.webp",
+    "art/prince-v5-sw.webp",
+    "art/prince-v5-w.webp",
     "art/prince.webp",
     "art/ruins.webp",
     "art/smith.webp",
