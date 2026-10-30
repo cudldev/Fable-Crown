@@ -3,6 +3,46 @@ import { createRpg } from "../src/rpg/engine";
 import { canStep, interactionTiles, objectById } from "../src/rpg/world";
 import type { RpgState } from "../src/rpg/types";
 
+// Keep a bounded trace for hosted-only save observation failures.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    let workerNumber = 0;
+    const record = (entry: Record<string, unknown>) => {
+      const entries = JSON.parse(sessionStorage.getItem("save-observation-trace") || "[]");
+      entries.push({ at: performance.now(), ...entry });
+      sessionStorage.setItem("save-observation-trace", JSON.stringify(entries.slice(-160)));
+    };
+    const BrowserWorker = window.Worker;
+    window.Worker = class extends BrowserWorker {
+      private traceId: number;
+      constructor(...args: ConstructorParameters<typeof Worker>) {
+        super(...args); this.traceId = ++workerNumber;
+        record({ event: "worker", worker: this.traceId, url: String(args[0]) });
+        this.addEventListener("message", event => {
+          const data = event.data, state = data?.state as RpgState | undefined;
+          if (!state?.player) return;
+          record({ event: "message", worker: this.traceId, message: data.message,
+            tick: state.tick, savedAt: state.savedAt, storageOkay: data.storageOkay, hp: state.player.health,
+            attack: state.player.skills.attack, position: state.player.position,
+            active: state.control.active, waiting: state.control.waiting, receipt: data.receipt });
+        });
+      }
+      postMessage(message: unknown, transferOrOptions?: Transferable[] | StructuredSerializeOptions) {
+        const data = message as { type?: string; command?: unknown; requestId?: string; value?: RpgState };
+        record({ event: "post", worker: this.traceId, type: data.type, command: data.command, requestId: data.requestId,
+          imported: data.type === "import" ? { tick: data.value?.tick, hp: data.value?.player?.health, attack: data.value?.player?.skills?.attack } : undefined });
+        if (Array.isArray(transferOrOptions)) super.postMessage(message, transferOrOptions);
+        else super.postMessage(message, transferOrOptions);
+      }
+    };
+  });
+});
+test.afterEach(async ({ page }, info) => {
+  if (info.status === info.expectedStatus) return;
+  const trace = await page.evaluate(() => sessionStorage.getItem("save-observation-trace")).catch(() => null);
+  await info.attach("save-observation-trace", { body: trace || "unavailable", contentType: "application/json" });
+});
+
 async function importState(page: Page, state: unknown) {
   if (!(await page.getByRole("button", { name: "Save on device" }).isVisible()))
     await page.getByRole("button", { name: "Open game menu" }).click();
@@ -34,6 +74,17 @@ async function snapshot(page: Page): Promise<RpgState> {
         request.onerror = () => reject(request.error);
       }),
   );
+  await page.evaluate(saved => {
+    const entries = JSON.parse(sessionStorage.getItem("save-observation-trace") || "[]");
+    entries.push({ event: "snapshot", at: performance.now(), tick: saved.tick, hp: saved.player.health,
+      attack: saved.player.skills.attack, savedAt: saved.savedAt, position: saved.player.position });
+    sessionStorage.setItem("save-observation-trace", JSON.stringify(entries.slice(-160)));
+  }, value as RpgState);
+  await page.evaluate(saved => {
+    const entries = JSON.parse(sessionStorage.getItem("save-observation-trace") || "[]");
+    entries.push({ event: "snapshot", at: performance.now(), tick: saved.tick, hp: saved.player.health, attack: saved.player.skills.attack, savedAt: saved.savedAt, position: saved.player.position });
+    sessionStorage.setItem("save-observation-trace", JSON.stringify(entries.slice(-160)));
+  }, value as RpgState);
   await page.getByRole("button", { name: "Close panel" }).click();
   return value as RpgState;
 }
