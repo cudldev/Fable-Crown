@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import { canStep, interactionTiles, objectById } from "../src/rpg/world";
 import type { RpgState } from "../src/rpg/types";
@@ -40,7 +41,9 @@ test.beforeEach(async ({ page }) => {
 test.afterEach(async ({ page }, info) => {
   if (info.status === info.expectedStatus) return;
   const trace = await page.evaluate(() => sessionStorage.getItem("save-observation-trace")).catch(() => null);
-  await info.attach("save-observation-trace", { body: trace || "unavailable", contentType: "application/json" });
+  const path = info.outputPath("save-observation-trace.json");
+  await writeFile(path, trace || "null");
+  await info.attach("save-observation-trace", { path, contentType: "application/json" });
 });
 
 async function importState(page: Page, state: unknown) {
