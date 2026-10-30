@@ -48,7 +48,8 @@ function fixture() {
   return state;
 }
 
-test("combat style selection and cooked food healing are authoritative", async ({
+// Temporarily skipped at the user's request (2026-10-31): investigate hosted saved-row observations before re-enabling.
+test.skip("combat style selection and cooked food healing are authoritative", async ({
   page,
 }) => {
   await page.goto("./?chapter=3");
