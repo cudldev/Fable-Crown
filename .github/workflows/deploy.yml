@@ -45,7 +45,15 @@ jobs:
       - name: Install browser for acceptance checks
         run: npx playwright install --with-deps chromium
       - name: Verify playable demo
-        run: npm run test:browser
+        timeout-minutes: 20
+        run: npm run test:browser -- --max-failures=1
+      - name: Save browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failure-evidence
+          path: test-results/
+          retention-days: 7
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site

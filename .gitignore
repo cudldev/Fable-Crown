@@ -6,3 +6,4 @@ playwright-report/
 .tools/
 *.blend1
 __pycache__/
+/tmp/
