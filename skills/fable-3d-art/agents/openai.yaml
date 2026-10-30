@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fable Crown 3D Art"
+  short_description: "Model and review authored pixel-textured 3D game assets"
+  default_prompt: "Use $fable-3d-art to model and visually iterate this Fable Crown asset in Blender through MCP."

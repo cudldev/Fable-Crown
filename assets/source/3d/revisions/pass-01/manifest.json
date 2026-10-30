@@ -1,0 +1,299 @@
+{
+  "version": "d1e196e773f5bb3e",
+  "files": [
+    "art3d/bank.glb",
+    "art3d/forge.glb",
+    "art3d/tree.glb",
+    "art3d/alden.glb",
+    "art3d/anvil.glb",
+    "art3d/crate.glb",
+    "art3d/lantern.glb",
+    "art3d/palette.png"
+  ],
+  "assets": [
+    {
+      "id": "bank",
+      "url": "bank.glb",
+      "footprint": [
+        4,
+        3
+      ],
+      "requiredNodes": [
+        "roof"
+      ],
+      "source": "assets/source/3d/bank.blend",
+      "bytes": 194620,
+      "triangles": 1398,
+      "vertices": 2666,
+      "meshes": 103,
+      "primitives": 103,
+      "nodes": 114,
+      "materials": 1,
+      "bounds": {
+        "min": [
+          -2.260000159944791,
+          0,
+          -1.7338745609636237
+        ],
+        "max": [
+          2.260000159944791,
+          3.719999983906746,
+          1.949000087188312
+        ],
+        "size": [
+          4.520000319889582,
+          3.719999983906746,
+          3.6828746481519357
+        ]
+      },
+      "atlas": {
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "id": "forge",
+      "url": "forge.glb",
+      "footprint": [
+        4,
+        3
+      ],
+      "requiredNodes": [
+        "roof"
+      ],
+      "source": "assets/source/3d/forge.blend",
+      "bytes": 203328,
+      "triangles": 1401,
+      "vertices": 2715,
+      "meshes": 112,
+      "primitives": 112,
+      "nodes": 128,
+      "materials": 1,
+      "bounds": {
+        "min": [
+          -2.2600001740133284,
+          0,
+          -1.7297963331256683
+        ],
+        "max": [
+          2.2600001740133284,
+          4.162500095553696,
+          1.72676025243346
+        ],
+        "size": [
+          4.520000348026657,
+          4.162500095553696,
+          3.4565565855591283
+        ]
+      },
+      "atlas": {
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "id": "tree",
+      "url": "tree.glb",
+      "footprint": [
+        1,
+        1
+      ],
+      "requiredNodes": [],
+      "source": "assets/source/3d/tree.blend",
+      "bytes": 98068,
+      "triangles": 800,
+      "vertices": 1506,
+      "meshes": 21,
+      "primitives": 21,
+      "nodes": 28,
+      "materials": 1,
+      "bounds": {
+        "min": [
+          -1.1536848843097687,
+          -0.0026189619675278664,
+          -0.7408189028501511
+        ],
+        "max": [
+          1.0690104365348816,
+          3.417400062084198,
+          1.038927674293518
+        ],
+        "size": [
+          2.2226953208446503,
+          3.420019024051726,
+          1.7797465771436691
+        ]
+      },
+      "atlas": {
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "id": "alden",
+      "url": "alden.glb",
+      "footprint": [
+        1,
+        1
+      ],
+      "requiredNodes": [
+        "body",
+        "leftArm",
+        "rightArm",
+        "leftLeg",
+        "rightLeg",
+        "tool",
+        "cape"
+      ],
+      "source": "assets/source/3d/alden.blend",
+      "bytes": 165876,
+      "triangles": 1444,
+      "vertices": 2752,
+      "meshes": 58,
+      "primitives": 58,
+      "nodes": 65,
+      "materials": 1,
+      "bounds": {
+        "min": [
+          -0.4570000097155571,
+          0,
+          -0.3830000013113022
+        ],
+        "max": [
+          0.4570000097155571,
+          1.934999942779541,
+          0.2630000114440918
+        ],
+        "size": [
+          0.9140000194311142,
+          1.934999942779541,
+          0.646000012755394
+        ]
+      },
+      "atlas": {
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "id": "anvil",
+      "url": "anvil.glb",
+      "footprint": [
+        1,
+        1
+      ],
+      "requiredNodes": [],
+      "source": "assets/source/3d/anvil.blend",
+      "bytes": 49692,
+      "triangles": 202,
+      "vertices": 388,
+      "meshes": 10,
+      "primitives": 10,
+      "nodes": 13,
+      "materials": 1,
+      "bounds": {
+        "min": [
+          -0.36000001057982445,
+          0,
+          -0.2954423129558563
+        ],
+        "max": [
+          0.49000000953674316,
+          1.0270000486634672,
+          0.2954423129558563
+        ],
+        "size": [
+          0.8500000201165676,
+          1.0270000486634672,
+          0.5908846259117126
+        ]
+      },
+      "atlas": {
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "id": "crate",
+      "url": "crate.glb",
+      "footprint": [
+        1,
+        1
+      ],
+      "requiredNodes": [],
+      "source": "assets/source/3d/crate.blend",
+      "bytes": 82720,
+      "triangles": 420,
+      "vertices": 840,
+      "meshes": 35,
+      "primitives": 35,
+      "nodes": 39,
+      "materials": 1,
+      "bounds": {
+        "min": [
+          -0.3833472668911946,
+          0,
+          -0.4195000117890725
+        ],
+        "max": [
+          0.3833472668911946,
+          0.7799999890848994,
+          0.43800001448243975
+        ],
+        "size": [
+          0.7666945337823892,
+          0.7799999890848994,
+          0.8575000262715122
+        ]
+      },
+      "atlas": {
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "id": "lantern",
+      "url": "lantern.glb",
+      "footprint": [
+        1,
+        1
+      ],
+      "requiredNodes": [],
+      "source": "assets/source/3d/lantern.blend",
+      "bytes": 57892,
+      "triangles": 228,
+      "vertices": 456,
+      "meshes": 19,
+      "primitives": 19,
+      "nodes": 23,
+      "materials": 1,
+      "bounds": {
+        "min": [
+          -0.35500000417232513,
+          0,
+          -0.1899999976158142
+        ],
+        "max": [
+          0.3800000101327896,
+          1.3159999623894691,
+          0.1899999976158142
+        ],
+        "size": [
+          0.7350000143051147,
+          1.3159999623894691,
+          0.3799999952316284
+        ]
+      },
+      "atlas": {
+        "width": 512,
+        "height": 512
+      }
+    }
+  ],
+  "atlas": {
+    "width": 512,
+    "height": 512,
+    "bytes": 27506
+  },
+  "bytes": 879702
+}

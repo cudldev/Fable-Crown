@@ -3,3 +3,6 @@ dist/
 test-results/
 playwright-report/
 *.local
+.tools/
+*.blend1
+__pycache__/

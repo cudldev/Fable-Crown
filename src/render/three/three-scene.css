@@ -1,0 +1,37 @@
+.three-world { background: #8f9aa4; }
+.three-world > canvas { image-rendering: pixelated; }
+.three-world > canvas:focus-visible { outline: 2px solid #e0c68b; outline-offset: -3px; }
+.three-light-controls {
+  position: absolute; top: 90px; right: 18px; z-index: 4;
+  display: flex; gap: 3px; align-items: center; flex-wrap: wrap;
+  max-width: calc(100% - 36px); padding: 4px;
+  background: #23343de8; border: 1px solid #8d8667; border-radius: 5px;
+  box-shadow: 0 3px 12px #111a2428;
+}
+.three-light-controls > span { color: #c5b58a; font: 9px system-ui; padding: 0 6px; letter-spacing: 1px; }
+.three-light-controls button { min-height: 44px; min-width: 44px; padding: 7px 9px; color: #dedbc7; background: transparent; border-color: transparent; font: 11px system-ui; }
+.three-light-controls button[aria-pressed="true"] { background: #59615a; color: #fff0c7; border-color: #a79667; }
+.three-hit-layer button { visibility: visible; }
+.three-hit-layer button[hidden], .three-hit-layer span[hidden] { display: none; }
+.three-hit-layer button span { pointer-events: none; font: 10px system-ui; background: #22353bdc; color: #e4ddbf; text-shadow: 0 1px #172731; border: 1px solid #8d866766; }
+.three-hit-layer .tile-object.resource { z-index: 0; }
+.three-hit-layer .tile-object span { opacity: .88; }
+.three-feedback { position: absolute; pointer-events: none; transform: translate(-50%, -100%); white-space: nowrap; font: 600 13px system-ui; color: #fff0c0; text-shadow: 0 2px 2px #182834, 1px 0 #182834; }
+.three-feedback-xp { color: #bde4e5; }
+.three-feedback-level { color: #ffe094; font-size: 17px; }
+.three-test-note { position: absolute; bottom: 192px; left: 18px; font: 10px system-ui; color: #e5dfc8; text-shadow: 0 1px 3px #172c35; pointer-events: none; }
+.three-fallback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 32px)); padding: 24px; background: #eee5cf; color: #31434a; border: 1px solid #9f8b5e; border-radius: 8px; z-index: 4; }
+.three-fallback p { word-break: break-word; }
+.game-shell[data-panel-open="true"] .three-light-controls { display: none; }
+@media (max-width: 600px) {
+  .three-light-controls { top: 81px; right: 10px; max-width: 160px; gap: 2px; padding: 3px; display: grid; grid-template-columns: repeat(3, 44px); }
+  .three-light-controls > span { display: none; }
+  .three-light-controls button { padding: 6px 8px; font-size: 10px; }
+  .three-light-controls button[aria-label="Sun shadows"] { grid-column: 1 / -1; }
+  .three-light-controls button[aria-label="Perspective camera"] { grid-column: span 2; }
+  .three-test-note { left: 10px; bottom: 210px; font-size: 9px; }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  .three-light-controls { top: 78px; right: 10px; }
+  .three-test-note { display: none; }
+}

@@ -1,0 +1,8 @@
+{
+  "url": "http://127.0.0.1:5173/Fable-Crown/?renderer=3d&assetReview=1",
+  "browser": "156.0.8078.48",
+  "viewport": "1440x900 DPR1, phone390x844",
+  "models": "bank,forge,tree,alden,anvil,crate,lantern",
+  "errors": [],
+  "external": []
+}

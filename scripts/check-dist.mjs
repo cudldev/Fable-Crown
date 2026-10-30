@@ -33,6 +33,13 @@ for (const path of art.files) {
 }
 if (bytes !== art.bytes)
   throw new Error("Artwork download size does not match shipped files");
+const models = JSON.parse(await readFile("dist/art3d/manifest.json", "utf8"));
+for (const path of models.files) {
+  if (!/^art3d\/[a-z0-9-]+\.(glb|png)$/.test(path))
+    throw new Error("3D artwork path escaped deployment base");
+  await access("dist/" + path);
+  if (!sw.includes("./" + path)) throw new Error("3D artwork missing from offline cache");
+}
 console.log(
   `Verified ${paths.length} HTML asset URLs, ${art.files.length} artwork files, manifest and worker cache scope at ${base}`,
 );

@@ -1,4 +1,6 @@
 # Codex instructions
+For 3D asset creation or quality iteration, modeler and art-review agents must read `skills/fable-3d-art/SKILL.md` and the relevant specialist reference. Execute the skill's visual review loop; technical export success does not establish art acceptance. The lead controls the shared Blender MCP session and integrates separate character/environment/prop work.
+
 Read all docs/ and tasks/MILESTONES.md. Implement milestones sequentially. Start M0 only unless asked to continue. Keep each milestone runnable, testable, and record results in docs/PROGRESS.md. Strict TypeScript; deterministic simulation separate from rendering; 600ms integer ticks; no client API keys; original placeholder art; no LLM required for basic gameplay. Test and build after each milestone. Never claim performance without benchmarks.
 
 GitHub Pages is the initial hosting target. M0 must include a working GitHub Actions deployment workflow for a Vite static build, configurable repository subpath/base URL, and documentation for repository Pages settings. Never require a server or secret for the baseline game. Verify deployed asset paths and PWA scope. Do not claim a deployment is live without verifying it.

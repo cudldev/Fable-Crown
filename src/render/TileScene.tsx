@@ -41,7 +41,7 @@ export type TileSelection =
   | { kind: "enemy" | "drop"; id: string }
   | { kind: "grave" }
   | { kind: "tile"; position: TilePosition };
-interface Props {
+export interface TileSceneProps {
   state: RpgState;
   camera: TileCamera;
   onCamera: (c: TileCamera) => void;
@@ -126,7 +126,7 @@ export default function TileScene({
   presentationEpoch = 0,
   onWorkContact,
   onFootstep,
-}: Props) {
+}: TileSceneProps) {
   const world = worldForState(state);
   const cachedWorld = useRef(world);
   const root = useRef<HTMLDivElement>(null),

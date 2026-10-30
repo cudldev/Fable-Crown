@@ -2,6 +2,7 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 const manifest = JSON.parse(await readFile("dist/art/manifest.json", "utf8"));
 const coreArt = manifest.files;
+const art3d = JSON.parse(await readFile("dist/art3d/manifest.json", "utf8"));
 const files = [
   "./",
   "./index.html",
@@ -10,11 +11,14 @@ const files = [
   "./crown-192.png",
   "./crown-512.png",
   "./art/manifest.json",
+  "./art3d/manifest.json",
+  ...art3d.files.map((file) => "./" + file),
   ...(await readdir("dist/assets")).map((f) => "./assets/" + f),
 ];
 const hash = createHash("sha256")
   .update(await readFile("dist/index.html"))
   .update(manifest.version)
+  .update(art3d.version)
   .digest("hex")
   .slice(0, 12);
 await writeFile(

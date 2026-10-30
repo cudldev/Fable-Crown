@@ -1,5 +1,7 @@
 # Fable Crown — Painterly Fantasy Art Direction (CURRENT)
 
+2026-10-30: the user authorized a separate optional [3D pixel-art renderer test](THREE_RENDERER_TEST.md), using chunky RuneScape-inspired shapes, JRPG characters and atmospheric realtime lighting. Its explicit test scope overrides the painterly rules below only when `?renderer=3d` is selected; the painterly renderer remains the default.
+
 ## Authoritative decision
 The game's visual style is **fully painterly, hand-illustrated traditional Japanese fantasy**, inspired by the *illustrative qualities* of classic fantasy RPG cover art, expressive watercolor-and-ink linework, and richly staged medieval fantasy. **Pixel art is no longer a requirement.** Earlier pixel/HD-2D references are superseded by this document. Do not apply pixelation, sprite-resolution limits, pixel-art shaders, nearest-neighbor scaling, or pixel textures merely to match older documents.
 

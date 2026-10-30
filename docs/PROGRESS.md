@@ -1,5 +1,27 @@
 # Progress — 2026-10-29
 
+## 3D test publication — 2026-10-30
+
+User authorized publishing the reviewed local 3D test. Existing public repository and GitHub Actions Pages configuration verified; preparing the tested renderer, original assets, sources and workflow for publication. Direct game route: `https://cudldev.github.io/Fable-Crown/?renderer=3d`; read-only asset route adds `&assetReview=1`. Painterly remains the default. Live verification pending.
+
+## Optional 3D test and Blender MCP art workflow — 2026-10-30
+
+User-authorized renderer experiment retains the painterly default and existing V5 worker/simulation/saves. `?renderer=3d` loads Three.js, actual low-poly models/pixel textures, legal trace-driven character movement/actions, selection/routes, depletion, gates, cutaways, effects and fallback. Default20°perspective has orthographic comparison; whole-map overview remains orthographic. Realtime lighting uses one1024px sun shadow and four stable shadowless local slots, with day/dusk/night presets. Static terrain/scenery is batched and compatible GLB meshes merge by material without losing animation pivots, facade/roof groups or light markers.
+
+Lead designed contracts/integration and controlled the shared Blender MCP session; separate modelers owned character/environment/prop sources and QA owned acceptance/asset checks. Verified real upstream MCP for Blender2.2.6 with Blender5.1.2 through its official Python MCP client/server, project-local tools, telemetry disabled, no external asset/generation integrations. Seven original editable `.blend` sources and checked embedded GLBs (bank, forge, tree, Alden, anvil, crate, lantern) total900,298runtime bytes including atlas; source blends total1,057,446bytes at the recorded checkpoint. Saved-source export and the pinned setup script were actually exercised. Loading a source and exporting must be separate MCP requests to restore Blender's UI context. `docs/ART_PIPELINE.md` documents setup, export, validation, captures and source ownership.
+
+Created/validated `skills/fable-3d-art` with character/environment/prop and image-review references, installed the same skill in the local Codex skills folder, and added its routing rule to AGENTS.md. Independent forward review plus modeler use drove actual corrections: shoulder/face/hair/costume massing, strap/nape defects, distinct bank/forge roofs and openings, logical bank doorway/facade cutaway, and tree crown shape. Earlier sources/exports remain in `assets/source/3d/revisions/pass-01/`. Exported-image comparisons are under `docs/art-audit/three-pass-02`, `three-pass-03` and `three-preview`. Reviewed forms/integration are usable drafts; flat cloth/face/building materials and foliage craft remain below the concept. No production-quality or user art-acceptance claim.
+
+The standalone `?renderer=3d&assetReview=1` workbench loads all seven GLBs, rotates models, compares light/camera presets, previews walking/cutaways, and creates no game worker or save writes. Local preview is available under the running dev server's `/Fable-Crown/` path; app-panel opening was queued and a direct local link supplied. The published Pages release is unchanged; no push or deployment was performed.
+
+Gate:272unit tests, strict TypeScript, root and repository-subpath production builds, asset/PWA path validation and43/43browser scenarios pass. New cases cover actual WebGL draws, real smelting/input consumption, retained inventory/XP/archives across renderer/camera changes, light limits, viewport controls, seven loaded Blender assets, isolated read-only workbench, cached offline GLB/query reload and unavailable-WebGL fallback. No required external runtime requests/page errors. Eleven asset/merge cases verify GLB geometry/indices/UVs/embedded resources, grounded transforms, source/pivot contracts, malformed exports, budgets and preserved roof/facade/light/limb bounds.
+
+Final workbench-only correction fits projected models between the heading and toolbar on small viewports without moving geometry. Actual portrait390×844 and landscape844×390 screenshots in perspective/orthographic modes, including walking, show unobscured head and boots (`docs/screenshots/three-assets-*-fixed*.png`). After rebuilding and checking the final subpath/PWA, both affected production camera/workbench browser cases passed again in9.5s. The game renderer/assets used by the benchmark did not change.
+
+Warm desktop benchmark after1,200simulation ticks/1,330NPC completions: Chrome156.0.8078.48, Windows/i9-10850K/RTX5070Ti,1280×720DPR1 with1200×675drawing buffer;3s warmup+5s sampling per view. Close/far/overview/day/night RAF p50~8.3ms,p958.5ms. Max draw calls549/1739/1498/529/551; max triangles149860/364829/324919/148117/156842. Four local lights/one shadow in play views; both disabled in overview. Raw evidence: `docs/THREE_RENDERER_BENCHMARK.json`. These are frame intervals and counters, not GPU timings, memory, cold-start or physical-phone measurements. Distant-view draw counts and full production art/animation remain future work.
+
+Last actual usage read:56%used/about44%remaining. No reset redeemed, credits purchased, hosted inference, required keys or paid runtime service introduced.
+
 ## Vertical slice
 
 Implemented the current demo-first override, rather than the superseded M0–M8 roadmap. Foundation, deterministic simulation, autonomous gathering/hauling/building, Thought & Intention, painterly presentation and bounded offline proof of concept are integrated.

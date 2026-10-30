@@ -1,0 +1,346 @@
+import { test, expect, type Page } from "@playwright/test";
+import { createRpg } from "../src/rpg/engine";
+import { createGame } from "../src/simulation";
+import { interactionTiles, objectById } from "../src/rpg/world";
+import type { RpgState } from "../src/rpg/types";
+
+test.use({ actionTimeout: 20000 });
+
+async function ready(page: Page) {
+  const world = page.getByTestId("rpg-world");
+  await expect(world).toHaveAttribute("data-renderer", "3d");
+  await expect(world).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await expect(page.getByTestId("three-canvas")).toBeVisible();
+  await expect(world).toHaveAttribute("data-active-lights", /^\d+$/);
+  await expect(world).toHaveAttribute("data-shadow-lights", /^\d+$/);
+  return world;
+}
+
+async function menu(page: Page) {
+  if (!(await page.getByRole("button", { name: "Save on device" }).isVisible()))
+    await page.getByRole("button", { name: "Open game menu" }).click();
+}
+
+async function closePanel(page: Page) {
+  const close = page.getByRole("button", { name: "Close panel" });
+  if (await close.isVisible()) await close.click();
+}
+
+async function restore(page: Page, state: RpgState) {
+  await menu(page);
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "three-fixture.json", mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(state)),
+  });
+  await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  await closePanel(page);
+}
+
+async function saved(page: Page): Promise<RpgState> {
+  await menu(page);
+  await page.getByRole("button", { name: "Save on device" }).click();
+  await expect(page.getByRole("status")).toContainText("Chronicle saved");
+  const result = await page.evaluate(() => new Promise<RpgState>((resolve, reject) => {
+    const request = indexedDB.open("fable-crown", 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const get = db.transaction("saves").objectStore("saves").get("v5");
+      get.onsuccess = () => { resolve(get.result); db.close(); };
+      get.onerror = () => { reject(get.error); db.close(); };
+    };
+  }));
+  await closePanel(page);
+  return result;
+}
+
+function waitingFixture() {
+  const state = createRpg(Date.now(), 8128);
+  Object.assign(state.control, {
+    waiting: true, goal: null, active: null, source: null,
+    queue: [], thought: null, thinkingUntil: 1_000_000_000,
+  });
+  state.player.path = [];
+  return state;
+}
+
+test("3D is opt-in, issues real WebGL draws and preserves the chapter when switching", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("./");
+  await expect(page.getByTestId("rpg-world")).toBeVisible();
+  await expect(page.getByTestId("three-canvas")).toHaveCount(0);
+  const fixture = waitingFixture();
+  await restore(page, fixture);
+  const archive = createGame(Date.now());
+  await page.evaluate((value) => new Promise<void>((resolve, reject) => {
+    const request = indexedDB.open("fable-crown", 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction("saves", "readwrite");
+      transaction.objectStore("saves").put(value, "v1");
+      transaction.oncomplete = () => { db.close(); resolve(); };
+      transaction.onerror = () => { db.close(); reject(transaction.error); };
+    };
+  }), archive);
+  await menu(page);
+  await page.getByRole("button", { name: "Use 3D test renderer" }).click();
+  await closePanel(page);
+  const world = await ready(page);
+  await expect.poll(async () => Number(await world.getAttribute("data-draw-calls"))).toBeGreaterThan(0);
+  await expect.poll(async () => Number(await world.getAttribute("data-triangles"))).toBeGreaterThan(0);
+  const context = await page.getByTestId("three-canvas").evaluate((canvas) => {
+    const gl = (canvas as HTMLCanvasElement).getContext("webgl2");
+    return gl ? { lost: gl.isContextLost(), version: gl.getParameter(gl.VERSION) as string } : null;
+  });
+  expect(context?.lost).toBe(false);
+  expect(context?.version).toContain("WebGL 2");
+  await expect(page.getByTestId("rpg-world").getByRole("button", { name: "Inspect Alden", exact: true })).toBeVisible();
+  await page.getByTestId("rpg-world").getByRole("button", { name: "Inspect Alden", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Character details" })).toBeVisible();
+  const before = await saved(page);
+  await menu(page);
+  await page.getByRole("button", { name: "Use painterly renderer" }).click();
+  await closePanel(page);
+  await expect(page.getByTestId("three-canvas")).toHaveCount(0);
+  const after = await saved(page);
+  expect(after.player.inventory).toEqual(before.player.inventory);
+  expect(after.player.skills).toEqual(before.player.skills);
+  expect(after.player.position).toEqual(before.player.position);
+  expect(after.version).toBe(5);
+  const archived = await page.evaluate(() => new Promise<unknown>((resolve, reject) => {
+    const request = indexedDB.open("fable-crown", 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const get = db.transaction("saves").objectStore("saves").get("v1");
+      get.onsuccess = () => { resolve(get.result); db.close(); };
+      get.onerror = () => { reject(get.error); db.close(); };
+    };
+  }));
+  expect(archived).toEqual(archive);
+  expect(errors).toEqual([]);
+});
+
+test("real smelting works in 3D and lighting controls do not grant items or XP", async ({ page }) => {
+  await page.goto("./?renderer=3d");
+  const world = await ready(page);
+  const state = waitingFixture();
+  state.player.position = { ...interactionTiles(objectById("oakrest-furnace")!)[0]! };
+  state.player.previousPosition = { ...state.player.position };
+  state.player.inventory.push({ itemId: "copper-ore", quantity: 6 }, { itemId: "tin-ore", quantity: 6 });
+  await restore(page, state);
+  await page.getByRole("button", { name: "Inspect Oakrest furnace", exact: true }).click();
+  await page.getByRole("button", { name: "Craft here" }).click();
+  await page.getByLabel("Craft quantity").selectOption("1");
+  await page.locator(".rpg-shop-list article").filter({ hasText: "Smelt bronze bar" })
+    .getByRole("button", { name: "Make 1", exact: true }).click();
+  await page.getByRole("button", { name: "Open inventory" }).click();
+  await expect(page.getByRole("button", { name: /Bronze bar, 1/i })).toBeVisible({ timeout: 20000 });
+  await closePanel(page);
+  const pause = page.getByRole("button", { name: "Pause Alden", exact: true });
+  if (await pause.isVisible()) await pause.click();
+  const before = await saved(page);
+  expect(before.player.skills.smithing).toBeGreaterThan(state.player.skills.smithing);
+  expect(before.player.inventory.find((item) => item.itemId === "copper-ore")?.quantity).toBe(5);
+  expect(before.player.inventory.find((item) => item.itemId === "tin-ore")?.quantity).toBe(5);
+  const images: Buffer[] = [];
+  for (const preset of ["Day", "Dusk", "Night"]) {
+    const button = page.getByRole("button", { name: `${preset} lighting`, exact: true });
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(async () => Number(await world.getAttribute("data-active-lights"))).toBeLessThanOrEqual(4);
+    await expect.poll(async () => Number(await world.getAttribute("data-shadow-lights"))).toBeLessThanOrEqual(1);
+    images.push(await page.getByTestId("three-canvas").screenshot());
+    await page.screenshot({ path: `docs/screenshots/three-${preset.toLowerCase()}.png` });
+  }
+  expect(images[0].equals(images[1])).toBe(false);
+  expect(images[1].equals(images[2])).toBe(false);
+  const shadows = page.getByRole("button", { name: "Sun shadows", exact: true });
+  await shadows.click();
+  await expect(shadows).toHaveAttribute("aria-pressed", "false");
+  await expect.poll(async () => Number(await world.getAttribute("data-shadow-lights"))).toBe(0);
+  const after = await saved(page);
+  expect(after.player.inventory).toEqual(before.player.inventory);
+  expect(after.player.skills).toEqual(before.player.skills);
+  expect(after.player.position).toEqual(before.player.position);
+  expect(after.control.waiting).toBe(true);
+});
+
+test("3D camera and touch controls fit portrait and landscape without external runtime requests", async ({ page }) => {
+  const errors: string[] = [], external: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("request", (request) => {
+    const url = request.url();
+    if (/^https?:/.test(url) && page.url().startsWith("http") && new URL(url).origin !== new URL(page.url()).origin)
+      external.push(url);
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("./?renderer=3d");
+  await ready(page);
+  await restore(page, waitingFixture());
+  for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
+    await page.setViewportSize(viewport);
+    await expect(page.getByTestId("three-canvas")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    for (const name of ["Open destinations", "Open game menu", "Zoom in", "Zoom out", "Follow Alden", "Dusk lighting"]) {
+      const button = page.getByRole("button", { name, exact: true });
+      await expect(button).toBeVisible();
+      const box = await button.boundingBox();
+      expect(box?.width, `${name} width`).toBeGreaterThanOrEqual(44);
+      expect(box?.height, `${name} height`).toBeGreaterThanOrEqual(44);
+    }
+    const before = await page.getByTestId("rpg-world").getByRole("button", { name: "Inspect Alden", exact: true }).boundingBox();
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+    await page.getByRole("button", { name: "Zoom out", exact: true }).click();
+    const canvas = page.getByTestId("three-canvas");
+    const box = await canvas.boundingBox();
+    expect(box).not.toBeNull();
+    const x = box!.x + box!.width * .48, y = box!.y + box!.height * .47;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 55, y + 35, { steps: 8 });
+    await page.mouse.up();
+    await expect.poll(async () => {
+      const after = await page.getByTestId("rpg-world").getByRole("button", { name: "Inspect Alden", exact: true }).boundingBox();
+      return !!before && !!after && Math.hypot(after.x - before.x, after.y - before.y) > 10;
+    }).toBe(true);
+    await page.getByRole("button", { name: "Follow Alden", exact: true }).click();
+    await page.screenshot({ path: `docs/screenshots/three-${viewport.width === 390 ? "portrait" : "landscape"}.png` });
+  }
+  expect(external).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("3D bundles and query route reload offline with the same saved chapter", async ({ page, context }) => {
+  await page.goto("./?renderer=3d");
+  await ready(page);
+  await restore(page, waitingFixture());
+  const before = await saved(page);
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker?.controller)), { timeout: 30000 }).toBe(true);
+  await menu(page);
+  await page.getByRole("button", { name: /Save world offline/ }).click();
+  await expect(page.getByRole("button", { name: "World saved offline" })).toBeVisible({ timeout: 60000 });
+  await closePanel(page);
+  await context.setOffline(true);
+  try {
+    await page.reload();
+    await ready(page);
+    expect(new URL(page.url()).searchParams.get("renderer")).toBe("3d");
+    const after = await saved(page);
+    expect(after.player.inventory).toEqual(before.player.inventory);
+    expect(after.player.skills).toEqual(before.player.skills);
+    expect(after.player.position).toEqual(before.player.position);
+  } finally {
+    await context.setOffline(false);
+  }
+});
+
+test("unavailable WebGL offers a working painterly fallback", async ({ page }) => {
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: Parameters<typeof getContext>) {
+      if (String(args[0]).startsWith("webgl")) return null;
+      return getContext.apply(this, args);
+    } as typeof getContext;
+  });
+  await page.goto("./?renderer=3d");
+  await page.getByRole("button", { name: "Use painterly view", exact: true }).click();
+  await expect(page.getByTestId("rpg-world")).toBeVisible();
+  await expect(page.getByTestId("three-canvas")).toHaveCount(0);
+  expect(new URL(page.url()).searchParams.get("renderer")).not.toBe("3d");
+  await page.getByRole("button", { name: "Open inventory" }).click();
+  await expect(page.locator(".rpg-backpack button")).toHaveCount(28);
+});
+
+test("all Blender assets load and switching camera projection preserves the saved character", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("./?renderer=3d");
+  const world = await ready(page);
+  await expect(world).toHaveAttribute("data-assets", "blender");
+  const ids = (await world.getAttribute("data-production-assets"))!.split(",").sort();
+  expect(ids).toEqual(["alden", "anvil", "bank", "crate", "forge", "lantern", "tree"]);
+  await restore(page, waitingFixture());
+  const before = await saved(page);
+  for (const mode of ["orthographic", "perspective"] as const) {
+    const button = page.getByRole("button", { name: `${mode === "perspective" ? "Perspective" : "Orthographic"} camera`, exact: true });
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    await expect(world).toHaveAttribute("data-camera-mode", mode);
+    await expect.poll(async () => Number(await world.getAttribute("data-draw-calls"))).toBeGreaterThan(0);
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+    await page.getByRole("button", { name: "Zoom out", exact: true }).click();
+  }
+  const after = await saved(page);
+  expect(after.player.position).toEqual(before.player.position);
+  expect(after.player.skills).toEqual(before.player.skills);
+  expect(after.player.inventory).toEqual(before.player.inventory);
+  expect(after.control.waiting).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test("art workbench is isolated from gameplay and cached models reload offline", async ({ page, context }) => {
+  const errors: string[] = [], workers: string[] = [], external: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("./");
+  await expect(page.getByTestId("rpg-world")).toBeVisible();
+  await restore(page, waitingFixture());
+  await saved(page);
+  page.on("request", request => {
+    if (/^https?:/.test(request.url()) && new URL(request.url()).origin !== new URL(page.url()).origin) external.push(request.url());
+  });
+  await page.goto("./?assetReview=1");
+  const review = page.getByTestId("asset-review");
+  await expect(review).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await expect(review).toHaveAttribute("data-assets", "blender");
+  expect((await review.getAttribute("data-production-assets"))!.split(",").sort())
+    .toEqual(["alden", "anvil", "bank", "crate", "forge", "lantern", "tree"]);
+  expect(page.workers()).toHaveLength(0);
+  page.on("worker", worker => workers.push(worker.url()));
+  const readChronicle = () => page.evaluate(() => new Promise<string>((resolve, reject) => {
+    const request = indexedDB.open("fable-crown", 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result, get = db.transaction("saves").objectStore("saves").get("v5");
+      get.onsuccess = () => { resolve(JSON.stringify(get.result)); db.close(); };
+      get.onerror = () => { reject(get.error); db.close(); };
+    };
+  }));
+  const before = await readChronicle();
+  for (const id of ["bank", "forge", "tree", "alden", "anvil", "crate", "lantern", "village"]) {
+    await page.getByLabel("Preview model").selectOption(id);
+    await expect(page.getByLabel("Preview model")).toHaveValue(id);
+    await page.getByRole("button", { name: "Rotate preview right", exact: true }).click();
+  }
+  await page.getByLabel("Preview model").selectOption("alden");
+  const walk = page.getByRole("button", { name: "Walk animation preview", exact: true });
+  await walk.click(); await expect(walk).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Rotate preview left", exact: true }).click();
+  for (const name of ["Day lighting", "Night lighting", "Orthographic camera", "Perspective camera"]) {
+    const button = page.getByRole("button", { name, exact: true });
+    await button.click(); await expect(button).toHaveAttribute("aria-pressed", "true");
+  }
+  await page.getByLabel("Preview model").selectOption("bank");
+  const roofs = page.getByRole("button", { name: "Show roofs", exact: true });
+  await roofs.click(); await expect(roofs).toHaveAttribute("aria-pressed", "false");
+  await roofs.click(); await expect(roofs).toHaveAttribute("aria-pressed", "true");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByLabel("Preview model").selectOption("alden");
+  await page.screenshot({ path: "docs/screenshots/three-assets-phone.png" });
+  expect(await readChronicle()).toBe(before);
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker?.controller)), { timeout: 30000 }).toBe(true);
+  await context.setOffline(true);
+  try {
+    await page.reload();
+    await expect(review).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+    await expect(review).toHaveAttribute("data-assets", "blender");
+    await page.getByLabel("Preview model").selectOption("alden");
+    expect(await readChronicle()).toBe(before);
+  } finally { await context.setOffline(false); }
+  expect(workers).toEqual([]);
+  expect(external).toEqual([]);
+  expect(errors).toEqual([]);
+});

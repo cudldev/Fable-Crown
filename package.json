@@ -11,17 +11,25 @@
     "preview": "vite preview --host 127.0.0.1",
     "test:browser": "playwright test",
     "check:dist": "node scripts/check-dist.mjs",
-    "prebuild": "node scripts/prepare-art.mjs"
+    "prebuild": "node scripts/prepare-art.mjs && node scripts/check-art3d.mjs",
+    "art:start": "node scripts/art-workflow.mjs start",
+    "art:status": "node scripts/art-workflow.mjs status",
+    "art:generate": "node scripts/art-workflow.mjs generate",
+    "art:export": "node scripts/art-workflow.mjs export",
+    "art:check": "node scripts/check-art3d.mjs",
+    "art:capture": "node scripts/review-art.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import TileScene, {
+import {
   type TileCamera,
   type TileSelection,
 } from "../render/TileScene";
+import { SceneHost } from "../render/SceneHost";
 import {
   WORLD,
   TOWNS,
@@ -56,6 +57,16 @@ function download(value: unknown, name: string) {
   URL.revokeObjectURL(url);
 }
 export default function RpgApp() {
+  const [rendererMode, setRendererMode] = useState<"painterly" | "3d">(() =>
+    new URLSearchParams(location.search).get("renderer") === "3d" ? "3d" : "painterly",
+  );
+  const changeRenderer = (mode: "painterly" | "3d") => {
+    const url = new URL(location.href);
+    if (mode === "3d") url.searchParams.set("renderer", "3d");
+    else url.searchParams.delete("renderer");
+    history.replaceState(null, "", url);
+    setRendererMode(mode);
+  };
   const [state, setState] = useState<RpgState | null>(null),
     [camera, setCamera] = useState<TileCamera>({
       x: 52,
@@ -404,7 +415,9 @@ export default function RpgApp() {
       data-panel-open={!!panel || (!!selection && selection.kind !== "tile")}
     >
       {state ? (
-        <TileScene
+        <SceneHost
+          mode={rendererMode}
+          onFallback={() => changeRenderer("painterly")}
           state={state}
           camera={camera}
           onCamera={setCamera}
@@ -1722,6 +1735,17 @@ export default function RpgApp() {
                 constant orders.
               </p>
               <div className="menu-grid">
+                <button
+                  aria-pressed={rendererMode === "3d"}
+                  onClick={() => changeRenderer(rendererMode === "3d" ? "painterly" : "3d")}
+                >
+                  {rendererMode === "3d" ? "Use painterly renderer" : "Use 3D test renderer"}
+                </button>
+                {rendererMode === "3d" && <button onClick={() => {
+                  const url = new URL(location.href);
+                  url.searchParams.set("assetReview", "1");
+                  location.assign(url);
+                }}>Open art workbench</button>}
                 <button onClick={() => send("save")}>Save on device</button>
                 <button
                   onClick={() =>

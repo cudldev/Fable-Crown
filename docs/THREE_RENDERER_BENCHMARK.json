@@ -1,0 +1,91 @@
+{
+  "label": "three-test",
+  "url": "http://127.0.0.1:4174/Fable-Crown/?renderer=3d",
+  "browser": "156.0.8078.48",
+  "platform": "win32 10.0.26200 x64",
+  "cpu": "Intel(R) Core(TM) i9-10850K CPU @ 3.60GHz",
+  "logicalCpus": 20,
+  "viewport": "1280x720 DPR1; headless; no CPU throttling; 3s warmup and 5s sample per view",
+  "capabilities": {
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (NVIDIA)",
+    "drawingBuffer": [
+      1200,
+      675
+    ]
+  },
+  "art": {
+    "source": "blender",
+    "loadedIds": [
+      "bank",
+      "forge",
+      "tree",
+      "alden",
+      "anvil",
+      "crate",
+      "lantern"
+    ],
+    "cameraMode": "perspective"
+  },
+  "simulationWarmupTicks": 1200,
+  "npcCompletedAtImport": 1330,
+  "interpretation": "requestAnimationFrame intervals and renderer counters, not GPU timings, physical-phone measurements or memory measurements",
+  "results": [
+    {
+      "mode": "close",
+      "frameCount": 599,
+      "frameIntervalP50Ms": 8.300000000000182,
+      "frameIntervalP95Ms": 8.5,
+      "maxDrawCalls": 549,
+      "maxTriangles": 149860,
+      "maxActiveLocalLights": 4,
+      "maxShadowLights": 1,
+      "maxReportedRendererFrameMs": 8.5
+    },
+    {
+      "mode": "far",
+      "frameCount": 600,
+      "frameIntervalP50Ms": 8.300000000001091,
+      "frameIntervalP95Ms": 8.5,
+      "maxDrawCalls": 1739,
+      "maxTriangles": 364829,
+      "maxActiveLocalLights": 4,
+      "maxShadowLights": 1,
+      "maxReportedRendererFrameMs": 8.5
+    },
+    {
+      "mode": "overview",
+      "frameCount": 600,
+      "frameIntervalP50Ms": 8.30000000000291,
+      "frameIntervalP95Ms": 8.5,
+      "maxDrawCalls": 1498,
+      "maxTriangles": 324919,
+      "maxActiveLocalLights": 0,
+      "maxShadowLights": 0,
+      "maxReportedRendererFrameMs": 8.5
+    },
+    {
+      "mode": "day",
+      "frameCount": 600,
+      "frameIntervalP50Ms": 8.30000000000291,
+      "frameIntervalP95Ms": 8.5,
+      "maxDrawCalls": 529,
+      "maxTriangles": 148117,
+      "maxActiveLocalLights": 4,
+      "maxShadowLights": 1,
+      "maxReportedRendererFrameMs": 8.5
+    },
+    {
+      "mode": "night",
+      "frameCount": 594,
+      "frameIntervalP50Ms": 8.30000000000291,
+      "frameIntervalP95Ms": 8.5,
+      "maxDrawCalls": 551,
+      "maxTriangles": 156842,
+      "maxActiveLocalLights": 4,
+      "maxShadowLights": 1,
+      "maxReportedRendererFrameMs": 16.6
+    }
+  ]
+}

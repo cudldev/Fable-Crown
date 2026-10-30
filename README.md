@@ -32,10 +32,12 @@ Progress saves in IndexedDB. V5 copies existing V4/V3 progress while retaining e
 
 ## Development and hosting
 
-Node 22.12+: `npm ci`, then `npm run dev`. Checks: `npm test`, `npm run typecheck`, `npm run build`, `npm run check:dist`, `npm run test:browser`. Chrome is used locally; CI installs Chromium. Playwright starts production preview. For Pages subpath verification set `GITHUB_REPOSITORY=cudldev/Fable-Crown` when building, and `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/` for browser tests. Rebuild after changing the base; do not share a build directory across concurrent builds.
+An optional [3D renderer test](docs/THREE_RENDERER_TEST.md) is available locally with `?renderer=3d`, or through **Game menu → Use 3D test renderer**. It uses original low-poly pixel-textured assets and realtime lighting while sharing the existing simulation and saves. Add `&assetReview=1` for the independent art workbench. Seven editable Blender models, the [Blender MCP workflow](docs/ART_PIPELINE.md), and a [modeling skill](skills/fable-3d-art/SKILL.md) support further art iteration. The painterly view remains the default; switch back in the menu. This test is not a claim of a new public deployment.
+
+Node 22.15+: `npm ci`, then `npm run dev`. Checks: `npm test`, `npm run typecheck`, `npm run build`, `npm run check:dist`, `npm run test:browser`. Chrome is used locally; CI installs Chromium. Playwright starts production preview. For Pages subpath verification set `GITHUB_REPOSITORY=cudldev/Fable-Crown` when building, and `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/` for browser tests. Rebuild after changing the base; do not share a build directory across concurrent builds.
 
 GitHub Settings → Pages → Source: **GitHub Actions**. Push to main runs the gates and deploys. `GITHUB_REPOSITORY` derives the subpath; `VITE_BASE_PATH` overrides it. PWA scope is relative. No server, secret, API key, telemetry, hosted inference or required third-party runtime call.
 
 The deterministic TypeScript simulation is independent of rendering and uses 600 ms integer ticks. Canvas projects logical tiles into the painterly isometric view. [Original artwork and exact prompts](assets/generated/README.md) remain versioned. Characters use limited painted-cutout animation. Multiplayer, Grand Exchange, advanced combat, detailed social routines and optional browser-local narrative models remain outside this slice. Browser emulation is tested; no physical-device/FPS claim is made. Use one game tab per device.
 
-React/React DOM are MIT licensed; dependency licenses accompany npm packages. Reference collages and older generated backdrops are retained as sources and never loaded by the tile game.
+React/React DOM and Three.js are MIT licensed; dependency licenses accompany npm packages. Reference collages and older generated backdrops are retained as sources and never loaded by the tile game.

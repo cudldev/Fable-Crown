@@ -1,5 +1,7 @@
 # Working notes
 
+- Authorized optional3D test: chunky RuneScape-inspired forms, pixel textures, JRPG characters, muted colours and atmospheric realtime lighting. Four shadowless local light slots plus one sun shadow; keep painterly default. User wants lead-owned design/integration and bounded specialist delegation. See THREE_RENDERER_TEST.md.
+- 3D art: use skills/fable-3d-art; one lead controls Blender MCP, modelers own separate recipes. Saved .blend → art:export → art:check → art:capture/workbench. Load a .blend and export in separate MCP requests so Blender restores context. Preserve draft checkpoints; image review is separate from technical passes.
 - Latest scope: FEEL_AND_OAKREST.md; stop after verified Pages. Simplified painterly Town Life,2:1buildings/single trees; compare gameplay scale.
 - Pure tile simulation → worker clock/saves → isometric Canvas. Lead owns contracts/integration; specialists own separate files. Sol High core, Sol Medium renderer, Luna Medium browser QA.
 - Gate each stage: unit tests, strict build, check:dist, browser. Serialize builds: another build can replace dist with a different base during browser tests.
