@@ -22,14 +22,15 @@ class RendererBoundary extends Component<
 }
 
 /** 3D is the game view; unsupported devices can keep playing the same saved chapter. */
-export function SceneHost({ mode, onFallback, ...props }: TileSceneProps & {
+export function SceneHost({ mode, onFallback, panelOpen, ...props }: TileSceneProps & {
   mode: "painterly" | "3d";
   onFallback: () => void;
+  panelOpen: boolean;
 }) {
   return (
     <RendererBoundary key={mode} onFallback={onFallback}>
       <Suspense fallback={<div className="loading-screen">Opening the village…</div>}>
-        {mode === "3d" ? <ThreeScene {...props} onFallback={onFallback} /> : <CompatibilityScene {...props} />}
+        {mode === "3d" ? <ThreeScene {...props} panelOpen={panelOpen} onFallback={onFallback} /> : <CompatibilityScene {...props} />}
       </Suspense>
     </RendererBoundary>
   );

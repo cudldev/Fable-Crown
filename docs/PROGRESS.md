@@ -6,6 +6,10 @@ User approved replacing the 2D representation with the existing 3D world/assets.
 
 Local gate:272unit tests, strict TypeScript/repository-base production build, asset/PWA validation and43/43browser scenarios pass (4.1min), with all ordinary gameplay scenarios using the default 3D route. Reviewed actual desktop/portrait screenshots. Checks cover earlier-save migration/archives, quests, gathering/crafting, combat/loot/graves, gates, manual movement, controls, graphics failure recovery, asset viewer and offline reload. No new art or performance claim. GitHub deployment and live verification pending.
 
+First hosted gate (`41084963172`) stopped publication:34passed/9failed under software rendering. Reproduced the rapid-equip failure locally with forced SwiftShader. Fixed backpack DOM keys following slot index instead of item identity, repeated save/import acknowledgements reusing stale toast state, and stale confirmation timeouts. Background drawing now runs at4fps behind foreground panels while worker/simulation timing stays unchanged. Closed the redundant first WebGL page in audio fallback QA. Ferry QA records real worker snapshots so it can verify the exact arrival/fare even after autonomy moves onward.
+
+Follow-up: all43software-rendering browser cases passed in5.1min; final ferry-observer check passed separately. Added `npm run test:browser:software` for reproduction. Serialized rerun passed272unit tests plus strict build/asset/PWA checks. An earlier overlapping software-browser/unit run hit two CPU-contention timeouts; avoid overlapping those suites. Deployment retry pending.
+
 ## Character style exploration — 2026-10-30
 
 Study 02 (`alden-painterly-3d-v2.png`) adds broad directional brushwork and richer cloth/skin color variation while preserving Alden's design. Generated concept visually reviewed; Blender reproduction and user style acceptance remain pending.

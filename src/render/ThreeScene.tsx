@@ -9,7 +9,7 @@ import type { LightingPreset } from "./three/lighting";
 import "./tile-scene.css";
 import "./three/three-scene.css";
 
-export interface ThreeSceneProps extends TileSceneProps { onFallback: () => void }
+export interface ThreeSceneProps extends TileSceneProps { onFallback: () => void; panelOpen: boolean }
 
 /** The game view consumes immutable simulation snapshots. */
 export default function ThreeScene(props: ThreeSceneProps) {

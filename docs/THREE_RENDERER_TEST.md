@@ -14,6 +14,7 @@ The renderer uses the current worker, 600ms ticks, V5 saves, map coordinates, ac
 - One logical tile is one world unit. Logical x/y map to 3D x/z. Models are centred in their existing object footprints and characters stand at their actual tile positions.
 - The same legal movement traces and action phases drive presentation. Lighting, model animation, atmosphere and camera controls cannot issue gameplay outcomes.
 - Terrain is batched; geometry, pixel textures and materials are shared. Renderer cleanup must remove listeners, stop animation and release GPU resources.
+- With a foreground panel open, background world drawing is limited to four frames per second so controls and save messages can run promptly. Simulation timing remains unchanged.
 - One sun shadow map and four reusable unshadowed local light slots are the initial budget. Windows use an emissive surface plus local light; illumination does not require a shadow map. Light selection is managed explicitly, not inferred solely from light radius.
 - Day, Dusk and Night are visual test presets. They do not advance the gameplay calendar. Sun shadows can be toggled for comparison.
 - All code and art load from the static application origin. No API keys, inference, telemetry, external runtime assets or paid services are introduced. The PWA caches the renderer chunks under the existing base URL.

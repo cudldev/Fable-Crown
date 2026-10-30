@@ -10,6 +10,7 @@
     "test": "vitest run",
     "preview": "vite preview --host 127.0.0.1",
     "test:browser": "playwright test",
+    "test:browser:software": "playwright test --config playwright.software.config.ts",
     "check:dist": "node scripts/check-dist.mjs",
     "prebuild": "node scripts/prepare-art.mjs && node scripts/check-art3d.mjs",
     "art:start": "node scripts/art-workflow.mjs start",

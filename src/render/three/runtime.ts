@@ -8,7 +8,7 @@ import type { ActorArt, ArtLibrary, ObjectArt } from "./contracts";
 import { LightingRig, type LightingPreset, type SceneLamp } from "./lighting";
 
 export type CameraMode = "perspective" | "orthographic";
-export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode }
+export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode; panelOpen?: boolean }
 interface Person {
   art: ActorArt; timeline?: MotionTimeline; angle: number;
   rest: { bodyY: number; bodyX: number; leftArmX: number; rightArmX: number; leftLegX: number; rightLegX: number; capeX: number };
@@ -127,7 +127,9 @@ export class ThreeRuntime {
     const loop = (time: number) => {
       if (this.disposed) return;
       try {
-        this.frame(time);
+        // Keep controls and worker messages responsive while a foreground panel is open.
+        // The world still advances at its normal simulation rate; only background drawing slows.
+        if (!this.ready || !this.props.panelOpen || time - this.previousTime >= 250) this.frame(time);
         if (!this.ready) { this.ready = true; onReady(); }
         this.raf = requestAnimationFrame(loop);
       } catch (error) { this.onError(error instanceof Error ? error.message : "The 3D view could not draw this scene."); }

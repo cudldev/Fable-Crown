@@ -36,6 +36,8 @@ The [3D renderer](docs/THREE_RENDERER_TEST.md) is the default game view, with th
 
 Node 22.15+: `npm ci`, then `npm run dev`. Checks: `npm test`, `npm run typecheck`, `npm run build`, `npm run check:dist`, `npm run test:browser`. Chrome is used locally; CI installs Chromium. Playwright starts production preview. For Pages subpath verification set `GITHUB_REPOSITORY=cudldev/Fable-Crown` when building, and `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/` for browser tests. Rebuild after changing the base; do not share a build directory across concurrent builds.
 
+Use `npm run test:browser:software` to reproduce software-rendered WebGL locally. Run browser and unit suites sequentially to avoid CPU contention.
+
 GitHub Settings → Pages → Source: **GitHub Actions**. Push to main runs the gates and deploys. `GITHUB_REPOSITORY` derives the subpath; `VITE_BASE_PATH` overrides it. PWA scope is relative. No server, secret, API key, telemetry, hosted inference or required third-party runtime call.
 
 The deterministic TypeScript simulation is independent of rendering and uses 600 ms integer ticks. Three.js renders the logical tiles as a 3D world; movement, work and effects follow committed simulation results. Existing saves and [original artwork and exact prompts](assets/generated/README.md) are retained. Multiplayer, Grand Exchange, advanced combat, detailed social routines and optional browser-local narrative models remain outside this slice. Browser emulation is tested; no physical-device/FPS claim is made. Use one game tab per device.

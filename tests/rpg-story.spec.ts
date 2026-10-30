@@ -149,6 +149,23 @@ test("River Letters dialogue records the chosen scouting branch", async ({
 test("ferry passage stays locked until River Letters is complete, then charges five coins", async ({
   page,
 }) => {
+  // Observe committed worker snapshots: autonomy can move on before a slow save/UI
+  // round trip samples the brief arrival tile. The journey itself must still occur.
+  await page.addInitScript(() => {
+    const GameWorker = window.Worker;
+    window.Worker = class extends GameWorker {
+      constructor(...args: ConstructorParameters<typeof Worker>) {
+        super(...args);
+        this.addEventListener("message", event => {
+          const state = event.data?.state as RpgState | undefined;
+          if (!state?.player) return;
+          const samples = JSON.parse(sessionStorage.getItem("ferry-test-snapshots") || "[]");
+          samples.push({ position: state.player.position, coins: state.player.inventory.find(item => item.itemId === "coins")?.quantity });
+          sessionStorage.setItem("ferry-test-snapshots", JSON.stringify(samples.slice(-64)));
+        });
+      }
+    };
+  });
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("./?chapter=3");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
@@ -202,17 +219,10 @@ test("ferry passage stays locked until River Letters is complete, then charges f
     .click();
   await expect
     .poll(
-      async () => {
-        const result = await snapshot(page);
-        return {
-          position: result.player.position,
-          coins: result.player.inventory.find((item) => item.itemId === "coins")
-            ?.quantity,
-        };
-      },
+      () => page.evaluate(() => JSON.parse(sessionStorage.getItem("ferry-test-snapshots") || "[]")),
       { timeout: 12000 },
     )
-    .toEqual({
+    .toContainEqual({
       position: FERRIES["ferry-west"].destination,
       coins: 5,
     });

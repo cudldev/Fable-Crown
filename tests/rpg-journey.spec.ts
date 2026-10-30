@@ -175,7 +175,9 @@ test("sound settings persist and missing AudioContext leaves gameplay available"
     "35",
   );
 
-  const fallback = await page.context().newPage();
+  const context = page.context();
+  await page.close();
+  const fallback = await context.newPage();
   const errors: string[] = [];
   fallback.on("pageerror", (error) => errors.push(error.message));
   await fallback.addInitScript(() => {

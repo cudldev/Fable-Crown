@@ -69,7 +69,7 @@ export default function RpgApp() {
     }),
     [selection, setSelection] = useState<TileSelection | null>(null),
     [panel, setPanel] = useState<string | null>(null),
-    [message, setMessage] = useState(""),
+    [notice, setNotice] = useState({ text: "", sequence: 0 }),
     [hasArchive, setHasArchive] = useState(false),
     [storageOkay, setStorageOkay] = useState(true),
     [offline, setOffline] = useState(""),
@@ -77,6 +77,8 @@ export default function RpgApp() {
     [quantity, setQuantity] = useState(10),
     [bagItem, setBagItem] = useState<string | null>(null);
   const [feedbackEpoch, setFeedbackEpoch] = useState(0);
+  const message = notice.text;
+  const setMessage = (text: string) => setNotice(current => ({ text, sequence: current.sequence + 1 }));
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [rejection, setRejection] = useState<CommandReceipt | null>(null);
   const [commandNotice, setCommandNotice] = useState<{
@@ -147,7 +149,7 @@ export default function RpgApp() {
     if (!message) return;
     const t = setTimeout(() => setMessage(""), 6000);
     return () => clearTimeout(t);
-  }, [message]);
+  }, [message, notice.sequence]);
   useEffect(() => {
     if (!commandNotice || commandNotice.pending) return;
     const timer = setTimeout(() => setCommandNotice(null), 4000);
@@ -176,8 +178,10 @@ export default function RpgApp() {
         .then((m) => setWorldSize(`${(m.bytes / 1048576).toFixed(1)} MiB`))
         .catch(() => {});
   }, [panel, worldSize]);
-  const send = (type: string, extra = {}) =>
+  const send = (type: string, extra = {}) => {
+    if (type === "save" || type === "import") setMessage("");
     worker.current?.postMessage({ type, ...extra });
+  };
   const command = (command: RpgCommand) => {
     const requestId = `request-${++requestSequence.current}`;
     latestRequest.current = requestId;
@@ -408,6 +412,7 @@ export default function RpgApp() {
       {state ? (
         <SceneHost
           mode={rendererMode}
+          panelOpen={!!panel || (!!selection && selection.kind !== "tile")}
           onFallback={() => setRendererMode("painterly")}
           state={state}
           camera={camera}
@@ -1336,7 +1341,7 @@ export default function RpgApp() {
                   const item = bagSlots[i];
                   return (
                     <button
-                      key={i}
+                      key={item ? `${item.itemId}:${bagSlots.slice(0, i).filter(slot => slot.itemId === item.itemId).length}` : `empty:${i}`}
                       disabled={!item}
                       title={item ? itemName(item.itemId) : "Empty slot"}
                       aria-label={
