@@ -1,8 +1,14 @@
 # Progress — 2026-10-29
 
+## Character style exploration — 2026-10-30
+
+Study 02 (`alden-painterly-3d-v2.png`) adds broad directional brushwork and richer cloth/skin color variation while preserving Alden's design. Generated concept visually reviewed; Blender reproduction and user style acceptance remain pending.
+
+Design the shared 3D character style before writing the consistency skill. Built-in image generation produced Alden proportion comparisons and a Dragon's Crown-inspired painterly 3D study; images and exact prompts are under `assets/reference/character-style/`. Visually reviewed as concept candidates only; neither direction is user-approved. No Blender model, runtime art, skill or deployment changed; no code tests needed for these reference images.
+
 ## 3D test publication — 2026-10-30
 
-User authorized publishing the reviewed local 3D test. Existing public repository and GitHub Actions Pages configuration verified; preparing the tested renderer, original assets, sources and workflow for publication. Direct game route: `https://cudldev.github.io/Fable-Crown/?renderer=3d`; read-only asset route adds `&assetReview=1`. Painterly remains the default. Live verification pending.
+Published commit `2ac9f47` through [successful Pages workflow 40978720442](https://github.com/cudldev/Fable-Crown/actions/runs/40978720442). GitHub passed strict typecheck,272unit tests, repository-base build/path/PWA checks and43browser scenarios. Direct [3D game](https://cudldev.github.io/Fable-Crown/?renderer=3d) and [asset viewer](https://cudldev.github.io/Fable-Crown/?renderer=3d&assetReview=1) verified in Chrome156 on the actual HTTPS site: all seven Blender assets, real WebGL draws, light/camera controls, model selection,390×844 layout, offline viewer reload and correct repository service-worker scope. No page errors, failed HTTP requests or external runtime requests. Painterly remains the default and the viewer creates no game worker. Evidence: `docs/THREE_PAGES_VERIFICATION.json` and `docs/screenshots/three-pages-live-*.png`. Desktop browser verification does not establish physical-phone performance. About44%allowance remains; no reset or charges.
 
 ## Optional 3D test and Blender MCP art workflow — 2026-10-30
 
@@ -12,7 +18,7 @@ Lead designed contracts/integration and controlled the shared Blender MCP sessio
 
 Created/validated `skills/fable-3d-art` with character/environment/prop and image-review references, installed the same skill in the local Codex skills folder, and added its routing rule to AGENTS.md. Independent forward review plus modeler use drove actual corrections: shoulder/face/hair/costume massing, strap/nape defects, distinct bank/forge roofs and openings, logical bank doorway/facade cutaway, and tree crown shape. Earlier sources/exports remain in `assets/source/3d/revisions/pass-01/`. Exported-image comparisons are under `docs/art-audit/three-pass-02`, `three-pass-03` and `three-preview`. Reviewed forms/integration are usable drafts; flat cloth/face/building materials and foliage craft remain below the concept. No production-quality or user art-acceptance claim.
 
-The standalone `?renderer=3d&assetReview=1` workbench loads all seven GLBs, rotates models, compares light/camera presets, previews walking/cutaways, and creates no game worker or save writes. Local preview is available under the running dev server's `/Fable-Crown/` path; app-panel opening was queued and a direct local link supplied. The published Pages release is unchanged; no push or deployment was performed.
+The standalone `?renderer=3d&assetReview=1` workbench loads all seven GLBs, rotates models, compares light/camera presets, previews walking/cutaways, and creates no game worker or save writes. Local preview was supplied first; subsequent authorized publication and live verification are recorded above.
 
 Gate:272unit tests, strict TypeScript, root and repository-subpath production builds, asset/PWA path validation and43/43browser scenarios pass. New cases cover actual WebGL draws, real smelting/input consumption, retained inventory/XP/archives across renderer/camera changes, light limits, viewport controls, seven loaded Blender assets, isolated read-only workbench, cached offline GLB/query reload and unavailable-WebGL fallback. No required external runtime requests/page errors. Eleven asset/merge cases verify GLB geometry/indices/UVs/embedded resources, grounded transforms, source/pivot contracts, malformed exports, budgets and preserved roof/facade/light/limb bounds.
 

@@ -1,0 +1,21 @@
+{
+  "base": "https://cudldev.github.io/Fable-Crown/",
+  "errors": [],
+  "failures": [],
+  "external": [],
+  "routes": [
+    {
+      "route": "https://cudldev.github.io/Fable-Crown/?renderer=3d",
+      "models": "bank,forge,tree,alden,anvil,crate,lantern",
+      "draws": "778"
+    },
+    {
+      "route": "https://cudldev.github.io/Fable-Crown/?renderer=3d&assetReview=1",
+      "models": "bank,forge,tree,alden,anvil,crate,lantern"
+    }
+  ],
+  "serviceWorkerScope": "https://cudldev.github.io/Fable-Crown/",
+  "offlineViewer": true,
+  "defaultPainterly": true,
+  "browser": "156.0.8078.48"
+}
