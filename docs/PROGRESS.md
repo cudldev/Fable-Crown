@@ -438,3 +438,5 @@ Latest evidence: tmp/ci-failure-5 and tmp/hosted-gate.log in the managed voxel-d
 
 ### User-authorized temporary test skip — 2026-10-31
 Temporarily skipped only the healing/combat-style saved-state browser case at the user's request. Other unit, browser, save/offline and deployment checks remain enabled. The saved-row issue is unresolved; re-enable this case after diagnosis. Release retry/public verification remain pending.
+
+Skip retry41143497405 confirms1skipped. Deployment then stopped at the separate enemy/combat-XP saved-row assertion (expected>0,read0). No additional tests were skipped; current voxel release is still NOT live. User waiver covers only the healing/combat-style case.
