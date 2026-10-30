@@ -94,7 +94,7 @@ test("enemy inspection, combat XP and loot, plus recoverable grave UI", async ({
   state.player.previousPosition = { ...adjacent! };
   enemy.health = 1;
   await importState(page, state);
-  await page.getByRole("button", { name: /Inspect Moss boar/ }).click();
+  await page.getByRole("button", { name: "Inspect Moss boar, 1 health", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Enemy actions" }),
   ).toContainText("Health 1/");

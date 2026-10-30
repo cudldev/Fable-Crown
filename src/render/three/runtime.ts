@@ -104,6 +104,7 @@ export class ThreeRuntime {
   private raf = 0;
   private disposed = false;
   private previousTime = 0;
+  private panelDrawRequested = false;
   private metricsAt = 0;
   private visibilityAt = 0;
   private ready = false;
@@ -171,8 +172,8 @@ export class ThreeRuntime {
     const loop = (time: number) => {
       if (this.disposed) return;
       try {
-        // Foreground panels keep the simulation running while background drawing slows.
-        if (!this.ready || !this.props.panelOpen || time - this.previousTime >= 250) this.frame(time);
+        // Foreground panels keep worker/UI messages responsive without submitting hidden frames.
+        if (!this.ready || !this.props.panelOpen || this.panelDrawRequested) { this.panelDrawRequested = false; this.frame(time); }
         if (!this.ready) { this.ready = true; onReady(); }
         this.raf = requestAnimationFrame(loop);
       } catch (error) { this.onError(error instanceof Error ? error.message : "The 3D view could not draw this scene."); }
@@ -182,6 +183,12 @@ export class ThreeRuntime {
   private ownGeometry<T extends THREE.BufferGeometry>(geometry: T): T { this.ownGeometries.push(geometry); return geometry; }
   private ownMaterial<T extends THREE.Material>(material: T): T { this.ownMaterials.push(material); return material; }
   update(props: RuntimeInput) {
+    const before = this.props.state.player.position, after = props.state.player.position;
+    if (Math.hypot(after.x - before.x, after.y - before.y) > 2 || Boolean(props.state.grave) !== Boolean(this.props.state.grave) ||
+      props.state.worldRevision !== this.props.state.worldRevision) this.panelDrawRequested = true;
+    // Direct view controls still redraw while a panel is open; snapshots alone do not.
+    if (props.camera !== this.props.camera || props.visual !== this.props.visual || props.lighting !== this.props.lighting ||
+      props.cameraMode !== this.props.cameraMode || props.shadows !== this.props.shadows || props.gi !== this.props.gi || props.ao !== this.props.ao) this.panelDrawRequested = true;
     this.props = props;
   }
   private resize() {

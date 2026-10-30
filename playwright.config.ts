@@ -11,6 +11,7 @@ export default defineConfig({
     headless: true,
     // Keep all functional assertions on CPU-only CI; explicit high-DPI cases override this.
     deviceScaleFactor: process.env.CI ? 0.5 : 1,
+    launchOptions: process.env.CI ? { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] } : undefined,
   },
   webServer: process.env.DEMO_URL?.startsWith("https:")
     ? undefined
