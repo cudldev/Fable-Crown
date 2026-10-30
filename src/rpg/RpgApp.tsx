@@ -1,3 +1,4 @@
+import { flushSync } from "react-dom";
 import PixelPortrait from "../render/PixelPortrait";
 import { clampGameplayZoom } from "../render/camera-limits";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -180,7 +181,7 @@ export default function RpgApp() {
         .catch(() => {});
   }, [panel, worldSize]);
   const send = (type: string, extra = {}) => {
-    if (type === "save" || type === "import") setMessage("");
+    if (type === "save" || type === "import") flushSync(() => setMessage(""));
     worker.current?.postMessage({ type, ...extra });
   };
   const command = (command: RpgCommand) => {
