@@ -64,6 +64,26 @@ function waitingFixture() {
   return state;
 }
 
+test.describe("delayed renderer loading", () => {
+  test.use({ serviceWorkers: "block" });
+  test("the world shell and save controls remain available before the renderer downloads", async ({ page }) => {
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    await page.route(/\/assets\/ThreeScene-[^/]+\.js$/, async route => { await gate; await route.continue(); });
+    try {
+      await page.goto("./", { waitUntil: "domcontentloaded" });
+      const world = page.getByTestId("rpg-world");
+      await expect(world).toBeVisible();
+      await expect(world).toHaveAttribute("data-status", "starting");
+      await menu(page);
+      await page.getByRole("button", { name: "Save on device", exact: true }).click();
+      await expect(page.getByRole("status")).toContainText("Chronicle saved");
+      await closePanel(page);
+    } finally { release(); }
+    await ready(page);
+  });
+});
+
 test("voxel is the default, draws with WebGL and preserves the chapter with legacy URLs", async ({ page }) => {
   const errors: string[] = [], obsoleteAssets: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));

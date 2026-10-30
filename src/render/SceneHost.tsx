@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, type ReactNode } from "react";
 import type { TileSceneProps } from "./scene-types";
+import "./tile-scene.css";
 
 const ThreeScene = lazy(() => import("./ThreeScene"));
 
@@ -24,7 +25,7 @@ class RendererBoundary extends Component<
 export function SceneHost(props: TileSceneProps & { panelOpen: boolean }) {
   return (
     <RendererBoundary>
-      <Suspense fallback={<div className="loading-screen">Opening the voxel village…</div>}>
+      <Suspense fallback={<div className="tile-world three-world" data-testid="rpg-world" data-renderer="3d" data-status="starting" aria-label="Voxel world loading"><div className="loading-screen">Opening the voxel village…</div></div>}>
         <ThreeScene {...props} />
       </Suspense>
     </RendererBoundary>
