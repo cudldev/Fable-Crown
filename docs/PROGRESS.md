@@ -1,5 +1,11 @@
 # Progress — 2026-10-29
 
+## Main game promoted to 3D — 2026-10-30
+
+User approved replacing the 2D representation with the existing 3D world/assets. The ordinary URL now initializes 3D, older preview URLs still work, and the normal renderer toggle/test labels are removed. The menu opens the standalone asset viewer. Canvas is lazy-loaded only after a graphics failure and user recovery choice; worker, saves and progression remain intact. Restored descriptive action-progress accessibility for Alden and inspected villagers; updated ground-click regression to use 3D projection and verify actual saved movement. Independent QA reviewed integration contracts. Further uncommitted asset experiments remain in the original workspace, outside this isolated release.
+
+Local gate:272unit tests, strict TypeScript/repository-base production build, asset/PWA validation and43/43browser scenarios pass (4.1min), with all ordinary gameplay scenarios using the default 3D route. Reviewed actual desktop/portrait screenshots. Checks cover earlier-save migration/archives, quests, gathering/crafting, combat/loot/graves, gates, manual movement, controls, graphics failure recovery, asset viewer and offline reload. No new art or performance claim. GitHub deployment and live verification pending.
+
 ## Character style exploration — 2026-10-30
 
 Study 02 (`alden-painterly-3d-v2.png`) adds broad directional brushwork and richer cloth/skin color variation while preserving Alden's design. Generated concept visually reviewed; Blender reproduction and user style acceptance remain pending.

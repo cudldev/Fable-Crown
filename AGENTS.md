@@ -1,4 +1,6 @@
 # Codex instructions
+LATEST RENDERER OVERRIDE (2026-10-30): The user approved replacing the 2D game representation with the existing 3D renderer. The ordinary URL opens 3D with the current assets, near-orthographic perspective and bounded realtime lighting. There is no normal renderer switch; the old Canvas view is retained only for graphics-failure recovery. Preserve simulation, saves and zero-cost/offline requirements. This supersedes earlier optional-test and 2D-default instructions; new art experiments still require their own visual acceptance.
+
 For 3D asset creation or quality iteration, modeler and art-review agents must read `skills/fable-3d-art/SKILL.md` and the relevant specialist reference. Execute the skill's visual review loop; technical export success does not establish art acceptance. The lead controls the shared Blender MCP session and integrates separate character/environment/prop work.
 
 Read all docs/ and tasks/MILESTONES.md. Implement milestones sequentially. Start M0 only unless asked to continue. Keep each milestone runnable, testable, and record results in docs/PROGRESS.md. Strict TypeScript; deterministic simulation separate from rendering; 600ms integer ticks; no client API keys; original placeholder art; no LLM required for basic gameplay. Test and build after each milestone. Never claim performance without benchmarks.

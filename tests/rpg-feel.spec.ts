@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { calendarDate, createRpg } from "../src/rpg/engine";
 import { ITEMS } from "../src/rpg/content";
 import { findPath } from "../src/rpg/world";
-import { tileToScreen } from "../src/render/iso";
+import { PerspectiveCamera, Vector3 } from "three";
 import type { RpgState } from "../src/rpg/types";
 
 const originalV4 = JSON.parse(
@@ -96,19 +96,23 @@ test("manual map movement is acknowledged and reaches its tile across mobile lay
   expect(target).toBeDefined();
   await importState(page, state);
   await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  await page.getByRole("button", { name: "Close panel" }).click();
 
   const world = page.getByTestId("rpg-world");
+  await expect(world).toHaveAttribute("data-status", "ready");
+  await expect(world).toHaveAttribute("data-camera-x", "100.00");
+  await expect(world).toHaveAttribute("data-camera-y", "80.00");
   const bounds = await world.boundingBox();
   expect(bounds).not.toBeNull();
-  const zoom = 0.85;
-  const center = tileToScreen({
-    x: state.player.position.x,
-    y: state.player.position.y + 2 / zoom,
-  });
-  const destination = tileToScreen(target!);
+  const camera = new PerspectiveCamera(20, bounds!.width / bounds!.height, .1, 650);
+  const distance = (24 / .85) / (2 * Math.tan(Math.PI / 18));
+  camera.position.set(100, .4, 80).addScaledVector(new Vector3(32, 37, 45).normalize(), distance);
+  camera.lookAt(100, .4, 80);
+  camera.updateMatrixWorld();
+  const destination = new Vector3(target!.x, 0, target!.y).project(camera);
   const point = {
-    x: bounds!.width / 2 + (destination.x - center.x) * zoom,
-    y: bounds!.height / 2 + (destination.y - center.y) * zoom,
+    x: (destination.x + 1) * bounds!.width / 2,
+    y: (1 - destination.y) * bounds!.height / 2,
   };
   await page.mouse.click(bounds!.x + point.x, bounds!.y + point.y);
   await expect(page.getByLabel("Command acknowledgement")).toContainText(

@@ -2,7 +2,7 @@
 
 [Play the demo](https://cudldev.github.io/Fable-Crown/) · [Tile RPG plan](docs/TILE_RPG_PLAN.md) · [Progress](docs/PROGRESS.md)
 
-A painterly autonomous RPG on a 256 × 192 isometric tile world with three settlements and 24 characters. Alden follows persistent ambitions; you guide his thoughts or give direct and queued orders. The Old School RuneScape reference informs tile movement, skills and preparation; the setting, quests and generated art are original.
+A 3D autonomous RPG on a 256 × 192 tile world with three settlements and 24 characters. Alden follows persistent ambitions; you guide his thoughts or give direct and queued orders. The Old School RuneScape reference informs tile movement, skills and preparation; the setting, quests and generated art are original.
 
 Ten skills progress separately: Woodcutting, Mining, Smithing, Fishing, Cooking, Attack, Strength, Defence, Hitpoints and Ranged. Gather trees, ores and fish with appropriate tools; smelt, smith and cook; trade real supplies for tools, armour, bows and ammunition. A 28-slot backpack, separate equipment and connected personal bank support longer journeys. Villagers keep their own supplies.
 
@@ -32,12 +32,12 @@ Progress saves in IndexedDB. V5 copies existing V4/V3 progress while retaining e
 
 ## Development and hosting
 
-An optional [3D renderer test](docs/THREE_RENDERER_TEST.md) is available locally with `?renderer=3d`, or through **Game menu → Use 3D test renderer**. It uses original low-poly pixel-textured assets and realtime lighting while sharing the existing simulation and saves. Add `&assetReview=1` for the independent art workbench. Seven editable Blender models, the [Blender MCP workflow](docs/ART_PIPELINE.md), and a [modeling skill](skills/fable-3d-art/SKILL.md) support further art iteration. The painterly view remains the default; switch back in the menu. This test is not a claim of a new public deployment.
+The [3D renderer](docs/THREE_RENDERER_TEST.md) is the default game view, with the current original low-poly assets, near-orthographic perspective and realtime lighting. No renderer query is required; existing `?renderer=3d` links remain valid. **Game menu → Open asset viewer** opens the independent workbench (`?assetReview=1`). Seven editable Blender models, the [Blender MCP workflow](docs/ART_PIPELINE.md), and a [modeling skill](skills/fable-3d-art/SKILL.md) support further art iteration. The earlier Canvas view loads only when requested after a graphics failure.
 
 Node 22.15+: `npm ci`, then `npm run dev`. Checks: `npm test`, `npm run typecheck`, `npm run build`, `npm run check:dist`, `npm run test:browser`. Chrome is used locally; CI installs Chromium. Playwright starts production preview. For Pages subpath verification set `GITHUB_REPOSITORY=cudldev/Fable-Crown` when building, and `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/` for browser tests. Rebuild after changing the base; do not share a build directory across concurrent builds.
 
 GitHub Settings → Pages → Source: **GitHub Actions**. Push to main runs the gates and deploys. `GITHUB_REPOSITORY` derives the subpath; `VITE_BASE_PATH` overrides it. PWA scope is relative. No server, secret, API key, telemetry, hosted inference or required third-party runtime call.
 
-The deterministic TypeScript simulation is independent of rendering and uses 600 ms integer ticks. Canvas projects logical tiles into the painterly isometric view. [Original artwork and exact prompts](assets/generated/README.md) remain versioned. Characters use limited painted-cutout animation. Multiplayer, Grand Exchange, advanced combat, detailed social routines and optional browser-local narrative models remain outside this slice. Browser emulation is tested; no physical-device/FPS claim is made. Use one game tab per device.
+The deterministic TypeScript simulation is independent of rendering and uses 600 ms integer ticks. Three.js renders the logical tiles as a 3D world; movement, work and effects follow committed simulation results. Existing saves and [original artwork and exact prompts](assets/generated/README.md) are retained. Multiplayer, Grand Exchange, advanced combat, detailed social routines and optional browser-local narrative models remain outside this slice. Browser emulation is tested; no physical-device/FPS claim is made. Use one game tab per device.
 
 React/React DOM and Three.js are MIT licensed; dependency licenses accompany npm packages. Reference collages and older generated backdrops are retained as sources and never loaded by the tile game.

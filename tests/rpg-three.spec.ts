@@ -64,12 +64,11 @@ function waitingFixture() {
   return state;
 }
 
-test("3D is opt-in, issues real WebGL draws and preserves the chapter when switching", async ({ page }) => {
+test("the default game uses 3D and preserves the chapter and archives across reloads", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("./");
-  await expect(page.getByTestId("rpg-world")).toBeVisible();
-  await expect(page.getByTestId("three-canvas")).toHaveCount(0);
+  await ready(page);
   const fixture = waitingFixture();
   await restore(page, fixture);
   const archive = createGame(Date.now());
@@ -85,7 +84,9 @@ test("3D is opt-in, issues real WebGL draws and preserves the chapter when switc
     };
   }), archive);
   await menu(page);
-  await page.getByRole("button", { name: "Use 3D test renderer" }).click();
+  await expect(page.getByRole("button", { name: "Use 3D test renderer" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Use painterly renderer" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Open asset viewer", exact: true })).toBeVisible();
   await closePanel(page);
   const world = await ready(page);
   await expect.poll(async () => Number(await world.getAttribute("data-draw-calls"))).toBeGreaterThan(0);
@@ -100,15 +101,16 @@ test("3D is opt-in, issues real WebGL draws and preserves the chapter when switc
   await page.getByTestId("rpg-world").getByRole("button", { name: "Inspect Alden", exact: true }).click();
   await expect(page.getByRole("region", { name: "Character details" })).toBeVisible();
   const before = await saved(page);
-  await menu(page);
-  await page.getByRole("button", { name: "Use painterly renderer" }).click();
-  await closePanel(page);
-  await expect(page.getByTestId("three-canvas")).toHaveCount(0);
+  await page.reload();
+  await ready(page);
   const after = await saved(page);
   expect(after.player.inventory).toEqual(before.player.inventory);
   expect(after.player.skills).toEqual(before.player.skills);
   expect(after.player.position).toEqual(before.player.position);
   expect(after.version).toBe(5);
+  // Existing shared preview links still open the same 3D game.
+  await page.goto("./?renderer=3d");
+  await ready(page);
   const archived = await page.evaluate(() => new Promise<unknown>((resolve, reject) => {
     const request = indexedDB.open("fable-crown", 1);
     request.onerror = () => reject(request.error);
@@ -213,8 +215,8 @@ test("3D camera and touch controls fit portrait and landscape without external r
   expect(errors).toEqual([]);
 });
 
-test("3D bundles and query route reload offline with the same saved chapter", async ({ page, context }) => {
-  await page.goto("./?renderer=3d");
+test("the default 3D game reloads offline with the same saved chapter", async ({ page, context }) => {
+  await page.goto("./");
   await ready(page);
   await restore(page, waitingFixture());
   const before = await saved(page);
@@ -227,7 +229,7 @@ test("3D bundles and query route reload offline with the same saved chapter", as
   try {
     await page.reload();
     await ready(page);
-    expect(new URL(page.url()).searchParams.get("renderer")).toBe("3d");
+    expect(new URL(page.url()).searchParams.has("renderer")).toBe(false);
     const after = await saved(page);
     expect(after.player.inventory).toEqual(before.player.inventory);
     expect(after.player.skills).toEqual(before.player.skills);
@@ -237,7 +239,7 @@ test("3D bundles and query route reload offline with the same saved chapter", as
   }
 });
 
-test("unavailable WebGL offers a working painterly fallback", async ({ page }) => {
+test("unavailable WebGL offers a working compatibility view without resetting the chapter", async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: Parameters<typeof getContext>) {
@@ -245,13 +247,20 @@ test("unavailable WebGL offers a working painterly fallback", async ({ page }) =
       return getContext.apply(this, args);
     } as typeof getContext;
   });
-  await page.goto("./?renderer=3d");
-  await page.getByRole("button", { name: "Use painterly view", exact: true }).click();
+  await page.goto("./");
+  const fixture = waitingFixture();
+  fixture.player.skills.woodcutting = 37;
+  await restore(page, fixture);
+  const before = await saved(page);
+  await page.getByRole("button", { name: "Use compatibility view", exact: true }).click();
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   await expect(page.getByTestId("three-canvas")).toHaveCount(0);
-  expect(new URL(page.url()).searchParams.get("renderer")).not.toBe("3d");
   await page.getByRole("button", { name: "Open inventory" }).click();
   await expect(page.locator(".rpg-backpack button")).toHaveCount(28);
+  await closePanel(page);
+  const after = await saved(page);
+  expect(after.player.skills).toEqual(before.player.skills);
+  expect(after.player.inventory).toEqual(before.player.inventory);
 });
 
 test("all Blender assets load and switching camera projection preserves the saved character", async ({ page }) => {

@@ -9,9 +9,9 @@ import type { LightingPreset } from "./three/lighting";
 import "./tile-scene.css";
 import "./three/three-scene.css";
 
-export interface ThreeSceneProps extends TileSceneProps { onFallback?: () => void }
+export interface ThreeSceneProps extends TileSceneProps { onFallback: () => void }
 
-/** Optional renderer only: it consumes the same immutable snapshots as the painterly view. */
+/** The game view consumes immutable simulation snapshots. */
 export default function ThreeScene(props: ThreeSceneProps) {
   const root = useRef<HTMLDivElement>(null), canvas = useRef<HTMLCanvasElement>(null);
   const runtime = useRef<ThreeRuntime | null>(null);
@@ -47,10 +47,6 @@ export default function ThreeScene(props: ThreeSceneProps) {
     return () => { active = false; controller.abort(); runtime.current?.dispose(); runtime.current = null; };
   }, []);
   useEffect(() => { runtime.current?.update(latest.current); });
-  const fallback = () => {
-    if (props.onFallback) props.onFallback();
-    else { const url = new URL(location.href); url.searchParams.delete("renderer"); location.assign(url); }
-  };
   const bind = (key: string) => (element: HTMLElement | null) => {
     if (element) hits.current.set(key, element); else hits.current.delete(key);
   };
@@ -63,9 +59,10 @@ export default function ThreeScene(props: ThreeSceneProps) {
   return (
     <div ref={root} className="tile-world three-world" data-testid="rpg-world" data-renderer="3d" data-status={status} data-lighting={lighting} data-assets={assets.source} data-production-assets={assets.ids.join(",")}>
       <canvas ref={canvas} data-testid="three-canvas" aria-label="The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused." tabIndex={0} />
-      {status !== "unavailable" && <>
-        <div className="three-light-controls" role="group" aria-label="3D lighting preview">
-          <span>3D TEST</span>
+      {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the village…</div>}
+      {status === "ready" && <>
+        <div className="three-light-controls" role="group" aria-label="View settings">
+          <span>VIEW</span>
           {(["day", "dusk", "night"] as const).map(preset => <button key={preset} aria-label={`${preset[0].toUpperCase()}${preset.slice(1)} lighting`} aria-pressed={lighting === preset} onClick={() => setLighting(preset)}>{preset[0].toUpperCase()}{preset.slice(1)}</button>)}
           <button aria-label="Sun shadows" aria-pressed={shadows} onClick={() => setShadows(value => !value)}>Shadows {shadows ? "on" : "off"}</button>
           <button aria-label="Perspective camera" aria-pressed={cameraMode === "perspective"} onClick={() => setCameraMode("perspective")}>Perspective</button>
@@ -94,10 +91,21 @@ export default function ThreeScene(props: ThreeSceneProps) {
           {!props.camera.overview && props.state.grave && <button ref={bind("grave")} className="tile-grave" aria-label="Inspect your backpack grave" data-three-selection={JSON.stringify({ kind: "grave" })} onClick={event => keyboardSelect(event, { kind: "grave" })}><span>Backpack grave</span></button>}
           {(props.feedback ?? []).map(floater => <span ref={bind(`feedback-${floater.id}`)} className={`three-feedback three-feedback-${floater.tone}`} key={floater.id}>{floater.text}</span>)}
         </div>
-        {props.state.player.action && !props.state.player.path.length && <div className="tile-progress-accessible"><span role="progressbar" aria-label={`${props.state.player.action.kind} action progress`} aria-valuemin={0} aria-valuemax={props.state.player.action.duration} aria-valuenow={props.state.player.action.duration - props.state.player.action.remaining} /></div>}
-        <span className="three-test-note" title={assets.warning || undefined}>Pixel-textured 3D · {assets.source === "blender" ? "Blender assets" : assets.source === "loading" ? "Loading models…" : "Procedural models"} · {props.state.player.position.x}, {props.state.player.position.y}</span>
+        <div className="tile-progress-accessible">
+          {[props.state.player, ...props.state.npcs].filter(actor => actor.action && !actor.path.length &&
+            (actor.id === 0 || props.selection?.kind === "actor" && props.selection.id === actor.id)).map(actor => {
+            const action = actor.action!;
+            const object = world.objects.find(value => value.id === action.targetId);
+            const label = action.kind === "gather" ? object?.kind === "rock" ? "Mining" : object?.kind === "tree" ? "Woodcutting" : "Fishing"
+              : action.kind === "craft" ? action.recipeId?.includes("cook") ? "Cooking" : "Crafting" : action.kind;
+            return <span key={actor.id} role="progressbar" aria-label={`${label} action progress`} aria-valuemin={0}
+              aria-valuemax={action.duration} aria-valuenow={action.duration - action.remaining}
+              aria-valuetext={`${actor.name}: ${action.duration - action.remaining} of ${action.duration} ticks`} />;
+          })}
+        </div>
+        <span className="three-test-note">{props.state.player.position.x}, {props.state.player.position.y}</span>
       </>}
-      {status === "unavailable" && <section className="three-fallback" aria-label="3D renderer unavailable"><h2>3D view unavailable</h2><p>{failure}</p><button onClick={fallback}>Use painterly view</button></section>}
+      {status === "unavailable" && <section className="three-fallback" aria-label="3D renderer unavailable"><h2>3D view unavailable</h2><p>{failure}</p><button onClick={props.onFallback}>Use compatibility view</button></section>}
     </div>
   );
 }

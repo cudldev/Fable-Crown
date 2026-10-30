@@ -1,12 +1,12 @@
-# Optional 3D renderer test
+# 3D game renderer
 
-User-authorized experiment, 2026-10-30: chunky RuneScape-inspired 3D shapes, coarse pixel textures, compact JRPG characters, muted colours and atmospheric realtime lighting. The existing painterly renderer remains the default. This is a presentation experiment on the current RPG, not a new progression chapter.
+User-approved main renderer, 2026-10-30: the existing 3D world and assets replace the 2D game representation. Current assets use chunky RuneScape-inspired shapes, coarse pixel textures, compact JRPG characters, muted colours and atmospheric realtime lighting. This changes presentation of the current RPG and preserves its progression chapter.
 
-## Open the test
+## Open the game
 
-Run `npm run dev`, then open `http://127.0.0.1:5173/?renderer=3d`. Alternatively, open the game menu and choose **Use 3D test renderer**. **Use painterly renderer** switches back without restarting the simulation. The renderer choice lives in the URL, not the saved RPG chapter. A production preview uses the same query under its configured repository subpath.
+Run `npm run dev`, then open `http://127.0.0.1:5173/`. The ordinary game URL opens 3D; earlier `?renderer=3d` links still work. **Game menu → Open asset viewer** opens the independent workbench. There is no regular 2D/3D switch. If graphics initialization or rendering fails, **Use compatibility view** loads the older Canvas renderer without restarting the simulation or changing saves. Reloading attempts 3D again.
 
-The views share the current worker, 600ms ticks, V5 saves, map coordinates, actions, inventory, progression and offline reconciliation. This experiment does not change collision or award items/XP. Use normal chronicle export if you want a separate copy of your journey.
+The renderer uses the current worker, 600ms ticks, V5 saves, map coordinates, actions, inventory, progression and offline reconciliation. It does not change collision or award items/XP. Existing chronicles and archived chapters remain usable.
 
 ## Rendering contract
 
@@ -37,4 +37,4 @@ Results are recorded in `docs/PROGRESS.md`. Publication was authorized on 2026-1
 - [3D game test](https://cudldev.github.io/Fable-Crown/?renderer=3d)
 - [Asset viewer](https://cudldev.github.io/Fable-Crown/?renderer=3d&assetReview=1)
 
-The unqualified site URL retains the painterly default. Deployment verification is recorded separately in the progress log.
+The unqualified site URL now opens 3D. Deployment verification is recorded separately in the progress log.
