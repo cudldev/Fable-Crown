@@ -8,6 +8,7 @@
 - Pure tile simulation → worker clock/saves → isometric Canvas. Lead owns contracts/integration; specialists own separate files. Sol High core, Sol Medium renderer, Luna Medium browser QA.
 - Gate each stage: unit tests, strict build, check:dist, browser. Serialize builds: another build can replace dist with a different base during browser tests.
 - Default3D QA: `test:browser:software` reproduces SwiftShader. Serialize CPU-heavy software-browser/unit suites. Backpack keys follow item identity; save/import must clear stale notices and repeated confirmations refresh TTL. Record transient ferry arrival from committed worker messages, since autonomy continues afterward.
+- Release isolation: this task uses the managed `default-3d` checkout. Unfinished character/voxel studies remain uncommitted in the original Fable Crown workspace; they were not included in this renderer release.
 - Pages: cudldev/Fable-Crown. Main URL opens3D; viewer uses `?assetReview=1`; older `?renderer=3d` links still work. Build GITHUB_REPOSITORY=cudldev/Fable-Crown; Playwright DEMO_URL=http://127.0.0.1:4174/Fable-Crown/. Preview inherits base from URL. Verify actual public release after CI.
 - Windows npm certificate fix: NODE_USE_SYSTEM_CA=1; retain TLS. Localhost/git/network may need sandbox escalation. No paid services or reset redemption.
 - Current key v5 copies V4/V3; never overwrite archived v4/v3/v1. Real migration fixtures cover each prior chapter. Sources/prompts through assets/generated/v5; metadata merges across versions. Offline query reload uses cached index fallback.

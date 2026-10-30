@@ -1,0 +1,12 @@
+{
+  "base": "https://cudldev.github.io/Fable-Crown/",
+  "errors": [],
+  "failed": [],
+  "external": [],
+  "models": "bank,forge,tree,alden,anvil,crate,lantern",
+  "default3d": true,
+  "viewer": "https://cudldev.github.io/Fable-Crown/?assetReview=1",
+  "scope": "https://cudldev.github.io/Fable-Crown/",
+  "offlineDefault3d": true,
+  "browser": "156.0.8078.74"
+}
