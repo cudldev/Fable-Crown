@@ -72,3 +72,5 @@
 
 - Latest local playtest: use production preview with the build's matching base (currently npm run preview -- --base /Fable-Crown/ --port 4173), then /Fable-Crown/?renderer=3d. Verify the visible voxel world/pixel cast; public Pages may lag local work.
 - Voxel streaming: 16m parents contain 8m children; 5 LODs, 100k visible/262144 resident-cell targets. Use scripts/benchmark-voxel-lod.mjs; serialize builds/browser runs. GPU batches stream; shared VOX stays loaded. Gameplay caps at 64 vertical/96 horizontal tiles; strategic overview is separate.
+
+- Release gate unfinished31Oct: acfa1dd on main; managed voxel-default-release worktree owns latest fixes. CI41142685175 has a saved-state observation failure; do not call voxel live. Resume from PROGRESS release checkpoint, then verify fresh/offline and cached upgrade.
