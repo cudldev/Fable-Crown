@@ -78,9 +78,11 @@ test.describe("delayed renderer loading", () => {
       await menu(page);
       await page.getByRole("button", { name: "Save on device", exact: true }).click();
       await expect(page.getByRole("status")).toContainText("Chronicle saved");
-      await closePanel(page);
     } finally { release(); }
-    await ready(page);
+    const world = await ready(page);
+    await expect(world.getByRole("button", { name: "Inspect Alden", exact: true })).toBeVisible();
+    await expect(world.getByRole("button", { name: /Inspect Reedbow outlaw/ })).toBeHidden();
+    await closePanel(page);
   });
 });
 

@@ -182,6 +182,7 @@ export class ThreeRuntime {
   }
   private ownGeometry<T extends THREE.BufferGeometry>(geometry: T): T { this.ownGeometries.push(geometry); return geometry; }
   private ownMaterial<T extends THREE.Material>(material: T): T { this.ownMaterials.push(material); return material; }
+  requestDraw() { this.panelDrawRequested = true; }
   update(props: RuntimeInput) {
     const before = this.props.state.player.position, after = props.state.player.position;
     if (Math.hypot(after.x - before.x, after.y - before.y) > 2 || Boolean(props.state.grave) !== Boolean(this.props.state.grave) ||

@@ -20,6 +20,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
   const root = useRef<HTMLDivElement>(null), canvas = useRef<HTMLCanvasElement>(null);
   const runtime = useRef<ThreeRuntime | null>(null);
   const hits = useRef(new Map<string, HTMLElement>());
+  const positionedElements = useRef(new WeakSet<HTMLElement>());
   const [lighting, setLighting] = useState<LightingPreset>(DEFAULT_VISUAL_PRESET.lighting);
   const [shadows, setShadows] = useState(DEFAULT_VISUAL_PRESET.shadows);
   const [gi, setGI] = useState(DEFAULT_VISUAL_PRESET.gi), [ao, setAO] = useState(DEFAULT_VISUAL_PRESET.ao);
@@ -76,7 +77,12 @@ export default function ThreeScene(props: ThreeSceneProps) {
   }, []);
   useEffect(() => { runtime.current?.update(latest.current); });
   const bind = (key: string) => (element: HTMLElement | null) => {
-    if (element) hits.current.set(key, element); else hits.current.delete(key);
+    if (element) {
+      hits.current.set(key, element);
+      if (!positionedElements.current.has(element)) {
+        element.hidden = true; positionedElements.current.add(element); runtime.current?.requestDraw();
+      }
+    } else hits.current.delete(key);
   };
   const keyboardSelect = (event: React.MouseEvent, selection: TileSelection) => {
     // Pointer selection is handled by the drag-aware runtime, keyboard activation by React.
@@ -143,3 +149,4 @@ export default function ThreeScene(props: ThreeSceneProps) {
     </div>
   );
 }
+
