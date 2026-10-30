@@ -45,7 +45,7 @@ if (command === "start") {
   for (const [key, filename] of Object.entries(recipes)) if (category === "all" || category === key) runClient(["run", local("assets", "source", "3d", filename)]);
 } else if (command === "export") {
   const ids = args.length ? args : catalog;
-  if (ids.some(id => !catalog.includes(id))) throw Error("Unknown asset ID.");
+  if (ids.some(id => !catalog.includes(id) && id !== "alden-ink")) throw Error("Unknown asset ID.");
   const sources = ids.map(id => local("assets", "source", "3d", `${id}.blend`));
   if (sources.some(file => !existsSync(file))) throw Error("An editable Blender source is missing.");
   for (const file of sources) {
@@ -60,4 +60,8 @@ if (command === "start") {
 if (command === "generate" || command === "export") {
   const checked = spawnSync(process.execPath, [local("scripts", "check-art3d.mjs"), "--write"], { cwd: root, stdio: "inherit", windowsHide: true });
   if (checked.status !== 0) process.exit(checked.status || 1);
+  if (args.includes("alden-ink")) {
+    const ink = spawnSync(process.execPath, [local("scripts", "check-ink-study.mjs"), "--write"], { cwd: root, stdio: "inherit", windowsHide: true });
+    if (ink.status !== 0) process.exit(ink.status || 1);
+  }
 }

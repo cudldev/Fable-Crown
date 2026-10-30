@@ -1,0 +1,8352 @@
+{
+  "version": "bda888271296c45a",
+  "method": "Generated top-down pigment art -> voxel-cell color sampling -> authored flat volumes/material joins -> shared opaque palette -> native VOX",
+  "style": "terrain-warm-storybook-a",
+  "status": "Lead-reviewed usable draft toward style A; user art acceptance and game integration pending",
+  "tileMetres": 1,
+  "pitch": 0.0625,
+  "levelMetres": 0.5,
+  "variantPeriod": 4,
+  "variants": {
+    "grass": [
+      "grass-a",
+      "grass-v01",
+      "grass-v02",
+      "grass-v03",
+      "grass-v04",
+      "grass-v05",
+      "grass-v06",
+      "grass-v07",
+      "grass-v08",
+      "grass-v09",
+      "grass-v10",
+      "grass-v11",
+      "grass-v12",
+      "grass-v13",
+      "grass-v14",
+      "grass-v15"
+    ],
+    "dirt": [
+      "dirt-a",
+      "dirt-v01",
+      "dirt-v02",
+      "dirt-v03",
+      "dirt-v04",
+      "dirt-v05",
+      "dirt-v06",
+      "dirt-v07",
+      "dirt-v08",
+      "dirt-v09",
+      "dirt-v10",
+      "dirt-v11",
+      "dirt-v12",
+      "dirt-v13",
+      "dirt-v14",
+      "dirt-v15"
+    ],
+    "cobble": [
+      "cobble-a",
+      "cobble-v01",
+      "cobble-v02",
+      "cobble-v03",
+      "cobble-v04",
+      "cobble-v05",
+      "cobble-v06",
+      "cobble-v07",
+      "cobble-v08",
+      "cobble-v09",
+      "cobble-v10",
+      "cobble-v11",
+      "cobble-v12",
+      "cobble-v13",
+      "cobble-v14",
+      "cobble-v15"
+    ],
+    "sand": [
+      "sand-a",
+      "sand-v01",
+      "sand-v02",
+      "sand-v03",
+      "sand-v04",
+      "sand-v05",
+      "sand-v06",
+      "sand-v07",
+      "sand-v08",
+      "sand-v09",
+      "sand-v10",
+      "sand-v11",
+      "sand-v12",
+      "sand-v13",
+      "sand-v14",
+      "sand-v15"
+    ],
+    "grass-dirt-edge": [
+      "grass-dirt-edge",
+      "grass-dirt-edge-v01",
+      "grass-dirt-edge-v02",
+      "grass-dirt-edge-v03",
+      "grass-dirt-edge-v04",
+      "grass-dirt-edge-v05",
+      "grass-dirt-edge-v06",
+      "grass-dirt-edge-v07",
+      "grass-dirt-edge-v08",
+      "grass-dirt-edge-v09",
+      "grass-dirt-edge-v10",
+      "grass-dirt-edge-v11",
+      "grass-dirt-edge-v12",
+      "grass-dirt-edge-v13",
+      "grass-dirt-edge-v14",
+      "grass-dirt-edge-v15"
+    ],
+    "grass-dirt-edge-south": [
+      "grass-dirt-edge-south",
+      "grass-dirt-edge-south-v01",
+      "grass-dirt-edge-south-v02",
+      "grass-dirt-edge-south-v03",
+      "grass-dirt-edge-south-v04",
+      "grass-dirt-edge-south-v05",
+      "grass-dirt-edge-south-v06",
+      "grass-dirt-edge-south-v07",
+      "grass-dirt-edge-south-v08",
+      "grass-dirt-edge-south-v09",
+      "grass-dirt-edge-south-v10",
+      "grass-dirt-edge-south-v11",
+      "grass-dirt-edge-south-v12",
+      "grass-dirt-edge-south-v13",
+      "grass-dirt-edge-south-v14",
+      "grass-dirt-edge-south-v15"
+    ],
+    "grass-dirt-outer": [
+      "grass-dirt-outer",
+      "grass-dirt-outer-v01",
+      "grass-dirt-outer-v02",
+      "grass-dirt-outer-v03",
+      "grass-dirt-outer-v04",
+      "grass-dirt-outer-v05",
+      "grass-dirt-outer-v06",
+      "grass-dirt-outer-v07",
+      "grass-dirt-outer-v08",
+      "grass-dirt-outer-v09",
+      "grass-dirt-outer-v10",
+      "grass-dirt-outer-v11",
+      "grass-dirt-outer-v12",
+      "grass-dirt-outer-v13",
+      "grass-dirt-outer-v14",
+      "grass-dirt-outer-v15"
+    ],
+    "grass-dirt-inner": [
+      "grass-dirt-inner",
+      "grass-dirt-inner-v01",
+      "grass-dirt-inner-v02",
+      "grass-dirt-inner-v03",
+      "grass-dirt-inner-v04",
+      "grass-dirt-inner-v05",
+      "grass-dirt-inner-v06",
+      "grass-dirt-inner-v07",
+      "grass-dirt-inner-v08",
+      "grass-dirt-inner-v09",
+      "grass-dirt-inner-v10",
+      "grass-dirt-inner-v11",
+      "grass-dirt-inner-v12",
+      "grass-dirt-inner-v13",
+      "grass-dirt-inner-v14",
+      "grass-dirt-inner-v15"
+    ],
+    "grass-sand-edge": [
+      "grass-sand-edge",
+      "grass-sand-edge-v01",
+      "grass-sand-edge-v02",
+      "grass-sand-edge-v03",
+      "grass-sand-edge-v04",
+      "grass-sand-edge-v05",
+      "grass-sand-edge-v06",
+      "grass-sand-edge-v07",
+      "grass-sand-edge-v08",
+      "grass-sand-edge-v09",
+      "grass-sand-edge-v10",
+      "grass-sand-edge-v11",
+      "grass-sand-edge-v12",
+      "grass-sand-edge-v13",
+      "grass-sand-edge-v14",
+      "grass-sand-edge-v15"
+    ],
+    "grass-sand-edge-south": [
+      "grass-sand-edge-south",
+      "grass-sand-edge-south-v01",
+      "grass-sand-edge-south-v02",
+      "grass-sand-edge-south-v03",
+      "grass-sand-edge-south-v04",
+      "grass-sand-edge-south-v05",
+      "grass-sand-edge-south-v06",
+      "grass-sand-edge-south-v07",
+      "grass-sand-edge-south-v08",
+      "grass-sand-edge-south-v09",
+      "grass-sand-edge-south-v10",
+      "grass-sand-edge-south-v11",
+      "grass-sand-edge-south-v12",
+      "grass-sand-edge-south-v13",
+      "grass-sand-edge-south-v14",
+      "grass-sand-edge-south-v15"
+    ],
+    "grass-sand-outer": [
+      "grass-sand-outer",
+      "grass-sand-outer-v01",
+      "grass-sand-outer-v02",
+      "grass-sand-outer-v03",
+      "grass-sand-outer-v04",
+      "grass-sand-outer-v05",
+      "grass-sand-outer-v06",
+      "grass-sand-outer-v07",
+      "grass-sand-outer-v08",
+      "grass-sand-outer-v09",
+      "grass-sand-outer-v10",
+      "grass-sand-outer-v11",
+      "grass-sand-outer-v12",
+      "grass-sand-outer-v13",
+      "grass-sand-outer-v14",
+      "grass-sand-outer-v15"
+    ],
+    "grass-sand-inner": [
+      "grass-sand-inner",
+      "grass-sand-inner-v01",
+      "grass-sand-inner-v02",
+      "grass-sand-inner-v03",
+      "grass-sand-inner-v04",
+      "grass-sand-inner-v05",
+      "grass-sand-inner-v06",
+      "grass-sand-inner-v07",
+      "grass-sand-inner-v08",
+      "grass-sand-inner-v09",
+      "grass-sand-inner-v10",
+      "grass-sand-inner-v11",
+      "grass-sand-inner-v12",
+      "grass-sand-inner-v13",
+      "grass-sand-inner-v14",
+      "grass-sand-inner-v15"
+    ],
+    "dirt-cobble-edge": [
+      "dirt-cobble-edge",
+      "dirt-cobble-edge-v01",
+      "dirt-cobble-edge-v02",
+      "dirt-cobble-edge-v03",
+      "dirt-cobble-edge-v04",
+      "dirt-cobble-edge-v05",
+      "dirt-cobble-edge-v06",
+      "dirt-cobble-edge-v07",
+      "dirt-cobble-edge-v08",
+      "dirt-cobble-edge-v09",
+      "dirt-cobble-edge-v10",
+      "dirt-cobble-edge-v11",
+      "dirt-cobble-edge-v12",
+      "dirt-cobble-edge-v13",
+      "dirt-cobble-edge-v14",
+      "dirt-cobble-edge-v15"
+    ],
+    "dirt-cobble-edge-south": [
+      "dirt-cobble-edge-south",
+      "dirt-cobble-edge-south-v01",
+      "dirt-cobble-edge-south-v02",
+      "dirt-cobble-edge-south-v03",
+      "dirt-cobble-edge-south-v04",
+      "dirt-cobble-edge-south-v05",
+      "dirt-cobble-edge-south-v06",
+      "dirt-cobble-edge-south-v07",
+      "dirt-cobble-edge-south-v08",
+      "dirt-cobble-edge-south-v09",
+      "dirt-cobble-edge-south-v10",
+      "dirt-cobble-edge-south-v11",
+      "dirt-cobble-edge-south-v12",
+      "dirt-cobble-edge-south-v13",
+      "dirt-cobble-edge-south-v14",
+      "dirt-cobble-edge-south-v15"
+    ],
+    "dirt-cobble-outer": [
+      "dirt-cobble-outer",
+      "dirt-cobble-outer-v01",
+      "dirt-cobble-outer-v02",
+      "dirt-cobble-outer-v03",
+      "dirt-cobble-outer-v04",
+      "dirt-cobble-outer-v05",
+      "dirt-cobble-outer-v06",
+      "dirt-cobble-outer-v07",
+      "dirt-cobble-outer-v08",
+      "dirt-cobble-outer-v09",
+      "dirt-cobble-outer-v10",
+      "dirt-cobble-outer-v11",
+      "dirt-cobble-outer-v12",
+      "dirt-cobble-outer-v13",
+      "dirt-cobble-outer-v14",
+      "dirt-cobble-outer-v15"
+    ],
+    "dirt-cobble-inner": [
+      "dirt-cobble-inner",
+      "dirt-cobble-inner-v01",
+      "dirt-cobble-inner-v02",
+      "dirt-cobble-inner-v03",
+      "dirt-cobble-inner-v04",
+      "dirt-cobble-inner-v05",
+      "dirt-cobble-inner-v06",
+      "dirt-cobble-inner-v07",
+      "dirt-cobble-inner-v08",
+      "dirt-cobble-inner-v09",
+      "dirt-cobble-inner-v10",
+      "dirt-cobble-inner-v11",
+      "dirt-cobble-inner-v12",
+      "dirt-cobble-inner-v13",
+      "dirt-cobble-inner-v14",
+      "dirt-cobble-inner-v15"
+    ],
+    "cliff-stone": [
+      "cliff-stone",
+      "cliff-stone-v01",
+      "cliff-stone-v02",
+      "cliff-stone-v03",
+      "cliff-stone-v04",
+      "cliff-stone-v05",
+      "cliff-stone-v06",
+      "cliff-stone-v07",
+      "cliff-stone-v08",
+      "cliff-stone-v09",
+      "cliff-stone-v10",
+      "cliff-stone-v11",
+      "cliff-stone-v12",
+      "cliff-stone-v13",
+      "cliff-stone-v14",
+      "cliff-stone-v15"
+    ],
+    "stairs-stone-east": [
+      "stairs-stone-east",
+      "stairs-stone-east-v01",
+      "stairs-stone-east-v02",
+      "stairs-stone-east-v03",
+      "stairs-stone-east-v04",
+      "stairs-stone-east-v05",
+      "stairs-stone-east-v06",
+      "stairs-stone-east-v07",
+      "stairs-stone-east-v08",
+      "stairs-stone-east-v09",
+      "stairs-stone-east-v10",
+      "stairs-stone-east-v11",
+      "stairs-stone-east-v12",
+      "stairs-stone-east-v13",
+      "stairs-stone-east-v14",
+      "stairs-stone-east-v15"
+    ]
+  },
+  "reviewIds": [
+    "grass-a",
+    "grass-v05",
+    "grass-v10",
+    "dirt-a",
+    "dirt-v05",
+    "cobble-a",
+    "cobble-v05",
+    "sand-a",
+    "grass-dirt-edge",
+    "grass-dirt-outer",
+    "grass-dirt-inner",
+    "dirt-cobble-edge",
+    "grass-sand-edge",
+    "cliff-stone",
+    "stairs-stone-east"
+  ],
+  "sourceArtwork": {
+    "grass": {
+      "file": "artwork/grass.png",
+      "sha256": "713eb1c4d9530fc8e2ed1cb18ab4a4a54991fbe9dec2179e074fe846abf45288"
+    },
+    "dirt": {
+      "file": "artwork/dirt.png",
+      "sha256": "688ff06eb2dbcd3ddf61e22f599d7f2aabc4415000a5505adadae9a52225f7fe"
+    },
+    "cobble": {
+      "file": "artwork/cobble.png",
+      "sha256": "9b845da9bf332e6ef8bf9e74faceaf0133f51dfa40df4ebd744891f187a44183"
+    },
+    "sand": {
+      "file": "artwork/sand.png",
+      "sha256": "73f37aeb90a535a92ab8678cceec8eb0fd8a6b99d4d99e4ac72c44956145ea0c"
+    }
+  },
+  "sourceAxes": "X east, Y north, Z up; runtime X east, Y up, Z south",
+  "edgeContract": "Exactly flat16x16top at0m;8cells below. World phase mod(x,4),mod(-z,4) preserves macro-artwork. North/south joins do not rotate artwork.",
+  "provenance": {
+    "logicalMaterialField": [
+      64,
+      64
+    ],
+    "rasterChanged": false,
+    "voxelDataConditioning": "Area sample ->4voxel periodic edge bridge -> soft material joins ->128color median-cut. Side strata authored separately.",
+    "scope": "Color source plus exact native tile geometry. No TRELLIS, recovered shape, albedo extraction, or raster output rewrite."
+  },
+  "assets": [
+    {
+      "id": "grass-a",
+      "file": "grass-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v01",
+      "file": "grass-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v02",
+      "file": "grass-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v03",
+      "file": "grass-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v04",
+      "file": "grass-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v05",
+      "file": "grass-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v06",
+      "file": "grass-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v07",
+      "file": "grass-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v08",
+      "file": "grass-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v09",
+      "file": "grass-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v10",
+      "file": "grass-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v11",
+      "file": "grass-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v12",
+      "file": "grass-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v13",
+      "file": "grass-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v14",
+      "file": "grass-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "grass-v15",
+      "file": "grass-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "grass"
+    },
+    {
+      "id": "dirt-a",
+      "file": "dirt-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v01",
+      "file": "dirt-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v02",
+      "file": "dirt-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v03",
+      "file": "dirt-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v04",
+      "file": "dirt-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v05",
+      "file": "dirt-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v06",
+      "file": "dirt-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v07",
+      "file": "dirt-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v08",
+      "file": "dirt-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v09",
+      "file": "dirt-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v10",
+      "file": "dirt-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v11",
+      "file": "dirt-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v12",
+      "file": "dirt-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v13",
+      "file": "dirt-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v14",
+      "file": "dirt-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "dirt-v15",
+      "file": "dirt-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "dirt"
+    },
+    {
+      "id": "cobble-a",
+      "file": "cobble-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v01",
+      "file": "cobble-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v02",
+      "file": "cobble-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v03",
+      "file": "cobble-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v04",
+      "file": "cobble-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v05",
+      "file": "cobble-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v06",
+      "file": "cobble-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v07",
+      "file": "cobble-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v08",
+      "file": "cobble-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v09",
+      "file": "cobble-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v10",
+      "file": "cobble-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v11",
+      "file": "cobble-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v12",
+      "file": "cobble-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v13",
+      "file": "cobble-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v14",
+      "file": "cobble-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "cobble-v15",
+      "file": "cobble-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "cobble"
+    },
+    {
+      "id": "sand-a",
+      "file": "sand-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v01",
+      "file": "sand-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v02",
+      "file": "sand-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v03",
+      "file": "sand-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v04",
+      "file": "sand-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v05",
+      "file": "sand-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v06",
+      "file": "sand-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v07",
+      "file": "sand-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v08",
+      "file": "sand-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v09",
+      "file": "sand-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v10",
+      "file": "sand-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v11",
+      "file": "sand-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v12",
+      "file": "sand-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v13",
+      "file": "sand-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v14",
+      "file": "sand-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "sand-v15",
+      "file": "sand-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "sand"
+    },
+    {
+      "id": "grass-dirt-edge",
+      "file": "grass-dirt-edge.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v01",
+      "file": "grass-dirt-edge-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v02",
+      "file": "grass-dirt-edge-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v03",
+      "file": "grass-dirt-edge-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v04",
+      "file": "grass-dirt-edge-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v05",
+      "file": "grass-dirt-edge-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v06",
+      "file": "grass-dirt-edge-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v07",
+      "file": "grass-dirt-edge-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v08",
+      "file": "grass-dirt-edge-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v09",
+      "file": "grass-dirt-edge-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v10",
+      "file": "grass-dirt-edge-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v11",
+      "file": "grass-dirt-edge-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v12",
+      "file": "grass-dirt-edge-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v13",
+      "file": "grass-dirt-edge-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v14",
+      "file": "grass-dirt-edge-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-v15",
+      "file": "grass-dirt-edge-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south",
+      "file": "grass-dirt-edge-south.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v01",
+      "file": "grass-dirt-edge-south-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v02",
+      "file": "grass-dirt-edge-south-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v03",
+      "file": "grass-dirt-edge-south-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v04",
+      "file": "grass-dirt-edge-south-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v05",
+      "file": "grass-dirt-edge-south-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v06",
+      "file": "grass-dirt-edge-south-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v07",
+      "file": "grass-dirt-edge-south-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v08",
+      "file": "grass-dirt-edge-south-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v09",
+      "file": "grass-dirt-edge-south-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v10",
+      "file": "grass-dirt-edge-south-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v11",
+      "file": "grass-dirt-edge-south-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v12",
+      "file": "grass-dirt-edge-south-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v13",
+      "file": "grass-dirt-edge-south-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v14",
+      "file": "grass-dirt-edge-south-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-edge-south-v15",
+      "file": "grass-dirt-edge-south-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer",
+      "file": "grass-dirt-outer.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v01",
+      "file": "grass-dirt-outer-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v02",
+      "file": "grass-dirt-outer-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v03",
+      "file": "grass-dirt-outer-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v04",
+      "file": "grass-dirt-outer-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v05",
+      "file": "grass-dirt-outer-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v06",
+      "file": "grass-dirt-outer-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v07",
+      "file": "grass-dirt-outer-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v08",
+      "file": "grass-dirt-outer-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v09",
+      "file": "grass-dirt-outer-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v10",
+      "file": "grass-dirt-outer-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v11",
+      "file": "grass-dirt-outer-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v12",
+      "file": "grass-dirt-outer-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v13",
+      "file": "grass-dirt-outer-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v14",
+      "file": "grass-dirt-outer-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-outer-v15",
+      "file": "grass-dirt-outer-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner",
+      "file": "grass-dirt-inner.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v01",
+      "file": "grass-dirt-inner-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v02",
+      "file": "grass-dirt-inner-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v03",
+      "file": "grass-dirt-inner-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v04",
+      "file": "grass-dirt-inner-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v05",
+      "file": "grass-dirt-inner-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v06",
+      "file": "grass-dirt-inner-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v07",
+      "file": "grass-dirt-inner-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v08",
+      "file": "grass-dirt-inner-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v09",
+      "file": "grass-dirt-inner-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v10",
+      "file": "grass-dirt-inner-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v11",
+      "file": "grass-dirt-inner-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v12",
+      "file": "grass-dirt-inner-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v13",
+      "file": "grass-dirt-inner-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v14",
+      "file": "grass-dirt-inner-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-dirt-inner-v15",
+      "file": "grass-dirt-inner-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "dirt",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge",
+      "file": "grass-sand-edge.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v01",
+      "file": "grass-sand-edge-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v02",
+      "file": "grass-sand-edge-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v03",
+      "file": "grass-sand-edge-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v04",
+      "file": "grass-sand-edge-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v05",
+      "file": "grass-sand-edge-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v06",
+      "file": "grass-sand-edge-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v07",
+      "file": "grass-sand-edge-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v08",
+      "file": "grass-sand-edge-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v09",
+      "file": "grass-sand-edge-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v10",
+      "file": "grass-sand-edge-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v11",
+      "file": "grass-sand-edge-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v12",
+      "file": "grass-sand-edge-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v13",
+      "file": "grass-sand-edge-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v14",
+      "file": "grass-sand-edge-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-v15",
+      "file": "grass-sand-edge-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south",
+      "file": "grass-sand-edge-south.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v01",
+      "file": "grass-sand-edge-south-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v02",
+      "file": "grass-sand-edge-south-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v03",
+      "file": "grass-sand-edge-south-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v04",
+      "file": "grass-sand-edge-south-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v05",
+      "file": "grass-sand-edge-south-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v06",
+      "file": "grass-sand-edge-south-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v07",
+      "file": "grass-sand-edge-south-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v08",
+      "file": "grass-sand-edge-south-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v09",
+      "file": "grass-sand-edge-south-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v10",
+      "file": "grass-sand-edge-south-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v11",
+      "file": "grass-sand-edge-south-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v12",
+      "file": "grass-sand-edge-south-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v13",
+      "file": "grass-sand-edge-south-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v14",
+      "file": "grass-sand-edge-south-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-edge-south-v15",
+      "file": "grass-sand-edge-south-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer",
+      "file": "grass-sand-outer.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v01",
+      "file": "grass-sand-outer-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v02",
+      "file": "grass-sand-outer-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v03",
+      "file": "grass-sand-outer-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v04",
+      "file": "grass-sand-outer-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v05",
+      "file": "grass-sand-outer-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v06",
+      "file": "grass-sand-outer-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v07",
+      "file": "grass-sand-outer-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v08",
+      "file": "grass-sand-outer-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v09",
+      "file": "grass-sand-outer-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v10",
+      "file": "grass-sand-outer-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v11",
+      "file": "grass-sand-outer-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v12",
+      "file": "grass-sand-outer-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v13",
+      "file": "grass-sand-outer-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v14",
+      "file": "grass-sand-outer-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-outer-v15",
+      "file": "grass-sand-outer-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner",
+      "file": "grass-sand-inner.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v01",
+      "file": "grass-sand-inner-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v02",
+      "file": "grass-sand-inner-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v03",
+      "file": "grass-sand-inner-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v04",
+      "file": "grass-sand-inner-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v05",
+      "file": "grass-sand-inner-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v06",
+      "file": "grass-sand-inner-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v07",
+      "file": "grass-sand-inner-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v08",
+      "file": "grass-sand-inner-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v09",
+      "file": "grass-sand-inner-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v10",
+      "file": "grass-sand-inner-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v11",
+      "file": "grass-sand-inner-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v12",
+      "file": "grass-sand-inner-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v13",
+      "file": "grass-sand-inner-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v14",
+      "file": "grass-sand-inner-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "grass-sand-inner-v15",
+      "file": "grass-sand-inner-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "grass",
+        "to": "sand",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge",
+      "file": "dirt-cobble-edge.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v01",
+      "file": "dirt-cobble-edge-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v02",
+      "file": "dirt-cobble-edge-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v03",
+      "file": "dirt-cobble-edge-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v04",
+      "file": "dirt-cobble-edge-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v05",
+      "file": "dirt-cobble-edge-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v06",
+      "file": "dirt-cobble-edge-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v07",
+      "file": "dirt-cobble-edge-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v08",
+      "file": "dirt-cobble-edge-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v09",
+      "file": "dirt-cobble-edge-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v10",
+      "file": "dirt-cobble-edge-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v11",
+      "file": "dirt-cobble-edge-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v12",
+      "file": "dirt-cobble-edge-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v13",
+      "file": "dirt-cobble-edge-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v14",
+      "file": "dirt-cobble-edge-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-v15",
+      "file": "dirt-cobble-edge-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south",
+      "file": "dirt-cobble-edge-south.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v01",
+      "file": "dirt-cobble-edge-south-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v02",
+      "file": "dirt-cobble-edge-south-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v03",
+      "file": "dirt-cobble-edge-south-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v04",
+      "file": "dirt-cobble-edge-south-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v05",
+      "file": "dirt-cobble-edge-south-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v06",
+      "file": "dirt-cobble-edge-south-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v07",
+      "file": "dirt-cobble-edge-south-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v08",
+      "file": "dirt-cobble-edge-south-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v09",
+      "file": "dirt-cobble-edge-south-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v10",
+      "file": "dirt-cobble-edge-south-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v11",
+      "file": "dirt-cobble-edge-south-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v12",
+      "file": "dirt-cobble-edge-south-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v13",
+      "file": "dirt-cobble-edge-south-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v14",
+      "file": "dirt-cobble-edge-south-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-edge-south-v15",
+      "file": "dirt-cobble-edge-south-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "edge-south",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer",
+      "file": "dirt-cobble-outer.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v01",
+      "file": "dirt-cobble-outer-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v02",
+      "file": "dirt-cobble-outer-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v03",
+      "file": "dirt-cobble-outer-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v04",
+      "file": "dirt-cobble-outer-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v05",
+      "file": "dirt-cobble-outer-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v06",
+      "file": "dirt-cobble-outer-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v07",
+      "file": "dirt-cobble-outer-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v08",
+      "file": "dirt-cobble-outer-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v09",
+      "file": "dirt-cobble-outer-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v10",
+      "file": "dirt-cobble-outer-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v11",
+      "file": "dirt-cobble-outer-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v12",
+      "file": "dirt-cobble-outer-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v13",
+      "file": "dirt-cobble-outer-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v14",
+      "file": "dirt-cobble-outer-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-outer-v15",
+      "file": "dirt-cobble-outer-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "outer",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner",
+      "file": "dirt-cobble-inner.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v01",
+      "file": "dirt-cobble-inner-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v02",
+      "file": "dirt-cobble-inner-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v03",
+      "file": "dirt-cobble-inner-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v04",
+      "file": "dirt-cobble-inner-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v05",
+      "file": "dirt-cobble-inner-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v06",
+      "file": "dirt-cobble-inner-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v07",
+      "file": "dirt-cobble-inner-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v08",
+      "file": "dirt-cobble-inner-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v09",
+      "file": "dirt-cobble-inner-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v10",
+      "file": "dirt-cobble-inner-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v11",
+      "file": "dirt-cobble-inner-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v12",
+      "file": "dirt-cobble-inner-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v13",
+      "file": "dirt-cobble-inner-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v14",
+      "file": "dirt-cobble-inner-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "dirt-cobble-inner-v15",
+      "file": "dirt-cobble-inner-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "transition": {
+        "from": "dirt",
+        "to": "cobble",
+        "profile": "inner",
+        "softBandVoxels": 9
+      }
+    },
+    {
+      "id": "cliff-stone",
+      "file": "cliff-stone.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v01",
+      "file": "cliff-stone-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v02",
+      "file": "cliff-stone-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v03",
+      "file": "cliff-stone-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v04",
+      "file": "cliff-stone-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v05",
+      "file": "cliff-stone-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v06",
+      "file": "cliff-stone-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v07",
+      "file": "cliff-stone-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v08",
+      "file": "cliff-stone-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v09",
+      "file": "cliff-stone-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v10",
+      "file": "cliff-stone-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v11",
+      "file": "cliff-stone-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v12",
+      "file": "cliff-stone-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v13",
+      "file": "cliff-stone-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v14",
+      "file": "cliff-stone-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "cliff-stone-v15",
+      "file": "cliff-stone-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "flat",
+      "topMetres": 0,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 2048,
+      "previewOnly": true,
+      "material": "stone"
+    },
+    {
+      "id": "stairs-stone-east",
+      "file": "stairs-stone-east.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        0,
+        0
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v01",
+      "file": "stairs-stone-east-v01.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        1,
+        0
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v02",
+      "file": "stairs-stone-east-v02.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        2,
+        0
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v03",
+      "file": "stairs-stone-east-v03.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        3,
+        0
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v04",
+      "file": "stairs-stone-east-v04.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        0,
+        1
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v05",
+      "file": "stairs-stone-east-v05.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        1,
+        1
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v06",
+      "file": "stairs-stone-east-v06.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        2,
+        1
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v07",
+      "file": "stairs-stone-east-v07.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        3,
+        1
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v08",
+      "file": "stairs-stone-east-v08.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        0,
+        2
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v09",
+      "file": "stairs-stone-east-v09.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        1,
+        2
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v10",
+      "file": "stairs-stone-east-v10.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        2,
+        2
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v11",
+      "file": "stairs-stone-east-v11.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        3,
+        2
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v12",
+      "file": "stairs-stone-east-v12.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        0,
+        3
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v13",
+      "file": "stairs-stone-east-v13.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        1,
+        3
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v14",
+      "file": "stairs-stone-east-v14.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        2,
+        3
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    },
+    {
+      "id": "stairs-stone-east-v15",
+      "file": "stairs-stone-east-v15.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "shape": "stair",
+      "topMetres": null,
+      "phase": [
+        3,
+        3
+      ],
+      "cells": 1280,
+      "previewOnly": true,
+      "material": "stone",
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ]
+    }
+  ]
+}

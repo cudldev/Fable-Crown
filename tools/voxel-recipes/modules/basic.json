@@ -1,0 +1,316 @@
+{
+  "version": 1,
+  "modules": {
+    "tree.limb": {
+      "parameters": {
+        "points": {
+          "type": "points",
+          "default": [
+            [
+              0,
+              0,
+              0,
+              0.2
+            ],
+            [
+              0,
+              0,
+              1,
+              0.1
+            ]
+          ]
+        },
+        "material": {
+          "type": "material",
+          "default": "bark"
+        }
+      },
+      "nodes": {
+        "limb": {
+          "op": "sweep",
+          "points": {
+            "$param": "points"
+          },
+          "material": {
+            "$param": "material"
+          }
+        }
+      },
+      "output": "limb"
+    },
+    "tree.foliage-cluster": {
+      "parameters": {
+        "material": {
+          "type": "material",
+          "default": "leaf"
+        },
+        "accent": {
+          "type": "material",
+          "default": "leaf-light"
+        },
+        "underside": {
+          "type": "material",
+          "default": "leaf-shadow"
+        },
+        "step": {
+          "type": "number",
+          "default": 0.2,
+          "min": 0.125,
+          "max": 0.3
+        }
+      },
+      "nodes": {
+        "core": {
+          "op": "ellipsoid",
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "radii": [
+            0.72,
+            0.66,
+            0.48
+          ],
+          "exponent": 2.6,
+          "step": {
+            "$param": "step"
+          },
+          "material": {
+            "$param": "material"
+          }
+        },
+        "west": {
+          "op": "ellipsoid",
+          "center": [
+            -0.55,
+            -0.1,
+            -0.08
+          ],
+          "radii": [
+            0.45,
+            0.44,
+            0.32
+          ],
+          "exponent": 2.7,
+          "step": {
+            "$param": "step"
+          },
+          "material": {
+            "$param": "material"
+          }
+        },
+        "east": {
+          "op": "ellipsoid",
+          "center": [
+            0.5,
+            0.12,
+            -0.12
+          ],
+          "radii": [
+            0.44,
+            0.48,
+            0.32
+          ],
+          "exponent": 2.7,
+          "step": {
+            "$param": "step"
+          },
+          "material": {
+            "$param": "material"
+          }
+        },
+        "front": {
+          "op": "ellipsoid",
+          "center": [
+            0.05,
+            -0.5,
+            -0.14
+          ],
+          "radii": [
+            0.48,
+            0.37,
+            0.3
+          ],
+          "exponent": 2.7,
+          "step": {
+            "$param": "step"
+          },
+          "material": {
+            "$param": "material"
+          }
+        },
+        "back": {
+          "op": "ellipsoid",
+          "center": [
+            -0.1,
+            0.47,
+            -0.04
+          ],
+          "radii": [
+            0.42,
+            0.4,
+            0.32
+          ],
+          "exponent": 2.7,
+          "step": {
+            "$param": "step"
+          },
+          "material": {
+            "$param": "material"
+          }
+        },
+        "upper": {
+          "op": "ellipsoid",
+          "center": [
+            -0.13,
+            0.1,
+            0.34
+          ],
+          "radii": [
+            0.44,
+            0.43,
+            0.3
+          ],
+          "exponent": 2.7,
+          "step": {
+            "$param": "step"
+          },
+          "material": {
+            "$param": "accent"
+          }
+        },
+        "lower": {
+          "op": "ellipsoid",
+          "center": [
+            0.18,
+            -0.06,
+            -0.35
+          ],
+          "radii": [
+            0.35,
+            0.36,
+            0.26
+          ],
+          "exponent": 2.7,
+          "step": {
+            "$param": "step"
+          },
+          "material": {
+            "$param": "underside"
+          }
+        },
+        "cluster": {
+          "op": "union",
+          "inputs": [
+            "core",
+            "west",
+            "east",
+            "front",
+            "back",
+            "upper",
+            "lower"
+          ]
+        }
+      },
+      "output": "cluster"
+    },
+    "prop.hoop": {
+      "parameters": {
+        "radius": {
+          "type": "number",
+          "default": 0.42,
+          "min": 0.05,
+          "max": 2
+        },
+        "height": {
+          "type": "number",
+          "default": 0.08,
+          "min": 0.01,
+          "max": 0.5
+        },
+        "material": {
+          "type": "material",
+          "default": "iron"
+        },
+        "thickness": {
+          "type": "number",
+          "default": 0.0625,
+          "min": 0.01,
+          "max": 0.2
+        }
+      },
+      "nodes": {
+        "outer": {
+          "op": "lathe",
+          "profile": [
+            [
+              0,
+              {
+                "$param": "radius"
+              }
+            ],
+            [
+              {
+                "$param": "height"
+              },
+              {
+                "$param": "radius"
+              }
+            ]
+          ],
+          "material": {
+            "$param": "material"
+          }
+        },
+        "inner": {
+          "op": "lathe",
+          "profile": [
+            [
+              -0.01,
+              {
+                "$sub": [
+                  {
+                    "$param": "radius"
+                  },
+                  {
+                    "$param": "thickness"
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "$add": [
+                  {
+                    "$param": "height"
+                  },
+                  0.01
+                ]
+              },
+              {
+                "$sub": [
+                  {
+                    "$param": "radius"
+                  },
+                  {
+                    "$param": "thickness"
+                  }
+                ]
+              }
+            ]
+          ],
+          "material": {
+            "$param": "material"
+          }
+        },
+        "ring": {
+          "op": "difference",
+          "base": "outer",
+          "cut": "inner"
+        }
+      },
+      "output": "ring"
+    }
+  }
+}

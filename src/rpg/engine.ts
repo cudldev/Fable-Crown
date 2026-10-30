@@ -261,6 +261,27 @@ function route(s: RpgState, p: ActorState, o: WorldObject): boolean {
 }
 function travel(s: RpgState, p: ActorState) {
   const player = p.id === 0;
+  if (player && s.control.source === "autonomous" && !s.control.paceOverride) {
+    const threatened = s.enemies.some((e) => e.health > 0 && distance(p.position, e.position) <= 10 &&
+      (e.engagedUntil > s.tick || (ENEMIES[e.definitionId].aggressive && distance(p.position, e.position) <= 6)));
+    const retreating = s.control.active?.type === "move" && p.health <= Math.max(3,
+      Math.ceil(maxHealth(p) * (0.2 + 0.3 * getPlannerProfile(s).caution / 100))) && !p.inventory.some((i) => ITEMS[i.itemId].heals);
+    // Never stop during an engagement, recovery trip or retreat. Keep a reserve for emergencies.
+    const urgent = threatened || retreating || s.control.active?.type === "recover";
+    const canRest = !urgent && s.control.active?.type !== "attack" && !p.action;
+    if (canRest && ((s.control.staminaResting && p.runEnergy < 6000) || (p.runEnergy <= 1500 && p.path.length >= 16))) {
+      s.control.staminaResting = true;
+      s.control.running = false;
+      // Deliberate rest recovers faster than working/walking, making a planned break useful.
+      p.runEnergy = Math.min(10000, p.runEnergy + 150);
+      p.activity = "Resting to recover run energy";
+      return;
+    }
+    delete s.control.staminaResting;
+    if (urgent) s.control.running = p.runEnergy >= 60;
+    else if (p.path.length < 4 || p.runEnergy <= 1500) s.control.running = false;
+    else if (p.runEnergy >= 4000) s.control.running = true;
+  } else if (player) delete s.control.staminaResting;
   if (player && p.runEnergy < 60) s.control.running = false;
   const running = player ? s.control.running !== false : p.runEnergy > 0;
   let steps = running ? 2 : 1;
@@ -282,6 +303,8 @@ function travel(s: RpgState, p: ActorState) {
     if (running && p.runEnergy > 0) p.runEnergy = Math.max(0, p.runEnergy - 60);
   }
   if (player && running && p.runEnergy < 60) s.control.running = false;
+  if (player && s.control.source === "autonomous")
+    p.activity = running ? "Running to the next requirement" : "Walking while run energy recovers";
 }
 function toolFor(p: ActorState, resource: ResourceDefinition) {
   return [
@@ -405,6 +428,8 @@ function bankDetour(s: RpgState, p: ActorState) {
   }
 }
 function finish(s: RpgState, message?: string) {
+  delete s.control.staminaResting;
+  delete s.control.paceOverride;
   s.control.active = null;
   s.control.source = null;
   s.player.action = null;
@@ -2559,6 +2584,7 @@ function orderRoute(s: RpgState, order: RpgOrder): TilePosition[] | null {
   return target ? adjacent(p, target) ? [] : objectRoute(s, p.position, target) : null;
 }
 function beginPlayerOrder(s: RpgState, order: RpgOrder, path: TilePosition[]) {
+  delete s.control.staminaResting;
   s.control.active = structuredClone(order); s.control.source = "player";
   s.player.path = path; s.player.action = null;
   if (order.type === "gather" && inventorySlots(s.player.inventory) === 28) {
@@ -2622,6 +2648,8 @@ export function applyRpgCommand(
     return ok("Reordered queued intention.");
   }
   if (command.type === "wait") {
+    delete s.control.staminaResting;
+    delete s.control.paceOverride;
     s.control.waiting = true;
     s.control.active = null;
     s.control.source = null;
@@ -2652,6 +2680,8 @@ export function applyRpgCommand(
         "Not enough run energy. Walk or wait to recover before running.",
       );
     s.control.running = command.enabled;
+    s.control.paceOverride = true;
+    delete s.control.staminaResting;
     return ok(
       command.enabled
         ? "Running enabled."
@@ -3106,6 +3136,8 @@ export function validateRpgSave(v: unknown): RpgState | null {
     if (
       typeof c.waiting !== "boolean" ||
       (c.running !== undefined && typeof c.running !== "boolean") ||
+      (c.staminaResting !== undefined && typeof c.staminaResting !== "boolean") ||
+      (c.paceOverride !== undefined && typeof c.paceOverride !== "boolean") ||
       !Array.isArray(c.queue) ||
       c.queue.length > 8 ||
       !c.queue.every((o) => validOrder(o, w)) ||

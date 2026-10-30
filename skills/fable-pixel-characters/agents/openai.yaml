@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fable Pixel Characters"
+  short_description: "Author consistent Fable Crown pixel billboard units"
+  default_prompt: "Use $fable-pixel-characters to create an original game unit matching Fable Crown's compact pixel billboard style."

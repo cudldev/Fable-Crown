@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "warm-voxel-candidate-02",
+  "status": "candidate",
+  "materials": {
+    "bark": {
+      "colors": [
+        "986b42"
+      ]
+    },
+    "bark-light": {
+      "colors": [
+        "b88b55"
+      ]
+    },
+    "leaf": {
+      "colors": [
+        "82974f"
+      ]
+    },
+    "leaf-sage": {
+      "colors": [
+        "6b864a"
+      ]
+    },
+    "leaf-light": {
+      "colors": [
+        "a4b866"
+      ]
+    },
+    "leaf-shadow": {
+      "colors": [
+        "4b693e"
+      ]
+    },
+    "wood": {
+      "colors": [
+        "a77b49"
+      ]
+    },
+    "iron": {
+      "colors": [
+        "535e58"
+      ]
+    },
+    "endgrain": {
+      "colors": [
+        "bd985f"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "24b29700eb2935a4",
+  "files": [
+    "art3d/voxel/tree.vox"
+  ],
+  "assets": [
+    {
+      "id": "tree",
+      "file": "tree.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        34,
+        35,
+        0
+      ],
+      "cutHeight": 0.5
+    }
+  ],
+  "source": "assets/explorations/voxel/trellis-oak-softlight-v1/vox-01/asset.vox"
+}

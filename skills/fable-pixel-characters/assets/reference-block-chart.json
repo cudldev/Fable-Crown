@@ -1,0 +1,199 @@
+{
+  "bitmapPixels": [
+    401,
+    423
+  ],
+  "xBlockEdges": [
+    {
+      "position": 16,
+      "energy": 19383.5
+    },
+    {
+      "position": 35,
+      "energy": 6400.7
+    },
+    {
+      "position": 72,
+      "energy": 41421.1
+    },
+    {
+      "position": 109,
+      "energy": 19154
+    },
+    {
+      "position": 146,
+      "energy": 20844.7
+    },
+    {
+      "position": 219,
+      "energy": 17699.5
+    },
+    {
+      "position": 255,
+      "energy": 22923.2
+    },
+    {
+      "position": 292,
+      "energy": 28580.1
+    },
+    {
+      "position": 327,
+      "energy": 20558.2
+    },
+    {
+      "position": 364,
+      "energy": 18527.3
+    }
+  ],
+  "yBlockEdges": [
+    {
+      "position": 48,
+      "energy": 23870.3
+    },
+    {
+      "position": 86,
+      "energy": 13297.2
+    },
+    {
+      "position": 122,
+      "energy": 16618.6
+    },
+    {
+      "position": 159,
+      "energy": 28300.3
+    },
+    {
+      "position": 196,
+      "energy": 26205.1
+    },
+    {
+      "position": 231,
+      "energy": 42276.2
+    },
+    {
+      "position": 269,
+      "energy": 20948
+    },
+    {
+      "position": 306,
+      "energy": 32862.4
+    },
+    {
+      "position": 343,
+      "energy": 34987.7
+    },
+    {
+      "position": 383,
+      "energy": 24696.8
+    }
+  ],
+  "workingGrid": {
+    "originBitmap": [
+      16,
+      48
+    ],
+    "pitchBitmap": [
+      18.4,
+      18.6
+    ],
+    "size": [
+      20,
+      18
+    ],
+    "status": "measurement-derived reference chart; inspect transparency/skin-vs-background manually"
+  },
+  "sampleLegend": {
+    "H": [
+      140,
+      78,
+      54
+    ],
+    "h": [
+      136,
+      76,
+      54
+    ],
+    "S": [
+      253,
+      213,
+      155
+    ],
+    "E": [
+      60,
+      38,
+      28
+    ],
+    "B": [
+      66,
+      94,
+      191
+    ],
+    "D": [
+      45,
+      67,
+      126
+    ],
+    "G": [
+      249,
+      199,
+      101
+    ],
+    "W": [
+      248,
+      238,
+      215
+    ],
+    "F": [
+      128,
+      75,
+      58
+    ],
+    "T": [
+      178,
+      172,
+      169
+    ],
+    "t": [
+      208,
+      202,
+      196
+    ],
+    "K": [
+      148,
+      84,
+      60
+    ],
+    "A": [
+      253,
+      214,
+      155
+    ],
+    ".": [
+      253,
+      247,
+      234
+    ]
+  },
+  "sampleRows": [
+    ".....FFHHKKFF.......",
+    ".....FFHHKKFF.......",
+    "...FFHHhhhhHHFF..tt.",
+    "...FFHHhhhHKKFF..tt.",
+    "...hhGGGGGGGGhH..TT.",
+    "...hhGGGGGGGGHH..TT.",
+    "...SSEESSSSEESS..TT.",
+    "...SSEESSSSEESS..TT.",
+    ".DDBBSSAAAASSBBDDTT.",
+    ".DDBBSAAAAAAABBDDTT.",
+    "GGGDDBBBBBBBBDDGGGGG",
+    "GGGDDBBBBBBBBDDGGGGG",
+    "DDDDDDDGGGGDDDDDDKK.",
+    "DDDDDDDGGGGDDDDDDKK.",
+    "DDDWWWWWWWWWWWWDDAA.",
+    "DDDWWWWWWWWWWWWDDAA.",
+    "...FFFF....FFFF.....",
+    "...FFFF....FFFF....."
+  ],
+  "sampleRowsStatus": "Unreviewed nearest-color diagnostic only; native source contains semantically corrected authored rows/layers.",
+  "artStatus": "Pending user style review"
+}

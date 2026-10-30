@@ -12,7 +12,7 @@ export default defineConfig({
   webServer: process.env.DEMO_URL?.startsWith("https:")
     ? undefined
     : {
-        command: "npm run preview -- --port 4174",
+        command: `npm run preview -- --port ${new URL(process.env.DEMO_URL || "http://127.0.0.1:4174/").port || "4174"}`,
         env: {
           VITE_BASE_PATH: new URL(
             process.env.DEMO_URL || "http://127.0.0.1:4174/",

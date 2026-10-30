@@ -341,7 +341,7 @@
     min-width: 0;
     padding: 6px 8px;
   }
-  .rpg-shell .hero-status img {
+  .rpg-shell .hero-status :is(img, .unit-portrait) {
     display: none;
   }
   .rpg-shell .doing-now {

@@ -364,6 +364,10 @@ export interface RpgState {
   control: {
     /** Older V3 saves default to running when energy permits. */
     running?: boolean;
+    /** Safe autonomous travel recovery; the route and committed order stay intact. */
+    staminaResting?: boolean;
+    /** A manual Run/Walk choice holds until the current intention finishes. */
+    paceOverride?: boolean;
     waiting: boolean;
     active: RpgOrder | null;
     source?: "player" | "autonomous" | null;

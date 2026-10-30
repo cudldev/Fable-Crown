@@ -5,10 +5,10 @@ import {
   SphereGeometry, SRGBColorSpace, Vector3,
 } from "three";
 import type { ActorState, WorldObject, Terrain } from "../../rpg/types";
-import type { ActorArt, ArtLibrary, LightAnchor, ObjectArt } from "./contracts";
+import type { RigidActorArt, RigidArtLibrary, LightAnchor, ObjectArt } from "./contracts";
 
 /** Original code-authored test art. All roots use one tile = one metre, +Z front. */
-export function createArtLibrary(): ArtLibrary {
+export function createArtLibrary(): RigidArtLibrary {
   const geometries = new Set<BufferGeometry>();
   const materials = new Map<string, MeshLambertMaterial>();
   const textures = new Set<DataTexture>();
@@ -342,7 +342,7 @@ export function createArtLibrary(): ArtLibrary {
       }
     }
   }
-  function createActor(actor: Pick<ActorState, "id" | "role" | "name">): ActorArt {
+  function createActor(actor: Pick<ActorState, "id" | "role" | "name">): RigidActorArt {
     const group = new Group(); group.name = `actor:${actor.name}`;
     const body = subgroup(group, "body"), prince = actor.id === 0;
     const clothes: Record<string, number> = { woodcutter: 0x596c4d, miner: 0x737b75, smith: 0x5e5043, builder: 0x9a875f, fisher: 0x69848a, cook: 0xa59a85, merchant: 0x79677e };
@@ -389,7 +389,7 @@ export function createArtLibrary(): ArtLibrary {
     } else if (actor.role === "smith" || actor.role === "miner") {
       mesh(body, rounded, actor.role === "miner" ? m.lightStone : m.darkWood, 0, 1.76, -.005, .27, .16, .25, "work-cap");
     }
-    return { group, body, leftArm: arms[0], rightArm: arms[1], leftLeg: legs[0], rightLeg: legs[1], tool, cape };
+    return { kind: "rigid", group, body, leftArm: arms[0], rightArm: arms[1], leftLeg: legs[0], rightLeg: legs[1], tool, cape };
   }
   function createEnemy(definitionId: string) {
     const group = new Group(); group.name = `enemy:${definitionId}`;

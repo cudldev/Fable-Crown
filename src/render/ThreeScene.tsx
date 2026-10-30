@@ -1,29 +1,57 @@
-import { useEffect, useRef, useState } from "react";
-import type { TileSceneProps, TileSelection } from "./TileScene";
+import { useEffect, useId, useRef, useState } from "react";
+import type { TileSceneProps, TileSelection } from "./scene-types";
 import { worldForState } from "../rpg/world";
 import { ENEMIES } from "../rpg/content";
 import { objectHitTarget } from "./presentation";
 import { ThreeRuntime, type RuntimeInput, type CameraMode } from "./three/runtime";
 import { loadProductionArt } from "./three/production-assets";
 import type { LightingPreset } from "./three/lighting";
+import VisualSettingsPanel from "./three/VisualSettingsPanel";
+import { DEFAULT_VISUAL_PRESET, DEFAULT_VISUAL_SETTINGS, normalizeVisualSettings, type VisualSettings } from "./three/visual-settings";
 import "./tile-scene.css";
 import "./three/three-scene.css";
 
-export interface ThreeSceneProps extends TileSceneProps { onFallback: () => void; panelOpen: boolean }
+const FOLIAGE_SETTINGS_KEY = "fable-crown.foliage-settings";
 
-/** The game view consumes immutable simulation snapshots. */
+export type ThreeSceneProps = TileSceneProps & { panelOpen: boolean };
+
+/** The voxel world consumes immutable simulation snapshots. */
 export default function ThreeScene(props: ThreeSceneProps) {
   const root = useRef<HTMLDivElement>(null), canvas = useRef<HTMLCanvasElement>(null);
   const runtime = useRef<ThreeRuntime | null>(null);
   const hits = useRef(new Map<string, HTMLElement>());
-  const [lighting, setLighting] = useState<LightingPreset>("dusk");
-  const [shadows, setShadows] = useState(true);
-  const [cameraMode, setCameraMode] = useState<CameraMode>("perspective");
-  const [assets, setAssets] = useState<{ source: string; ids: string[]; warning: string }>({ source: "loading", ids: [], warning: "" });
+  const [lighting, setLighting] = useState<LightingPreset>(DEFAULT_VISUAL_PRESET.lighting);
+  const [shadows, setShadows] = useState(DEFAULT_VISUAL_PRESET.shadows);
+  const [gi, setGI] = useState(DEFAULT_VISUAL_PRESET.gi), [ao, setAO] = useState(DEFAULT_VISUAL_PRESET.ao);
+  const [cameraMode, setCameraMode] = useState<CameraMode>(DEFAULT_VISUAL_PRESET.cameraMode);
+  const [visual, setVisual] = useState<VisualSettings>(() => {
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem(FOLIAGE_SETTINGS_KEY) ?? "{}");
+      const foliage = saved && typeof saved === "object" ? saved as Partial<VisualSettings> : {};
+      return normalizeVisualSettings({ foliageEnabled: foliage.foliageEnabled, foliageDensity: foliage.foliageDensity, windStrength: foliage.windStrength });
+    }
+    catch { return { ...DEFAULT_VISUAL_SETTINGS }; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(FOLIAGE_SETTINGS_KEY, JSON.stringify({ foliageEnabled: visual.foliageEnabled, foliageDensity: visual.foliageDensity, windStrength: visual.windStrength })); }
+    catch { /* Foliage still works when device storage is unavailable. */ }
+  }, [visual.foliageEnabled, visual.foliageDensity, visual.windStrength]);
+  const [settingsOpen, setSettingsOpen] = useState(false), settingsId = useId();
+  const settingsButton = useRef<HTMLButtonElement>(null);
+  const closeSettings = () => { setSettingsOpen(false); settingsButton.current?.focus(); };
+  const copyPerformance = () => {
+    const gl = canvas.current?.getContext("webgl2"), extension = gl?.getExtension("WEBGL_debug_renderer_info");
+    return JSON.stringify({ type: "fable-crown.performance", version: 1, capturedAt: new Date().toISOString(),
+      visibility: document.visibilityState, focused: document.hasFocus(), viewport: [innerWidth, innerHeight], devicePixelRatio,
+      browser: navigator.userAgent, gpu: gl && extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : "unavailable",
+      counters: { ...root.current?.dataset } }, null, 2);
+  };
+  const resetVisual = () => { setVisual({ ...DEFAULT_VISUAL_SETTINGS }); setLighting(DEFAULT_VISUAL_PRESET.lighting); setShadows(DEFAULT_VISUAL_PRESET.shadows); setGI(DEFAULT_VISUAL_PRESET.gi); setAO(DEFAULT_VISUAL_PRESET.ao); setCameraMode(DEFAULT_VISUAL_PRESET.cameraMode); };
+  const [assets, setAssets] = useState<{ source: string; ids: string[]; voxelIds: string[]; warning: string; characterStyle: string; characterReady: boolean }>({ source: "loading", ids: [], voxelIds: [], warning: "", characterStyle: "pixel", characterReady: false });
   const [status, setStatus] = useState<"starting" | "ready" | "unavailable">("starting");
   const [failure, setFailure] = useState("");
-  const latest = useRef<RuntimeInput>({ ...props, lighting, shadows, cameraMode });
-  latest.current = { ...props, lighting, shadows, cameraMode };
+  const latest = useRef<RuntimeInput>({ ...props, lighting, shadows, cameraMode, gi, ao, visual });
+  latest.current = { ...props, lighting, shadows, cameraMode, gi, ao, visual };
   const world = worldForState(props.state);
   useEffect(() => {
     let active = true;
@@ -31,7 +59,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
     void loadProductionArt(controller.signal).then(result => {
       if (!active) { result.library.dispose(); return; }
       try {
-        setAssets({ source: result.source, ids: result.loadedIds, warning: result.warnings.join(" ") });
+        setAssets({ source: result.source, ids: result.loadedIds, voxelIds: result.voxelIds, warning: result.warnings.join(" "), characterStyle: result.characterStyle, characterReady: result.characterReady });
         const view = new ThreeRuntime(canvas.current!, root.current!, latest.current, hits.current,
           () => { if (active) setStatus("ready"); },
           message => { if (active) { setFailure(message); setStatus("unavailable"); } }, result.library);
@@ -57,17 +85,23 @@ export default function ThreeScene(props: ThreeSceneProps) {
   const objectButtons = world.objects.filter(object => objectHitTarget(object, props.camera.zoom, props.camera.overview,
     props.selection?.kind === "object" && props.selection.id === object.id));
   return (
-    <div ref={root} className="tile-world three-world" data-testid="rpg-world" data-renderer="3d" data-status={status} data-lighting={lighting} data-assets={assets.source} data-production-assets={assets.ids.join(",")}>
+    <div ref={root} className="tile-world three-world" data-testid="rpg-world" data-renderer="3d" data-render-style={visual.renderStyle} data-status={status} data-lighting={lighting} data-assets={assets.source} data-production-assets={assets.ids.join(",")} data-voxel-assets={assets.voxelIds.join(",")} data-character-style={assets.characterStyle} data-character-ready={assets.characterReady}>
       <canvas ref={canvas} data-testid="three-canvas" aria-label="The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused." tabIndex={0} />
-      {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the village…</div>}
+      {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the voxel village…</div>}
       {status === "ready" && <>
+        <span className="three-performance" data-testid="fps-indicator" aria-label="Rendering performance" aria-live="off">FPS —</span>
         <div className="three-light-controls" role="group" aria-label="View settings">
-          <span>VIEW</span>
+          <span>VOXEL</span>
           {(["day", "dusk", "night"] as const).map(preset => <button key={preset} aria-label={`${preset[0].toUpperCase()}${preset.slice(1)} lighting`} aria-pressed={lighting === preset} onClick={() => setLighting(preset)}>{preset[0].toUpperCase()}{preset.slice(1)}</button>)}
           <button aria-label="Sun shadows" aria-pressed={shadows} onClick={() => setShadows(value => !value)}>Shadows {shadows ? "on" : "off"}</button>
+          <button aria-label="Global illumination" aria-pressed={gi} onClick={() => setGI(value => !value)}>GI {gi ? "on" : "off"}</button>
+          <button aria-label="Ambient occlusion" aria-pressed={ao} onClick={() => setAO(value => !value)}>AO {ao ? "on" : "off"}</button>
           <button aria-label="Perspective camera" aria-pressed={cameraMode === "perspective"} onClick={() => setCameraMode("perspective")}>Perspective</button>
           <button aria-label="Orthographic camera" aria-pressed={cameraMode === "orthographic"} onClick={() => setCameraMode("orthographic")}>Ortho</button>
+          <button ref={settingsButton} className="visual-settings-trigger" aria-expanded={settingsOpen} aria-controls={settingsId} onClick={() => setSettingsOpen(value => !value)}>Visual settings</button>
         </div>
+        {settingsOpen && <VisualSettingsPanel id={settingsId} settings={visual} preset={lighting} shadows={shadows} gi={gi} ao={ao} cameraMode={cameraMode} performanceReport={copyPerformance}
+          onChange={patch => setVisual(previous => normalizeVisualSettings({ ...previous, ...patch }))} onShadows={setShadows} onGI={setGI} onAO={setAO} onReset={resetVisual} onClose={closeSettings} />}
         <div className="tile-hit-layer three-hit-layer">
           {objectButtons.map(object => {
             const selection: TileSelection = { kind: "object", id: object.id };
@@ -103,9 +137,9 @@ export default function ThreeScene(props: ThreeSceneProps) {
               aria-valuetext={`${actor.name}: ${action.duration - action.remaining} of ${action.duration} ticks`} />;
           })}
         </div>
-        <span className="three-test-note">{props.state.player.position.x}, {props.state.player.position.y}</span>
+        <span className="three-test-note" title={assets.warning || undefined}>Voxel world · Pixel sprite cast · {props.state.player.position.x}, {props.state.player.position.y}</span>
       </>}
-      {status === "unavailable" && <section className="three-fallback" aria-label="3D renderer unavailable"><h2>3D view unavailable</h2><p>{failure}</p><button onClick={props.onFallback}>Use compatibility view</button></section>}
+      {status === "unavailable" && <section className="three-fallback" aria-label="Voxel renderer unavailable"><h2>Voxel world unavailable</h2><p>{failure}</p><p>Enable WebGL2 and reload. Your saved chapter is kept on this device.</p><button onClick={() => location.reload()}>Retry voxel renderer</button></section>}
     </div>
   );
 }

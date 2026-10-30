@@ -1,12 +1,18 @@
-# 3D game renderer
+# Optional 3D renderer test
 
-User-approved main renderer, 2026-10-30: the existing 3D world and assets replace the 2D game representation. Current assets use chunky RuneScape-inspired shapes, coarse pixel textures, compact JRPG characters, muted colours and atmospheric realtime lighting. This changes presentation of the current RPG and preserves its progression chapter.
+> Current renderer update — 2026-10-30: The former 3D test is now the default and only gameplay renderer. Open the ordinary game URL; `?assetReview=1` opens the current workbench. Historical switching and character-study instructions below are retired.
 
-## Open the game
+> Rendering update (2026-10-30): the game now uses normal display resolution with antialiasing and a 2× density cap. Pixelated mode and its selector are removed; old device preferences cannot enable it. Character sprites and voxel artwork are preserved.
 
-Run `npm run dev`, then open `http://127.0.0.1:5173/`. The ordinary game URL opens 3D; earlier `?renderer=3d` links still work. **Game menu → Open asset viewer** opens the independent workbench. There is no regular 2D/3D switch. If graphics initialization or rendering fails, **Use compatibility view** loads the older Canvas renderer without restarting the simulation or changing saves. Reloading attempts 3D again.
+> Current direction (2026-10-30): [warm storybook voxel fantasy](ART_DIRECTION.md). This document records the earlier renderer experiment and existing switch/default behavior. Pixel-textured low-poly assets and painterly artwork below are retained fallbacks during the [voxel migration](VOXEL_ASSET_MIGRATION.md).
 
-The renderer uses the current worker, 600ms ticks, V5 saves, map coordinates, actions, inventory, progression and offline reconciliation. It does not change collision or award items/XP. Existing chronicles and archived chapters remain usable.
+User-authorized experiment, 2026-10-30: chunky RuneScape-inspired 3D shapes, coarse pixel textures, compact JRPG characters, muted colours and atmospheric realtime lighting. The existing painterly renderer remains the default. This is a presentation experiment on the current RPG, not a new progression chapter.
+
+## Open the test
+
+Run `npm run dev`, then open `http://127.0.0.1:5173/?renderer=3d`. Alternatively, open the game menu and choose **Use 3D test renderer**. **Use painterly renderer** switches back without restarting the simulation. The renderer choice lives in the URL, not the saved RPG chapter. A production preview uses the same query under its configured repository subpath.
+
+The views share the current worker, 600ms ticks, V5 saves, map coordinates, actions, inventory, progression and offline reconciliation. This experiment does not change collision or award items/XP. Use normal chronicle export if you want a separate copy of your journey.
 
 ## Rendering contract
 
@@ -14,7 +20,6 @@ The renderer uses the current worker, 600ms ticks, V5 saves, map coordinates, ac
 - One logical tile is one world unit. Logical x/y map to 3D x/z. Models are centred in their existing object footprints and characters stand at their actual tile positions.
 - The same legal movement traces and action phases drive presentation. Lighting, model animation, atmosphere and camera controls cannot issue gameplay outcomes.
 - Terrain is batched; geometry, pixel textures and materials are shared. Renderer cleanup must remove listeners, stop animation and release GPU resources.
-- With a foreground panel open, background world drawing is limited to four frames per second so controls and save messages can run promptly. Simulation timing remains unchanged.
 - One sun shadow map and four reusable unshadowed local light slots are the initial budget. Windows use an emissive surface plus local light; illumination does not require a shadow map. Light selection is managed explicitly, not inferred solely from light radius.
 - Day, Dusk and Night are visual test presets. They do not advance the gameplay calendar. Sun shadows can be toggled for comparison.
 - All code and art load from the static application origin. No API keys, inference, telemetry, external runtime assets or paid services are introduced. The PWA caches the renderer chunks under the existing base URL.
@@ -38,4 +43,4 @@ Results are recorded in `docs/PROGRESS.md`. Publication was authorized on 2026-1
 - [3D game test](https://cudldev.github.io/Fable-Crown/?renderer=3d)
 - [Asset viewer](https://cudldev.github.io/Fable-Crown/?renderer=3d&assetReview=1)
 
-The unqualified site URL now opens 3D. Deployment verification is recorded separately in the progress log.
+The unqualified site URL retains the painterly default. Deployment verification is recorded separately in the progress log.

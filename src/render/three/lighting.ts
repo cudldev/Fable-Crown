@@ -1,5 +1,6 @@
 import { Color, DirectionalLight, Fog, HemisphereLight, PointLight, type Scene, Vector3 } from "three";
 import type { LightAnchor } from "./contracts";
+import { DEFAULT_VISUAL_SETTINGS, sunDirection, type VisualSettings } from "./visual-settings";
 
 export type LightingPreset = "day" | "dusk" | "night";
 export const LOCAL_LIGHT_LIMIT = 4;
@@ -8,6 +9,13 @@ export const LIGHTING_PRESETS = {
   dusk: { sky: 0x8f9aa4, fog: 0x8f9aa4, sun: 0xffd1a0, sunPower: 1.7, fill: 0xa8bdcc, ground: 0x5b5b43, fillPower: 1.2, lamps: 1.8 },
   night: { sky: 0x303f52, fog: 0x303f52, sun: 0x9ebce2, sunPower: 0.5, fill: 0x8baccb, ground: 0x3b4243, fillPower: 0.72, lamps: 2.5 },
 } as const;
+
+export function resolveLighting(preset: LightingPreset, settings: Readonly<VisualSettings> = DEFAULT_VISUAL_SETTINGS) {
+  const p = LIGHTING_PRESETS[preset], tint = (value: string | null, fallback: number) => value ? Number.parseInt(value.slice(1), 16) : fallback;
+  return { ...p, sun: tint(settings.sunTint, p.sun), fill: tint(settings.ambientTint, p.fill), sky: tint(settings.skyTint, p.sky),
+    fog: tint(settings.skyTint, p.fog), sunPower: p.sunPower * settings.sunStrength, fillPower: p.fillPower * settings.ambientStrength,
+    lamps: p.lamps * settings.lampStrength, direction: sunDirection(settings) };
+}
 
 export interface SceneLamp extends LightAnchor { id: string }
 /** Explicit selection caps shader light count; radius alone does not cull a Three.js light. */
@@ -40,6 +48,9 @@ export class LightingRig {
   private shadowRight = new Vector3(16, 0, 28).normalize();
   private shadowUp = new Vector3(-28, 34, 16).normalize().cross(this.shadowRight).normalize();
   private sunOffset = new Vector3(-28, 34, 16);
+  private visual: Readonly<VisualSettings> = DEFAULT_VISUAL_SETTINGS;
+  private appliedVisual?: Readonly<VisualSettings>;
+  private lampGain = LIGHTING_PRESETS.dusk.lamps as number;
   constructor(scene: Scene) {
     this.scene = scene;
     this.sun.castShadow = true;
@@ -53,9 +64,11 @@ export class LightingRig {
     this.setPreset("dusk");
   }
   setPreset(preset: LightingPreset) {
-    if (this.preset === preset && this.scene.background) return;
+    if (this.preset === preset && this.scene.background && this.appliedVisual === this.visual) return;
     this.preset = preset;
-    const p = LIGHTING_PRESETS[preset];
+    this.appliedVisual = this.visual;
+    const p = resolveLighting(preset, this.visual);
+    this.lampGain = p.lamps;
     this.scene.background = new Color(p.sky);
     this.fog.color.setHex(p.fog);
     this.sun.color.setHex(p.sun);
@@ -63,17 +76,28 @@ export class LightingRig {
     this.fill.color.setHex(p.fill);
     this.fill.groundColor.setHex(p.ground);
     this.fill.intensity = p.fillPower;
+    this.sunOffset.fromArray(p.direction).multiplyScalar(Math.hypot(28, 34, 16));
+    this.shadowRight.set(this.sunOffset.z, 0, -this.sunOffset.x).normalize();
+    this.shadowUp.copy(this.sunOffset).normalize().cross(this.shadowRight).normalize();
+    if (this.sun.shadow.mapSize.x !== this.visual.shadowResolution) {
+      this.sun.shadow.map?.dispose(); this.sun.shadow.map = null;
+      this.sun.shadow.mapSize.set(this.visual.shadowResolution, this.visual.shadowResolution); this.sun.shadow.needsUpdate = true;
+    }
+    this.sun.shadow.radius = this.visual.shadowSoftness; this.sun.shadow.bias = this.visual.shadowBias; this.sun.shadow.normalBias = this.visual.shadowNormalBias;
+    const half = this.visual.shadowCoverage / 2;
+    Object.assign(this.sun.shadow.camera, { left: -half, right: half, top: half, bottom: -half }); this.sun.shadow.camera.updateProjectionMatrix();
   }
+  setVisual(settings: Readonly<VisualSettings>) { this.visual = settings; }
   setShadows(enabled: boolean) { this.shadows = enabled; this.sun.castShadow = enabled; }
   get activeCount() { return this.active.length; }
   get shadowCount() { return this.shadows ? 1 : 0; }
   update(lamps: readonly SceneLamp[], target: Vector3, time: number, overview: boolean, cameraDistance = 66) {
-    this.scene.fog = overview ? null : this.fog;
+    this.scene.fog = overview || !this.visual.fogEnabled ? null : this.fog;
     this.fog.near = Math.max(1, cameraDistance - 8);
-    this.fog.far = cameraDistance + 70;
+    this.fog.far = cameraDistance + this.visual.fogReach;
     // Snap in light-camera space to whole shadow texels. World-axis snapping alone
     // still slides rotated shadow samples when the camera follows a walking actor.
-    const texel = 48 / this.sun.shadow.mapSize.x;
+    const texel = this.visual.shadowCoverage / this.sun.shadow.mapSize.x;
     const u = target.dot(this.shadowRight), v = target.dot(this.shadowUp);
     this.shadowTarget.copy(target)
       .addScaledVector(this.shadowRight, Math.round(u / texel) * texel - u)
@@ -93,7 +117,7 @@ export class LightingRig {
       light.color.setHex(source.color);
       light.distance = source.distance;
       const flicker = source.kind === "forge" ? 0.92 + 0.05 * Math.sin(time * 0.013 + index) + 0.03 * Math.sin(time * 0.023) : 1;
-      light.intensity = source.intensity * LIGHTING_PRESETS[this.preset].lamps * flicker;
+      light.intensity = source.intensity * this.lampGain * flicker;
     });
   }
   dispose() {

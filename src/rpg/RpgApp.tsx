@@ -1,8 +1,10 @@
+import PixelPortrait from "../render/PixelPortrait";
+import { clampGameplayZoom } from "../render/camera-limits";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   type TileCamera,
   type TileSelection,
-} from "../render/TileScene";
+} from "../render/scene-types";
 import { SceneHost } from "../render/SceneHost";
 import {
   WORLD,
@@ -57,7 +59,6 @@ function download(value: unknown, name: string) {
   URL.revokeObjectURL(url);
 }
 export default function RpgApp() {
-  const [rendererMode, setRendererMode] = useState<"painterly" | "3d">("3d");
   const [state, setState] = useState<RpgState | null>(null),
     [camera, setCamera] = useState<TileCamera>({
       x: 52,
@@ -173,7 +174,7 @@ export default function RpgApp() {
   }, []);
   useEffect(() => {
     if (panel === "menu" && !worldSize)
-      fetch(`${base}art/manifest.json`)
+      fetch(`${base}world-assets.json`)
         .then((r) => r.json())
         .then((m) => setWorldSize(`${(m.bytes / 1048576).toFixed(1)} MiB`))
         .catch(() => {});
@@ -351,7 +352,7 @@ export default function RpgApp() {
   async function offlineWorld() {
     setOffline("Preparing…");
     try {
-      const m = (await (await fetch(`${base}art/manifest.json`)).json()) as {
+      const m = (await (await fetch(`${base}world-assets.json`)).json()) as {
         version: string;
         files: string[];
       };
@@ -411,9 +412,7 @@ export default function RpgApp() {
     >
       {state ? (
         <SceneHost
-          mode={rendererMode}
           panelOpen={!!panel || (!!selection && selection.kind !== "tile")}
-          onFallback={() => setRendererMode("painterly")}
           state={state}
           camera={camera}
           onCamera={setCamera}
@@ -556,7 +555,7 @@ export default function RpgApp() {
           onClick={() =>
             setCamera((c) => ({
               ...c,
-              zoom: Math.min(2, c.zoom * 1.25),
+              zoom: clampGameplayZoom(c.zoom * 1.25),
               overview: false,
             }))
           }
@@ -568,7 +567,7 @@ export default function RpgApp() {
           onClick={() =>
             setCamera((c) => ({
               ...c,
-              zoom: Math.max(0.15, c.zoom / 1.25),
+              zoom: clampGameplayZoom(c.zoom / 1.25),
               overview: false,
             }))
           }
@@ -1735,7 +1734,7 @@ export default function RpgApp() {
                   const url = new URL(location.href);
                   url.searchParams.set("assetReview", "1");
                   location.assign(url);
-                }}>Open asset viewer</button>
+                }}>Open art workbench</button>
                 <button onClick={() => send("save")}>Save on device</button>
                 <button
                   onClick={() =>
@@ -1971,7 +1970,7 @@ export default function RpgApp() {
               setPanel(null);
             }}
           >
-            <img src={`${base}art/prince.webp`} alt="" />
+            <PixelPortrait />
             <span>
               <strong>
                 Alden{" "}

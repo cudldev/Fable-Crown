@@ -64,9 +64,10 @@ function waitingFixture() {
   return state;
 }
 
-test("the default game uses 3D and preserves the chapter and archives across reloads", async ({ page }) => {
-  const errors: string[] = [];
+test("voxel is the default, draws with WebGL and preserves the chapter with legacy URLs", async ({ page }) => {
+  const errors: string[] = [], obsoleteAssets: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  page.on("request", request => { if (/\/(art|ink|fitted)\/|alden(?:-ink|-fitted)?\.glb/.test(request.url())) obsoleteAssets.push(request.url()); });
   await page.goto("./");
   await ready(page);
   const fixture = waitingFixture();
@@ -84,9 +85,7 @@ test("the default game uses 3D and preserves the chapter and archives across rel
     };
   }), archive);
   await menu(page);
-  await expect(page.getByRole("button", { name: "Use 3D test renderer" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Use painterly renderer" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Open asset viewer", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Use painterly|Use 3D test renderer/ })).toHaveCount(0);
   await closePanel(page);
   const world = await ready(page);
   await expect.poll(async () => Number(await world.getAttribute("data-draw-calls"))).toBeGreaterThan(0);
@@ -101,16 +100,19 @@ test("the default game uses 3D and preserves the chapter and archives across rel
   await page.getByTestId("rpg-world").getByRole("button", { name: "Inspect Alden", exact: true }).click();
   await expect(page.getByRole("region", { name: "Character details" })).toBeVisible();
   const before = await saved(page);
-  await page.reload();
+  await page.goto("./?renderer=painterly&character=fitted&terrain=legacy");
   await ready(page);
+  await expect(world).toHaveAttribute("data-character-style", "pixel");
+  await expect(world).toHaveAttribute("data-character-rig", "billboard");
+  await expect(world).toHaveAttribute("data-terrain-source", "vox");
+  await page.goto("./?renderer=3d&character=ink");
+  await ready(page);
+  await expect(world).toHaveAttribute("data-character-style", "pixel");
   const after = await saved(page);
   expect(after.player.inventory).toEqual(before.player.inventory);
   expect(after.player.skills).toEqual(before.player.skills);
   expect(after.player.position).toEqual(before.player.position);
   expect(after.version).toBe(5);
-  // Existing shared preview links still open the same 3D game.
-  await page.goto("./?renderer=3d");
-  await ready(page);
   const archived = await page.evaluate(() => new Promise<unknown>((resolve, reject) => {
     const request = indexedDB.open("fable-crown", 1);
     request.onerror = () => reject(request.error);
@@ -122,6 +124,7 @@ test("the default game uses 3D and preserves the chapter and archives across rel
     };
   }));
   expect(archived).toEqual(archive);
+  expect(obsoleteAssets).toEqual([]);
   expect(errors).toEqual([]);
 });
 
@@ -215,7 +218,74 @@ test("3D camera and touch controls fit portrait and landscape without external r
   expect(errors).toEqual([]);
 });
 
-test("the default 3D game reloads offline with the same saved chapter", async ({ page, context }) => {
+for (const mode of ["perspective", "orthographic"] as const) {
+  test(`${mode} camera drag stays anchored when multiple pointer events arrive between frames`, async ({ page }) => {
+    await page.goto("./");
+    await ready(page);
+    await restore(page, waitingFixture());
+    await page.getByRole("button", { name: `${mode === "perspective" ? "Perspective" : "Orthographic"} camera`, exact: true }).click();
+    for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
+      await page.setViewportSize(viewport);
+      const canvas = page.getByTestId("rpg-world").locator("canvas");
+      const start = await canvas.evaluate(element => {
+        const box = element.getBoundingClientRect();
+        // Landscape preview controls can cover the old fixed35%/45% drag point.
+        // Exercise a real exposed world point rather than dragging a toolbar.
+        for (const [x, y] of [[.35, .45], [.35, .62], [.6, .6], [.45, .25], [.55, .52], [.25, .35]]) {
+          const point = { x: box.x + box.width * x, y: box.y + box.height * y };
+          const hit = document.elementFromPoint(point.x, point.y);
+          if (hit === element || hit?.closest("[data-three-selection]")) return point;
+        }
+        throw Error("No exposed world point for camera drag regression.");
+      });
+      const traces = [];
+      for (const burst of [false, true]) {
+        await page.getByRole("button", { name: "Follow Alden", exact: true }).click();
+        await page.evaluate(async () => { for (let i = 0; i < 2; i++) await new Promise(resolve => requestAnimationFrame(resolve)); });
+        await page.mouse.move(start.x, start.y);
+        await page.mouse.down();
+        const trace = await page.evaluate(async ({ start, burst }) => {
+          const canvas = document.querySelector<HTMLCanvasElement>('[data-testid="rpg-world"] canvas')!;
+          const actor = document.querySelector<HTMLElement>('[data-testid="rpg-world"] [aria-label="Inspect Alden"]')!;
+          const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+          const position = () => ({ x: parseFloat(actor.style.left), y: parseFloat(actor.style.top) });
+          await frame(); await frame();
+          const before = position();
+          const samples = [];
+          // Several events between frames, then reverse. A final small delta
+          // must not overwrite earlier movement that has not rendered yet.
+          for (const offset of [12, 24, 36, 48, 36, 24, 12, 0]) {
+            const direction = samples.length < 4 ? 1 : -1;
+            for (const x of burst ? [offset - direction * 4, offset - direction, offset] : [offset]) {
+              canvas.dispatchEvent(new PointerEvent("pointermove", {
+                bubbles: true, pointerId: 1, pointerType: "mouse", buttons: 1,
+                clientX: start.x + x, clientY: start.y + x / 2,
+              }));
+            }
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await frame(); await frame();
+            samples.push({ x: position().x - before.x, y: position().y - before.y });
+          }
+          await frame(); await frame();
+          return { samples, settled: { x: position().x - before.x, y: position().y - before.y } };
+        }, { start, burst });
+        await page.mouse.up();
+        expect(Math.hypot(trace.settled.x, trace.settled.y)).toBeLessThan(1);
+        traces.push(trace.samples);
+      }
+      // Perspective parallax depends on the marker's height/depth. Compare the
+      // same gesture with one versus three events per frame in the actual view.
+      expect(Math.abs(traces[0][3].x)).toBeGreaterThan(30);
+      for (let i = 0; i < traces[0].length; i++) {
+        const expected = traces[0][i], actual = traces[1][i];
+        expect(Math.abs(actual.x - expected.x), JSON.stringify({ viewport, expected, actual })).toBeLessThan(1);
+        expect(Math.abs(actual.y - expected.y), JSON.stringify({ viewport, expected, actual })).toBeLessThan(1);
+      }
+    }
+  });
+}
+
+test("default voxel world reloads offline with the same saved chapter", async ({ page, context }) => {
   await page.goto("./");
   await ready(page);
   await restore(page, waitingFixture());
@@ -239,28 +309,24 @@ test("the default 3D game reloads offline with the same saved chapter", async ({
   }
 });
 
-test("unavailable WebGL offers a working compatibility view without resetting the chapter", async ({ page }) => {
+test("unavailable WebGL keeps menus usable and retries the voxel world", async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: Parameters<typeof getContext>) {
-      if (String(args[0]).startsWith("webgl")) return null;
+      if (String(args[0]).startsWith("webgl") && localStorage.getItem("test-webgl-enabled") !== "yes") return null;
       return getContext.apply(this, args);
     } as typeof getContext;
   });
-  await page.goto("./");
-  const fixture = waitingFixture();
-  fixture.player.skills.woodcutting = 37;
-  await restore(page, fixture);
-  const before = await saved(page);
-  await page.getByRole("button", { name: "Use compatibility view", exact: true }).click();
-  await expect(page.getByTestId("rpg-world")).toBeVisible();
-  await expect(page.getByTestId("three-canvas")).toHaveCount(0);
+  await page.goto("./?renderer=3d");
+  await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "unavailable");
+  await expect(page.getByRole("button", { name: "Retry voxel renderer", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /painterly/i })).toHaveCount(0);
   await page.getByRole("button", { name: "Open inventory" }).click();
   await expect(page.locator(".rpg-backpack button")).toHaveCount(28);
   await closePanel(page);
-  const after = await saved(page);
-  expect(after.player.skills).toEqual(before.player.skills);
-  expect(after.player.inventory).toEqual(before.player.inventory);
+  await page.evaluate(() => localStorage.setItem("test-webgl-enabled", "yes"));
+  await page.getByRole("button", { name: "Retry voxel renderer", exact: true }).click();
+  await ready(page);
 });
 
 test("all Blender assets load and switching camera projection preserves the saved character", async ({ page }) => {
@@ -270,7 +336,7 @@ test("all Blender assets load and switching camera projection preserves the save
   const world = await ready(page);
   await expect(world).toHaveAttribute("data-assets", "blender");
   const ids = (await world.getAttribute("data-production-assets"))!.split(",").sort();
-  expect(ids).toEqual(["alden", "anvil", "bank", "crate", "forge", "lantern", "tree"]);
+  expect(ids).toEqual(["anvil", "bank", "crate", "forge", "lantern", "tree"]);
   await restore(page, waitingFixture());
   const before = await saved(page);
   for (const mode of ["orthographic", "perspective"] as const) {
@@ -305,7 +371,7 @@ test("art workbench is isolated from gameplay and cached models reload offline",
   await expect(review).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   await expect(review).toHaveAttribute("data-assets", "blender");
   expect((await review.getAttribute("data-production-assets"))!.split(",").sort())
-    .toEqual(["alden", "anvil", "bank", "crate", "forge", "lantern", "tree"]);
+    .toEqual(["anvil", "bank", "crate", "forge", "lantern", "tree"]);
   expect(page.workers()).toHaveLength(0);
   page.on("worker", worker => workers.push(worker.url()));
   const readChronicle = () => page.evaluate(() => new Promise<string>((resolve, reject) => {
@@ -324,8 +390,10 @@ test("art workbench is isolated from gameplay and cached models reload offline",
     await page.getByRole("button", { name: "Rotate preview right", exact: true }).click();
   }
   await page.getByLabel("Preview model").selectOption("alden");
-  const walk = page.getByRole("button", { name: "Walk animation preview", exact: true });
-  await walk.click(); await expect(walk).toHaveAttribute("aria-pressed", "true");
+  await expect(review).toHaveAttribute("data-character-style", "pixel");
+  await expect(review).toHaveAttribute("data-character-rig", "billboard");
+  await expect(page.getByRole("button", { name: "Walk animation preview", exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Character animation")).toHaveCount(0);
   await page.getByRole("button", { name: "Rotate preview left", exact: true }).click();
   for (const name of ["Day lighting", "Night lighting", "Orthographic camera", "Perspective camera"]) {
     const button = page.getByRole("button", { name, exact: true });

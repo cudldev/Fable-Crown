@@ -217,7 +217,7 @@ test("real V4 chapter migrates to V5 while its source row and archive remain int
   await page.goto("./?chapter=3");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   // Navigate away so the running worker cannot overwrite the seeded migration input.
-  await page.goto("./art/manifest.json");
+  await page.goto("./world-assets.json");
   await expect(page.locator("body")).toContainText("files");
   await page.waitForTimeout(100);
   const source = structuredClone(originalV4) as Record<string, any>;

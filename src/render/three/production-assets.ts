@@ -3,11 +3,14 @@ import {
   Texture, Vector3, Matrix4, type BufferGeometry, type BufferAttribute, type Object3D, type MeshStandardMaterial,
 } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { clone as cloneHierarchy } from "three/addons/utils/SkeletonUtils.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { createArtLibrary } from "./art";
-import type { ActorArt, ArtLibrary, LightAnchor, ObjectArt } from "./contracts";
-import type { ActorState, WorldObject } from "../../rpg/types";
+import { loadVoxelAssets, voxelObject } from "./voxel-assets";
+import { loadTerrainTiles, type TerrainTiles } from "./terrain-tiles";
+import { standaloneVoxel } from "./voxel-buckets";
+import type { VoxelObject } from "./voxel-data";
+import type { ArtLibrary, LightAnchor, ObjectArt } from "./contracts";
+import type { WorldObject } from "../../rpg/types";
 
 interface AssetSpec { id: string; url: string; footprint?: [number, number]; requiredNodes: string[] }
 interface ModelTemplate { root: Group; spec: AssetSpec }
@@ -16,6 +19,10 @@ export interface ProductionArtResult {
   loadedIds: string[];
   warnings: string[];
   source: "blender" | "procedural";
+  characterStyle: "pixel";
+  /** The pixel cast is authored locally and requires no character model download. */
+  characterReady: boolean;
+  voxelIds: string[];
 }
 const supported = new Set(["bank", "forge", "tree", "alden", "anvil", "crate", "lantern"]);
 const actorNodes = ["body", "leftArm", "rightArm", "leftLeg", "rightLeg"];
@@ -68,19 +75,6 @@ function groupNode(root: Object3D, name: string): Group | undefined {
   return group;
 }
 
-/** Give articulated pivots Y-up axes even when a Blender export retains a Z-up root conversion. */
-function animationPivot(root: Group, name: string, parent: Group): Group | undefined {
-  const previous = root.getObjectByName(name); if (!previous) return undefined;
-  previous.updateWorldMatrix(true, true); parent.updateWorldMatrix(true, false);
-  const group = new Group(); group.name = name; group.visible = previous.visible;
-  group.position.copy(parent.worldToLocal(previous.getWorldPosition(new Vector3())));
-  previous.name = `${name}-source`;
-  parent.add(group); group.updateWorldMatrix(true, false);
-  // attach preserves each mesh's world appearance while removing the converted pivot axes.
-  for (const child of [...previous.children]) group.attach(child);
-  previous.removeFromParent(); return group;
-}
-
 function lightAnchors(root: Group): LightAnchor[] {
   const lights: LightAnchor[] = []; root.updateWorldMatrix(true, true);
   root.traverse(node => {
@@ -99,6 +93,10 @@ function lightAnchors(root: Group): LightAnchor[] {
 
 /** Collapse static geometry within each independently animated/hidden part, never across pivots. */
 export function mergeModelMeshes(root: Group, articulated: boolean, owned: Set<BufferGeometry>) {
+  // Static attachments beneath bones must retain their animated parents too.
+  // Skinned characters are authored/merged in Blender, never flattened here.
+  let hasSkin = false; root.traverse(node => { if ("isSkinnedMesh" in node) hasSkin = true; });
+  if (hasSkin) return;
   root.updateWorldMatrix(true, true);
   const groups = new Map<string, { parent: Object3D; material: Material; meshes: Mesh[] }>();
   root.traverse(node => {
@@ -141,8 +139,11 @@ export function mergeModelMeshes(root: Group, articulated: boolean, owned: Set<B
 }
 
 /** Load once per renderer lifetime; cloned instances share all GLB meshes, materials and atlases. */
-export async function loadProductionArt(signal: AbortSignal): Promise<ProductionArtResult> {
+export async function loadProductionArt(signal: AbortSignal, options: { terrain?: boolean } = {}): Promise<ProductionArtResult> {
   const fallback = createArtLibrary(), templates = new Map<string, ModelTemplate>();
+  let voxelModels = new Map<string, VoxelObject>();
+  let terrainTiles: TerrainTiles | undefined;
+  const voxelPreviews = new Set<Mesh>();
   const geometry = new Set<BufferGeometry>(), materials = new Set<Material>(), textures = new Set<Texture>();
   const instances = new Set<Group>();
   const converted = new Map<Material, MeshLambertMaterial>();
@@ -151,11 +152,12 @@ export async function loadProductionArt(signal: AbortSignal): Promise<Production
   let disposed = false;
   const dispose = () => {
     if (disposed) return; disposed = true; fallback.dispose();
+    for (const mesh of voxelPreviews) { if ("dispose" in mesh && typeof mesh.dispose === "function") mesh.dispose(); mesh.geometry.dispose(); const material = mesh.material; if (!Array.isArray(material)) material.dispose(); }
+    voxelPreviews.clear(); voxelModels.clear();
     const bitmaps = new Set<ImageBitmap>();
     geometry.forEach(value => value.dispose()); materials.forEach(value => value.dispose());
     textures.forEach(value => { value.dispose(); const image = value.source.data; if (typeof ImageBitmap !== "undefined" && image instanceof ImageBitmap) bitmaps.add(image); });
     bitmaps.forEach(image => image.close());
-    instances.forEach(group => group.traverse(node => { if ("skeleton" in node && typeof node.skeleton === "object" && node.skeleton && "dispose" in node.skeleton) (node.skeleton as { dispose(): void }).dispose(); }));
     templates.clear(); instances.clear();
   };
   function matte(original: Material) {
@@ -172,6 +174,7 @@ export async function loadProductionArt(signal: AbortSignal): Promise<Production
       flatShading: true, depthWrite: original.depthWrite,
     });
     material.name = original.name;
+    material.userData = { ...original.userData };
     for (const texture of [material.map, material.emissiveMap]) if (texture) {
       texture.magFilter = NearestFilter; texture.minFilter = NearestMipmapNearestFilter;
       texture.generateMipmaps = true; texture.anisotropy = 1; texture.needsUpdate = true;
@@ -194,12 +197,17 @@ export async function loadProductionArt(signal: AbortSignal): Promise<Production
   }
   try {
     const directory = new URL(`${import.meta.env.BASE_URL}art3d/`, location.href);
+    try { if (options.terrain !== false) terrainTiles = await loadTerrainTiles(new URL("terrain/", directory), signal); }
+    catch (error) { if (signal.aborted) throw error; warnings.push("Terrain tiles unavailable; using fallback ground. " + (error instanceof Error ? error.message : "")); }
+    try { voxelModels = await loadVoxelAssets(new URL("voxel/", directory), signal); }
+    catch (error) { if (signal.aborted) throw error; warnings.push(error instanceof Error ? error.message : "Voxel assets unavailable; using existing models."); }
     const response = await fetch(new URL("manifest.json", directory), { signal });
     if (!response.ok) throw Error("Production art is not installed; using procedural test models.");
     const specs = manifestAssets(await response.json());
     const loader = new GLTFLoader();
     // Sequential bounded loads simplify abort/disposal and avoid a burst of decoded atlases.
     for (const spec of specs) {
+      if (spec.id === "alden" || spec.id === "tree" && voxelModels.has("tree")) continue;
       if (signal.aborted) throw new DOMException("Renderer startup cancelled", "AbortError");
       try {
         const url = productionAssetUrl(spec.url, directory);
@@ -217,18 +225,10 @@ export async function loadProductionArt(signal: AbortSignal): Promise<Production
           node.castShadow = node.receiveShadow = true;
         });
         remove.forEach(node => node.removeFromParent());
-        const required = [...new Set([...spec.requiredNodes, ...(spec.id === "alden" ? actorNodes : [])])];
         if (!root.getObjectByProperty("isMesh", true)) throw Error(`${spec.id}: GLB contains no meshes.`);
-        for (const name of required) if (!root.getObjectByName(name)) throw Error(`${spec.id}: missing authored node ${name}.`);
-        for (const name of [...actorNodes, "roof", "facade", "available", "depleted", "toolGroup", "tool"]) groupNode(root, name);
-        if (spec.id === "alden") {
-          const body = animationPivot(root, "body", root)!;
-          for (const name of ["leftArm", "rightArm", "leftLeg", "rightLeg"]) animationPivot(root, name, body);
-          const rightArm = root.getObjectByName("rightArm") as Group;
-          const toolName = root.getObjectByName("toolGroup") ? "toolGroup" : root.getObjectByName("tool") ? "tool" : null;
-          if (toolName) animationPivot(root, toolName, rightArm);
-        }
-        mergeModelMeshes(root, spec.id === "alden", geometry);
+        for (const name of spec.requiredNodes) if (!root.getObjectByName(name)) throw Error(`${spec.id}: missing authored node ${name}.`);
+        for (const name of ["roof", "facade", "available", "depleted"]) groupNode(root, name);
+        mergeModelMeshes(root, false, geometry);
         templates.set(spec.id, { root, spec });
       } catch (error) {
         if (signal.aborted) throw error;
@@ -243,12 +243,27 @@ export async function loadProductionArt(signal: AbortSignal): Promise<Production
   function copy(id: string) {
     const template = templates.get(id);
     if (!template) return null;
-    const group = cloneHierarchy(template.root) as Group; instances.add(group);
+    const group = template.root.clone(true); instances.add(group);
     return { group, spec: template.spec };
   }
+  const terrain = { ...fallback.terrain };
+  if (terrainTiles) for (const kind of ["grass", "dirt", "stone", "sand"] as const) {
+    // GI captures representative native pigment, without sampling an unrelated atlas slot.
+    const material = new MeshLambertMaterial({ color: terrainTiles.meanColors[kind] });
+    material.name = `native-ground-mean-${kind}`; materials.add(material); terrain[kind] = material;
+  }
   const library: ArtLibrary = {
-    terrain: fallback.terrain,
-    createObject(object: WorldObject): ObjectArt {
+    terrain, terrainTiles,
+    createObject(object: WorldObject, options): ObjectArt {
+      const voxels = object.kind === "tree" ? voxelModels.get("tree") : undefined;
+      if (voxels) {
+        const art = voxelObject(voxels); art.group.name = `object:${object.id}`;
+        if (options?.standaloneVoxels) {
+          const available = standaloneVoxel(voxels.model.levels[0]); art.available.add(available); voxelPreviews.add(available);
+          if (voxels.depleted) { const depleted = standaloneVoxel(voxels.depleted.levels[0]); art.depleted.add(depleted); voxelPreviews.add(depleted); }
+        }
+        return art;
+      }
       const original = fallback.createObject(object);
       const id = object.kind === "bank" ? "bank" : object.kind === "furnace" || object.art?.includes("workshop") ? "forge" : object.kind === "tree" ? "tree" : object.kind === "anvil" ? "anvil" : object.art === "lantern" ? "lantern" : object.art === "crate" || object.art === "prop-supplies" ? "crate" : "";
       const model = copy(id); if (!model) return original;
@@ -268,29 +283,9 @@ export async function loadProductionArt(signal: AbortSignal): Promise<Production
       const authoredLights = lightAnchors(model.group);
       return { group: model.group, roof, facade, lights: authoredLights.length ? authoredLights : original.lights };
     },
-    createActor(actor: Pick<ActorState, "id" | "name" | "role">): ActorArt {
-      const original = fallback.createActor(actor);
-      if (actor.id !== 0) return original;
-      const model = copy("alden"); if (!model) return original;
-      const find = (name: string) => model.group.getObjectByName(name) as Group;
-      const body = find("body"), leftArm = find("leftArm"), rightArm = find("rightArm"), leftLeg = find("leftLeg"), rightLeg = find("rightLeg");
-      if (!body || !leftArm || !rightArm || !leftLeg || !rightLeg) return original;
-      const authoredTool = find("toolGroup") ?? find("tool");
-      let tool: Group;
-      if (authoredTool?.children.length) tool = authoredTool;
-      else {
-        tool = original.tool; tool.removeFromParent(); rightArm.add(tool);
-        if (authoredTool) tool.position.copy(authoredTool.position);
-      }
-      tool.visible = false;
-      const capeNode = model.group.getObjectByName("cape");
-      let cape: Mesh | undefined;
-      if (capeNode instanceof Mesh) cape = capeNode;
-      else capeNode?.traverse(child => { if (!cape && child instanceof Mesh) cape = child; });
-      return { group: model.group, body, leftArm, rightArm, leftLeg, rightLeg, tool, cape };
-    },
+    createActor: actor => fallback.createActor(actor),
     createEnemy: id => fallback.createEnemy(id),
     dispose,
   };
-  return { library, loadedIds: [...templates.keys()], warnings, source: templates.size ? "blender" : "procedural" };
+  return { library, loadedIds: [...templates.keys(), ...voxelModels.keys()], voxelIds: [...voxelModels.keys()], warnings, source: templates.size ? "blender" : "procedural", characterStyle: "pixel", characterReady: true };
 }

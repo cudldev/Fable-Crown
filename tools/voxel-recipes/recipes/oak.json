@@ -1,0 +1,695 @@
+{
+  "version": 1,
+  "id": "oak-modular-01",
+  "description": "A/B-inspired tree; modular limbs and designed overlapping foliage clusters. Draft.",
+  "seed": 42,
+  "parameters": {
+    "crownScale": {
+      "type": "number",
+      "default": 1,
+      "min": 0.8,
+      "max": 1.08,
+      "description": "Cluster scale; retains shared grid/voxel pitch"
+    }
+  },
+  "space": {
+    "min": [
+      -1.75,
+      -1.5,
+      0
+    ],
+    "max": [
+      1.75,
+      1.5,
+      4.25
+    ],
+    "footprintTiles": [
+      1,
+      1
+    ],
+    "sizeStatus": "provisional comparison size"
+  },
+  "style": "../styles/warm.json",
+  "libraries": [
+    "../modules/basic.json"
+  ],
+  "nodes": {
+    "trunk": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            0,
+            0,
+            0,
+            0.375
+          ],
+          [
+            -0.0625,
+            0,
+            0.5,
+            0.3125
+          ],
+          [
+            0,
+            0,
+            1,
+            0.26875
+          ],
+          [
+            -0.125,
+            0.03125,
+            1.5625,
+            0.2375
+          ],
+          [
+            -0.125,
+            0.0625,
+            2,
+            0.1875
+          ],
+          [
+            -0.375,
+            0.0625,
+            2.5,
+            0.1375
+          ],
+          [
+            -0.5625,
+            0.125,
+            2.875,
+            0.08125
+          ]
+        ]
+      }
+    },
+    "east-fork": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            -0.125,
+            0.03125,
+            1.5,
+            0.2125
+          ],
+          [
+            0.25,
+            -0.0625,
+            2,
+            0.175
+          ],
+          [
+            0.625,
+            -0.125,
+            2.5,
+            0.125
+          ],
+          [
+            0.875,
+            -0.0625,
+            2.9375,
+            0.075
+          ]
+        ]
+      }
+    },
+    "low-west-branch": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            -0.0625,
+            0,
+            1.125,
+            0.175
+          ],
+          [
+            -0.4375,
+            -0.0625,
+            1.4375,
+            0.13125
+          ],
+          [
+            -0.8125,
+            -0.125,
+            1.625,
+            0.1
+          ],
+          [
+            -1.1875,
+            -0.125,
+            1.8125,
+            0.0625
+          ]
+        ]
+      }
+    },
+    "front-branch": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            -0.0625,
+            0,
+            1.75,
+            0.15625
+          ],
+          [
+            0.1875,
+            -0.4375,
+            2.1875,
+            0.1125
+          ],
+          [
+            0.375,
+            -0.75,
+            2.625,
+            0.0625
+          ]
+        ]
+      }
+    },
+    "back-branch": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            -0.0625,
+            0.0625,
+            1.8125,
+            0.15
+          ],
+          [
+            -0.125,
+            0.5,
+            2.4375,
+            0.10625
+          ],
+          [
+            0.125,
+            0.8125,
+            2.9375,
+            0.0625
+          ]
+        ]
+      }
+    },
+    "root-west": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            0,
+            0,
+            0.3125,
+            0.25
+          ],
+          [
+            -0.3125,
+            -0.0625,
+            0.125,
+            0.1875
+          ],
+          [
+            -0.625,
+            -0.125,
+            0,
+            0.1
+          ]
+        ]
+      }
+    },
+    "root-east": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            0,
+            0,
+            0.25,
+            0.25
+          ],
+          [
+            0.3125,
+            -0.125,
+            0.0625,
+            0.175
+          ],
+          [
+            0.5625,
+            -0.25,
+            0,
+            0.0875
+          ]
+        ]
+      }
+    },
+    "root-front": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            0,
+            0,
+            0.25,
+            0.225
+          ],
+          [
+            0.0625,
+            -0.375,
+            0.0625,
+            0.15625
+          ],
+          [
+            0.1875,
+            -0.625,
+            0,
+            0.0875
+          ]
+        ]
+      }
+    },
+    "root-back": {
+      "op": "module",
+      "module": "tree.limb",
+      "params": {
+        "points": [
+          [
+            0,
+            0,
+            0.25,
+            0.21875
+          ],
+          [
+            -0.125,
+            0.375,
+            0.0625,
+            0.15
+          ],
+          [
+            -0.1875,
+            0.5625,
+            0,
+            0.0875
+          ]
+        ]
+      }
+    },
+    "wood": {
+      "op": "union",
+      "inputs": [
+        "trunk",
+        "east-fork",
+        "low-west-branch",
+        "front-branch",
+        "back-branch",
+        "root-west",
+        "root-east",
+        "root-front",
+        "root-back"
+      ]
+    },
+    "west-low": {
+      "op": "transform",
+      "input": "west-low-foliage",
+      "translate": [
+        -1.13,
+        -0.13,
+        1.86
+      ],
+      "scale": {
+        "$mul": [
+          0.47,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        -5,
+        0,
+        -10
+      ]
+    },
+    "east-low": {
+      "op": "transform",
+      "input": "east-low-foliage",
+      "translate": [
+        0.95,
+        -0.22,
+        2.4
+      ],
+      "scale": {
+        "$mul": [
+          0.54,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        0,
+        20
+      ]
+    },
+    "west": {
+      "op": "transform",
+      "input": "west-foliage",
+      "translate": [
+        -0.85,
+        0.05,
+        2.78
+      ],
+      "scale": {
+        "$mul": [
+          0.7,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        -5,
+        15
+      ]
+    },
+    "front": {
+      "op": "transform",
+      "input": "front-foliage",
+      "translate": [
+        0.22,
+        -0.65,
+        2.75
+      ],
+      "scale": {
+        "$mul": [
+          0.66,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        0,
+        -15
+      ]
+    },
+    "back": {
+      "op": "transform",
+      "input": "back-foliage",
+      "translate": [
+        0.1,
+        0.61,
+        3
+      ],
+      "scale": {
+        "$mul": [
+          0.65,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        5,
+        0,
+        25
+      ]
+    },
+    "east": {
+      "op": "transform",
+      "input": "east-foliage",
+      "translate": [
+        0.77,
+        0.05,
+        3.05
+      ],
+      "scale": {
+        "$mul": [
+          0.68,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        0,
+        30
+      ]
+    },
+    "middle": {
+      "op": "transform",
+      "input": "middle-foliage",
+      "translate": [
+        -0.1,
+        0.05,
+        3.05
+      ],
+      "scale": {
+        "$mul": [
+          0.71,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        0,
+        -10
+      ]
+    },
+    "upper-west": {
+      "op": "transform",
+      "input": "upper-west-foliage",
+      "translate": [
+        -0.54,
+        0.08,
+        3.41
+      ],
+      "scale": {
+        "$mul": [
+          0.65,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        5,
+        15
+      ]
+    },
+    "apex": {
+      "op": "transform",
+      "input": "apex-foliage",
+      "translate": [
+        0.05,
+        0.17,
+        3.67
+      ],
+      "scale": {
+        "$mul": [
+          0.53,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        0,
+        -20
+      ]
+    },
+    "front-small": {
+      "op": "transform",
+      "input": "front-small-foliage",
+      "translate": [
+        -0.4,
+        -0.55,
+        3.16
+      ],
+      "scale": {
+        "$mul": [
+          0.43,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        0,
+        0,
+        10
+      ]
+    },
+    "east-small": {
+      "op": "transform",
+      "input": "east-small-foliage",
+      "translate": [
+        0.98,
+        0.12,
+        2.82
+      ],
+      "scale": {
+        "$mul": [
+          0.36,
+          {
+            "$param": "crownScale"
+          }
+        ]
+      },
+      "rotate": [
+        10,
+        0,
+        0
+      ]
+    },
+    "tree": {
+      "op": "union",
+      "inputs": [
+        "painted-wood",
+        "west-low",
+        "east-low",
+        "west",
+        "front",
+        "back",
+        "east",
+        "middle",
+        "upper-west",
+        "apex",
+        "front-small",
+        "east-small"
+      ]
+    },
+    "west-low-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf-sage",
+        "accent": "leaf-light"
+      }
+    },
+    "east-low-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf-shadow",
+        "accent": "leaf-sage"
+      }
+    },
+    "west-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf-sage",
+        "accent": "leaf-light"
+      }
+    },
+    "front-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf",
+        "accent": "leaf-light"
+      }
+    },
+    "back-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf-shadow",
+        "accent": "leaf-sage"
+      }
+    },
+    "east-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf-sage",
+        "accent": "leaf-light"
+      }
+    },
+    "middle-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf",
+        "accent": "leaf-light"
+      }
+    },
+    "upper-west-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf",
+        "accent": "leaf-light"
+      }
+    },
+    "apex-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf-light",
+        "accent": "leaf-light"
+      }
+    },
+    "front-small-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf",
+        "accent": "leaf-light"
+      }
+    },
+    "east-small-foliage": {
+      "op": "module",
+      "module": "tree.foliage-cluster",
+      "params": {
+        "material": "leaf-sage",
+        "accent": "leaf-light"
+      }
+    },
+    "bark-patch": {
+      "op": "box",
+      "center": [
+        0.03,
+        -0.19,
+        0.95
+      ],
+      "size": [
+        0.125,
+        0.25,
+        0.75
+      ],
+      "material": "bark-light"
+    },
+    "painted-wood": {
+      "op": "paint",
+      "input": "wood",
+      "mask": "bark-patch",
+      "material": "bark-light"
+    }
+  },
+  "output": "tree",
+  "checks": {
+    "connected": true,
+    "grounded": true
+  },
+  "scale": "../profiles/game-scale.json"
+}

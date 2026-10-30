@@ -1,12 +1,15 @@
 # Fable Crown — Game Design (CURRENT)
 
+> Current actor update (2026-10-30): the user approved the full pixel billboard cast in the voxel world. See [cast implementation](PIXEL_CAST.md) and [generation skill](../skills/fable-pixel-characters/SKILL.md). Earlier voxel-volume/rig requirements for characters and enemies below are superseded; environment migration and gameplay contracts remain.
+
+
 > Current approved release: [FEEL_AND_OAKREST.md](FEEL_AND_OAKREST.md). Gameplay feel, natural movement and an authored starter district follow the completed early-game journey. It governs the next implementation; the larger roadmap remains staged.
 
-> Latest approved iteration: [TILE_RPG_PLAN.md](TILE_RPG_PLAN.md). A character-first autonomous RPG on an isometric256×192 tile world, nine skills, tools/gear, personal bank, shops, melee and three original quest chains. It supersedes continuous-coordinate travel and settlement-first progression below. The painterly art direction remains.
+> Latest approved iteration: [TILE_RPG_PLAN.md](TILE_RPG_PLAN.md). A character-first autonomous RPG on an isometric256×192 tile world, nine skills, tools/gear, personal bank, shops, melee and three original quest chains. It supersedes continuous-coordinate travel and settlement-first progression below. The current [voxel art direction](ART_DIRECTION.md) supersedes earlier painterly presentation requirements.
 
 > Latest approved expansion: see [EXPANDED_WORLD.md](EXPANDED_WORLD.md). The demo now uses a full-browser world, three settlements, 24 characters, generated layered artwork and direct contextual intentions/queue controls. This supersedes the earlier one-hamlet and limited-player-control scope below.
 
-**Pitch:** A mobile-first, painterly fantasy RPG and autonomous settlement builder. The player influences a young prince's thoughts and intentions as he guides a growing frontier city. Villagers have individual skills, personalities, needs and routines; the prince and villagers carry out decisions autonomously.
+**Pitch:** A mobile-first, warm storybook voxel fantasy RPG and autonomous settlement builder. The player influences a young prince's thoughts and intentions as he guides a growing frontier city. Villagers have individual skills, personalities, needs and routines; the prince and villagers carry out decisions autonomously.
 
 ## Player fantasy and role
 
@@ -34,7 +37,7 @@ One frontier hamlet with a small manor, forest, mine, bank/storage and an empty 
 
 ## Presentation and platform
 
-Fully painterly watercolor/ink Japanese traditional fantasy; simplified hand-painted gameplay characters, more detailed portraits. See `docs/ART_DIRECTION.md` — it overrides previous pixel/HD-2D prescriptions. Mobile-first responsive portrait/landscape, static PWA on GitHub Pages, no paid APIs. Optional local WebLLM for short narrative text only.
+Warm storybook voxel fantasy: stepped volume, natural matte colors, soft material transitions and crisp flat block terraces. Alden keeps his blue cape/gold trim; characters require readable silhouettes and articulated parts. See [ART_DIRECTION.md](ART_DIRECTION.md) and [VOXEL_ASSET_MIGRATION.md](VOXEL_ASSET_MIGRATION.md); migration is incomplete. Mobile-first responsive portrait/landscape, static PWA on GitHub Pages, no paid APIs. Optional local WebLLM for short narrative text only.
 
 ## Long-term vision (NOT demo requirements)
 

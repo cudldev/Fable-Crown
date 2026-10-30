@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "id": "provisional-16-voxels-per-metre",
+  "voxelSize": 0.0625,
+  "worldUnitsPerTile": 1,
+  "frameVoxels": 84,
+  "cellSize": 512,
+  "paddingVoxels": 8
+}

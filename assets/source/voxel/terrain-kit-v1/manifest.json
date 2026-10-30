@@ -1,0 +1,209 @@
+{
+  "version": "83998cfd162791ce",
+  "method": "Original authored modular VOX blockouts; not image reconstruction",
+  "status": "Editable prototype; not the complete terrain atlas or integrated game art",
+  "tileMetres": 1,
+  "pitch": 0.0625,
+  "levelMetres": 0.5,
+  "sourceAxes": "X east, Y north, Z up; runtime X east, Y up, Z south",
+  "edgeContract": "Flat sources cover exactly 1m square, top0m, bottom-0.5m. Terrain levels translate whole tiles. No per-corner warping.",
+  "rotation": "Runtime clockwise yaw quarter-turns about tile centre; native files retain source axes.",
+  "assets": [
+    {
+      "id": "grass-a",
+      "file": "grass-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "grass-b",
+      "file": "grass-b.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "dirt-a",
+      "file": "dirt-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "cobble-a",
+      "file": "cobble-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "sand-a",
+      "file": "sand-a.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "grass-dirt-edge",
+      "file": "grass-dirt-edge.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "grass-dirt-outer",
+      "file": "grass-dirt-outer.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "grass-dirt-inner",
+      "file": "grass-dirt-inner.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "cliff-stone",
+      "file": "cliff-stone.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        8
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 2048,
+      "shape": "flat",
+      "topMetres": 0,
+      "previewOnly": true
+    },
+    {
+      "id": "stairs-stone-east",
+      "file": "stairs-stone-east.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "size": [
+        16,
+        16,
+        8
+      ],
+      "cells": 1280,
+      "shape": "stair",
+      "topMetres": null,
+      "stepHeightsMetres": [
+        0.125,
+        0.25,
+        0.375,
+        0.5
+      ],
+      "previewOnly": true
+    }
+  ]
+}

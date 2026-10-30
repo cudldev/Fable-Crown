@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Voxel recipes · shared scale</title>
+<style>html,body{margin:0;height:100%;font:15px system-ui;color:#263025;background:#e9e2d2}canvas{display:block}header{position:absolute;left:24px;top:18px}h1{font-size:21px;margin:0 0 6px}p{margin:5px 0}button{padding:6px 12px;border:1px solid #84917b;border-radius:5px;background:#faf7ed;color:inherit;cursor:pointer}footer{position:absolute;bottom:18px;left:24px}.measure{position:absolute;pointer-events:none;color:#3d4938;font-weight:600;font-size:14px;background:#eee8d9c9;padding:2px 5px;border-radius:3px}</style></head><body>
+<header><h1>Voxel recipes · shared physical scale</h1><p id="scale">Loading actual exports…</p><p><button id="front">Front</button> <button id="iso">Three-quarter</button> <button id="format">Show GLB</button></p></header>
+<footer>One metre per grid square · same camera and voxel size for both assets · provisional dimensions</footer>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {VOXLoader,buildMesh} from 'three/addons/loaders/VOXLoader.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const params=new URLSearchParams(location.search),asset=params.get('asset')||'recipe-system-v1',jobs=(params.get('jobs')||'oak-03,barrel-04').split(',');
+if(jobs.length!==2||![asset,...jobs].every(s=>/^[a-zA-Z0-9-]+$/.test(s)))throw Error('Two local jobs required');
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.append(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#e9e2d2');
+const camera=new THREE.OrthographicCamera(-4.6,4.6,3.3,-3.3,.01,80);
+scene.add(new THREE.HemisphereLight(0xffffff,0x777c69,2));const key=new THREE.DirectionalLight(0xffffff,2.1);key.position.set(-4,8,5);scene.add(key);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(12,8),new THREE.MeshStandardMaterial({color:0xc2c4a6,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.015;scene.add(floor);
+const grid=new THREE.GridHelper(12,12,0x7b8b6c,0xa3ad91);grid.position.y=-.006;scene.add(grid);
+const displays=[],labels=[];
+function label(text,position){const element=document.createElement('div');element.className='measure';element.textContent=text;document.body.append(element);labels.push({element,position:new THREE.Vector3(...position)});}
+let sharedPitch;
+for(let i=0;i<jobs.length;i++){
+ const base=`/assets/explorations/voxel/${asset}/${jobs[i]}/`,report=await(await fetch(base+'report.json')).json();
+ const {voxel_size_units:pitch,pivot_voxels:pivot,units_per_tile:tile}=report.physical_scale;
+ if(i&&pitch!==sharedPitch)throw Error('Comparison rejected: voxel densities differ');if(tile!==1)throw Error('Comparison expects metre tiles');sharedPitch=pitch;
+ const {chunks}=await new VOXLoader().loadAsync(base+'asset.vox');if(chunks.length!==1)throw Error('One VOX model expected');
+ const chunk=chunks[0],size=[chunk.size.x,chunk.size.y,chunk.size.z];
+ if(size.some((n,d)=>n!==report.dimensions[d])||chunk.data.length/4!==report.occupied_voxels)throw Error('Independent VOX readback mismatch');
+ const mesh=buildMesh(chunk);mesh.position.set(size[0]/2-pivot[0],size[2]/2-pivot[2],pivot[1]-size[1]/2);
+ const vox=new THREE.Group();vox.add(mesh);vox.scale.setScalar(pitch);scene.add(vox);
+ const glb=(await new GLTFLoader().loadAsync(base+'asset.glb')).scene;scene.add(glb);glb.visible=false;
+ const a=new THREE.Box3().setFromObject(vox),b=new THREE.Box3().setFromObject(glb);
+ if(a.min.distanceTo(b.min)>1e-5||a.max.distanceTo(b.max)>1e-5)throw Error('Native VOX/GLB scale or pivot disagreement');
+ const x=i===0?-1.35:1.5;vox.position.x=glb.position.x=x;
+ const height=a.max.y-a.min.y;label(`${jobs[i].split('-')[0]} · ${height.toFixed(2)} m`,[x,.05,1.5]);
+ const points=[];points.push(new THREE.Vector3(x+1.0,0,0),new THREE.Vector3(x+1.0,height,0));
+ const ruler=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0x68765e}));scene.add(ruler);
+ displays.push({vox,glb,summary:{job:jobs[i],heightMetres:height,pitchMetres:pitch,cells:report.occupied_voxels,independentFormatsAgree:true}});
+}
+label('1 m',[2.9,1,0]);
+const tickPoints=[];for(let h=0;h<=4;h++){tickPoints.push(new THREE.Vector3(3.1,h,0),new THREE.Vector3(3.25,h,0));}
+tickPoints.push(new THREE.Vector3(3.1,0,0),new THREE.Vector3(3.1,4,0));scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(tickPoints),new THREE.LineBasicMaterial({color:0x5f7157})));
+label('4 m',[3.1,4.15,0]);
+document.getElementById('scale').textContent=`${(1/sharedPitch).toFixed(0)} voxels per metre · no individual resizing`;
+function view(name){camera.position.set(...(name==='front'?[0,1.95,12]:[5.5,5.2,11]));camera.lookAt(0,1.95,0);}
+function format(kind){for(const d of displays){d.vox.visible=kind==='vox';d.glb.visible=kind==='glb';}window.voxelCompare.mode=kind;}
+window.voxelCompare={ready:true,mode:'vox',assets:displays.map(d=>d.summary),view,format};
+document.getElementById('front').onclick=()=>view('front');document.getElementById('iso').onclick=()=>view('iso');document.getElementById('format').onclick=()=>format(window.voxelCompare.mode==='vox'?'glb':'vox');
+function resize(){const aspect=innerWidth/innerHeight;camera.left=-3.3*aspect;camera.right=3.3*aspect;camera.top=3.3;camera.bottom=-3.3;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}
+addEventListener('resize',resize);resize();view('iso');
+renderer.setAnimationLoop(()=>{renderer.render(scene,camera);for(const {element,position}of labels){const p=position.clone().project(camera);element.style.left=((p.x+1)/2*innerWidth)+'px';element.style.top=((-p.y+1)/2*innerHeight)+'px';}});
+</script></body></html>

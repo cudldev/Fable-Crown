@@ -1,0 +1,29 @@
+import type { RpgState, TilePosition } from "../rpg/types";
+import type { FeedbackFloater } from "./feedback";
+
+export interface TileCamera {
+  x: number;
+  y: number;
+  zoom: number;
+  follow: boolean;
+  overview: boolean;
+  grid: boolean;
+}
+export type TileSelection =
+  | { kind: "object"; id: string }
+  | { kind: "actor"; id: number }
+  | { kind: "enemy" | "drop"; id: string }
+  | { kind: "grave" }
+  | { kind: "tile"; position: TilePosition };
+export interface TileSceneProps {
+  state: RpgState;
+  camera: TileCamera;
+  onCamera: (c: TileCamera) => void;
+  selection: TileSelection | null;
+  onSelect: (s: TileSelection) => void;
+  feedback?: FeedbackFloater[];
+  previewRoute?: TilePosition[];
+  presentationEpoch?: number;
+  onWorkContact?: (kind: string) => void;
+  onFootstep?: (mode: "walk" | "run") => void;
+}

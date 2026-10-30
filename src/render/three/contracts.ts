@@ -1,5 +1,7 @@
 import type { Group, Mesh, MeshLambertMaterial, Vector3 } from "three";
 import type { ActorState, WorldObject, Terrain } from "../../rpg/types";
+import type { VoxelObject } from "./voxel-data";
+import type { TerrainTiles } from "./terrain-tiles";
 
 /** Model-local positions; the renderer places the root at the footprint centre. */
 export interface LightAnchor {
@@ -11,6 +13,7 @@ export interface LightAnchor {
 }
 export interface ObjectArt {
   group: Group;
+  voxels?: VoxelObject;
   roof?: Group;
   facade?: Group;
   available?: Group;
@@ -18,7 +21,8 @@ export interface ObjectArt {
   gate?: Group;
   lights: LightAnchor[];
 }
-export interface ActorArt {
+export interface RigidActorArt {
+  kind: "rigid";
   group: Group;
   body: Group;
   leftArm: Group;
@@ -28,10 +32,15 @@ export interface ActorArt {
   tool: Group;
   cape?: Mesh;
 }
+export type ActorArt = RigidActorArt;
 export interface ArtLibrary {
   terrain: Record<Terrain, MeshLambertMaterial>;
-  createObject(object: WorldObject): ObjectArt;
+  terrainTiles?: TerrainTiles;
+  createObject(object: WorldObject, options?: { standaloneVoxels?: boolean }): ObjectArt;
   createActor(actor: Pick<ActorState, "id" | "role" | "name">): ActorArt;
   createEnemy(definitionId: string): Group;
   dispose(): void;
+}
+export interface RigidArtLibrary extends Omit<ArtLibrary, "createActor"> {
+  createActor(actor: Pick<ActorState, "id" | "role" | "name">): RigidActorArt;
 }

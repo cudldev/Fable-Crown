@@ -1,5 +1,33 @@
-.three-world { background: #8f9aa4; }
-.three-world > canvas { image-rendering: pixelated; }
+.three-world { background: #8f9aa4; touch-action: auto; }
+.three-world > canvas, .three-hit-layer { touch-action: none; }
+.three-visual-settings { position: absolute; top: 146px; right: 18px; z-index: 7; display: flex; flex-direction: column; width: min(350px, calc(100% - 36px)); max-height: min(64dvh, calc(100% - 210px)); overflow: hidden; border: 1px solid #a89c78; border-radius: 7px; color: #ece4cf; background: #1d3036f7; box-shadow: 0 8px 30px #101b2766; user-select: text; touch-action: pan-y; }
+.three-visual-settings:focus { outline: none; }
+.three-visual-settings header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-bottom: 1px solid #ab9a6f55; }
+.three-visual-settings header strong { display: block; font: 600 14px system-ui; }
+.three-visual-settings header small { display: block; margin-top: 3px; color: #c8c8b2; font: 10px ui-monospace, monospace; }
+.three-visual-settings button, .three-visual-settings select { min-height: 36px; padding: 6px 9px; border: 1px solid #948c6a; border-radius: 4px; background: #3d4e4e; color: #f2e6c9; font: 11px system-ui; }
+.three-visual-settings header button { min-width: 36px; font-size: 20px; }
+.visual-settings-body { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 12px 12px; scrollbar-width: thin; }
+.three-visual-settings fieldset { margin: 10px 0 0; padding: 0 0 12px; border: 0; border-bottom: 1px solid #ab9a6f33; }
+.three-visual-settings legend { padding: 0; margin-bottom: 9px; color: #e8cf98; font: 600 12px system-ui; }
+.visual-slider { display: block; margin: 8px 0; font: 12px system-ui; }
+.visual-slider > span { display: flex; justify-content: space-between; gap: 10px; }
+.visual-value { color: #c5d9d0; font-variant-numeric: tabular-nums; }
+.visual-slider input { display: block; width: 100%; height: 24px; margin: 0; accent-color: #d5bd82; cursor: pointer; }
+.visual-toggle { display: flex; align-items: center; gap: 8px; min-height: 32px; font: 12px system-ui; }
+.visual-toggle input { accent-color: #d5bd82; width: 17px; height: 17px; }
+.visual-select { display: grid; gap: 5px; margin: 8px 0; font: 12px system-ui; }
+.visual-colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0; }
+.visual-colors label { display: grid; gap: 4px; font: 11px system-ui; }
+.visual-colors input { width: 100%; height: 34px; padding: 2px; border: 1px solid #948c6a; border-radius: 4px; background: transparent; }
+.three-visual-settings details { margin-top: 9px; font: 11px system-ui; }
+.three-visual-settings summary { min-height: 30px; cursor: pointer; }
+.three-visual-settings footer { display: flex; flex-wrap: wrap; gap: 6px; padding: 9px 12px; border-top: 1px solid #ab9a6f55; }
+.visual-copy-result p { font: 12px system-ui; }
+.visual-copy-result textarea { box-sizing: border-box; display: block; width: 100%; min-height: 130px; padding: 7px; border: 1px solid #948c6a; border-radius: 4px; background: #14242b; color: #ecdfbd; font: 10px ui-monospace, monospace; resize: vertical; }
+.game-shell[data-panel-open="true"] .three-visual-settings { display: none; }
+.three-performance { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 5; padding: 5px 9px; border: 1px solid #8d866766; border-radius: 4px; background: #172b32df; color: #e8e8d5; font: 11px/1.3 ui-monospace, monospace; font-variant-numeric: tabular-nums; pointer-events: none; }
+.three-world > canvas { image-rendering: auto; }
 .three-world > canvas:focus-visible { outline: 2px solid #e0c68b; outline-offset: -3px; }
 .three-light-controls {
   position: absolute; top: 90px; right: 18px; z-index: 4;
@@ -24,6 +52,10 @@
 .three-fallback p { word-break: break-word; }
 .game-shell[data-panel-open="true"] .three-light-controls { display: none; }
 @media (max-width: 600px) {
+  .three-visual-settings { top: 81px; right: 10px; width: calc(100% - 20px); max-height: calc(100% - 275px); }
+  .three-visual-settings button, .three-visual-settings select { min-height: 44px; }
+  .three-light-controls .visual-settings-trigger { grid-column: 1 / -1; }
+  .three-performance { top: 249px; left: 10px; transform: none; font-size: 10px; }
   .three-light-controls { top: 81px; right: 10px; max-width: 160px; gap: 2px; padding: 3px; display: grid; grid-template-columns: repeat(3, 44px); }
   .three-light-controls > span { display: none; }
   .three-light-controls button { padding: 6px 8px; font-size: 10px; }
@@ -32,6 +64,11 @@
   .three-test-note { left: 10px; bottom: 210px; font-size: 9px; }
 }
 @media (max-height: 500px) and (min-width: 601px) {
+  .three-visual-settings { top: 76px; right: 10px; width: 320px; max-height: calc(100% - 90px); }
   .three-light-controls { top: 78px; right: 10px; }
   .three-test-note { display: none; }
+}
+@media (max-height: 500px) and (min-width: 761px) {
+  /* Leave the right-hand intention card clear; keep controls above the minimap. */
+  .three-light-controls { left: 10px; right: auto; max-width: calc(100% - 390px); z-index: 6; }
 }

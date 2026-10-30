@@ -5,20 +5,24 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build && node scripts/pwa.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/release-art.mjs && node scripts/pwa.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview --host 127.0.0.1",
     "test:browser": "playwright test",
-    "test:browser:software": "playwright test --config playwright.software.config.ts",
     "check:dist": "node scripts/check-dist.mjs",
-    "prebuild": "node scripts/prepare-art.mjs && node scripts/check-art3d.mjs",
+    "prebuild": "node scripts/check-art3d.mjs && node scripts/check-voxel-assets.mjs && node scripts/publish-terrain.mjs && node scripts/check-terrain-assets.mjs",
     "art:start": "node scripts/art-workflow.mjs start",
     "art:status": "node scripts/art-workflow.mjs status",
     "art:generate": "node scripts/art-workflow.mjs generate",
     "art:export": "node scripts/art-workflow.mjs export",
     "art:check": "node scripts/check-art3d.mjs",
-    "art:capture": "node scripts/review-art.mjs"
+    "art:capture": "node scripts/review-art.mjs",
+    "voxel:build": "node scripts/voxel-recipes.mjs build",
+    "voxel:test": "node scripts/voxel-recipes.mjs test",
+    "voxel:preview": "node scripts/voxel-recipes.mjs preview",
+    "voxel:compare": "node scripts/voxel-recipes.mjs compare",
+    "test:browser:software": "playwright test --config=playwright.software.config.ts"
   },
   "dependencies": {
     "react": "^19.0.0",

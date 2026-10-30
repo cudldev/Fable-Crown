@@ -5,4 +5,4 @@ Portrait: character/world preview, current activity and progress, one thought ca
 Thoughts: 2–3 short actionable ideas, unobtrusive countdown and visible default. If ignored, autonomous choice resolves. Decision may be collapsed without pausing. Preserve open thought, selected NPC, camera and timer through orientation change. Journal stores meaningful decisions and offline outcomes. Player should influence an intention in <=3 taps.
 
 ## Current game UX direction
-Prince-led Thought & Intention interface for autonomous settlement growth. Portrait uses a world preview with bottom sheet; landscape uses side inspector. No mandatory text, joystick or dense controls. Painterly UI, simplified illustrated characters, no pixel-art requirement. See `docs/GAME_DESIGN.md` and `docs/ART_DIRECTION.md`.
+Prince-led Thought & Intention interface for autonomous settlement growth. Portrait uses a world preview with bottom sheet; landscape uses side inspector. No mandatory text, joystick or dense controls. Compact parchment/ink or navy/gold UI accompanies readable voxel characters and terrain. See `docs/GAME_DESIGN.md` and `docs/ART_DIRECTION.md`.

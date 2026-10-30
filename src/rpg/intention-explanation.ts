@@ -204,12 +204,22 @@ export function explainIntention(s: RpgState): IntentionView {
     if (s.grave && s.tick >= s.grave.retryAt) { title = "Ready to recover the backpack"; targetId = "grave"; targetPosition = { ...s.grave.position }; reason = "Backpack belongings remain at the grave; recovery takes priority when its retry window opens."; next = "Recover the remaining belongings before resuming the ambition."; tag = "recover"; }
     if (!(goal && goalMet(s, goal)) && /^(Blocked:|Cannot |No safe |No arrows |You need |Missing |Requires |Backpack full|Recover Iori|Prepare .*obtain|.*: need \d)/.test(s.control.reason)) blocked = s.control.reason;
   }
-  if (!s.control.waiting && p.path.length) {
+  if (!s.control.waiting && s.control.source === "autonomous" && s.control.staminaResting) {
+    phase = "wait"; tag = "stamina-rest"; title = "Resting to recover run energy";
+    reason = `Run energy ${Math.floor(p.runEnergy / 100)}%. Alden is saving strength for the long journey. His route and ambition are retained.`;
+    next = "Resume the same route at 60% run energy. Danger or a direct order interrupts the break.";
+    progress = { label: "Run energy recovery", value: Math.min(p.runEnergy, 6000), max: 6000 };
+    blocked = "";
+  } else if (!s.control.waiting && p.path.length) {
     phase = "travel";
     if (!/^(Travelling|Going to|Approaching|Retreating)/.test(title)) title = `Going to ${targetId ? objectById(targetId)?.name ?? title : title}`;
     const trace = p.movement?.tick === s.tick ? p.movement : null;
     progress = { label: `${p.path.length} tiles remaining`, value: trace ? trace.tiles.length - 1 : 0,
       max: trace ? trace.mode === "run" ? 2 : 1 : s.control.running !== false && p.runEnergy >= 60 ? 2 : 1 };
+    if (source === "autonomous") reason += s.control.paceOverride
+      ? " Following your Run/Walk choice for this intention."
+      : s.control.running !== false ? " Running to reach the next requirement sooner."
+      : " Walking to recover energy or finish a short approach; running resumes once energy reaches 40%.";
   } else if (!s.control.waiting && p.action && phase !== "wait") {
     phase = "work"; progress = { label: "Action progress", value: p.action.duration - p.action.remaining, max: p.action.duration };
   }

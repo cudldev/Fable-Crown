@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { createRpg } from "../src/rpg/engine";
+import { applyRpgCommand, createRpg } from "../src/rpg/engine";
 import { XP_THRESHOLDS } from "../src/rpg/skills";
 import { interactionTiles, WORLD } from "../src/rpg/world";
 import type { RpgState } from "../src/rpg/types";
@@ -241,4 +241,42 @@ test("Walk recovers energy and Run consumes it while the movement choice persist
   await expect(
     page.getByRole("button", { name: "Toggle running" }),
   ).toHaveAttribute("aria-pressed", "true");
+});
+
+test("Alden explains a stamina break and resumes autonomous running offline", async ({ page, context }) => {
+  const external: string[] = [], errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (url.protocol.startsWith("http") && page.url().startsWith("http") && url.origin !== new URL(page.url()).origin) external.push(url.href);
+  });
+  await page.goto("./?renderer=canvas");
+  await expect(page.getByTestId("rpg-world")).toBeVisible();
+  const state = waitingFixture();
+  expect(applyRpgCommand(state, { type: "move", position: { ...state.player.position, x: 97, y: 105 } }).ok).toBe(true);
+  state.control.source = "autonomous";
+  state.control.running = false;
+  state.control.staminaResting = true;
+  state.player.runEnergy = 4500;
+  await importState(page, state);
+  await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  await page.getByRole("button", { name: "Close panel" }).click();
+  const plan = page.getByRole("region", { name: "Alden's current plan" });
+  await expect(plan).toContainText("Resting to recover run energy");
+  await expect(plan.getByRole("progressbar", { name: "Run energy recovery" })).toBeVisible();
+  const resting = await savedState(page);
+  expect(resting.control.staminaResting).toBe(true);
+  expect(resting.player.position).toEqual(state.player.position);
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await context.setOffline(true);
+  try {
+    await page.reload();
+    await expect(page.getByTestId("rpg-world")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Toggle running" })).toHaveAttribute("aria-pressed", "true", { timeout: 15000 });
+    const running = await savedState(page);
+    expect(running.player.position).not.toEqual(state.player.position);
+    expect(running.control.staminaResting).toBeUndefined();
+    expect(running.control.source).toBe("autonomous");
+  } finally { await context.setOffline(false); }
+  expect(external).toEqual([]); expect(errors).toEqual([]);
 });

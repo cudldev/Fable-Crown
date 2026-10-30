@@ -1,0 +1,284 @@
+{
+  "version": 1,
+  "id": "barrel-modular-01",
+  "description": "Bulged round timber barrel with inset lid and two separate metal hoops. Draft.",
+  "seed": 19,
+  "parameters": {
+    "radius": {
+      "type": "number",
+      "default": 0.4375,
+      "min": 0.25,
+      "max": 0.5
+    },
+    "height": {
+      "type": "number",
+      "default": 1,
+      "min": 0.5,
+      "max": 1.25
+    }
+  },
+  "space": {
+    "min": [
+      -0.625,
+      -0.625,
+      0
+    ],
+    "max": [
+      0.625,
+      0.625,
+      1.375
+    ],
+    "footprintTiles": [
+      1,
+      1
+    ],
+    "sizeStatus": "provisional prop size"
+  },
+  "style": "../styles/warm.json",
+  "libraries": [
+    "../modules/basic.json"
+  ],
+  "nodes": {
+    "body": {
+      "op": "lathe",
+      "profile": [
+        [
+          0,
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.82
+            ]
+          }
+        ],
+        [
+          {
+            "$mul": [
+              {
+                "$param": "height"
+              },
+              0.15
+            ]
+          },
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.92
+            ]
+          }
+        ],
+        [
+          {
+            "$mul": [
+              {
+                "$param": "height"
+              },
+              0.5
+            ]
+          },
+          {
+            "$param": "radius"
+          }
+        ],
+        [
+          {
+            "$mul": [
+              {
+                "$param": "height"
+              },
+              0.85
+            ]
+          },
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.92
+            ]
+          }
+        ],
+        [
+          {
+            "$param": "height"
+          },
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.82
+            ]
+          }
+        ]
+      ],
+      "material": "wood"
+    },
+    "opening": {
+      "op": "lathe",
+      "profile": [
+        [
+          {
+            "$sub": [
+              {
+                "$param": "height"
+              },
+              0.065
+            ]
+          },
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.69
+            ]
+          }
+        ],
+        [
+          {
+            "$add": [
+              {
+                "$param": "height"
+              },
+              0.05
+            ]
+          },
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.69
+            ]
+          }
+        ]
+      ],
+      "material": "wood"
+    },
+    "rim": {
+      "op": "difference",
+      "base": "body",
+      "cut": "opening"
+    },
+    "lid": {
+      "op": "lathe",
+      "profile": [
+        [
+          {
+            "$sub": [
+              {
+                "$param": "height"
+              },
+              0.07
+            ]
+          },
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.7
+            ]
+          }
+        ],
+        [
+          {
+            "$sub": [
+              {
+                "$param": "height"
+              },
+              0.045
+            ]
+          },
+          {
+            "$mul": [
+              {
+                "$param": "radius"
+              },
+              0.7
+            ]
+          }
+        ]
+      ],
+      "material": "endgrain"
+    },
+    "hoop": {
+      "op": "module",
+      "module": "prop.hoop",
+      "params": {
+        "radius": {
+          "$add": [
+            {
+              "$mul": [
+                {
+                  "$param": "radius"
+                },
+                0.95
+              ]
+            },
+            0.0625
+          ]
+        },
+        "height": 0.125,
+        "thickness": 0.09375
+      }
+    },
+    "lower": {
+      "op": "transform",
+      "input": "hoop",
+      "translate": [
+        0,
+        0,
+        {
+          "$mul": [
+            {
+              "$param": "height"
+            },
+            0.18
+          ]
+        }
+      ]
+    },
+    "upper": {
+      "op": "transform",
+      "input": "hoop",
+      "translate": [
+        0,
+        0,
+        {
+          "$sub": [
+            {
+              "$mul": [
+                {
+                  "$param": "height"
+                },
+                0.82
+              ]
+            },
+            0.125
+          ]
+        }
+      ]
+    },
+    "barrel": {
+      "op": "union",
+      "inputs": [
+        "rim",
+        "lid",
+        "lower",
+        "upper"
+      ]
+    }
+  },
+  "output": "barrel",
+  "checks": {
+    "connected": true,
+    "grounded": true
+  },
+  "scale": "../profiles/game-scale.json"
+}

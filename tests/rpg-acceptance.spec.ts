@@ -242,14 +242,12 @@ test("world assets install to cache and shell reloads offline", async ({
   const decoded = await page.evaluate(async () => {
     const base = new URL("./", location.href);
     const manifest = await (
-      await fetch(new URL("art/manifest.json", base))
+      await fetch(new URL("world-assets.json", base))
     ).json();
     return Promise.all(
       manifest.files.map(async (path: string) => {
-        const image = new Image();
-        image.src = new URL(path, base).href;
-        await image.decode();
-        return image.naturalWidth > 0;
+        const response = await fetch(new URL(path, base));
+        return response.ok && (await response.arrayBuffer()).byteLength > 0;
       }),
     );
   });
