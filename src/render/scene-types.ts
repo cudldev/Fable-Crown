@@ -20,7 +20,7 @@ export interface ScenePreparation { stage: PreparationStage; message?: string }
 export interface TileSceneProps {
   state: RpgState;
   camera: TileCamera;
-  onCamera: (c: TileCamera) => void;
+  onCamera: (update: TileCamera | ((current: TileCamera) => TileCamera)) => void;
   selection: TileSelection | null;
   onSelect: (s: TileSelection) => void;
   onInteract?: (s: TileSelection) => void;

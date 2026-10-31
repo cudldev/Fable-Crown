@@ -229,10 +229,20 @@ test("native decoding preserves all source LOD, AO and stump data", async () => 
   const buffer = Uint8Array.from(await readFile(new URL("../public/art3d/voxel/tree.vox", import.meta.url))).buffer;
   const spec = { pitch: .0625, pivot: [34, 35, 0], cutHeight: .5 }, decoded = decodeVoxelAsset(buffer, spec), grid = parseVox(buffer);
   expect(decoded.size).toEqual(grid.size);
-  expect(decoded.voxels.model).toEqual(voxelModel(grid, spec.pitch, spec.pivot));
-  expect(decoded.voxels.depleted).toEqual(voxelModel(grid, spec.pitch, spec.pivot, spec.cutHeight));
+  const availableSurfaces = decoded.voxels.model.surfaces, depletedSurfaces = decoded.voxels.depleted!.surfaces;
+  const compareBase = (actual: typeof decoded.voxels.model, expected: typeof decoded.voxels.model) => {
+    expect(actual.pitch).toBe(expected.pitch); expect(actual.radius).toBe(expected.radius); expect(actual.levels).toHaveLength(expected.levels.length);
+    for (const [i, level] of [...actual.levels, actual.lighting].entries()) {
+      const reference = [...expected.levels, expected.lighting][i];
+      expect(level.count).toBe(reference.count); expect(level.pitch).toBe(reference.pitch);
+      for (const key of ["centers", "colors", "ao"] as const) expect(sameBytes(level[key], reference[key])).toBe(true);
+    }
+  };
+  compareBase(decoded.voxels.model, voxelModel(grid, spec.pitch, spec.pivot));
+  compareBase(decoded.voxels.depleted!, voxelModel(grid, spec.pitch, spec.pivot, spec.cutHeight));
+  expect(availableSurfaces).toHaveLength(5); expect(depletedSurfaces).toHaveLength(5);
   expect(decoded.voxels.depleted!.levels[3]).toBe(decoded.voxels.depleted!.levels[4]);
-});
+}, 15000);
 
 test("aborting asset loading terminates in-flight decoding and rejects its promise", async () => {
   class DecoderTransport {

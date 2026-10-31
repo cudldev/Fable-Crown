@@ -1,13 +1,22 @@
 /** Native VOX150 is the editable source; render LODs are derived locally, never authoritative game data. */
 import { Color, SRGBColorSpace } from "three";
+import type { VoxelSurfaceData, VoxelShadowData, VoxelSurfaceBounds } from "./voxel-surface";
 
 export interface VoxelGrid { size: [number, number, number]; cells: Uint8Array; palette: Uint8Array }
 export interface VoxelLevel { pitch: number; centers: Float32Array; colors: Float32Array; count: number; ao: Uint8Array }
-export interface VoxelModel { levels: VoxelLevel[]; lighting: VoxelLevel; pitch: number; radius: number }
+export interface VoxelModel { levels: VoxelLevel[]; lighting: VoxelLevel; pitch: number; radius: number; surfaces?: VoxelSurfaceData[]; shadowSurfaces?: (VoxelShadowData | undefined)[]; shadowBudgetExceeded?: boolean[] }
 export interface VoxelObject { model: VoxelModel; depleted?: VoxelModel }
 export const VOXEL_LOD_FACTORS = [1, 2, 4, 8, 16] as const;
+export const VOXEL_SHADOW_TRIANGLE_BUDGET = 2000;
+
+/** A cheaper existing LOD is an approximate shadow proxy, never a change to visible art. */
+export function selectVoxelShadowSurfaces(surfaces: readonly VoxelSurfaceData[], candidates: readonly VoxelShadowData[] = surfaces.map(surface => surface.shadow ?? surface), budget = VOXEL_SHADOW_TRIANGLE_BUDGET): (VoxelShadowData | undefined)[] | undefined {
+  if (!Number.isInteger(budget) || budget < 1 || candidates.length !== surfaces.length) throw Error("Invalid voxel shadow budget/candidates.");
+  const selected = surfaces.map((surface, index) => candidates.slice(index).find(candidate => candidate.triangles <= budget && candidate.triangles < surface.triangles));
+  return selected.some(Boolean) ? selected : undefined;
+}
 const index = (x: number, y: number, z: number, size: readonly number[]) => (x * size[1] + y) * size[2] + z;
-const aoOffsets = Array.from({length: 24}, (_, entry) => {
+export const VOXEL_AO_OFFSETS = Array.from({length: 24}, (_, entry) => {
   const face = Math.floor(entry / 4), axis = Math.floor(face / 2), sign = face % 2 ? 1 : -1, corner = entry % 4;
   const a = [0, 0, 0], b = [0, 0, 0], c = [0, 0, 0]; a[axis] = b[axis] = c[axis] = sign;
   a[(axis + 1) % 3] = c[(axis + 1) % 3] = corner & 1 ? 1 : -1;
@@ -80,7 +89,7 @@ export function surfaceLevel(grid: VoxelGrid, pitch: number, pivot: readonly num
     const at = (id - 1) * 4;
     color.setRGB(palette[at] / 255, palette[at + 1] / 255, palette[at + 2] / 255, SRGBColorSpace);
     colors.push(color.r, color.g, color.b);
-    if (!includeInterior) for (const {a, b, c} of aoOffsets) {
+    if (!includeInterior) for (const {a, b, c} of VOXEL_AO_OFFSETS) {
       const sideA = Number(occupied(x + a[0], y + a[1], z + a[2])), sideB = Number(occupied(x + b[0], y + b[1], z + b[2]));
       const occlusion = sideA && sideB ? 0 : 3 - sideA - sideB - Number(occupied(x + c[0], y + c[1], z + c[2]));
       ao.push(Math.round(255 * (.45 + .55 * occlusion / 3)));
@@ -123,5 +132,63 @@ export function composeVoxelModels(parts: readonly { model: VoxelModel; offset: 
     });
     return { pitch: levels[0].pitch, count, centers, colors, ao };
   };
-  return { pitch: parts[0].model.pitch, levels: parts[0].model.levels.map((_, index) => merge(parts.map(part => part.model.levels[index]))), lighting: merge(parts.map(part => part.model.lighting)), radius: Math.max(...parts.map(part => part.model.radius + Math.hypot(...part.offset))) };
+  const model: VoxelModel = { pitch: parts[0].model.pitch, levels: parts[0].model.levels.map((_, index) => merge(parts.map(part => part.model.levels[index]))), lighting: merge(parts.map(part => part.model.lighting)), radius: Math.max(...parts.map(part => part.model.radius + Math.hypot(...part.offset))) };
+  if (parts.every(part => part.model.surfaces?.length === part.model.levels.length)) {
+    const identities = new Map<VoxelSurfaceData, number>(), merged = new Map<string, VoxelSurfaceData>();
+    model.surfaces = model.levels.map((_, index) => {
+      const surfaces = parts.map(part => part.model.surfaces![index]);
+      const key = surfaces.map(surface => { if (!identities.has(surface)) identities.set(surface, identities.size); return identities.get(surface); }).join(":");
+      let surface = merged.get(key);
+      if (!surface) { surface = composeVoxelSurfaces(surfaces, parts.map(part => part.offset)); merged.set(key, surface); }
+      return surface;
+    });
+    const shadowIdentities = new Map<VoxelShadowData, number>(), shadowCache = new Map<string, VoxelShadowData>();
+    const candidates = model.surfaces.map((surface, index) => {
+      const selected = parts.map(part => part.model.shadowSurfaces?.[index] ?? part.model.surfaces![index].shadow ?? part.model.surfaces![index]);
+      const unchanged = selected.every((shadow, i) => shadow === (parts[i].model.surfaces![index].shadow ?? parts[i].model.surfaces![index]));
+      // Keep the already selected part silhouettes even when their sum is over
+      // budget. A coarser compound LOD has not passed the native shape gate.
+      if (unchanged) return surface.shadow ?? surface;
+      const key = selected.map(shadow => { if (!shadowIdentities.has(shadow)) shadowIdentities.set(shadow, shadowIdentities.size); return shadowIdentities.get(shadow); }).join(":");
+      let shadow = shadowCache.get(key);
+      if (!shadow) { shadow = composeVoxelGeometry(selected, parts.map(part => part.offset)); shadowCache.set(key, shadow); }
+      return shadow;
+    });
+    const shadows = candidates.map((candidate, index) => candidate.triangles < model.surfaces![index].triangles ? candidate : undefined);
+    model.shadowSurfaces = shadows.some(Boolean) ? shadows : undefined;
+    const exceeded = candidates.map(candidate => candidate.triangles > VOXEL_SHADOW_TRIANGLE_BUDGET);
+    model.shadowBudgetExceeded = exceeded.some(Boolean) ? exceeded : undefined;
+  }
+  return model;
+}
+
+/** Translation-only composition keeps native pigment/AO and shared per-level surface data. */
+function composeVoxelSurfaces(surfaces: readonly VoxelSurfaceData[], offsets: readonly (readonly [number, number, number])[]): VoxelSurfaceData {
+  const geometry = composeVoxelGeometry(surfaces, offsets), vertices = geometry.positions.length / 3;
+  const normals = new Int8Array(vertices * 3), colors = new Float32Array(vertices * 3), ao = new Uint8Array(vertices);
+  let at = 0;
+  for (const surface of surfaces) {
+    normals.set(surface.normals, at * 3); colors.set(surface.colors, at * 3); ao.set(surface.ao, at); at += surface.positions.length / 3;
+  }
+  const result: VoxelSurfaceData = { ...geometry, normals, colors, ao, pitch: surfaces[0].pitch,
+    exposedFaces: surfaces.reduce((sum, surface) => sum + surface.exposedFaces, 0), bytes: geometry.bytes + normals.byteLength + colors.byteLength + ao.byteLength };
+  if (surfaces.some(surface => surface.shadow)) result.shadow = composeVoxelGeometry(surfaces.map(surface => surface.shadow ?? surface), offsets);
+  return result;
+}
+
+function composeVoxelGeometry(geometry: readonly Pick<VoxelShadowData, "positions" | "indices">[], offsets: readonly (readonly [number, number, number])[]): VoxelShadowData {
+    const positions = new Float32Array(geometry.reduce((sum, part) => sum + part.positions.length, 0));
+    const indices = new Uint32Array(geometry.reduce((sum, part) => sum + part.indices.length, 0));
+    const bounds: VoxelSurfaceBounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
+    let vertexAt = 0, indexAt = 0;
+    geometry.forEach((part, i) => {
+      for (let at = 0; at < part.positions.length; at++) {
+        const axis = at % 3, value = Math.fround(part.positions[at] + offsets[i][axis]); positions[vertexAt * 3 + at] = value;
+        bounds.min[axis] = Math.min(bounds.min[axis], value); bounds.max[axis] = Math.max(bounds.max[axis], value);
+      }
+      for (let at = 0; at < part.indices.length; at++) indices[indexAt + at] = part.indices[at] + vertexAt;
+      vertexAt += part.positions.length / 3; indexAt += part.indices.length;
+    });
+    if (!positions.length) { bounds.min = [0, 0, 0]; bounds.max = [0, 0, 0]; }
+    return { positions, indices, bounds, quads: indices.length / 6, triangles: indices.length / 3, bytes: positions.byteLength + indices.byteLength };
 }

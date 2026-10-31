@@ -1,0 +1,861 @@
+{
+  "control": {
+    "identity": "c5f39e4f4b35",
+    "dist": "tmp/voxel-static-control-dist",
+    "sourceBuild": "cube-control-4db3161c3c20-ff5777784df7",
+    "views": [
+      {
+        "width": 1280,
+        "trials": [
+          {
+            "trial": 0,
+            "meanMs": 70.07827298050138,
+            "p99Ms": 166.79999999999563,
+            "over50Ms": 349,
+            "adequate": 0.8812986672284473,
+            "hidden": 0,
+            "coarser": 0.11870133277155273,
+            "longestContinuousCoarserMs": 867.5,
+            "maxPendingAgeMs": 10835.6,
+            "maxQueue": 36,
+            "cancelled": 82,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": null,
+            "geometryBytes": null,
+            "instanceBytes": null,
+            "publishedMedians": {
+              "gpuMs": 29.794,
+              "drawCalls": 343,
+              "triangles": 3602343,
+              "cpuVoxelsMs": 3.975,
+              "cpuRenderMs": 19.7,
+              "cpuGiMs": 9.143,
+              "cpuHitsMs": 14.114,
+              "colorTriangles": null,
+              "shadowTriangles": null,
+              "drawInstances": null,
+              "equivalentCells": 249903
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 156.60000000149012
+              }
+            ]
+          },
+          {
+            "trial": 1,
+            "meanMs": 75.14373259052927,
+            "p99Ms": 208.5,
+            "over50Ms": 343,
+            "adequate": 0.857761912175737,
+            "hidden": 0,
+            "coarser": 0.14223808782426298,
+            "longestContinuousCoarserMs": 1009.4000000000015,
+            "maxPendingAgeMs": 11544.8,
+            "maxQueue": 34,
+            "cancelled": 85,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": null,
+            "geometryBytes": null,
+            "instanceBytes": null,
+            "publishedMedians": {
+              "gpuMs": 34.935,
+              "drawCalls": 343,
+              "triangles": 3647026,
+              "cpuVoxelsMs": 4.186,
+              "cpuRenderMs": 21.45,
+              "cpuGiMs": 9.538,
+              "cpuHitsMs": 16.586,
+              "colorTriangles": null,
+              "shadowTriangles": null,
+              "drawInstances": null,
+              "equivalentCells": 247119
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 119.10000000149012
+              }
+            ]
+          },
+          {
+            "trial": 2,
+            "meanMs": 79.72116991643456,
+            "p99Ms": 200.09999999999127,
+            "over50Ms": 356,
+            "adequate": 0.8656459316769103,
+            "hidden": 0,
+            "coarser": 0.13435406832308974,
+            "longestContinuousCoarserMs": 1376.199999999997,
+            "maxPendingAgeMs": 16824.9,
+            "maxQueue": 31,
+            "cancelled": 79,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": null,
+            "geometryBytes": null,
+            "instanceBytes": null,
+            "publishedMedians": {
+              "gpuMs": 35.829,
+              "drawCalls": 342,
+              "triangles": 3593894,
+              "cpuVoxelsMs": 4.3,
+              "cpuRenderMs": 23.114,
+              "cpuGiMs": 10.6,
+              "cpuHitsMs": 17.233,
+              "colorTriangles": null,
+              "shadowTriangles": null,
+              "drawInstances": null,
+              "equivalentCells": 246423
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 116
+              }
+            ]
+          }
+        ],
+        "allMeanMs": 74.98105849582174,
+        "allMeanRangeMs": [
+          70.07827298050138,
+          79.72116991643456
+        ],
+        "warmMeanMs": 77.43245125348191,
+        "warmMeanRangeMs": [
+          75.14373259052927,
+          79.72116991643456
+        ],
+        "warmP99RangeMs": [
+          200.09999999999127,
+          208.5
+        ],
+        "warmAdequate": [
+          0.857761912175737,
+          0.8656459316769103
+        ],
+        "warmCoarser": [
+          0.13435406832308974,
+          0.14223808782426298
+        ],
+        "warmHidden": [
+          0,
+          0
+        ],
+        "longestCoarserMs": 1376.199999999997,
+        "warmPublishedMedianRanges": {
+          "gpuMs": [
+            34.935,
+            35.829
+          ],
+          "drawCalls": [
+            342,
+            343
+          ],
+          "triangles": [
+            3593894,
+            3647026
+          ],
+          "cpuVoxelsMs": [
+            4.186,
+            4.3
+          ],
+          "cpuRenderMs": [
+            21.45,
+            23.114
+          ],
+          "cpuGiMs": [
+            9.538,
+            10.6
+          ],
+          "cpuHitsMs": [
+            16.586,
+            17.233
+          ],
+          "colorTriangles": null,
+          "shadowTriangles": null,
+          "drawInstances": null,
+          "equivalentCells": [
+            246423,
+            247119
+          ]
+        },
+        "settleAfterFollowMs": 2031
+      },
+      {
+        "width": 390,
+        "trials": [
+          {
+            "trial": 0,
+            "meanMs": 61.876323119777126,
+            "p99Ms": 100,
+            "over50Ms": 304,
+            "adequate": 0.9842258796413009,
+            "hidden": 0,
+            "coarser": 0.01577412035869908,
+            "longestContinuousCoarserMs": 350.3999999999978,
+            "maxPendingAgeMs": 4896.5,
+            "maxQueue": 24,
+            "cancelled": 19,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": null,
+            "geometryBytes": null,
+            "instanceBytes": null,
+            "publishedMedians": {
+              "gpuMs": 25.009,
+              "drawCalls": 292,
+              "triangles": 4942882,
+              "cpuVoxelsMs": 3.111,
+              "cpuRenderMs": 18.389,
+              "cpuGiMs": 8.944,
+              "cpuHitsMs": 11.65,
+              "colorTriangles": null,
+              "shadowTriangles": null,
+              "drawInstances": null,
+              "equivalentCells": 236367
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 163.89999999850988
+              }
+            ]
+          },
+          {
+            "trial": 1,
+            "meanMs": 57.22924791086352,
+            "p99Ms": 100.09999999999854,
+            "over50Ms": 251,
+            "adequate": 0.9805113578287981,
+            "hidden": 0,
+            "coarser": 0.019488642171201886,
+            "longestContinuousCoarserMs": 400.3999999999942,
+            "maxPendingAgeMs": 3094.8,
+            "maxQueue": 24,
+            "cancelled": 19,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": null,
+            "geometryBytes": null,
+            "instanceBytes": null,
+            "publishedMedians": {
+              "gpuMs": 24.477,
+              "drawCalls": 290,
+              "triangles": 4911338,
+              "cpuVoxelsMs": 2.327,
+              "cpuRenderMs": 15.91,
+              "cpuGiMs": 7.33,
+              "cpuHitsMs": 12.01,
+              "colorTriangles": null,
+              "shadowTriangles": null,
+              "drawInstances": null,
+              "equivalentCells": 238564
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 87.79999999701977
+              }
+            ]
+          },
+          {
+            "trial": 2,
+            "meanMs": 63.73537604456825,
+            "p99Ms": 100.19999999999709,
+            "over50Ms": 294,
+            "adequate": 0.9792141951837767,
+            "hidden": 0,
+            "coarser": 0.020785804816223323,
+            "longestContinuousCoarserMs": 475.6000000000058,
+            "maxPendingAgeMs": 4571.2,
+            "maxQueue": 24,
+            "cancelled": 24,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": null,
+            "geometryBytes": null,
+            "instanceBytes": null,
+            "publishedMedians": {
+              "gpuMs": 26.41,
+              "drawCalls": 291,
+              "triangles": 5081462,
+              "cpuVoxelsMs": 3.112,
+              "cpuRenderMs": 19.237,
+              "cpuGiMs": 9.662,
+              "cpuHitsMs": 13.1,
+              "colorTriangles": null,
+              "shadowTriangles": null,
+              "drawInstances": null,
+              "equivalentCells": 238564
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 82.70000000298023
+              }
+            ]
+          }
+        ],
+        "allMeanMs": 60.94698235840297,
+        "allMeanRangeMs": [
+          57.22924791086352,
+          63.73537604456825
+        ],
+        "warmMeanMs": 60.48231197771588,
+        "warmMeanRangeMs": [
+          57.22924791086352,
+          63.73537604456825
+        ],
+        "warmP99RangeMs": [
+          100.09999999999854,
+          100.19999999999709
+        ],
+        "warmAdequate": [
+          0.9792141951837767,
+          0.9805113578287981
+        ],
+        "warmCoarser": [
+          0.019488642171201886,
+          0.020785804816223323
+        ],
+        "warmHidden": [
+          0,
+          0
+        ],
+        "longestCoarserMs": 475.6000000000058,
+        "warmPublishedMedianRanges": {
+          "gpuMs": [
+            24.477,
+            26.41
+          ],
+          "drawCalls": [
+            290,
+            291
+          ],
+          "triangles": [
+            4911338,
+            5081462
+          ],
+          "cpuVoxelsMs": [
+            2.327,
+            3.112
+          ],
+          "cpuRenderMs": [
+            15.91,
+            19.237
+          ],
+          "cpuGiMs": [
+            7.33,
+            9.662
+          ],
+          "cpuHitsMs": [
+            12.01,
+            13.1
+          ],
+          "colorTriangles": null,
+          "shadowTriangles": null,
+          "drawInstances": null,
+          "equivalentCells": [
+            238564,
+            238564
+          ]
+        },
+        "settleAfterFollowMs": 381
+      }
+    ]
+  },
+  "static": {
+    "identity": "6c312eb84d70",
+    "dist": "dist",
+    "views": [
+      {
+        "width": 1280,
+        "trials": [
+          {
+            "trial": 0,
+            "meanMs": 70.38022284122562,
+            "p99Ms": 166.89999999999782,
+            "over50Ms": 348,
+            "adequate": 0.9957018186135793,
+            "hidden": 0,
+            "coarser": 0.004298181386420697,
+            "longestContinuousCoarserMs": 108.59999999999854,
+            "maxPendingAgeMs": 0,
+            "maxQueue": 0,
+            "cancelled": 0,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": [
+              37,
+              37
+            ],
+            "geometryBytes": [
+              7419720,
+              7419720
+            ],
+            "instanceBytes": [
+              75548,
+              85952
+            ],
+            "publishedMedians": {
+              "gpuMs": 31.36,
+              "drawCalls": 326,
+              "triangles": 775962,
+              "cpuVoxelsMs": 3.022,
+              "cpuRenderMs": 19.314,
+              "cpuGiMs": 9.129,
+              "cpuHitsMs": 14.638,
+              "colorTriangles": 713234,
+              "shadowTriangles": 3944,
+              "drawInstances": 50,
+              "equivalentCells": 246523
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 140.89999999850988
+              }
+            ]
+          },
+          {
+            "trial": 1,
+            "meanMs": 67.12729805013927,
+            "p99Ms": 133.5,
+            "over50Ms": 329,
+            "adequate": 0.9937672986509644,
+            "hidden": 0,
+            "coarser": 0.006232701349035607,
+            "longestContinuousCoarserMs": 150.20000000000437,
+            "maxPendingAgeMs": 0,
+            "maxQueue": 0,
+            "cancelled": 0,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": [
+              37,
+              37
+            ],
+            "geometryBytes": [
+              7419720,
+              7419720
+            ],
+            "instanceBytes": [
+              85952,
+              86224
+            ],
+            "publishedMedians": {
+              "gpuMs": 30.376,
+              "drawCalls": 322,
+              "triangles": 774102,
+              "cpuVoxelsMs": 2.8,
+              "cpuRenderMs": 17.362,
+              "cpuGiMs": 7.963,
+              "cpuHitsMs": 15.013,
+              "colorTriangles": 712792,
+              "shadowTriangles": 4738,
+              "drawInstances": 50,
+              "equivalentCells": 247404
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 97.09999999403954
+              }
+            ]
+          },
+          {
+            "trial": 2,
+            "meanMs": 74.40027855153203,
+            "p99Ms": 200.1999999999971,
+            "over50Ms": 344,
+            "adequate": 0.9971882874012066,
+            "hidden": 0,
+            "coarser": 0.00281171259879337,
+            "longestContinuousCoarserMs": 75.09999999999127,
+            "maxPendingAgeMs": 0,
+            "maxQueue": 0,
+            "cancelled": 0,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": [
+              37,
+              37
+            ],
+            "geometryBytes": [
+              7419720,
+              7419720
+            ],
+            "instanceBytes": [
+              86224,
+              86224
+            ],
+            "publishedMedians": {
+              "gpuMs": 31.148,
+              "drawCalls": 322,
+              "triangles": 767982,
+              "cpuVoxelsMs": 3.057,
+              "cpuRenderMs": 21.457,
+              "cpuGiMs": 10.686,
+              "cpuHitsMs": 16.829,
+              "colorTriangles": 707368,
+              "shadowTriangles": 4654,
+              "drawInstances": 49,
+              "equivalentCells": 246523
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 84.60000000149012
+              }
+            ]
+          }
+        ],
+        "allMeanMs": 70.63593314763231,
+        "allMeanRangeMs": [
+          67.12729805013927,
+          74.40027855153203
+        ],
+        "warmMeanMs": 70.76378830083564,
+        "warmMeanRangeMs": [
+          67.12729805013927,
+          74.40027855153203
+        ],
+        "warmP99RangeMs": [
+          133.5,
+          200.1999999999971
+        ],
+        "warmAdequate": [
+          0.9937672986509644,
+          0.9971882874012066
+        ],
+        "warmCoarser": [
+          0.00281171259879337,
+          0.006232701349035607
+        ],
+        "warmHidden": [
+          0,
+          0
+        ],
+        "longestCoarserMs": 150.20000000000437,
+        "warmPublishedMedianRanges": {
+          "gpuMs": [
+            30.376,
+            31.148
+          ],
+          "drawCalls": [
+            322,
+            322
+          ],
+          "triangles": [
+            767982,
+            774102
+          ],
+          "cpuVoxelsMs": [
+            2.8,
+            3.057
+          ],
+          "cpuRenderMs": [
+            17.362,
+            21.457
+          ],
+          "cpuGiMs": [
+            7.963,
+            10.686
+          ],
+          "cpuHitsMs": [
+            15.013,
+            16.829
+          ],
+          "colorTriangles": [
+            707368,
+            712792
+          ],
+          "shadowTriangles": [
+            4654,
+            4738
+          ],
+          "drawInstances": [
+            49,
+            50
+          ],
+          "equivalentCells": [
+            246523,
+            247404
+          ]
+        },
+        "settleAfterFollowMs": 72
+      },
+      {
+        "width": 390,
+        "trials": [
+          {
+            "trial": 0,
+            "meanMs": 67.31309192200557,
+            "p99Ms": 116.79999999999927,
+            "over50Ms": 315,
+            "adequate": 1,
+            "hidden": 0,
+            "coarser": 0,
+            "longestContinuousCoarserMs": 0,
+            "maxPendingAgeMs": 0,
+            "maxQueue": 0,
+            "cancelled": 0,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": [
+              37,
+              37
+            ],
+            "geometryBytes": [
+              7419720,
+              7419720
+            ],
+            "instanceBytes": [
+              66776,
+              71672
+            ],
+            "publishedMedians": {
+              "gpuMs": 26.247,
+              "drawCalls": 277,
+              "triangles": 634776,
+              "cpuVoxelsMs": 2.389,
+              "cpuRenderMs": 18.437,
+              "cpuGiMs": 9.037,
+              "cpuHitsMs": 12.489,
+              "colorTriangles": 564990,
+              "shadowTriangles": 15308,
+              "drawInstances": 21,
+              "equivalentCells": 237990
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 138.60000000149012
+              }
+            ]
+          },
+          {
+            "trial": 1,
+            "meanMs": 62.387465181058495,
+            "p99Ms": 91.80000000000291,
+            "over50Ms": 314,
+            "adequate": 1,
+            "hidden": 0,
+            "coarser": 0,
+            "longestContinuousCoarserMs": 0,
+            "maxPendingAgeMs": 0,
+            "maxQueue": 0,
+            "cancelled": 0,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": [
+              37,
+              37
+            ],
+            "geometryBytes": [
+              7419720,
+              7419720
+            ],
+            "instanceBytes": [
+              71672,
+              71672
+            ],
+            "publishedMedians": {
+              "gpuMs": 25.153,
+              "drawCalls": 275,
+              "triangles": 636280,
+              "cpuVoxelsMs": 2.41,
+              "cpuRenderMs": 17.844,
+              "cpuGiMs": 9.512,
+              "cpuHitsMs": 12.311,
+              "colorTriangles": 562644,
+              "shadowTriangles": 14598,
+              "drawInstances": 21,
+              "equivalentCells": 236367
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 86.29999999701977
+              }
+            ]
+          },
+          {
+            "trial": 2,
+            "meanMs": 62.03899721448468,
+            "p99Ms": 91.89999999999418,
+            "over50Ms": 268,
+            "adequate": 1,
+            "hidden": 0,
+            "coarser": 0,
+            "longestContinuousCoarserMs": 0,
+            "maxPendingAgeMs": 0,
+            "maxQueue": 0,
+            "cancelled": 0,
+            "zoomReversions": [
+              0,
+              0
+            ],
+            "templates": [
+              37,
+              37
+            ],
+            "geometryBytes": [
+              7419720,
+              7419720
+            ],
+            "instanceBytes": [
+              71672,
+              74936
+            ],
+            "publishedMedians": {
+              "gpuMs": 24.418,
+              "drawCalls": 274,
+              "triangles": 636268,
+              "cpuVoxelsMs": 2.367,
+              "cpuRenderMs": 16.911,
+              "cpuGiMs": 8.478,
+              "cpuHitsMs": 11.96,
+              "colorTriangles": 564990,
+              "shadowTriangles": 15308,
+              "drawInstances": 21,
+              "equivalentCells": 239212
+            },
+            "ui": [
+              {
+                "action": "open-inventory",
+                "latencyMs": 80.70000000298023
+              }
+            ]
+          }
+        ],
+        "allMeanMs": 63.913184772516246,
+        "allMeanRangeMs": [
+          62.03899721448468,
+          67.31309192200557
+        ],
+        "warmMeanMs": 62.21323119777159,
+        "warmMeanRangeMs": [
+          62.03899721448468,
+          62.387465181058495
+        ],
+        "warmP99RangeMs": [
+          91.80000000000291,
+          91.89999999999418
+        ],
+        "warmAdequate": [
+          1,
+          1
+        ],
+        "warmCoarser": [
+          0,
+          0
+        ],
+        "warmHidden": [
+          0,
+          0
+        ],
+        "longestCoarserMs": 0,
+        "warmPublishedMedianRanges": {
+          "gpuMs": [
+            24.418,
+            25.153
+          ],
+          "drawCalls": [
+            274,
+            275
+          ],
+          "triangles": [
+            636268,
+            636280
+          ],
+          "cpuVoxelsMs": [
+            2.367,
+            2.41
+          ],
+          "cpuRenderMs": [
+            16.911,
+            17.844
+          ],
+          "cpuGiMs": [
+            8.478,
+            9.512
+          ],
+          "cpuHitsMs": [
+            11.96,
+            12.311
+          ],
+          "colorTriangles": [
+            562644,
+            564990
+          ],
+          "shadowTriangles": [
+            14598,
+            15308
+          ],
+          "drawInstances": [
+            21,
+            21
+          ],
+          "equivalentCells": [
+            236367,
+            239212
+          ]
+        },
+        "settleAfterFollowMs": 121
+      }
+    ]
+  },
+  "assetVersion": "97acb2e6696e",
+  "harnessIdentity": "8ccc9a34a7a2",
+  "cpuRate": 4,
+  "cpu": "Intel(R) Core(TM) i9-10850K CPU @ 3.60GHz",
+  "qualityReview": {
+    "inspected": [
+      "static-control-1280-frame-235.png",
+      "static-after-1280-frame-235.png",
+      "static-control-1280-frame-315.png",
+      "static-after-1280-frame-315.png",
+      "static-control-390-frame-235.png",
+      "static-after-390-frame-235.png",
+      "static-after-390-frame-315.png"
+    ],
+    "finding": "Matching camera framing retains native crowns, roots, source colors and AO; no giant placeholders or obvious holes in inspected motion frames. NPC locations can differ because the deterministic 600ms world continues during routes with different wall-clock durations. Shadow-only proxy has separate hard 0.9 IoU acceptance tests."
+  },
+  "notes": [
+    "Same current source and fixed camera; control changes only renderer import/adapter and diagnostic label. Both decode/bake the same assets and use the same workers, lighting, UI and route. Service workers blocked.",
+    "Three measured trials per viewport per renderer; first route warms route-specific render caches, warm ranges use trials 1 and 2. Raw reports include all trials and samples. No statistical or universal FPS guarantee.",
+    "RAF intervals are measured frame scheduling; GPU/CPU/call/triangle values are repeated published diagnostics at native cadence, summarized as observed medians, not independent frame timings.",
+    "CPU4x and mobile viewport are host emulation, not physical-phone measurements.",
+    "No phone average-frame-time speedup established; observed control/static ranges overlap. Detail continuity and queue-free reuse improve.",
+    "Actual instance semantics differ: old control uses per-voxel instances; static uses whole-prop/transition instances. Compare equivalentCells for LOD budget. geometryBytes/instanceBytes are scoped counters, not total RAM/VRAM.",
+    "Queue-only post-follow timings may observe stale bulk metrics at up to 500ms publication cadence and do not prove all transitions/GI fully settled.",
+    "Old static-before8c and static-after-v1 retain the mixed-input camera race and are historical combined-change evidence, not isolated mesh baselines."
+  ]
+}

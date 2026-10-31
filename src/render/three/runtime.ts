@@ -9,7 +9,7 @@ import { PixelBillboards } from "./pixel-billboards";
 import { UNIT_PIXEL_METRES } from "../unit-scale";
 import { samplePixelUnitPose } from "../pixel-canvas";
 import { heldToolForActor, heldToolForEnemy } from "../unit-tools";
-import { VoxelBuckets } from "./voxel-buckets";
+import { VoxelMeshes } from "./voxel-meshes";
 import { VoxelGI } from "./voxel-gi";
 import { captureGIWorld } from "./voxel-gi-source";
 import { FrameMeter, GpuMeter } from "./performance";
@@ -42,7 +42,7 @@ const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(ma
 export class ThreeRuntime {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
-  private voxelBuckets = new VoxelBuckets(this.scene, undefined, undefined, undefined, true);
+  private voxelBuckets = new VoxelMeshes(this.scene);
   private gi: VoxelGI;
   private depletedForGI: string[] = [];
   private giWorldDirty = true;
@@ -221,19 +221,22 @@ export class ThreeRuntime {
     report("shaders"); await this.nextPreparationFrame();
     const original = this.props;
     const isCurrent = () => !this.disposed && !this.startupAbort.signal.aborted;
-    // Compile the real materials with their final GI/curvature hooks installed.
-    // Overview changes fog and shadow defines; warm it before the HUD is exposed.
-    for (const overview of [false, true]) {
-      this.props = { ...original, camera: { ...original.camera, overview, follow: !overview && original.camera.follow } };
-      this.frame(performance.now(), false); this.scene.updateMatrixWorld(true);
-      await this.renderer.compileAsync(this.scene, this.camera);
-      if (!overview) await this.post.prepareWorld(this.renderer, this.scene, this.camera, isCurrent);
-      if (!isCurrent()) return;
-      // Initial GPU uploads/depth shaders also happen under the preparation screen.
-      this.frame(performance.now());
-      await this.nextPreparationFrame();
-    }
-    await this.post.prepare(this.renderer, isCurrent);
+    const finishMeshWarmup = this.voxelBuckets.beginWarmup();
+    try {
+      // Compile the real materials with their final GI/curvature hooks installed.
+      // Overview changes fog and shadow defines; warm it before the HUD is exposed.
+      for (const overview of [false, true]) {
+        this.props = { ...original, camera: { ...original.camera, overview, follow: !overview && original.camera.follow } };
+        this.frame(performance.now(), false); this.scene.updateMatrixWorld(true);
+        await this.renderer.compileAsync(this.scene, this.camera);
+        if (!overview) await this.post.prepareWorld(this.renderer, this.scene, this.camera, isCurrent);
+        if (!isCurrent()) return;
+        // Initial GPU uploads/depth shaders also happen under the preparation screen.
+        this.frame(performance.now());
+        await this.nextPreparationFrame();
+      }
+      await this.post.prepare(this.renderer, isCurrent);
+    } finally { finishMeshWarmup(); }
     if (!isCurrent()) return;
     this.props = this.pendingStartupInput ?? original;
     this.pendingStartupInput = undefined;
@@ -725,6 +728,11 @@ export class ThreeRuntime {
         postPasses: String(this.post.stats.passes), postSize: `${this.post.stats.width}x${this.post.stats.height}`,
         lightRayPasses: String(this.post.stats.rayPasses), celestialBody: this.sky.mesh.material.uniforms.moonMix.value > .5 ? "moon" : "sun",
         voxelBuckets: String(this.voxelBuckets.stats.visibleBuckets), voxelInstances: String(this.voxelBuckets.stats.instances),
+        voxelRenderer: "shared-static-meshes", voxelTemplates: String(this.voxelBuckets.stats.templates),
+        voxelTemplateBuilds: String(this.voxelBuckets.stats.templateBuilds), voxelGeometryBytes: String(this.voxelBuckets.stats.geometryBytes),
+        voxelInstanceBytes: String(this.voxelBuckets.stats.instanceBytes), voxelDrawInstances: String(this.voxelBuckets.stats.drawInstances),
+        voxelEquivalentCells: String(this.voxelBuckets.stats.equivalentCells),
+        voxelColorTriangles: String(this.voxelBuckets.stats.visibleTriangles), voxelShadowTriangles: String(this.voxelBuckets.stats.shadowTriangles),
         voxelLods: `${this.voxelBuckets.stats.lod0},${this.voxelBuckets.stats.lod1},${this.voxelBuckets.stats.lod2},${this.voxelBuckets.stats.lod3},${this.voxelBuckets.stats.lod4}`, voxelUploads: String(this.voxelBuckets.stats.uploads),
         voxelBudgetExceeded: String(this.voxelBuckets.stats.budgetExceeded),
         voxelVisibleObjects: String(this.voxelBuckets.stats.visibleObjects), voxelRequestedCells: String(this.voxelBuckets.stats.requestedCells),
@@ -918,7 +926,8 @@ export class ThreeRuntime {
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       if (pointers.size > 1) {
         const p = [...pointers.values()], distance = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-        if (pinch > 0) this.props.onCamera({ ...this.props.camera, zoom: clampGameplayZoom(this.props.camera.zoom * distance / pinch), overview: false });
+        const ratio = pinch > 0 ? distance / pinch : 1;
+        if (pinch > 0) this.props.onCamera(current => ({ ...current, zoom: clampGameplayZoom(current.zoom * ratio), overview: false }));
         pinch = distance; return;
       }
       if (pinched) return;
@@ -927,7 +936,13 @@ export class ThreeRuntime {
         const point = this.groundAt(event.clientX, event.clientY);
         // Keep the grabbed world point under the pointer. Incremental pointer
         // deltas lose movement when several events share the last rendered target.
-        if (dragAnchor && point) this.props.onCamera({ ...this.props.camera, x: clamp(this.target.x + dragAnchor.x - point.x, 0, this.world.width - 1), y: clamp(this.target.z + dragAnchor.z - point.z, 0, this.world.height - 1), follow: false, overview: false });
+        if (dragAnchor && point) {
+          const x = clamp(this.target.x + dragAnchor.x - point.x, 0, this.world.width - 1);
+          const y = clamp(this.target.z + dragAnchor.z - point.z, 0, this.world.height - 1);
+          // Apply only the pan fields to the latest queued camera state. A
+          // concurrent wheel/pinch must not be overwritten by stale props.
+          this.props.onCamera(current => ({ ...current, x, y, follow: false, overview: false }));
+        }
       }
     };
     const up = (event: PointerEvent) => {
@@ -960,13 +975,24 @@ export class ThreeRuntime {
       for (const id of pointers.keys()) if (this.root.hasPointerCapture(id)) this.root.releasePointerCapture(id);
       pointers.clear(); downSelection = null;
     };
-    const wheel = (event: WheelEvent) => { if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings")) return; event.preventDefault(); this.props.onCamera({ ...this.props.camera, zoom: clampGameplayZoom(this.props.camera.zoom * Math.exp(-event.deltaY * .0015)), overview: false }); };
+    const wheel = (event: WheelEvent) => {
+      if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings")) return;
+      event.preventDefault(); const factor = Math.exp(-event.deltaY * .0015);
+      this.props.onCamera(current => ({ ...current, zoom: clampGameplayZoom(current.zoom * factor), overview: false }));
+    };
     const key = (event: KeyboardEvent) => {
       if ((event.target as HTMLElement).tagName !== "CANVAS") return;
-      const view = this.props.camera;
       const steps: Record<string, [number, number]> = { ArrowLeft: [-2, 1], ArrowRight: [2, -1], ArrowUp: [-1, -2], ArrowDown: [1, 2] };
-      if (steps[event.key]) { event.preventDefault(); const [dx, dz] = steps[event.key]; this.props.onCamera({ ...view, x: clamp(this.target.x + dx, 0, this.world.width - 1), y: clamp(this.target.z + dz, 0, this.world.height - 1), follow: false, overview: false }); }
-      else if (["+", "=", "-"].includes(event.key)) { event.preventDefault(); this.props.onCamera({ ...view, zoom: clampGameplayZoom(view.zoom * (event.key === "-" ? .8 : 1.25)), overview: false }); }
+      if (steps[event.key]) {
+        event.preventDefault(); const [dx, dz] = steps[event.key], x = this.target.x, y = this.target.z;
+        this.props.onCamera(current => ({ ...current,
+          x: clamp((current.follow || current.overview ? x : current.x) + dx, 0, this.world.width - 1),
+          y: clamp((current.follow || current.overview ? y : current.y) + dz, 0, this.world.height - 1), follow: false, overview: false }));
+      }
+      else if (["+", "=", "-"].includes(event.key)) {
+        event.preventDefault(); const factor = event.key === "-" ? .8 : 1.25;
+        this.props.onCamera(current => ({ ...current, zoom: clampGameplayZoom(current.zoom * factor), overview: false }));
+      }
     };
     this.root.addEventListener("pointerdown", down); this.root.addEventListener("pointermove", move);
     this.root.addEventListener("pointerup", up); this.root.addEventListener("pointercancel", up);

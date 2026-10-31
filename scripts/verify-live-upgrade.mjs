@@ -54,6 +54,7 @@ try {
     expect(response.ok()).toBe(true);
     const expected = await response.json();
     expect(expected.files).toEqual(localAssets.files);
+    expect(expected.version).toBe(localAssets.version);
     const expectedCaches = ['fable-art-' + expected.version, 'fable-v3-' + expected.version].sort();
     // An opened target cache plus an old activated worker is not a completed
     // upgrade. Installation can still be running (or have failed).
@@ -70,6 +71,7 @@ try {
     await page.reload({ waitUntil: 'domcontentloaded' });
     const world = page.getByTestId('rpg-world');
     await expect(world).toHaveAttribute('data-status', 'ready', { timeout: 60000 });
+    await expect(world).toHaveAttribute('data-voxel-renderer', 'shared-static-meshes');
     await expect(world).toHaveAttribute('data-terrain-source', 'vox', { timeout: 60000 });
     expect(await page.evaluate(async () => (await (await fetch('world-assets.json')).json()).version)).toBe(expected.version);
     const after = await readSave(page);

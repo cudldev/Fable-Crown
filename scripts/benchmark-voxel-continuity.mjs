@@ -8,7 +8,7 @@ import os from 'node:os';
 
 const label = process.argv[2] || 'after';
 if (!/^[a-z0-9-]+$/.test(label)) throw Error('Invalid report label');
-const output = 'docs/performance/voxel-continuity';
+const output = process.env.BENCH_OUTPUT || 'docs/performance/voxel-continuity';
 const dist = process.env.BENCH_DIST || 'tmp/release-publication/dist';
 const cpuRate = Number(process.env.BENCH_CPU_RATE || 4), trials = Number(process.env.BENCH_TRIALS || 3);
 if (!(cpuRate >= 1 && cpuRate <= 20 && trials >= 1 && trials <= 5)) throw Error('Invalid benchmark parameters');
@@ -26,6 +26,8 @@ const position = interactionTiles(tree, WORLD)[0];
 Object.assign(state.control, { autoplay: false, waiting: true, goal: null, active: null, source: null, queue: [], thought: null, thinkingUntil: 1e9 });
 Object.assign(state.player, { position, previousPosition: { ...position }, path: [], action: null, movement: null });
 const identity = createHash('sha256').update(await readFile(`${dist}/index.html`)).digest('hex').slice(0,12);
+const assetVersion = JSON.parse(await readFile(`${dist}/world-assets.json`,'utf8')).version;
+const harnessIdentity = createHash('sha256').update(await readFile(new URL(import.meta.url))).digest('hex').slice(0,12);
 const host = await preview({ base: '/Fable-Crown/', build: { outDir: dist }, preview: { host: '127.0.0.1', port, strictPort: true } });
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 
@@ -51,6 +53,11 @@ async function route(page, frames = 360) {
         samples.push({ frame, at, intervalMs: previous === undefined ? null : at-previous,
           x:Number(d.cameraX), z:Number(d.cameraY), zoom:Number(d.cameraZoom), instances:Number(d.voxelInstances), nativeTrees:Number(d.voxelNativeTrees),
           queued:Number(d.voxelQueued), stagedCells:Number(d.voxelStagedCells), residentCells:Number(d.voxelResidentCells), preparationMs:Number(d.voxelPreparationMs),
+          renderer:d.voxelRenderer??'legacy-instanced-cubes', equivalentCells:optional('voxelEquivalentCells'), templateBuilds:optional('voxelTemplateBuilds'),
+          geometryBytes:optional('voxelGeometryBytes'), instanceBytes:optional('voxelInstanceBytes'), drawInstances:optional('voxelDrawInstances'),
+          colorTriangles:optional('voxelColorTriangles'), shadowTriangles:optional('voxelShadowTriangles'),
+          gpuMs:optional('gpuMs'),drawCalls:optional('drawCalls'),triangles:optional('triangles'),
+          cpuVoxelsMs:optional('cpuVoxelsMs'),cpuRenderMs:optional('cpuRenderMs'),cpuGiMs:optional('cpuGiMs'),cpuHitsMs:optional('cpuHitsMs'),foliageUploads:optional('foliageUploads'),
           cancelled:optional('voxelCancelled'), pendingAgeMs:optional('voxelPendingAgeMs'), transitions:optional('voxelTransitions'),
           closestTreeId:d.voxelClosestTreeId ?? null, closestTreeLod:optional('voxelClosestTreeLod'), closestTreeDesiredLod:optional('voxelClosestTreeDesiredLod') });
         previous = at;
@@ -70,19 +77,32 @@ async function route(page, frames = 360) {
       const mismatch=[], unfinished=[];let active;
       for(const s of samples){
         if(active&&(s.closestTreeId!==active.id||s.closestTreeDesiredLod!==active.target)){unfinished.push({...active,end:s.at,reason:'nearest-or-target-changed'});active=undefined;}
-        if(s.closestTreeId&&s.closestTreeDesiredLod>=0&&s.closestTreeLod!==s.closestTreeDesiredLod){active??={id:s.closestTreeId,target:s.closestTreeDesiredLod,start:s.at};}
+        if(s.closestTreeId&&s.closestTreeDesiredLod!==null&&s.closestTreeDesiredLod>=0&&s.closestTreeLod!==null&&s.closestTreeLod>=0&&s.closestTreeLod>s.closestTreeDesiredLod){active??={id:s.closestTreeId,target:s.closestTreeDesiredLod,start:s.at};}
         else if(active){mismatch.push({...active,end:s.at,latencyMs:s.at-active.start});active=undefined;}
       }
       if(active)unfinished.push({...active,end:samples.at(-1).at,reason:'route-ended'});
-      const watched=samples.filter(s=>s.closestTreeId&&s.closestTreeDesiredLod!==null&&s.closestTreeDesiredLod>=0&&s.closestTreeLod>=0);
+      const requested=samples.filter(s=>s.closestTreeId&&s.closestTreeDesiredLod!==null&&s.closestTreeDesiredLod>=0);
+      const watched=requested.filter(s=>s.closestTreeLod!==null&&s.closestTreeLod>=0), hidden=requested.filter(s=>s.closestTreeLod===null||s.closestTreeLod<0);
       const matching=watched.filter(s=>s.closestTreeLod===s.closestTreeDesiredLod), native=watched.filter(s=>s.closestTreeDesiredLod===0);
-      const duration=list=>list.reduce((sum,s)=>sum+(s.intervalMs??0),0), watchedMs=duration(watched), nativeMs=duration(native);
-      const refinement={supported:watched.length>0,completed:mismatch,unfinished,watchedSamples:watched.length,
+      const adequate=watched.filter(s=>s.closestTreeLod<=s.closestTreeDesiredLod), coarser=watched.filter(s=>s.closestTreeLod>s.closestTreeDesiredLod);
+      const duration=list=>list.reduce((sum,s)=>sum+(s.intervalMs??0),0), watchedMs=duration(watched), nativeMs=duration(native), requestedMs=duration(requested);
+      let coarserRunMs=0,longestCoarserMs=0;
+      for(const s of samples){if(s.closestTreeId&&s.closestTreeDesiredLod!==null&&s.closestTreeDesiredLod>=0&&s.closestTreeLod!==null&&s.closestTreeLod>=0&&s.closestTreeLod>s.closestTreeDesiredLod){coarserRunMs+=s.intervalMs??0;longestCoarserMs=Math.max(longestCoarserMs,coarserRunMs);}else coarserRunMs=0;}
+      const refinement={supported:requested.length>0,completed:mismatch,unfinished,watchedSamples:watched.length,
         matchedFraction:watched.length?matching.length/watched.length:null,matchedTimeFraction:watchedMs?duration(matching)/watchedMs:null,
         nativeMatchedTimeFraction:nativeMs?duration(native.filter(s=>s.closestTreeLod===0))/nativeMs:null,
+        adequateOrFinerTimeFraction:requestedMs?duration(adequate)/requestedMs:null,coarserTimeFraction:requestedMs?duration(coarser)/requestedMs:null,
+        hiddenSamples:hidden.length,hiddenTimeFraction:requestedMs?duration(hidden)/requestedMs:null,longestContinuousCoarserMs:longestCoarserMs,
         longestObservedMismatchMs:Math.max(0,...mismatch.map(s=>s.end-s.start),...unfinished.map(s=>s.end-s.start)),
         maxPendingAgeMs:Math.max(0,...samples.map(s=>s.pendingAgeMs??0)),cancelledDelta:samples.at(-1).cancelled===null?null:samples.at(-1).cancelled-samples[0].cancelled};
-      return {samples,ui,refinement,
+      // Bulk camera diagnostics may publish a few frames after a command. Once
+      // its new zoom is observed, held drag must never restore the old value.
+      const zoomWindows=[{start:Math.floor(frames*.5)+1,end:Math.floor(frames*.7)+1,expected:.75},{start:Math.floor(frames*.7)+1,end:frames,expected:2}];
+      const input=zoomWindows.map(window=>{
+        const observed=samples.filter(s=>s.frame>=window.start&&s.frame<window.end),first=observed.findIndex(s=>Math.abs(s.zoom-window.expected)<.0001);
+        return {...window,firstObservedFrame:first<0?null:observed[first].frame,revertedSamples:first<0?null:observed.slice(first).filter(s=>Math.abs(s.zoom-window.expected)>.0001).length};
+      });
+      return {samples,ui,refinement,input,
         meanMs:intervals.reduce((a,b)=>a+b,0)/intervals.length,p95Ms:intervals[Math.floor(intervals.length*.95)],p99Ms:intervals[Math.floor(intervals.length*.99)],maxMs:intervals.at(-1),
         over33Ms:intervals.filter(n=>n>33.34).length,over50Ms:intervals.filter(n=>n>50).length,glError:gl.getError(),gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'unavailable',final:{...root.dataset}};
     }, {start,frames});
@@ -91,7 +111,8 @@ async function route(page, frames = 360) {
 
 try {
   const results=[],captures=[];let stopping=false;
-  const report=complete=>({label,identity,dist,cpuRate,cpu:os.cpus()[0]?.model,position,results,captures,complete,
+  const report=complete=>({label,identity,assetVersion,harnessIdentity,dist,cpuRate,cpu:os.cpus()[0]?.model,position,results,captures,complete,
+    metricSemantics:{instances:'Cube renderers submit one instance per voxel; shared-static-meshes submits one per prop/transition copy. Compare equivalentCells for LOD budgets, not instances.',preparationMs:'Cube renderer packing work; static renderer whole update planning/batch work. These are different operations.',gpuAndCpu:'Published moving diagnostic samples retain their native cadence; repeated RAF reads are not independent GPU/CPU timings. RAF intervals measure actual observed frame scheduling. Geometry/instance bytes are reported storage counters, not total RAM or VRAM.'},
     scope:'Same forest fixture, continuous captured drag with zoom changes, repeated RAF trials per viewport. Chrome CPU throttling is host emulation, not physical-phone performance. Screenshots use separate route. Frame counters preserve their publication cadence; per-tree/cancellation/age/transition metrics are null on builds without those diagnostics. Matched fractions include actual observed time; unfinished mismatch segments are censored observations, not successful refinements. UI latency includes main-thread scheduling. No universal FPS/latency guarantee.'});
   const checkpoint=()=>writeFile(`${output}/${label}.partial.json`,JSON.stringify(report(false),null,2));
   const stopRequested=()=>readFile(`${output}/${label}.stop`).then(()=>true,()=>false);
@@ -114,8 +135,9 @@ try {
       await checkpoint();
       console.log(JSON.stringify({label,viewport,trial,meanMs:result.meanMs,p99Ms:result.p99Ms,over50Ms:result.over50Ms,
         matchedTimeFraction:result.refinement.matchedTimeFraction,nativeMatchedTimeFraction:result.refinement.nativeMatchedTimeFraction,
+        adequateOrFinerTimeFraction:result.refinement.adequateOrFinerTimeFraction,hiddenTimeFraction:result.refinement.hiddenTimeFraction,
         maxPendingAgeMs:result.refinement.maxPendingAgeMs,cancelledDelta:result.refinement.cancelledDelta,
-        longestObservedMismatchMs:result.refinement.longestObservedMismatchMs,completedRefinements:result.refinement.completed.length,ui:result.ui}));
+        longestObservedMismatchMs:result.refinement.longestObservedMismatchMs,completedRefinements:result.refinement.completed.length,input:result.input,ui:result.ui}));
       if(await stopRequested()){stopping=true;break;}
     }
     if(stopping){await cdp.detach();await page.close();break;}

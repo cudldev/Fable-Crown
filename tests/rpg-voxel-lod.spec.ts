@@ -23,7 +23,7 @@ test("3D distance is capped across controls and nested voxel batches stay within
   await expect(world).toHaveAttribute("data-camera-span", "30.00");
   await expect(world).toHaveAttribute("data-camera-zoom", "0.7500");
   await expect.poll(async () => Number(await world.getAttribute("data-camera-distance"))).toBeLessThan(91);
-  await expect.poll(async () => Number(await world.getAttribute("data-voxel-instances"))).toBeLessThanOrEqual(VOXEL_VISIBLE_CELL_BUDGET);
+  await expect.poll(async () => Number(await world.getAttribute("data-voxel-equivalent-cells"))).toBeLessThanOrEqual(VOXEL_VISIBLE_CELL_BUDGET);
   await expect(world).toHaveAttribute("data-voxel-budget-exceeded", "false");
   await page.screenshot({ path: "docs/art-audit/voxel-lod-v2/far.png" });
   await canvas.dispatchEvent("wheel", { deltaY: 100000, bubbles: true });
@@ -44,7 +44,7 @@ test("3D distance is capped across controls and nested voxel batches stay within
   await expect(world).toHaveAttribute("data-camera-span", "30.00");
   await page.getByRole("button", { name: "World overview", exact: true }).click();
   await expect.poll(async () => Number(await world.getAttribute("data-voxel-parent-buckets"))).toBeGreaterThan(0);
-  await expect.poll(async () => Number(await world.getAttribute("data-voxel-instances"))).toBeLessThanOrEqual(VOXEL_VISIBLE_CELL_BUDGET);
+  await expect.poll(async () => Number(await world.getAttribute("data-voxel-equivalent-cells"))).toBeLessThanOrEqual(VOXEL_VISIBLE_CELL_BUDGET);
   const overviewLods = (await world.getAttribute("data-voxel-lods"))!.split(",").map(Number);
   expect(overviewLods.slice(2).reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
   expect(overviewLods[0]).toBe(0);

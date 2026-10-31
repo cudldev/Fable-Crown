@@ -1,5 +1,9 @@
 # Voxel runtime and migration
 
+Static-prop candidate (2026-10-31): native VOX remains the source. A worker bakes exposed, greedily joined surfaces once per asset/LOD; whole-prop instances share their buffers. New props wait for the requested template and fade in, with no coarse placeholder. Startup warms the actual shared geometry before exposing the HUD. Previous cube-bucket sections below are historical; `VoxelMeshes` is the new gameplay path, with `VoxelBuckets` retained for reference/workbench tests.
+
+Visible pigment, corner AO and voxel steps are preserved. Separate shadow-only geometry is used when cheaper; native oak uses a validated1,972-triangle density proxy (2,000target), versus9,806for exact greedy shadows. Visible oak remains49,656triangles. Shadow masks overlap the exact reference by92–94% across three measured sun directions; unsafe reductions retain finer geometry. Whole-prop instance counts, voxel-equivalent LOD budgets and unique geometry bytes are separate diagnostics. No source VOX, simulation or save contract changed.
+
 > Current renderer update — 2026-10-30: Voxel rendering is now the default and only gameplay view, with the approved pixel billboard cast. Retired painterly/ink/fitted styles are excluded from the release. Display resolution uses antialiasing/DPR capped at 2×; historical Pixelated/Smooth controls below are retired. Environment conversion remains incomplete.
 
 Current user direction (2026-10-30): replace the existing3D presentation's assets with the accepted voxel style. Keep native VOX as source data, render GPU-instanced cubes, partition the world into buckets and derive LOD. A first cached diffuse GI/AO pass and live FPS indicator are now implemented; see VOXEL_LIGHTING.md for evidence and limits.

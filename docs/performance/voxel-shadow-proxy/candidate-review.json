@@ -1,0 +1,493 @@
+{
+  "profiles": [
+    {
+      "name": "current",
+      "bounds": {
+        "min": [
+          -2.125,
+          0,
+          -2.3125
+        ],
+        "max": [
+          2.125,
+          4,
+          2.1875
+        ]
+      },
+      "samples": [
+        {
+          "direction": [
+            -6,
+            10,
+            7
+          ],
+          "intersection": 6559,
+          "union": 7046,
+          "exactPixels": 6693,
+          "proxyPixels": 6912,
+          "iou": 0.9308827703661652,
+          "precision": 0.9489293981481481,
+          "recall": 0.9799790826236366,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1972
+        },
+        {
+          "direction": [
+            9,
+            8,
+            -4
+          ],
+          "intersection": 8073,
+          "union": 8777,
+          "exactPixels": 8227,
+          "proxyPixels": 8623,
+          "iou": 0.919790361171243,
+          "precision": 0.9362170938188565,
+          "recall": 0.9812811474413516,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1972
+        },
+        {
+          "direction": [
+            -8,
+            5,
+            -7
+          ],
+          "intersection": 13019,
+          "union": 13893,
+          "exactPixels": 13198,
+          "proxyPixels": 13714,
+          "iou": 0.9370906211761318,
+          "precision": 0.9493218608721015,
+          "recall": 0.9864373389907561,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1972
+        }
+      ]
+    },
+    {
+      "name": "rejected-or-1446",
+      "bounds": {
+        "min": [
+          -2.125,
+          0,
+          -2.3125
+        ],
+        "max": [
+          2.125,
+          4,
+          2.1875
+        ]
+      },
+      "samples": [
+        {
+          "direction": [
+            -6,
+            10,
+            7
+          ],
+          "intersection": 6693,
+          "union": 8265,
+          "exactPixels": 6693,
+          "proxyPixels": 8265,
+          "iou": 0.8098003629764066,
+          "precision": 0.8098003629764066,
+          "recall": 1,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1446
+        },
+        {
+          "direction": [
+            9,
+            8,
+            -4
+          ],
+          "intersection": 8227,
+          "union": 10047,
+          "exactPixels": 8227,
+          "proxyPixels": 10047,
+          "iou": 0.8188513984273913,
+          "precision": 0.8188513984273913,
+          "recall": 1,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1446
+        },
+        {
+          "direction": [
+            -8,
+            5,
+            -7
+          ],
+          "intersection": 13198,
+          "union": 15889,
+          "exactPixels": 13198,
+          "proxyPixels": 15889,
+          "iou": 0.8306375479891749,
+          "precision": 0.8306375479891749,
+          "recall": 1,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1446
+        }
+      ]
+    },
+    {
+      "name": "lod1-exact",
+      "bounds": {
+        "min": [
+          -2.125,
+          0,
+          -2.1875
+        ],
+        "max": [
+          2.125,
+          4,
+          2.1875
+        ]
+      },
+      "samples": [
+        {
+          "direction": [
+            -6,
+            10,
+            7
+          ],
+          "intersection": 6693,
+          "union": 7220,
+          "exactPixels": 6693,
+          "proxyPixels": 7220,
+          "iou": 0.9270083102493075,
+          "precision": 0.9270083102493075,
+          "recall": 1,
+          "exactTriangles": 9806,
+          "proxyTriangles": 4886
+        },
+        {
+          "direction": [
+            9,
+            8,
+            -4
+          ],
+          "intersection": 8227,
+          "union": 8850,
+          "exactPixels": 8227,
+          "proxyPixels": 8850,
+          "iou": 0.9296045197740113,
+          "precision": 0.9296045197740113,
+          "recall": 1,
+          "exactTriangles": 9806,
+          "proxyTriangles": 4886
+        },
+        {
+          "direction": [
+            -8,
+            5,
+            -7
+          ],
+          "intersection": 13198,
+          "union": 14196,
+          "exactPixels": 13198,
+          "proxyPixels": 14196,
+          "iou": 0.9296985066215836,
+          "precision": 0.9296985066215836,
+          "recall": 1,
+          "exactTriangles": 9806,
+          "proxyTriangles": 4886
+        }
+      ]
+    },
+    {
+      "name": "density-0125",
+      "bounds": {
+        "min": [
+          -2.125,
+          0,
+          -2.3125
+        ],
+        "max": [
+          2.125,
+          4,
+          2.1875
+        ]
+      },
+      "samples": [
+        {
+          "direction": [
+            -6,
+            10,
+            7
+          ],
+          "intersection": 6681,
+          "union": 7705,
+          "exactPixels": 6693,
+          "proxyPixels": 7693,
+          "iou": 0.8670992861778066,
+          "precision": 0.8684518393344599,
+          "recall": 0.9982070820259973,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1978
+        },
+        {
+          "direction": [
+            9,
+            8,
+            -4
+          ],
+          "intersection": 8218,
+          "union": 9549,
+          "exactPixels": 8227,
+          "proxyPixels": 9540,
+          "iou": 0.8606136768247984,
+          "precision": 0.8614255765199161,
+          "recall": 0.9989060410842349,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1978
+        },
+        {
+          "direction": [
+            -8,
+            5,
+            -7
+          ],
+          "intersection": 13195,
+          "union": 15102,
+          "exactPixels": 13198,
+          "proxyPixels": 15099,
+          "iou": 0.8737253343927956,
+          "precision": 0.8738989337042188,
+          "recall": 0.9997726928322473,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1978
+        }
+      ]
+    },
+    {
+      "name": "density-025",
+      "bounds": {
+        "min": [
+          -2.125,
+          0,
+          -2.3125
+        ],
+        "max": [
+          2.125,
+          4,
+          2.1875
+        ]
+      },
+      "samples": [
+        {
+          "direction": [
+            -6,
+            10,
+            7
+          ],
+          "intersection": 6674,
+          "union": 7521,
+          "exactPixels": 6693,
+          "proxyPixels": 7502,
+          "iou": 0.8873819970748571,
+          "precision": 0.8896294321514263,
+          "recall": 0.997161213207829,
+          "exactTriangles": 9806,
+          "proxyTriangles": 2186
+        },
+        {
+          "direction": [
+            9,
+            8,
+            -4
+          ],
+          "intersection": 8174,
+          "union": 9068,
+          "exactPixels": 8227,
+          "proxyPixels": 9015,
+          "iou": 0.9014115571239524,
+          "precision": 0.9067110371602884,
+          "recall": 0.9935577974960496,
+          "exactTriangles": 9806,
+          "proxyTriangles": 2186
+        },
+        {
+          "direction": [
+            -8,
+            5,
+            -7
+          ],
+          "intersection": 13152,
+          "union": 14355,
+          "exactPixels": 13198,
+          "proxyPixels": 14309,
+          "iou": 0.91619644723093,
+          "precision": 0.9191417988678454,
+          "recall": 0.9965146234277921,
+          "exactTriangles": 9806,
+          "proxyTriangles": 2186
+        }
+      ]
+    },
+    {
+      "name": "density-0375",
+      "bounds": {
+        "min": [
+          -2.125,
+          0,
+          -2.3125
+        ],
+        "max": [
+          2.125,
+          4,
+          2.1875
+        ]
+      },
+      "samples": [
+        {
+          "direction": [
+            -6,
+            10,
+            7
+          ],
+          "intersection": 6559,
+          "union": 7046,
+          "exactPixels": 6693,
+          "proxyPixels": 6912,
+          "iou": 0.9308827703661652,
+          "precision": 0.9489293981481481,
+          "recall": 0.9799790826236366,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1972
+        },
+        {
+          "direction": [
+            9,
+            8,
+            -4
+          ],
+          "intersection": 8073,
+          "union": 8777,
+          "exactPixels": 8227,
+          "proxyPixels": 8623,
+          "iou": 0.919790361171243,
+          "precision": 0.9362170938188565,
+          "recall": 0.9812811474413516,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1972
+        },
+        {
+          "direction": [
+            -8,
+            5,
+            -7
+          ],
+          "intersection": 13019,
+          "union": 13893,
+          "exactPixels": 13198,
+          "proxyPixels": 13714,
+          "iou": 0.9370906211761318,
+          "precision": 0.9493218608721015,
+          "recall": 0.9864373389907561,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1972
+        }
+      ]
+    },
+    {
+      "name": "density-05",
+      "bounds": {
+        "min": [
+          -2.125,
+          0,
+          -2.3125
+        ],
+        "max": [
+          2.125,
+          4,
+          2.1875
+        ]
+      },
+      "samples": [
+        {
+          "direction": [
+            -6,
+            10,
+            7
+          ],
+          "intersection": 6426,
+          "union": 6955,
+          "exactPixels": 6693,
+          "proxyPixels": 6688,
+          "iou": 0.9239396117900791,
+          "precision": 0.9608253588516746,
+          "recall": 0.9601075750784401,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1776
+        },
+        {
+          "direction": [
+            9,
+            8,
+            -4
+          ],
+          "intersection": 7690,
+          "union": 8598,
+          "exactPixels": 8227,
+          "proxyPixels": 8061,
+          "iou": 0.8943940451267737,
+          "precision": 0.953975933507009,
+          "recall": 0.9347271180260119,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1776
+        },
+        {
+          "direction": [
+            -8,
+            5,
+            -7
+          ],
+          "intersection": 12737,
+          "union": 13730,
+          "exactPixels": 13198,
+          "proxyPixels": 13269,
+          "iou": 0.9276766205389658,
+          "precision": 0.9599065490994046,
+          "recall": 0.9650704652220033,
+          "exactTriangles": 9806,
+          "proxyTriangles": 1776
+        }
+      ]
+    }
+  ],
+  "eligible": [
+    "current",
+    "density-0375"
+  ],
+  "exactBounds": {
+    "min": [
+      -2.125,
+      0,
+      -2.1875
+    ],
+    "max": [
+      2.125,
+      4,
+      2.1875
+    ]
+  },
+  "visibleTriangles": 49656,
+  "glError": 0,
+  "errors": [],
+  "budget": 2000,
+  "minimumIoU": 0.9,
+  "boundsDelta": {
+    "min": [
+      0,
+      0,
+      -0.125
+    ],
+    "max": [
+      0,
+      0,
+      0
+    ]
+  },
+  "note": "Production shadow-only factor4 density .375; rejected OR1446 and other experimental thresholds retained for comparison. Visible VOX surfaces unchanged. Production proxy expands runtime negative Z by .125m; recall is about .98 across the measured suns. Mask threshold: receiver red channel darkens >15; 512px overhead camera / PCF 2048. Overlay: exact-only blue, proxy-only amber, overlap charcoal. Current production policy must meet the unchanged .9 IoU gate."
+}
