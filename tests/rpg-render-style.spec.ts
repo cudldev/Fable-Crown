@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openWorldTools } from "./world-tools";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import { VOXEL_VERSION } from "../src/render/three/voxel-version";
@@ -60,6 +61,7 @@ test("normal rendering follows display density and ignores legacy pixelation thr
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   await expect(world).toHaveAttribute("data-render-style", "smooth");
   await expect(world).toHaveAttribute("data-render-width", "1688");
+  await openWorldTools(page);
   await page.getByRole("button", { name: "Visual settings", exact: true }).click();
   await expect(panel.getByRole("combobox", { name: "Visual style" })).toHaveCount(0);
   await page.screenshot({ path: output + "/landscape-settings.png" });

@@ -2,6 +2,8 @@
 
 First implementation,2026-10-30. The3D game now has cached first-bounce diffuse global illumination, independent ambient-occlusion controls and a live FPS/frame-time indicator. This is a measured desktop prototype; actual-phone performance and final art acceptance remain pending.
 
+2026-10-31 scheduling: all four worker phases now use cancellable ~4ms cooperative slices, retaining the previous complete field until a matching replacement is ready. Final GPU texture upload remains synchronous; sampling/precision/energy are unchanged. See [async pass evidence and limits](performance/async-streaming/README.md).
+
 ## What runs
 
 - Static world occupancy/albedo/emission is built from native VOX lighting cells and actual non-voxel triangles. Triangle/box intersection preserves openings more accurately than filling object bounds. Texture/vertex colors supply approximate base color; source images/VOX palette are unchanged.

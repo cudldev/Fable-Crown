@@ -25,6 +25,7 @@ import { WorldCurve, cameraPitch, closeCameraBlend } from "./world-curve";
 import { clampGameplayZoom, gameplaySpan } from "../camera-limits";
 import { ContactDetail } from "./contact-detail";
 import { layoutFeedback, type FeedbackAnchor, type FeedbackRect } from "../feedback-layout";
+import { FloatingVials } from "./floating-vials";
 
 export type CameraMode = "perspective" | "orthographic";
 export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode; gi?: boolean; ao?: boolean; visual?: Readonly<VisualSettings> }
@@ -41,7 +42,7 @@ const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(ma
 export class ThreeRuntime {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
-  private voxelBuckets = new VoxelBuckets(this.scene);
+  private voxelBuckets = new VoxelBuckets(this.scene, undefined, undefined, undefined, true);
   private gi: VoxelGI;
   private depletedForGI: string[] = [];
   private giWorldDirty = true;
@@ -59,6 +60,7 @@ export class ThreeRuntime {
   private pixelStrikes = new Map<THREE.Group, number>();
   private enemyMotion = new Map<string, { x: number; z: number; fromX: number; fromZ: number; at: number; moving: boolean; health: number; hitUntil: number; deathUntil: number }>();
   private rig = new LightingRig(this.scene);
+  private vials?: FloatingVials;
   private sky = new SkySystem(this.scene);
   private foliage = new FoliageSystem(this.scene);
   private props: RuntimeInput;
@@ -115,6 +117,8 @@ export class ThreeRuntime {
   private metricsAt = 0;
   private visibilityAt = 0;
   private ready = false;
+  private pendingStartupInput?: RuntimeInput;
+  private startupAbort = new AbortController();
   private resizeObserver: ResizeObserver;
   private viewportChanged = () => this.resize();
   private reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -172,7 +176,9 @@ export class ThreeRuntime {
     this.scene.add(this.mist);
     this.contextLost = event => {
       event.preventDefault(); cancelAnimationFrame(this.raf);
+      this.startupAbort.abort();
       this.onError("The voxel graphics context was lost. Reload to retry; your saved chapter remains on this device.");
+      this.dispose();
     };
     canvas.addEventListener("webglcontextlost", this.contextLost);
     this.inputDispose = this.bindInput();
@@ -180,19 +186,79 @@ export class ThreeRuntime {
     this.resizeObserver.observe(root); this.resize();
     window.addEventListener("resize", this.viewportChanged);
     const loop = (time: number) => {
-      if (this.disposed) return;
+      if (this.disposed || this.startupAbort.signal.aborted) return;
       try {
+        if (!this.ready && this.pendingStartupInput) { this.props = this.pendingStartupInput; this.pendingStartupInput = undefined; }
         // The world stays visible behind inspectors and drawers; keep its animation continuous.
         this.frame(time);
         if (!this.ready) { this.ready = true; onReady(); }
         this.raf = requestAnimationFrame(loop);
       } catch (error) { this.onError(error instanceof Error ? error.message : "The 3D view could not draw this scene."); }
     };
-    this.raf = requestAnimationFrame(loop);
+    void this.prepare().then(() => {
+      if (!this.disposed && !this.startupAbort.signal.aborted) this.raf = requestAnimationFrame(loop);
+    }).catch(error => {
+      if (!this.disposed) this.onError(error instanceof Error ? error.message : "The world could not finish preparing.");
+    });
   }
   private ownGeometry<T extends THREE.BufferGeometry>(geometry: T): T { this.ownGeometries.push(geometry); return geometry; }
   private ownMaterial<T extends THREE.Material>(material: T): T { this.ownMaterials.push(material); return material; }
-  update(props: RuntimeInput) { this.props = props; }
+  update(props: RuntimeInput) { if (this.ready) this.props = props; else this.pendingStartupInput = props; }
+  private nextPreparationFrame(): Promise<void> {
+    const signal = this.startupAbort.signal;
+    return new Promise((resolve, reject) => {
+      if (signal.aborted) { reject(signal.reason); return; }
+      const abort = () => { cancelAnimationFrame(frame); reject(signal.reason); };
+      const frame = requestAnimationFrame(() => { signal.removeEventListener("abort", abort); resolve(); });
+      signal.addEventListener("abort", abort, { once: true });
+    });
+  }
+  private async prepare() {
+    const report = (stage: "world" | "shaders" | "lighting") => {
+      this.root.dataset.preparation = stage; this.props.onPreparation?.({ stage });
+    };
+    report("shaders"); await this.nextPreparationFrame();
+    const original = this.props;
+    const isCurrent = () => !this.disposed && !this.startupAbort.signal.aborted;
+    // Compile the real materials with their final GI/curvature hooks installed.
+    // Overview changes fog and shadow defines; warm it before the HUD is exposed.
+    for (const overview of [false, true]) {
+      this.props = { ...original, camera: { ...original.camera, overview, follow: !overview && original.camera.follow } };
+      this.frame(performance.now(), false); this.scene.updateMatrixWorld(true);
+      await this.renderer.compileAsync(this.scene, this.camera);
+      if (!overview) await this.post.prepareWorld(this.renderer, this.scene, this.camera, isCurrent);
+      if (!isCurrent()) return;
+      // Initial GPU uploads/depth shaders also happen under the preparation screen.
+      this.frame(performance.now());
+      await this.nextPreparationFrame();
+    }
+    await this.post.prepare(this.renderer, isCurrent);
+    if (!isCurrent()) return;
+    this.props = this.pendingStartupInput ?? original;
+    this.pendingStartupInput = undefined;
+    report("lighting");
+    let activePreparationMs = 0, previousPreparationAt = performance.now();
+    do {
+      await this.nextPreparationFrame(); this.frame(performance.now(), false);
+      const now = performance.now(); activePreparationMs += Math.min(100, now - previousPreparationAt); previousPreparationAt = now;
+      // GI is optional: a failed worker retains the existing deterministic ambient fill.
+      const visual = this.props.visual ?? DEFAULT_VISUAL_SETTINGS;
+      const needsGI = !this.props.camera.overview && ((this.props.gi !== false && visual.giStrength > 0) || (this.props.ao !== false && visual.aoStrength > 0));
+      const lightingReady = this.gi.stats.appliedVersion > 0 && this.gi.stats.appliedVersion === this.gi.stats.version;
+      if (!this.voxelBuckets.stats.queued && (!needsGI || lightingReady || this.gi.stats.state === "error")) break;
+      if (activePreparationMs > 20000) {
+        if (this.voxelBuckets.stats.queued) throw Error("The world is taking too long to prepare. Reload to retry.");
+        this.root.dataset.startupLightingFallback = "true"; break;
+      }
+    } while (!this.disposed);
+    if (this.disposed) return;
+    this.frame(performance.now());
+    this.root.dataset.preparation = "ready";
+    this.root.dataset.startupPrograms = String(this.renderer.info.programs?.length ?? 0);
+    this.frameMeter.reset(); this.previousTime = 0;
+    // Updates received during preparation become normal gameplay snapshots.
+    this.props = this.pendingStartupInput ?? this.props; this.pendingStartupInput = undefined;
+  }
   private clearClickIndicator() {
     this.clickAnimation?.cancel(); this.clickAnimation = undefined;
     if (this.clickExpiry) clearTimeout(this.clickExpiry);
@@ -494,7 +560,7 @@ export class ThreeRuntime {
       }
     }
   }
-  private frame(time: number) {
+  private frame(time: number, draw = true) {
     const cpuStart = performance.now();
     this.frameMeter.sample(time);
     this.sync(time);
@@ -606,6 +672,7 @@ export class ThreeRuntime {
     this.curve.prepareCulling(this.scene);
     this.gi.update(this.target, lighting, this.lamps, this.depletedForGI, this.props.gi !== false, this.props.ao !== false, view.overview, giCycleVisual(visual));
     const renderStart = performance.now();
+    if (draw) {
     this.renderer.info.reset();
     this.gpuMeter.begin();
     this.waterSystem.update(this.renderer, this.scene, this.camera, this.water,
@@ -613,6 +680,7 @@ export class ThreeRuntime {
     this.post.render(this.renderer, this.scene, this.camera, visual, distance, closeCameraBlend(view.zoom), view.overview, this.canvas.width / this.width, this.sky.lightSource, this.rig.sun,
       { center: this.target, strength: this.curve.strength, range: this.curve.view.range.y });
     this.gpuMeter.end();
+    }
     const hitStart = performance.now();
     this.updateHitPositions(time);
     const costs = this.frameCosts;
@@ -656,8 +724,11 @@ export class ThreeRuntime {
         voxelLargestCellPixels: this.voxelBuckets.stats.largestCellPixels.toFixed(3),
         voxelParentBuckets: String(this.voxelBuckets.stats.parentBuckets), voxelChildBuckets: String(this.voxelBuckets.stats.childBuckets),
         voxelResidentBuckets: String(this.voxelBuckets.stats.residentBuckets), voxelResidentCells: String(this.voxelBuckets.stats.residentCells),
+        voxelQueued: String(this.voxelBuckets.stats.queued), voxelStagedCells: String(this.voxelBuckets.stats.stagedCells),
+        voxelCommits: String(this.voxelBuckets.stats.committed), voxelPreparationMs: this.voxelBuckets.stats.preparationMs.toFixed(3),
         giState: this.gi.stats.state, giVersion: String(this.gi.stats.version), giApplied: String(this.gi.stats.appliedVersion),
         giSolveMs: this.gi.stats.totalMs.toFixed(2), giTextureBytes: String(this.gi.stats.textureBytes ?? 0),
+        giMaxSliceMs: (this.gi.stats.maxSliceMs ?? 0).toFixed(3), giYields: String(this.gi.stats.yields ?? 0),
         giBounces: String(this.gi.stats.bounces ?? 0), dayNightCycle: String(visual.dayNightCycle), dayHour: visual.cycleHour?.toFixed(4) ?? "fixed",
         giProbes: String(this.gi.stats.validProbes ?? 0), giEnabled: String(this.props.gi !== false), aoEnabled: String(this.props.ao !== false),
         giLighting: this.gi.stats.appliedPreset ?? "pending",
@@ -680,6 +751,8 @@ export class ThreeRuntime {
     return null;
   }
   private updateHitPositions(time: number) {
+    this.vials ??= new FloatingVials(this.root);
+    this.vials.beginFrame(time, this.rig, this.camera);
     const feedback: FeedbackAnchor[] = [], reserved: FeedbackRect[] = [];
     for (const [key, element] of this.hits) {
       let position: THREE.Vector3 | undefined, height = 0;
@@ -697,7 +770,7 @@ export class ThreeRuntime {
           const action = this.props.state.player.action;
           if (action) {
             const fraction = clamp((action.duration - action.remaining + clamp((time - this.observedAt) / 600, 0, 1)) / Math.max(1, action.duration), 0, 1);
-            element.style.setProperty("--work-progress", `${fraction * 100}%`);
+            element.style.setProperty("--work-progress", String(fraction));
             const progress = element.querySelector("progress"); if (progress) { progress.max = action.duration; progress.value = fraction * action.duration; }
             this.root.dataset.workProgress = fraction.toFixed(3);
           }
@@ -736,6 +809,7 @@ export class ThreeRuntime {
         else {
           element.style.left = `${x}px`; element.style.top = `${y}px`;
           if (key.startsWith("health-") || key === "work-player") {
+            this.vials.update(element, position, this.rig);
             const point = layoutFeedback([{ id: key, x, y, width: element.offsetWidth, height: element.offsetHeight }], reserved, this.width, this.height).get(key);
             if (!point) { element.hidden = true; continue; }
             element.style.left = `${point.x}px`; element.style.top = `${point.y}px`;
@@ -872,7 +946,7 @@ export class ThreeRuntime {
   }
   dispose() {
     if (this.disposed) return;
-    this.disposed = true; cancelAnimationFrame(this.raf); this.resizeObserver.disconnect(); this.inputDispose();
+    this.disposed = true; this.startupAbort.abort(); cancelAnimationFrame(this.raf); this.resizeObserver.disconnect(); this.inputDispose();
     this.canvas.removeEventListener("webglcontextlost", this.contextLost);
     window.removeEventListener("resize", this.viewportChanged);
     this.clearClickIndicator(); this.clearEffects(); this.rig.dispose();

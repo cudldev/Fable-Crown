@@ -7,10 +7,12 @@ interface Props {
   cameraMode: "perspective" | "orthographic";
   onChange: (patch: Partial<VisualSettings>) => void; onShadows: (value: boolean) => void; onGI: (value: boolean) => void; onAO: (value: boolean) => void;
   onReset: () => void; onClose: () => void;
+  onPreset: (preset: LightingPreset) => void;
+  onCameraMode: (mode: "perspective" | "orthographic") => void;
   performanceReport?: () => string;
 }
 
-export default function VisualSettingsPanel({ id, settings, preset, shadows, gi, ao, cameraMode, onChange, onShadows, onGI, onAO, onReset, onClose, performanceReport }: Props) {
+export default function VisualSettingsPanel({ id, settings, preset, shadows, gi, ao, cameraMode, onChange, onShadows, onGI, onAO, onReset, onClose, onPreset, onCameraMode, performanceReport }: Props) {
   const panel = useRef<HTMLElement>(null);
   const copyArea = useRef<HTMLTextAreaElement>(null);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle"), [copyText, setCopyText] = useState("");
@@ -39,6 +41,18 @@ export default function VisualSettingsPanel({ id, settings, preset, shadows, gi,
     onKeyDown={event => { event.stopPropagation(); if (event.key === "Escape") { event.preventDefault(); onClose(); } }}>
     <header><div><strong>Visual settings</strong><small data-visual-performance>Live preview</small></div><button type="button" aria-label="Close visual settings" onClick={onClose}>×</button></header>
     <div className="visual-settings-body">
+      <fieldset><legend>View</legend>
+        <label className="visual-select">Lighting preset<select aria-label="Lighting preset" value={settings.dayNightCycle ? "cycle" : preset} onChange={event => {
+          const value = event.currentTarget.value;
+          if (value === "cycle") onChange({ dayNightCycle: true });
+          else onPreset(value as LightingPreset);
+        }}>
+          <option value="cycle">Day–night cycle</option><option value="day">Day</option><option value="dusk">Dusk</option><option value="night">Night</option>
+        </select></label>
+        <label className="visual-select">Camera<select aria-label="Camera projection" value={cameraMode} onChange={event => onCameraMode(event.currentTarget.value as "perspective" | "orthographic")}>
+          <option value="perspective">Perspective</option><option value="orthographic">Orthographic</option>
+        </select></label>
+      </fieldset>
       <fieldset><legend>Lens & world</legend>
         {slider("bloom", "Bloom")}{slider("chromaticAberration", "Chromatic aberration", " px")}
         {slider("lensDistortion", "Lens distortion")}

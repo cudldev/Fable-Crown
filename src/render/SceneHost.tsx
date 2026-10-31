@@ -1,15 +1,16 @@
 import { Component, lazy, Suspense, type ReactNode } from "react";
-import type { TileSceneProps } from "./scene-types";
+import type { ScenePreparation, TileSceneProps } from "./scene-types";
 import "./tile-scene.css";
 
 const ThreeScene = lazy(() => import("./ThreeScene"));
 
 class RendererBoundary extends Component<
-  { children: ReactNode },
+  { children: ReactNode; onPreparation?: (preparation: ScenePreparation) => void },
   { failed: boolean }
 > {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch() { this.props.onPreparation?.({ stage: "unavailable", message: "The voxel world could not start." }); }
   render() {
     return this.state.failed ? (
       <div className="loading-screen" role="alert">
@@ -24,7 +25,7 @@ class RendererBoundary extends Component<
 /** Rendering consumes immutable snapshots independently of the simulation worker. */
 export function SceneHost(props: TileSceneProps) {
   return (
-    <RendererBoundary>
+    <RendererBoundary onPreparation={props.onPreparation}>
       <Suspense fallback={<div className="tile-world three-world" data-testid="rpg-world" data-renderer="3d" data-status="starting" aria-label="Voxel world loading"><div className="loading-screen">Opening the voxel village…</div></div>}>
         <ThreeScene {...props} />
       </Suspense>

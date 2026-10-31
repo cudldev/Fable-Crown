@@ -26,12 +26,22 @@ export function triangleBoxOverlap(triangle: readonly number[], center: V3, half
 }
 
 export function rasterizeGI(world: GIWorldSource, config: GISolveConfig): GIGrid {
+  const steps = rasterizeGISteps(world, config);
+  let result = steps.next();
+  while (!result.done) result = steps.next();
+  return result.value;
+}
+
+/** Same ordered writes as the synchronous path, with bounded cancellation/yield points. */
+export function* rasterizeGISteps(world: GIWorldSource, config: GISolveConfig): Generator<void, GIGrid> {
   const { origin, size, pitch } = config, count = size[0] * size[1] * size[2];
   const grid: GIGrid = { origin, size, pitch, albedo: new Uint32Array(count), emission: new Uint32Array(count), world, rays: 0 };
-  const paint = (bounds: number[], color: number, emission: number, triangle?: number[]) => {
+  let work = 0;
+  function* paint(bounds: number[], color: number, emission: number, triangle?: number[]): Generator<void> {
     const low = origin.map((v, axis) => Math.max(0, Math.floor((bounds[axis] - v) / pitch))) as V3;
     const high = origin.map((v, axis) => Math.min(size[axis] - 1, Math.floor((bounds[axis + 3] - v) / pitch))) as V3;
     for (let z = low[2]; z <= high[2]; z++) for (let y = low[1]; y <= high[1]; y++) for (let x = low[0]; x <= high[0]; x++) {
+      if (++work % 64 === 0) yield;
       const center: V3 = [origin[0] + (x + .5) * pitch, origin[1] + (y + .5) * pitch, origin[2] + (z + .5) * pitch];
       if (triangle && !triangleBoxOverlap(triangle, center, pitch / 2)) continue;
       const at = giIndex(x, y, z, size); grid.albedo[at] = color;
@@ -40,19 +50,22 @@ export function rasterizeGI(world: GIWorldSource, config: GISolveConfig): GIGrid
   };
   const depleted = new Set(config.depleted);
   for (const object of world.objects) {
+    if (++work % 64 === 0) yield;
     if ([0, 1, 2].some(axis => object.bounds[axis] > origin[axis] + size[axis] * pitch || object.bounds[axis + 3] < origin[axis])) continue;
     for (const triangles of [object.triangles, depleted.has(object.id) ? object.depletedTriangles : object.availableTriangles]) for (let i = 0; i < triangles.length; i += 15) {
+      if (++work % 64 === 0) yield;
       const triangle = [...triangles.subarray(i, i + 9)];
       const low = [0, 1, 2].map(axis => Math.min(triangle[axis], triangle[axis + 3], triangle[axis + 6]));
       const high = [0, 1, 2].map(axis => Math.max(triangle[axis], triangle[axis + 3], triangle[axis + 6]));
       const color = packRGB(triangles[i + 9], triangles[i + 10], triangles[i + 11]);
       const emit = triangles[i + 12] + triangles[i + 13] + triangles[i + 14] > 0 ? packRGB(triangles[i + 12] / 4, triangles[i + 13] / 4, triangles[i + 14] / 4) : 0;
-      paint([...low, ...high], color, emit, triangle);
+      yield* paint([...low, ...high], color, emit, triangle);
     }
     const boxes = depleted.has(object.id) ? object.boxes?.depleted : object.boxes?.available;
     if (boxes) for (let i = 0; i < boxes.length; i += 7) {
+      if (++work % 64 === 0) yield;
       const h = boxes[i + 3] / 2 - 1e-5;
-      paint([boxes[i] - h, boxes[i + 1] - h, boxes[i + 2] - h, boxes[i] + h, boxes[i + 1] + h, boxes[i + 2] + h], packRGB(boxes[i + 4], boxes[i + 5], boxes[i + 6]), 0);
+      yield* paint([boxes[i] - h, boxes[i + 1] - h, boxes[i + 2] - h, boxes[i] + h, boxes[i + 1] + h, boxes[i + 2] + h], packRGB(boxes[i + 4], boxes[i + 5], boxes[i + 6]), 0);
     }
   }
   return grid;

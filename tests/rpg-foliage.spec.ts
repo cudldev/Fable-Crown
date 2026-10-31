@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { renderFrameCount } from "./render-profile";
+import { openWorldTools } from "./world-tools";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { build, type Plugin } from "esbuild";
@@ -61,6 +62,7 @@ test("tile foliage animates, controls persist, and the game keeps working offlin
   await page.getByRole("button", { name: "Day lighting", exact: true }).click(); await frames(page); await page.screenshot({ path: `${output}/world-day.png` });
   await page.getByRole("button", { name: "Orthographic camera", exact: true }).click(); await frames(page); await page.screenshot({ path: `${output}/world-orthographic.png` });
   await page.setViewportSize({ width: 390, height: 844 }); await frames(page); await page.screenshot({ path: `${output}/phone-portrait.png` });
+  await openWorldTools(page);
   await page.getByRole("button", { name: "Visual settings", exact: true }).click();
   await panel.getByRole("slider", { name: "Foliage density", exact: true }).scrollIntoViewIfNeeded(); await page.screenshot({ path: `${output}/phone-controls.png` });
   await panel.getByRole("slider", { name: "Foliage density", exact: true }).press("End"); await panel.getByRole("button", { name: "Done", exact: true }).click();

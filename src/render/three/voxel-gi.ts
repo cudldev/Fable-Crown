@@ -41,7 +41,7 @@ const lighting = `
 #endif
 `;
 
-export interface GIStats { state: string; version: number; appliedVersion: number; appliedPreset?: string; totalMs: number; voxelizeMs?: number; probesMs?: number; interpolateMs?: number; packMs?: number; probes?: number; validProbes?: number; depletedCount?: number; rays?: number; occupied?: number; textureBytes?: number; bounces?: number }
+export interface GIStats { state: string; version: number; appliedVersion: number; appliedPreset?: string; totalMs: number; voxelizeMs?: number; probesMs?: number; interpolateMs?: number; packMs?: number; probes?: number; validProbes?: number; depletedCount?: number; rays?: number; occupied?: number; textureBytes?: number; bounces?: number; maxSliceMs?: number; yields?: number }
 
 function texture(data: Uint16Array, size: V3): Data3DTexture {
   const result = new Data3DTexture(data, 2 * (size[0] + 2), size[1], 2 * (size[2] + 2));

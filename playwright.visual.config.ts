@@ -5,6 +5,8 @@ import config from "./playwright.config";
 export default defineConfig({
   ...config,
   testMatch: [
+    "**/rpg-floating-ui.spec.ts",
+    "**/rpg-mobile-hud.spec.ts",
     "**/rpg-acceptance.spec.ts", "**/rpg-inputs.spec.ts", "**/rpg-gameplay-feel.spec.ts",
     "**/rpg-celestial.spec.ts", "**/rpg-click-feedback.spec.ts",
     "**/rpg-daylight-shadows.spec.ts", "**/rpg-fidelity.spec.ts",
@@ -14,6 +16,7 @@ export default defineConfig({
     "**/rpg-shore-outline.spec.ts", "**/rpg-sky.spec.ts",
     "**/rpg-sprite-lighting.spec.ts", "**/rpg-view-distance.spec.ts",
     "**/rpg-three.spec.ts", "**/rpg-visual-settings.spec.ts", "**/rpg-voxel*.spec.ts",
+    "**/rpg-startup.spec.ts",
     "**/rpg-water*.spec.ts",
   ],
 });

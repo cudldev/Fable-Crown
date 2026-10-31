@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { renderFrameCount } from "./render-profile";
+import { openWorldTools } from "./world-tools";
 import { mkdir, writeFile } from "node:fs/promises";
 import { build } from "esbuild";
 import { createRpg } from "../src/rpg/engine";
@@ -59,7 +60,8 @@ test("cloud controls animate reflected sky in the actual game and fit on mobile"
   await page.getByRole("button", { name: "Night lighting", exact: true }).click(); await frames(page); await page.screenshot({ path: `${output}/world-night.png` });
   await page.getByRole("button", { name: "Orthographic camera", exact: true }).click(); await frames(page);
   await page.screenshot({ path: `${output}/world-orthographic.png` });
-  await page.setViewportSize({ width: 390, height: 844 }); await page.getByRole("button", { name: "Visual settings", exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 }); await openWorldTools(page);
+  await page.getByRole("button", { name: "Visual settings", exact: true }).click();
   await panel.getByRole("slider", { name: "Cloud size", exact: true }).scrollIntoViewIfNeeded(); await page.screenshot({ path: `${output}/phone-controls.png` });
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
   expect(errors).toEqual([]); expect(external).toEqual([]);

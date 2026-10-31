@@ -68,7 +68,9 @@ test("fidelity controls, diffuse bounce comparison and default saved-time daylig
     cycle.push({ hour, ...await measure(page) }); await page.screenshot({ path: `${output}/cycle-${hour}.png` });
   }
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
-    await page.setViewportSize(viewport); await expect(page.getByTestId("fps-indicator")).toBeVisible();
+    await page.setViewportSize(viewport);
+    await expect(page.getByTestId("fps-indicator")).toBeHidden();
+    await expect(page.getByTestId("fps-indicator")).toHaveText(/\d+ FPS · \d+\.\d ms/);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
     await page.screenshot({ path: `${output}/${viewport.width < 500 ? "portrait" : "landscape"}.png` });
   }

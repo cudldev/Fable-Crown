@@ -60,6 +60,7 @@ test("visual controls update the renderer, copy a reusable preset, reset and fit
   await panel.press("Escape"); await expect(panel).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Visual settings", exact: true })).toBeFocused();
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "World tools", exact: true }).click();
   await page.getByRole("button", { name: "Visual settings", exact: true }).click(); await expect(panel).toBeVisible();
   await page.screenshot({ path: output + "/phone.png" });
   const body = panel.locator(".visual-settings-body"), box = await body.boundingBox();

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openWorldTools } from "./world-tools";
 import { build } from "esbuild";
 import { mkdir, writeFile } from "node:fs/promises";
 
@@ -37,7 +38,8 @@ test("lens distortion control previews, copies, resets and persists offline on p
   await expect(slider).toHaveValue("0.15");
   await slider.press("End");
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
-    await page.setViewportSize(viewport); await slider.scrollIntoViewIfNeeded(); await expect(slider).toBeInViewport();
+    await page.setViewportSize(viewport); await openWorldTools(page);
+    await slider.scrollIntoViewIfNeeded(); await expect(slider).toBeInViewport();
     await page.screenshot({ path: `${output}/${viewport.width < 500 ? "portrait" : "landscape"}.png` });
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
   }
@@ -45,6 +47,7 @@ test("lens distortion control previews, copies, resets and persists offline on p
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
   await context.setOffline(true); await page.reload();
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
+  await openWorldTools(page);
   await page.getByRole("button", { name: "Visual settings", exact: true }).click();
   await expect(slider).toHaveValue("1");
   await panel.getByRole("button", { name: "Reset visual settings", exact: true }).click();

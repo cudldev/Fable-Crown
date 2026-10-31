@@ -15,6 +15,8 @@ export type TileSelection =
   | { kind: "enemy" | "drop"; id: string }
   | { kind: "grave" }
   | { kind: "tile"; position: TilePosition };
+export type PreparationStage = "chapter" | "assets" | "world" | "shaders" | "lighting" | "ready" | "unavailable";
+export interface ScenePreparation { stage: PreparationStage; message?: string }
 export interface TileSceneProps {
   state: RpgState;
   camera: TileCamera;
@@ -28,4 +30,5 @@ export interface TileSceneProps {
   presentationEpoch?: number;
   onWorkContact?: (kind: string) => void;
   onFootstep?: (mode: "walk" | "run") => void;
+  onPreparation?: (preparation: ScenePreparation) => void;
 }

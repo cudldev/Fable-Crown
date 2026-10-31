@@ -1,5 +1,6 @@
 import { Group } from "three";
-import { parseVox, voxelModel, type VoxelObject } from "./voxel-data";
+import { type VoxelModel, type VoxelObject } from "./voxel-data";
+import { VoxelAssetDecoder } from "./voxel-decoder";
 import { VOXEL_VERSION } from "./voxel-version";
 import type { WorldObject } from "../../rpg/types";
 
@@ -36,16 +37,18 @@ export async function loadVoxelAssets(base: URL, signal: AbortSignal): Promise<M
   const manifest = await response.json();
   if (manifest.version !== VOXEL_VERSION) throw Error("Native voxel cache version differs from this build.");
   const specs = voxelAssetSpecs(manifest), result = new Map<string, VoxelObject>();
-  const models = new Map<string, ReturnType<typeof voxelModel>>();
+  const models = new Map<string, VoxelModel>();
   const sizes = new Map<string, readonly number[]>();
+  const decoder = new VoxelAssetDecoder(signal);
+  try {
   for (const spec of specs) {
     const url = new URL(spec.file, base); url.searchParams.set("v", VOXEL_VERSION);
     const file = await fetch(url, { signal }); if (!file.ok) throw Error(`${spec.id}: native VOX unavailable.`);
-    const grid = parseVox(await file.arrayBuffer());
-    sizes.set(spec.id, grid.size);
-    const model = voxelModel(grid, spec.pitch, spec.pivot); models.set(spec.id, model);
-    result.set(spec.id, { model, depleted: spec.cutHeight === undefined ? undefined : voxelModel(grid, spec.pitch, spec.pivot, spec.cutHeight) });
+    const decoded = await decoder.decode(await file.arrayBuffer(), spec); signal.throwIfAborted();
+    sizes.set(spec.id, decoded.size); models.set(spec.id, decoded.voxels.model);
+    result.set(spec.id, decoded.voxels);
   }
+  } finally { decoder.dispose(); }
   for (const spec of specs) if (spec.depletedAsset) {
     const depletedSize = sizes.get(spec.depletedAsset)!;
     if (sizes.get(spec.id)!.some((size, i) => size !== depletedSize[i])) throw Error("Depleted voxel asset must share its native coordinate frame.");

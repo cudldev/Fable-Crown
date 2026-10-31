@@ -1,5 +1,9 @@
 # Working notes
 
+- Floating UI: no plates on health/work/name/reward/combat labels; halo for text. Nine-pixel health vials use FloatingVials (sun/fill +4existing lamps,10Hz, cached CSS writes); rounded front glint follows light angle/tint. Skilling uses ActionCycle SVG rings in world/HUD; world arc follows actual interpolated attempt fraction and resets at the next attempt. Keep liquid readability floor; no backdrop blur/captures. Review rpg-floating-ui and actual day/night/action screenshots.
+
+- Mobile UI: `mobile-hud.css` covers ≤760px or ≤500px height. Default HUD stays under25% coverage; Tools reveals map/camera/visuals, Thoughts holds details. Run rpg-mobile-hud + visual-settings + mobile three/messages checks locally; keep GPU coverage out of release CI.
+
 - LOD: select per object inside shared batches, using camera depth/scaled pitch. Use floor for the 1.5 CSS-pixel target; keep desired hysteresis separate from forced budgets. Cull exact object bounds before spending detail; the old 100k view cap masked the threshold fix. Current caps: 250k visible/100k per batch/524288 resident. Regressions: voxel-rendering.test.ts + rpg-voxel-lod.spec.ts (native trees, zoom return/mobile/offline).
 
 - First prop batch: assets/explorations/voxel/prop-batch-v1. Image→TRELLIS→vox-01 raw; vox-02 explicit palette ramp pass fixes near-black faces without geometry changes. Shared16cells/m +4m oak comparisons. Ore inferred1.625×1.75×.75m,larger thanbrief; crate brace weak. Review beforebinding; ore states/material variants pending. run_prop_batch.py --resume preserves complete jobs; converter now takes --asset-id. Current drafts+scale ZIP inbatchfolder.
@@ -129,4 +133,10 @@
 
 - Final CI boundary: test:release has2non-GPU worker/save/offline/mobile smoke cases. GPU interactions and visual/performance suites are local; verify real public WebGL after publish.
 
-- Live3145104 / CI41156022977 verified2026-10-31; asset version e9d6b83674ae. Local GPU suites; CI2non-GPU smoke cases. Upgrade checks must await SW activation and hold saves through real Pause/Save commands; do not mutate IndexedDB behind a running worker.
+- Current live release3145104 / Actions41156022977 verified2026-10-31; e9d6b83674ae. Canonical integrated checkout tmp/release-publication. CI2non-GPU smoke cases; visual/GPU suites local. Wait for SW activation before upgrade reload; hold save fixtures via real Pause/Save.
+
+- Async rendering: voxel assets decode in a worker; runtime LOD stages at2ms/8192cells and commits≤1replacement/frame, retaining prior/coarse coverage. GI slices at~4ms; final GPU uploads remain synchronous. Keep identical capped levels shared.
+- Streaming benchmark: scripts/benchmark-streaming.mjs LABEL; BENCH_DIST selects an isolated original. Run original→changed→original serially; see performance/async-streaming. Root pass is not yet in tmp/release-publication. New local GPU regression: rpg-voxel-streaming.spec.ts; mobile controls use Tools.
+- First overview hitch diagnosed: shader-profile.json records934ms frame/~880ms waiting on11new shader programs. No async prewarm currently; warm normal+overview fog/shadow variants next. See performance/async-streaming/README.md; diagnosis only.
+- Startup now gates all HUD/world input through ScenePreparation; initial HTML also explains loading. Precompile actual direct/HDR/overview/post targets before ready; abort context loss, require current GI version. New rpg-startup tests cover offline/error/noHUDflash and0first-overview links.
+- Combined candidate is now integrated in tmp/release-publication, including latest glass-vial/action-ring UI. Publish only after other project chats finish; local visual coverage77active/1priorwaiver, release CI stays2non-GPU smoke cases.

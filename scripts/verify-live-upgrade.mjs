@@ -23,8 +23,13 @@ try {
   if (process.argv.includes('--before') && process.env.BASELINE_OFFLINE === '1') await context.setOffline(true);
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   if (process.argv.includes('--before')) {
+    await expect(page.getByTestId('rpg-world')).toHaveAttribute('data-status', 'ready', { timeout: 60000 });
     await expect(page.getByRole('button', { name: 'Open game menu', exact: true })).toBeVisible({ timeout: 60000 });
     const pause = page.getByRole('button', { name: 'Pause Alden', exact: true });
+    if (!(await pause.isVisible())) {
+      const thoughts = page.getByRole('button', { name: 'Open thoughts', exact: true });
+      if (await thoughts.isVisible()) await thoughts.click();
+    }
     if (await pause.isVisible()) await pause.click();
     await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
     await page.getByRole('button', { name: 'Open game menu', exact: true }).click();

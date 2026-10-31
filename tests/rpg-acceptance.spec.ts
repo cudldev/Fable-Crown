@@ -361,15 +361,20 @@ test("portrait and landscape fit, controls stay touch sized, and no remote runti
     ).toBe(true);
     for (const name of [
       "Open destinations",
-      "World overview",
+      "World tools",
       "Open game menu",
-      "Zoom in",
-      "Zoom out",
     ]) {
       const box = await page.getByRole("button", { name }).boundingBox();
       expect(box?.width, `${name} width`).toBeGreaterThanOrEqual(44);
       expect(box?.height, `${name} height`).toBeGreaterThanOrEqual(44);
     }
+    await page.getByRole("button", { name: "World tools", exact: true }).click();
+    for (const name of ["World overview", "Zoom in", "Zoom out"]) {
+      const box = await page.getByRole("button", { name, exact: true }).boundingBox();
+      expect(box?.width).toBeGreaterThanOrEqual(44);
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+    }
+    await page.getByRole("button", { name: "World tools", exact: true }).click();
   }
   expect(external).toEqual([]);
   expect(errors).toEqual([]);

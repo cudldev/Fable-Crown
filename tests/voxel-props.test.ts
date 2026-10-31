@@ -6,10 +6,21 @@ import { loadVoxelAssets, voxelAssetSpecs, voxelBindingId, voxelObject } from ".
 import { VOXEL_VERSION } from "../src/render/three/voxel-version";
 import { WORLD } from "../src/rpg/world";
 import { captureGIWorld } from "../src/render/three/voxel-gi-source";
+import { decodeVoxelAsset } from "../src/render/three/voxel-decode";
 
 let models: Map<string, VoxelObject>;
 const urls: string[] = [];
 beforeAll(async () => {
+  // Node lacks browser Worker; exercise the real decoder behind an async transport.
+  class DecoderTransport {
+    onmessage?: (event: { data: ReturnType<typeof decodeVoxelAsset> }) => void;
+    terminated = false;
+    postMessage({ buffer, spec }: { buffer: ArrayBuffer; spec: Parameters<typeof decodeVoxelAsset>[1] }) {
+      queueMicrotask(() => { if (!this.terminated) this.onmessage?.({ data: decodeVoxelAsset(buffer, spec) }); });
+    }
+    terminate() { this.terminated = true; }
+  }
+  vi.stubGlobal("Worker", DecoderTransport);
   const manifest = JSON.parse(await readFile(new URL("../public/art3d/voxel/manifest.json", import.meta.url), "utf8"));
   const files = new Map<string, Uint8Array>();
   for (const asset of manifest.assets) files.set(asset.file, Uint8Array.from(await readFile(new URL("../public/art3d/voxel/" + asset.file, import.meta.url))));

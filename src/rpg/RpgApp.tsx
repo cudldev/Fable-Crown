@@ -1,8 +1,10 @@
 import { flushSync } from "react-dom";
 import PixelPortrait from "../render/PixelPortrait";
+import { ActionCycle } from "../render/ActionCycle";
 import { clampGameplayZoom, MAX_GAMEPLAY_ZOOM } from "../render/camera-limits";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  type ScenePreparation,
   type TileCamera,
   type TileSelection,
 } from "../render/scene-types";
@@ -42,9 +44,11 @@ import { starterChoices } from "./starter";
 import { actionFeedback } from "./action-feedback";
 import { defaultInteraction } from "./default-interaction";
 import { WorldContextMenu, type WorldMenuItem } from "./WorldContextMenu";
+import { StartupScreen } from "./StartupScreen";
 import type { TilePosition } from "./types";
 import type { SkillId, EquipmentSlot, CombatStyle } from "./types";
 import "./rpg.css";
+import "./mobile-hud.css";
 const base = import.meta.env.BASE_URL;
 const itemName = (id: string) =>
   ITEMS[id]?.name ??
@@ -82,6 +86,15 @@ export default function RpgApp() {
     [quantity, setQuantity] = useState(10),
     [bagItem, setBagItem] = useState<string | null>(null);
   const [feedbackEpoch, setFeedbackEpoch] = useState(0);
+  const [preparation, setPreparation] = useState<ScenePreparation>({ stage: "chapter" });
+  const [startupError, setStartupError] = useState<string>();
+  const chapterReady = useRef(false);
+  const preparing = !state || preparation.stage !== "ready" && preparation.stage !== "unavailable";
+  const preparingRef = useRef(true);
+  preparingRef.current = preparing;
+  const onPreparation = useCallback((next: ScenePreparation) => {
+    setPreparation(current => current.stage === next.stage && current.message === next.message ? current : next);
+  }, []);
   const [bagSearch, setBagSearch] = useState("");
   const [bagFilter, setBagFilter] = useState("all");
   const [bagGrouped, setBagGrouped] = useState(false);
@@ -100,6 +113,7 @@ export default function RpgApp() {
   const message = notice.text;
   const setMessage = (text: string) => setNotice(current => ({ text, sequence: current.sequence + 1 }));
   const [messagesOpen, setMessagesOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [rejection, setRejection] = useState<CommandReceipt | null>(null);
   const [commandNotice, setCommandNotice] = useState<{
     text: string;
@@ -116,9 +130,12 @@ export default function RpgApp() {
   const worker = useRef<Worker | null>(null),
     input = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    const w = new Worker(new URL("./game.worker.ts", import.meta.url), {
-      type: "module",
-    });
+    let w: Worker;
+    try { w = new Worker(new URL("./game.worker.ts", import.meta.url), { type: "module" }); }
+    catch {
+      setStartupError("The RPG chapter could not start. Reload to try again.");
+      return;
+    }
     worker.current = w;
     w.onmessage = (e) => {
       if ("archive" in e.data) {
@@ -127,11 +144,16 @@ export default function RpgApp() {
         return;
       }
       setState(e.data.state);
+      if (e.data.state && !chapterReady.current) {
+        chapterReady.current = true;
+        setPreparation(current => current.stage === "chapter" ? { stage: "assets" } : current);
+      }
       if (e.data.resetFeedback) {
         setWorldMenu(null); setUsingItem(null);
         setFeedbackEpoch((value) => value + 1);
         setCommandNotice(null);
         setMessagesOpen(false);
+        setToolsOpen(false);
         setRejection(null);
         latestRequest.current = "";
       }
@@ -153,6 +175,7 @@ export default function RpgApp() {
     };
     w.onerror = () => {
       setCommandNotice(null);
+      if (!chapterReady.current) setStartupError("The RPG chapter could not start. Reload to try again.");
       setMessage("The RPG chapter could not start. Reload to try again.");
     };
     const visibility = () =>
@@ -183,8 +206,10 @@ export default function RpgApp() {
   }, [commandNotice]);
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
+      if (preparingRef.current) return;
       if (e.key === "Escape") {
         e.preventDefault();
+        setToolsOpen(false);
         setWorldMenu(null);
         setUsingItem(null);
         setMessage("");
@@ -208,10 +233,12 @@ export default function RpgApp() {
         .catch(() => {});
   }, [panel, worldSize]);
   const send = (type: string, extra = {}) => {
+    if (preparingRef.current) return;
     if (type === "save" || type === "import") flushSync(() => setMessage(""));
     worker.current?.postMessage({ type, ...extra });
   };
   const command = (command: RpgCommand) => {
+    if (preparingRef.current) return;
     const requestId = `request-${++requestSequence.current}`;
     latestRequest.current = requestId;
     const label =
@@ -231,6 +258,7 @@ export default function RpgApp() {
   };
   useEffect(() => {
     const move = (event: KeyboardEvent) => {
+      if (preparingRef.current) return;
       const direction = ({ w: [0, -1], a: [-1, 0], s: [0, 1], d: [1, 0] } as Record<string, number[]>)[event.key.toLowerCase()];
       if (!direction || !state || panel || worldMenu || selection && selection.kind !== "tile" || event.ctrlKey || event.metaKey || event.altKey ||
         (event.target as HTMLElement).closest("input, textarea, select, [contenteditable=true]")) return;
@@ -246,12 +274,17 @@ export default function RpgApp() {
     return () => window.removeEventListener("keydown", move);
   }, [state, panel, selection, worldMenu]);
   const open = (p: string) => {
+    if (preparingRef.current) return;
+    setToolsOpen(false);
     setWorldMenu(null);
     setMessagesOpen(false);
     setPanel(panel === p ? null : p);
     setSelection(null);
+    setMapDestination(null);
   };
   const select = (s: TileSelection) => {
+    if (preparingRef.current) return;
+    setToolsOpen(false);
     setWorldMenu(null);
     setMessagesOpen(false);
     setMapDestination(null);
@@ -260,7 +293,8 @@ export default function RpgApp() {
     setSelection(s);
   };
   const interact = (selected: TileSelection) => {
-    if (!state) return;
+    if (!state || preparingRef.current) return;
+    setToolsOpen(false);
     setWorldMenu(null);
     if (usingItem && selected.kind === "object") {
       const target = objectById(selected.id), use = target && itemUses(state, usingItem, target)[0];
@@ -488,9 +522,12 @@ export default function RpgApp() {
       className="game-shell rpg-shell"
       aria-label="Fable Crown RPG"
       data-messages-open={messagesOpen}
-      data-panel-open={!!panel || (!!selection && selection.kind !== "tile")}
+      data-tools-open={toolsOpen}
+      data-panel-open={!!panel || !!mapDestination || (!!selection && selection.kind !== "tile")}
+      data-preparing={preparing}
     >
-      {state ? (
+      <div className="game-world" inert={preparing} aria-hidden={preparing || undefined}>
+      {state && (
         <SceneHost
           state={state}
           camera={camera}
@@ -498,19 +535,17 @@ export default function RpgApp() {
           selection={worldMenu?.selection ?? selection}
           onSelect={select}
           onInteract={interact}
-          onContextMenu={(selected, point) => { setSelection(null); setPanel(null); setMessagesOpen(false); setMapDestination(null); setWorldMenu({ selection: selected, ...point }); }}
+          onContextMenu={(selected, point) => { if (preparingRef.current) return; setToolsOpen(false); setSelection(null); setPanel(null); setMessagesOpen(false); setMapDestination(null); setWorldMenu({ selection: selected, ...point }); }}
           feedback={reward.floaters}
           presentationEpoch={feedbackEpoch}
           onWorkContact={audio.workContact}
           onFootstep={audio.footstep}
           previewRoute={previewRoute}
+          onPreparation={onPreparation}
         />
-      ) : (
-        <div className="loading-screen">
-          <h1>Fable Crown</h1>
-          <p>Opening a new chapter…</p>
-        </div>
       )}
+      </div>
+      <div className="game-hud" hidden={preparing} inert={preparing} aria-hidden={preparing || undefined}>
       {worldMenu && <WorldContextMenu x={worldMenu.x} y={worldMenu.y} items={menuItems} onClose={() => setWorldMenu(null)} />}
       {state && (
         <MessagePanel
@@ -521,6 +556,7 @@ export default function RpgApp() {
           onExpandedChange={(value) => {
             setMessagesOpen(value);
             if (value) {
+              setToolsOpen(false);
               setPanel(null);
               setSelection(null);
             }
@@ -532,6 +568,7 @@ export default function RpgApp() {
           state={state}
           previewRoute={previewRoute}
           onDestination={(position) => {
+            setToolsOpen(false);
             setMessagesOpen(false);
             setMapDestination(position);
             setSelection(null);
@@ -560,12 +597,24 @@ export default function RpgApp() {
         </button>
         <div className="header-actions">
           <button
+            className="world-overview-control"
             aria-label="World overview"
             onClick={() =>
               setCamera((c) => ({ ...c, overview: !c.overview, follow: false }))
             }
           >
             ⌖ World
+          </button>
+          <button
+            className="mobile-world-tools"
+            aria-label="World tools"
+            aria-expanded={toolsOpen}
+            onClick={() => {
+              setToolsOpen(value => !value);
+              setPanel(null); setSelection(null); setMessagesOpen(false); setMapDestination(null);
+            }}
+          >
+            {toolsOpen ? "Done" : "Tools"}
           </button>
           <button aria-label="Open game menu" onClick={() => open("menu")}>
             ☰
@@ -611,6 +660,9 @@ export default function RpgApp() {
         </section>
       )}
       <div className="camera-controls">
+        <button className="mobile-world-tools" aria-label="World overview" onClick={() => setCamera(c => ({ ...c, overview: !c.overview, follow: false }))}>
+          World
+        </button>
         {state && (
           <button
             className="rpg-run-control"
@@ -1150,6 +1202,16 @@ export default function RpgApp() {
             <>
               <span className="eyebrow">ALDEN’S INTENTIONS</span>
               <h2>{state.control.goal?.title ?? "The road ahead"}</h2>
+              <div className="mobile-plan-actions">
+                <button aria-label={state.control.waiting ? "Resume Alden" : "Pause Alden"} onClick={() => command({ type: state.control.waiting ? "resume" : "wait" })}>
+                  {state.control.waiting ? "Resume" : "Pause"}
+                </button>
+                <button aria-label="Show Alden's destination" disabled={!intention?.targetPosition} onClick={() => {
+                  if (!intention?.targetPosition) return;
+                  setPanel(null);
+                  setCamera(c => ({ ...c, x: intention.targetPosition!.x, y: intention.targetPosition!.y, follow: false, overview: false }));
+                }}>⌖ Destination</button>
+              </div>
               {intention && (
                 <section
                   className="rpg-decision-detail"
@@ -2082,7 +2144,7 @@ export default function RpgApp() {
                 {work ? `${work.label} · ${work.detail}` : intention?.title ?? player.activity}
               </span>
               {work && <span className="hud-work" data-testid="hud-work-status">
-                <progress aria-label={`${work.label} cycle progress`} value={work.elapsed} max={work.duration} />
+                <ActionCycle label={`${work.label} cycle progress`} value={work.elapsed} max={work.duration} />
                 <small>{work.elapsed}/{work.duration} ticks · {Math.ceil((work.duration - work.elapsed) * .6)}s to attempt</small>
               </span>}
               <span
@@ -2167,6 +2229,8 @@ export default function RpgApp() {
           e.target.value = "";
         }}
       />
+      </div>
+      {preparing && <StartupScreen stage={preparation.stage} error={startupError} />}
     </main>
   );
 }

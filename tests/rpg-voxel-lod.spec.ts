@@ -56,7 +56,10 @@ test("3D distance is capped across controls and nested voxel batches stay within
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: "docs/art-audit/voxel-lod-v2/phone.png" });
+  const tools = page.getByRole("button", { name: "World tools", exact: true });
+  await tools.click(); await expect(tools).toHaveAttribute("aria-expanded", "true");
   for (let i = 0; i < 4; i++) await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await tools.click(); await expect(tools).toHaveAttribute("aria-expanded", "false");
   // Pick real exposed world pixels: the responsive HUD can cover fixed touch coordinates.
   const touch = await world.evaluate(root => {
     for (let y = 160; y < innerHeight - 80; y += 20) {

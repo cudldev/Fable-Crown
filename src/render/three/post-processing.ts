@@ -182,6 +182,25 @@ export class PostProcessing {
       rayInverseProjection: this.raysMaterial.uniforms.inverseProjection, rayCameraWorld: this.raysMaterial.uniforms.cameraWorld, rayCenter: this.raysMaterial.uniforms.curveCenter, rayHorizon: { value: 0 } });
     this.quad.frustumCulled = false; this.scene.add(this.quad);
   }
+  async prepare(renderer: THREE.WebGLRenderer, isCurrent: () => boolean) {
+    const previous = this.quad.material;
+    try {
+      for (const [material, target] of [[this.raysMaterial, this.raysTarget], [this.blur, this.glowA], [this.blur, this.glowB], [this.composite, null]] as const) {
+        if (!isCurrent()) return;
+        this.quad.material = material;
+        await this.compileTo(renderer, this.scene, this.camera, target, isCurrent);
+      }
+    } finally { this.quad.material = previous; }
+  }
+  async prepareWorld(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, isCurrent: () => boolean) {
+    await this.compileTo(renderer, scene, camera, this.target, isCurrent);
+  }
+  private async compileTo(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, target: THREE.WebGLRenderTarget | null, isCurrent: () => boolean) {
+    if (!isCurrent()) return;
+    const previous = renderer.getRenderTarget(), cubeFace = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
+    try { renderer.setRenderTarget(target); await renderer.compileAsync(scene, camera); }
+    finally { if (isCurrent()) renderer.setRenderTarget(previous, cubeFace, mip); }
+  }
   render(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
     visual: Readonly<VisualSettings>, focus: number, close: number, overview: boolean, displayScale: number,
     light?: { direction: THREE.Vector3; color: THREE.Color; power: number }, shadowLight?: THREE.DirectionalLight,

@@ -1,0 +1,27 @@
+{
+  "label": "tint-cpu",
+  "cpu": "Intel(R) Core(TM) i9-10850K CPU @ 3.60GHz",
+  "scope": "Warm real Chrome WebGL game, fixed dusk, waiting Alden, 480-frame samples; phone viewport on desktop hardware.",
+  "results": [],
+  "tintCpu": {
+    "results": [
+      {
+        "bars": 1,
+        "meanUpdateMs": 0.0018000000019868215,
+        "p95BlockMeanMs": 0.003999999985098839
+      },
+      {
+        "bars": 8,
+        "meanUpdateMs": 0.010133333335320155,
+        "p95BlockMeanMs": 0.014000000059604644
+      },
+      {
+        "bars": 32,
+        "meanUpdateMs": 0.034199999998013174,
+        "p95BlockMeanMs": 0.05
+      }
+    ],
+    "scope": "CPU only: real DOM style writes, four lamps, changing sun, 2000 accelerated 10 Hz updates per bar count; warm blocks. Excludes deferred style/layout/paint; whole-game frame samples include those costs."
+  },
+  "errors": []
+}

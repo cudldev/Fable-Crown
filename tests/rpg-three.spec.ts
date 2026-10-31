@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createRpg } from "../src/rpg/engine";
 import { createGame } from "../src/simulation";
+import { openWorldTools } from "./world-tools";
 import { interactionTiles, objectById } from "../src/rpg/world";
 import type { RpgState } from "../src/rpg/types";
 
@@ -66,18 +67,18 @@ function waitingFixture() {
 
 test.describe("delayed renderer loading", () => {
   test.use({ serviceWorkers: "block" });
-  test("the world shell and save controls remain available before the renderer downloads", async ({ page }) => {
+  test("preparation hides the world and HUD until the renderer downloads", async ({ page }) => {
     let release!: () => void;
     const gate = new Promise<void>(resolve => { release = resolve; });
     await page.route(/\/assets\/ThreeScene-[^/]+\.js$/, async route => { await gate; await route.continue(); });
     try {
       await page.goto("./", { waitUntil: "domcontentloaded" });
       const world = page.getByTestId("rpg-world");
-      await expect(world).toBeVisible();
+      await expect(page.getByTestId("startup-screen")).toBeVisible();
+      await expect(world).toBeHidden();
       await expect(world).toHaveAttribute("data-status", "starting");
-      await menu(page);
-      await page.getByRole("button", { name: "Save on device", exact: true }).click();
-      await expect(page.getByRole("status")).toContainText("Chronicle saved");
+      await expect(page.getByRole("button", { name: "Open game menu", exact: true })).toBeHidden();
+      await expect(page.getByRole("button", { name: "Open inventory", exact: true })).toBeHidden();
     } finally { release(); }
     const world = await ready(page);
     await expect(world.getByRole("button", { name: "Inspect Alden", exact: true })).toBeVisible();
@@ -212,7 +213,8 @@ test("3D camera and touch controls fit portrait and landscape without external r
     await page.setViewportSize(viewport);
     await expect(page.getByTestId("three-canvas")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    for (const name of ["Open destinations", "Open game menu", "Zoom in", "Zoom out", "Follow Alden", "Dusk lighting"]) {
+    await page.getByRole("button", { name: "World tools", exact: true }).click();
+    for (const name of ["Open destinations", "Open game menu", "Zoom in", "Zoom out", "Follow Alden", "Visual settings"]) {
       const button = page.getByRole("button", { name, exact: true });
       await expect(button).toBeVisible();
       const box = await button.boundingBox();
@@ -235,6 +237,7 @@ test("3D camera and touch controls fit portrait and landscape without external r
       return !!before && !!after && Math.hypot(after.x - before.x, after.y - before.y) > 10;
     }).toBe(true);
     await page.getByRole("button", { name: "Follow Alden", exact: true }).click();
+    await page.getByRole("button", { name: "World tools", exact: true }).click();
     await page.screenshot({ path: `docs/screenshots/three-${viewport.width === 390 ? "portrait" : "landscape"}.png` });
   }
   expect(external).toEqual([]);
@@ -263,7 +266,10 @@ for (const mode of ["perspective", "orthographic"] as const) {
       });
       const traces = [];
       for (const burst of [false, true]) {
+        await openWorldTools(page);
         await page.getByRole("button", { name: "Follow Alden", exact: true }).click();
+        const tools = page.getByRole("button", { name: "World tools", exact: true });
+        if (await tools.isVisible() && await tools.getAttribute("aria-expanded") === "true") await tools.click();
         await page.evaluate(async () => { for (let i = 0; i < 2; i++) await new Promise(resolve => requestAnimationFrame(resolve)); });
         await page.mouse.move(start.x, start.y);
         await page.mouse.down();
@@ -440,7 +446,8 @@ test("art workbench is isolated from gameplay and cached models reload offline",
     await page.getByLabel("Preview model").selectOption("alden");
     expect(await readChronicle()).toBe(before);
   } finally { await context.setOffline(false); }
-  expect(workers).toEqual([]);
+  // The read-only asset decoder may start; gameplay/GI workers must stay absent.
+  expect(workers.every(url => /voxel-assets\.worker-/.test(url))).toBe(true);
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
 });

@@ -1,0 +1,91 @@
+{
+  "results": [
+    {
+      "label": "desktop-closed",
+      "callbacks": 241,
+      "rendered": 241,
+      "elapsedMs": 2008.4000000059605,
+      "renderRatio": 1,
+      "renderedFps": 119.996016729379,
+      "glError": 0,
+      "viewport": [
+        1280,
+        800
+      ],
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "label": "desktop-tree",
+      "callbacks": 241,
+      "rendered": 8,
+      "elapsedMs": 2003.8999999761581,
+      "renderRatio": 0.03319502074688797,
+      "renderedFps": 3.9922151804457218,
+      "glError": 0,
+      "viewport": [
+        1280,
+        800
+      ],
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "label": "desktop-menu",
+      "callbacks": 241,
+      "rendered": 8,
+      "elapsedMs": 2004.4000000059605,
+      "renderRatio": 0.03319502074688797,
+      "renderedFps": 3.991219317489628,
+      "glError": 0,
+      "viewport": [
+        1280,
+        800
+      ],
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "label": "desktop-closed-again",
+      "callbacks": 238,
+      "rendered": 238,
+      "elapsedMs": 2007.699999988079,
+      "renderRatio": 1,
+      "renderedFps": 118.54360711332029,
+      "glError": 0,
+      "viewport": [
+        1280,
+        800
+      ],
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "label": "portrait-tree",
+      "callbacks": 240,
+      "rendered": 8,
+      "elapsedMs": 2003.800000011921,
+      "renderRatio": 0.03333333333333333,
+      "renderedFps": 3.992414412592278,
+      "glError": 0,
+      "viewport": [
+        390,
+        844
+      ],
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    {
+      "label": "landscape-tree",
+      "callbacks": 241,
+      "rendered": 8,
+      "elapsedMs": 2006,
+      "renderRatio": 0.03319502074688797,
+      "renderedFps": 3.988035892323031,
+      "glError": 0,
+      "viewport": [
+        844,
+        390
+      ],
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    }
+  ],
+  "errors": [],
+  "external": [],
+  "scope": "Production Chrome, DPR1, default visual settings; counts actual WebGL draws per foreground RAF. Phone sizes are emulation, not physical-device benchmarks."
+}

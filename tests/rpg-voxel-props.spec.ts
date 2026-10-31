@@ -19,7 +19,10 @@ async function restore(page: Page, state: RpgState) {
   await page.getByRole("button", { name: "Open game menu" }).click();
   await page.locator('input[type="file"]').setInputFiles({ name: "voxel-props.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(state)) });
   await expect(page.getByRole("status")).toContainText("Chronicle restored"); await page.getByRole("button", { name: "Close panel" }).click();
+  const tools = page.getByRole("button", { name: "World tools", exact: true }), mobile = await tools.isVisible();
+  if (mobile && await tools.getAttribute("aria-expanded") !== "true") await tools.click();
   await page.getByRole("button", { name: "Follow Alden", exact: true }).click();
+  if (mobile && await tools.getAttribute("aria-expanded") === "true") await tools.click();
 }
 async function sample(page: Page) {
   return page.evaluate(async count => {

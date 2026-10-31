@@ -212,7 +212,7 @@ test("Alden style checkpoint shows the native pixel sprite clearly in the voxel 
   const marker = await player.boundingBox(), worldBox = (await canvas.boundingBox())!;
   const diagnostics = await world.evaluate(element => ({ ...((element as HTMLElement).dataset) }));
   // This review capture hides chrome only; the actual world and sprite shader are unchanged.
-  await page.locator('main.rpg-shell > :not([data-testid="rpg-world"])').evaluateAll(elements => elements.forEach(element => { (element as HTMLElement).style.visibility = "hidden"; }));
+  await page.locator('main.rpg-shell > :not([data-testid="rpg-world"]):not(.game-world)').evaluateAll(elements => elements.forEach(element => { (element as HTMLElement).style.visibility = "hidden"; }));
   await world.locator(".three-light-controls,.tile-hit-layer,.three-performance,.three-test-note").evaluateAll(elements => elements.forEach(element => { (element as HTMLElement).style.visibility = "hidden"; }));
   await page.screenshot({ path: output + "/browser-alden-world.png" });
   const centerX = marker ? marker.x + marker.width / 2 : worldBox.x + worldBox.width / 2;
@@ -243,7 +243,7 @@ test("unobstructed work contact keeps the pickaxe on Alden's shared cell grid", 
   await expectAnimatedFrame(page, 6, 6);
   const marker = (await world.getByRole("button", { name: "Inspect Alden", exact: true }).boundingBox())!;
   const clip = { x: marker.x + marker.width / 2 - 180, y: marker.y + marker.height / 2 - 180, width: 360, height: 360 };
-  await page.locator('main.rpg-shell > :not([data-testid="rpg-world"])').evaluateAll(elements => elements.forEach(element => { (element as HTMLElement).style.visibility = "hidden"; }));
+  await page.locator('main.rpg-shell > :not([data-testid="rpg-world"]):not(.game-world)').evaluateAll(elements => elements.forEach(element => { (element as HTMLElement).style.visibility = "hidden"; }));
   await world.locator(".three-light-controls,.tile-hit-layer,.three-performance,.three-test-note").evaluateAll(elements => elements.forEach(element => { (element as HTMLElement).style.visibility = "hidden"; }));
   await page.screenshot({ path: output + "/browser-work-contact-close.png", clip });
   expect(observed.errors).toEqual([]); expect(observed.shaderErrors).toEqual([]); expect(observed.external).toEqual([]);

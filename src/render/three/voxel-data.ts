@@ -99,10 +99,12 @@ export function voxelModel(grid: VoxelGrid, pitch: number, pivot: readonly numbe
   let occupiedHeight = 1;
   for (let at = 0; at < source.cells.length; at++) if (source.cells[at]) occupiedHeight = Math.max(occupiedHeight, at % grid.size[2] + 1 - pivot[2]);
   const maxFactor = 2 ** Math.max(0, Math.floor(Math.log2(Math.min(Math.max(...grid.size), occupiedHeight, cutHeight === undefined ? Infinity : cutHeight / pitch))));
+  const derived = new Map<number, VoxelLevel>();
   const levels = VOXEL_LOD_FACTORS.map(requested => {
     const factor = Math.min(requested, maxFactor);
+    const cached = derived.get(factor); if (cached) return cached;
     const coarse = factor === 1 ? { grid: source, pivot } : coarseGrid(source, pivot, factor);
-    return surfaceLevel(coarse.grid, pitch * factor, coarse.pivot);
+    const level = surfaceLevel(coarse.grid, pitch * factor, coarse.pivot); derived.set(factor, level); return level;
   });
   const coarse = coarseGrid(source, pivot, 8);
   return { pitch, levels, lighting: surfaceLevel(coarse.grid, pitch * 8, coarse.pivot, true), radius: Math.hypot(...grid.size.map((n, axis) => Math.max(Math.abs(pivot[axis]), Math.abs(n - pivot[axis])) * pitch)) };

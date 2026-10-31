@@ -38,7 +38,11 @@ test("cached GI, AO and FPS work in the actual world with independent controls a
   await expect(world).toHaveAttribute("data-gi-lighting", "night", { timeout: 60000 });
   const night = await sample(); await page.screenshot({ path: output + "/world-night.png" });
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByTestId("fps-indicator")).toBeVisible(); const phone = await sample(); await page.screenshot({ path: output + "/world-phone.png" });
+  // The quiet mobile HUD hides the meter, but rendering keeps its readings live.
+  await expect(page.getByTestId("fps-indicator")).toBeHidden();
+  await expect(page.getByTestId("fps-indicator")).toHaveText(/\d+ FPS · \d+\.\d ms/);
+  const phone = await sample(); expect(Number(phone.counters.fps)).toBeGreaterThan(0);
+  await page.screenshot({ path: output + "/world-phone.png" });
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
   const depletedBefore = Number(await world.getAttribute("data-gi-depleted"));
   Object.values(fixture.resources).forEach(resource => { resource.available = false; resource.respawnAt = 1_000_000_000; });

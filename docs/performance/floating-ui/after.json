@@ -1,0 +1,28 @@
+{
+  "label": "after",
+  "cpu": "Intel(R) Core(TM) i9-10850K CPU @ 3.60GHz",
+  "scope": "Warm real Chrome WebGL game, fixed dusk, waiting Alden, 480-frame samples; phone viewport on desktop hardware.",
+  "results": [
+    {
+      "width": 1280,
+      "height": 800,
+      "meanMs": 8.829018789144051,
+      "p95Ms": 16.600000000000364,
+      "p99Ms": 16.80000000000109,
+      "drawCalls": "379",
+      "triangles": "4492374",
+      "gpuMs": "5.572"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "meanMs": 8.446137787056369,
+      "p95Ms": 8.5,
+      "p99Ms": 16.600000000002183,
+      "drawCalls": "267",
+      "triangles": "5752608",
+      "gpuMs": "6.221"
+    }
+  ],
+  "errors": []
+}

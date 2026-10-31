@@ -1,0 +1,20 @@
+.game-hud, .game-world { display: contents; }
+.game-hud[hidden] { display: none; }
+.game-world[aria-hidden="true"] { visibility: hidden; }
+.startup-screen {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-items: center; overflow: auto;
+  padding: max(28px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background: #20363c; color: #f1e5c6; text-align: center;
+}
+.startup-content { width: min(100%, 400px); padding: 24px 0; }
+.startup-content > img { display: block; margin: 0 auto 16px; }
+.startup-screen .startup-brand { color: #d4bd82; font: 18px Georgia, serif; letter-spacing: .08em; margin: 0 0 30px; }
+.startup-screen h1 { font: 400 clamp(25px, 5.8vw, 32px)/1.2 Georgia, serif; margin: 0 0 14px; }
+.startup-screen .startup-detail { min-height: 42px; margin: 0; color: #d7d9c8; font: 14px/1.6 system-ui, sans-serif; overflow-wrap: anywhere; }
+.startup-progress { height: 4px; margin: 20px auto 0; max-width: 240px; overflow: hidden; background: #43575b; }
+.startup-progress span { display: block; width: 30%; height: 100%; background: #d4bd82; animation: startup-progress 1.7s ease-in-out infinite alternate; }
+.startup-screen button { min-height: 44px; margin-top: 18px; padding: 9px 28px; width: auto; color: #20363c; background: #e5d4a9; border: 1px solid #d4bd82; border-radius: 3px; font: 600 14px system-ui, sans-serif; cursor: pointer; }
+.startup-screen button:focus-visible { outline: 2px solid #f1e5c6; outline-offset: 4px; }
+@keyframes startup-progress { from { transform: translateX(-20%); } to { transform: translateX(255%); } }
+@media (prefers-reduced-motion: reduce) { .startup-progress span { animation: none; margin-inline: auto; } }

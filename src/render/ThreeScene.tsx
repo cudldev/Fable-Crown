@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { ActionCycle } from "./ActionCycle";
 import type { TileSceneProps, TileSelection } from "./scene-types";
 import { worldForState } from "../rpg/world";
 import { ENEMIES } from "../rpg/content";
@@ -75,21 +76,28 @@ export default function ThreeScene(props: ThreeSceneProps) {
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
-    void loadProductionArt(controller.signal).then(result => {
+    latest.current.onPreparation?.({ stage: "assets" });
+    void loadProductionArt(controller.signal).then(async result => {
+      if (!active) { result.library.dispose(); return; }
+      latest.current.onPreparation?.({ stage: "world" });
+      // Give the preparation screen a paint before constructing world geometry.
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
       if (!active) { result.library.dispose(); return; }
       try {
         setAssets({ source: result.source, ids: result.loadedIds, voxelIds: result.voxelIds, warning: result.warnings.join(" "), characterStyle: result.characterStyle, characterReady: result.characterReady });
         const view = new ThreeRuntime(canvas.current!, root.current!, latest.current, hits.current,
-          () => { if (active) setStatus("ready"); },
-          message => { if (active) { setFailure(message); setStatus("unavailable"); } }, result.library);
+          () => { if (active) { setStatus("ready"); latest.current.onPreparation?.({ stage: "ready" }); } },
+          message => { if (active) { setFailure(message); setStatus("unavailable"); latest.current.onPreparation?.({ stage: "unavailable", message }); } }, result.library);
         runtime.current = view;
       } catch (error) {
         result.library.dispose();
-        setFailure(error instanceof Error ? error.message : "WebGL2 is unavailable on this browser."); setStatus("unavailable");
+        const message = error instanceof Error ? error.message : "WebGL2 is unavailable on this browser.";
+        setFailure(message); setStatus("unavailable"); latest.current.onPreparation?.({ stage: "unavailable", message });
       }
     }).catch(error => {
       if (!active) return;
-      setFailure(error instanceof Error ? error.message : "The 3D assets could not load."); setStatus("unavailable");
+      const message = error instanceof Error ? error.message : "The 3D assets could not load.";
+      setFailure(message); setStatus("unavailable"); latest.current.onPreparation?.({ stage: "unavailable", message });
     });
     return () => { active = false; controller.abort(); runtime.current?.dispose(); runtime.current = null; };
   }, []);
@@ -138,6 +146,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
           <button ref={settingsButton} className="visual-settings-trigger" aria-expanded={settingsOpen} aria-controls={settingsId} onClick={() => setSettingsOpen(value => !value)}>Visual settings</button>
         </div>
         {settingsOpen && <VisualSettingsPanel id={settingsId} settings={visual} preset={lighting} shadows={shadows} gi={gi} ao={ao} cameraMode={cameraMode} performanceReport={copyPerformance}
+          onPreset={preset => { setLighting(preset); setVisual(previous => ({ ...previous, dayNightCycle: false })); }} onCameraMode={setCameraMode}
           onChange={patch => setVisual(previous => normalizeVisualSettings({ ...previous, ...patch }))} onShadows={setShadows} onGI={setGI} onAO={setAO} onReset={resetVisual} onClose={closeSettings} />}
         <div className="tile-hit-layer three-hit-layer">
           {objectButtons.map(object => {
@@ -177,8 +186,8 @@ export default function ThreeScene(props: ThreeSceneProps) {
             </span>;
           })}
           {!props.camera.overview && work && props.state.player.action?.kind !== "fight" && <span ref={bind("work-player")} className="world-work" data-testid="world-work-status">
+            <ActionCycle label={`${work.label} world progress`} value={work.elapsed} max={work.duration} />
             <b>{work.label} · {work.detail}</b>
-            <progress aria-label={`${work.label} world progress`} value={work.elapsed} max={work.duration} />
           </span>}
         </div>
         <div className="world-effects-layer" data-testid="world-effects-layer">
@@ -208,4 +217,3 @@ export default function ThreeScene(props: ThreeSceneProps) {
     </div>
   );
 }
-

@@ -122,7 +122,7 @@ test("pixel sprite form normals follow world lights in both mirror states withou
   for (let i = 0; i < 5; i++) await page.getByRole("button", { name: "Zoom in", exact: true }).click();
   await expect(world).toHaveAttribute("data-billboard-mode", "screen-aligned");
   await expect(world).toHaveAttribute("data-sprite-frame", "0");
-  await page.addStyleTag({ content: 'html.sprite-lighting-review main.rpg-shell > :not([data-testid="rpg-world"]),html.sprite-lighting-review .three-light-controls,html.sprite-lighting-review .three-performance,html.sprite-lighting-review .three-test-note,html.sprite-lighting-review .tile-hit-layer{visibility:hidden!important}' });
+  await page.addStyleTag({ content: 'html.sprite-lighting-review main.rpg-shell > :not([data-testid="rpg-world"]):not(.game-world),html.sprite-lighting-review .three-light-controls,html.sprite-lighting-review .three-performance,html.sprite-lighting-review .three-test-note,html.sprite-lighting-review .tile-hit-layer{visibility:hidden!important}' });
   const before = await savedPlayer(page);
   await visual(page, { Bloom: 0, "Chromatic aberration": 0, "Depth of field": 0, Exposure: 1, "Sun brightness": 1.4, "Ambient brightness": .15, "Lamp brightness": 0 }, true);
   const pairs: Record<string, { flat: Awaited<ReturnType<typeof capture>>; depth: Awaited<ReturnType<typeof capture>>; horizontalGain: number; verticalGain: number }> = {};

@@ -1,0 +1,126 @@
+.rpg-shell .mobile-world-tools { display: none; }
+.rpg-shell .mobile-plan-actions { display: none; }
+
+/* Phone portrait and short landscape views share the same quiet default HUD. */
+@media (max-width: 760px), (max-height: 500px) {
+  .rpg-shell .world-header {
+    top: max(8px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    gap: 8px;
+  }
+  .rpg-shell .realm-plaque { min-width: 0; max-width: calc(100% - 118px); min-height: 44px; padding: 5px 9px; gap: 7px; }
+  .rpg-shell .realm-plaque img { width: 24px; height: 24px; }
+  .rpg-shell .realm-plaque span { min-width: 0; }
+  .rpg-shell .realm-plaque small { display: none; }
+  .rpg-shell .realm-plaque strong { font-size: 18px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rpg-shell .header-actions { gap: 6px; }
+  .rpg-shell .header-actions button { min-width: 44px; min-height: 44px; padding: 7px 10px; }
+  .rpg-shell .world-overview-control { display: none; }
+  .rpg-shell .mobile-world-tools { display: block; }
+  .rpg-shell .mobile-plan-actions { display: flex; gap: 8px; margin: 10px 0; }
+  .rpg-shell .mobile-plan-actions button { flex: 1; font: 12px system-ui; }
+  .rpg-shell .header-actions [aria-expanded="true"] { background: #4a5c54; }
+
+  .rpg-shell .rpg-minimap,
+  .rpg-shell .camera-controls,
+  .rpg-shell .three-light-controls,
+  .rpg-shell .three-visual-settings,
+  .rpg-shell .three-performance,
+  .rpg-shell .three-test-note { display: none; }
+  .rpg-shell[data-tools-open="true"] .rpg-minimap { display: block; top: max(64px, calc(env(safe-area-inset-top) + 56px)); left: max(10px, env(safe-area-inset-left)); width: 110px; }
+  .rpg-shell[data-tools-open="true"] .rpg-minimap.expanded { width: min(430px, calc(100% - 20px)); z-index: 6; }
+  .rpg-shell[data-tools-open="true"] .rpg-minimap.expanded .minimap-surface { height: min(240px, 32dvh); }
+  .rpg-shell[data-tools-open="true"] .three-light-controls {
+    display: flex; top: max(64px, calc(env(safe-area-inset-top) + 56px)); right: max(10px, env(safe-area-inset-right)); left: auto;
+    padding: 0; max-width: none;
+  }
+  .rpg-shell .three-light-controls > span,
+  .rpg-shell .three-light-controls button:not(.visual-settings-trigger) { display: none; }
+  .rpg-shell .three-light-controls .visual-settings-trigger { display: block; min-height: 44px; padding: 8px 12px; }
+  .rpg-shell[data-tools-open="true"] .camera-controls {
+    display: flex; right: max(10px, env(safe-area-inset-right)); left: max(10px, env(safe-area-inset-left));
+    bottom: calc(var(--dock-height, 58px) + max(16px, env(safe-area-inset-bottom)));
+    flex-wrap: wrap; justify-content: flex-end; gap: 4px;
+  }
+  .rpg-shell .camera-controls button { min-height: 44px; min-width: 44px; padding: 6px 8px; font: 11px system-ui; }
+  .rpg-shell .camera-controls button.mobile-world-tools { font: 11px system-ui; }
+  .rpg-shell[data-tools-open="true"] .three-visual-settings {
+    display: flex; top: max(116px, calc(env(safe-area-inset-top) + 108px)); right: max(10px, env(safe-area-inset-right));
+    width: min(350px, calc(100% - 20px)); bottom: calc(var(--dock-height, 58px) + max(16px, env(safe-area-inset-bottom)));
+    max-height: none; z-index: 9;
+  }
+  .rpg-shell .three-visual-settings button,
+  .rpg-shell .three-visual-settings select,
+  .rpg-shell .three-visual-settings summary { min-height: 44px; }
+  .rpg-shell:has(.three-visual-settings) .rpg-minimap,
+  .rpg-shell:has(.three-visual-settings) .camera-controls { display: none; }
+
+  .rpg-shell .intention-dock {
+    left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom)); max-width: none; flex-wrap: nowrap; min-height: 54px;
+  }
+  .rpg-shell .hero-status { min-width: 0; max-width: none; flex: 1; padding: 7px 10px; gap: 0; }
+  .rpg-shell .hero-status :is(img, .unit-portrait),
+  .rpg-shell .hero-status .doing-now,
+  .rpg-shell .hero-status .rpg-xp-inline,
+  .rpg-shell .hud-work small,
+  .rpg-shell .next-intention { display: none; }
+  .rpg-shell .hero-status strong { font-size: 16px; white-space: nowrap; }
+  .rpg-shell .hero-status em { font: 9px system-ui; margin-left: 4px; }
+  .rpg-shell .hero-health { height: 4px; }
+  .rpg-shell .hero-status { position: relative; }
+  .rpg-shell .hero-status:has(.hud-work) > span { padding-right: 22px; }
+  .rpg-shell .hud-work { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin: 0; }
+  .rpg-shell .dock-buttons { flex: 0 0 auto; }
+  .rpg-shell .dock-buttons button,
+  .rpg-shell .dock-buttons button:first-child { min-width: 44px; min-height: 44px; padding: 7px 9px; font: 11px system-ui; }
+
+  .rpg-shell .thought-peek.intention-readout {
+    display: flex; left: max(10px, env(safe-area-inset-left)); right: calc(max(10px, env(safe-area-inset-right)) + 106px); top: auto;
+    bottom: calc(var(--dock-height, 58px) + max(16px, env(safe-area-inset-bottom))); width: auto; max-width: none; padding: 0;
+  }
+  .rpg-shell .intention-readout .plan-open { flex: 1; min-width: 0; padding: 5px 8px; min-height: 44px; }
+  .rpg-shell .intention-readout .plan-source { display: block; font-size: 0; letter-spacing: 0; margin: 0; }
+  .rpg-shell .intention-readout .plan-source em { float: none; font: 9px/1.2 system-ui; }
+  .rpg-shell .intention-readout .plan-now { display: block; white-space: nowrap; font: 600 11px/1.4 system-ui; margin: 2px 0 0; }
+  .rpg-shell .intention-readout .plan-now b,
+  .rpg-shell .intention-readout .plan-why,
+  .rpg-shell .intention-readout .plan-next,
+  .rpg-shell .intention-readout .plan-progress { display: none !important; }
+  .rpg-shell .intention-readout .plan-controls { display: flex; flex: 0 0 70px; border-top: 0; border-left: 1px solid #b19e6955; }
+  .rpg-shell .intention-readout .plan-controls button { font-size: 10px; padding: 5px; }
+  .rpg-shell .intention-readout .plan-controls button:not([aria-label="Autoplay"]) { display: none; }
+  .rpg-shell .rpg-messages.compact {
+    left: auto; right: max(10px, env(safe-area-inset-right)); width: 98px; max-width: none;
+    bottom: calc(var(--dock-height, 58px) + max(16px, env(safe-area-inset-bottom)));
+  }
+  .rpg-shell .message-heading { min-height: 44px; }
+  .rpg-shell .message-heading button { min-width: 44px; padding: 6px 8px; font-size: 11px; }
+  .rpg-shell .message-preview { display: none; }
+  .rpg-shell[data-tools-open="true"] .intention-readout,
+  .rpg-shell[data-tools-open="true"] .rpg-messages,
+  .rpg-shell[data-panel-open="true"] .intention-readout,
+  .rpg-shell[data-messages-open="true"] .intention-readout { display: none; }
+
+  .rpg-shell .drawer, .rpg-shell .context-panel, .rpg-shell .thought-panel {
+    left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); top: auto;
+    bottom: calc(var(--dock-height, 58px) + max(16px, env(safe-area-inset-bottom)));
+    width: auto; max-height: min(60dvh, calc(100dvh - var(--dock-height, 58px) - 84px)); padding: 20px;
+  }
+  .rpg-shell .drawer.wide-drawer { max-height: min(60dvh, calc(100dvh - var(--dock-height, 58px) - 84px)); }
+  .rpg-shell .rpg-messages.expanded { left: 10px; right: 10px; width: auto; bottom: calc(var(--dock-height, 58px) + max(16px, env(safe-area-inset-bottom))); }
+  .rpg-shell .rpg-story-choice { bottom: calc(var(--dock-height, 58px) + max(16px, env(safe-area-inset-bottom))); max-height: min(55dvh, calc(100dvh - var(--dock-height, 58px) - 84px)); z-index: 12; }
+  .rpg-shell:has(.rpg-story-choice) .intention-readout,
+  .rpg-shell:has(.rpg-story-choice) .rpg-messages { display: none; }
+
+  /* A side inspector leaves the centre of a landscape phone available. */
+  @media (min-width: 601px) and (max-height: 500px) {
+    .rpg-shell[data-tools-open="true"] .three-visual-settings { top: max(64px, calc(env(safe-area-inset-top) + 56px)); bottom: max(8px, env(safe-area-inset-bottom)); }
+    .rpg-shell .intention-dock { right: auto; width: 42%; }
+    .rpg-shell .thought-peek.intention-readout { left: calc(42% + max(18px, env(safe-area-inset-left) + 8px)); bottom: max(12px, env(safe-area-inset-bottom)); }
+    .rpg-shell .rpg-messages.compact { bottom: max(12px, env(safe-area-inset-bottom)); }
+    .rpg-shell .drawer, .rpg-shell .context-panel, .rpg-shell .thought-panel,
+    .rpg-shell .drawer.wide-drawer { left: auto; width: min(360px, calc(100% - 20px)); top: 64px; max-height: none; }
+  }
+}
