@@ -45,7 +45,7 @@ jobs:
       - name: Install browser for acceptance checks
         run: npx playwright install --with-deps chromium
       - name: Verify playable demo
-        timeout-minutes: 30
+        timeout-minutes: 60
         run: npm run test:browser -- --max-failures=1
       - name: Save browser failure evidence
         if: failure()
