@@ -1,0 +1,1209 @@
+{
+  "motionIdentity": "2666ae4c6e02",
+  "cpu": "Intel(R) Core(TM) i9-10850K CPU @ 3.60GHz",
+  "cpuRate": 4,
+  "frames": 180,
+  "trials": 2,
+  "chronology": [
+    "before-clean",
+    "intermediate-after-v1",
+    "before-return",
+    "after-v2"
+  ],
+  "artifacts": {
+    "before-clean": {
+      "version": "a8342481e32d",
+      "identity": "cc0fe8b6e1ee",
+      "harnessIdentity": "7055c22ab336",
+      "setup": "Captured before conditional foliageQueued-ready gate was added. Baseline has no foliageQueued diagnostic, so the new outside-timed gate would pass immediately. Motion body is unchanged; its hash was backfilled from unchanged source. Measurement samples are untouched. A renderer/native-assets/terrain setup guard and forest-native-presence result guard were added later; the captured baseline datasets satisfy all predicates."
+    },
+    "before-return": {
+      "version": "a8342481e32d",
+      "identity": "cc0fe8b6e1ee",
+      "harnessIdentity": "0da3f88f5913",
+      "setup": "Follow/fixture restore settles750ms, then waits for foliageQueued0 when that diagnostic exists. Absent on baseline, so it passes immediately. This gate is outside timed motion; motionIdentity identifies the unchanged RAF/input/sampling body."
+    },
+    "after-v2": {
+      "version": "769d378dd7f6",
+      "identity": "306f261cb091",
+      "harnessIdentity": "0da3f88f5913",
+      "setup": "Follow/fixture restore settles750ms, then waits for foliageQueued0 when that diagnostic exists. Absent on baseline, so it passes immediately. This gate is outside timed motion; motionIdentity identifies the unchanged RAF/input/sampling body."
+    }
+  },
+  "results": {
+    "before-clean": [
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 0,
+        "meanMs": 140.6877094972067,
+        "p95Ms": 333.79999999999563,
+        "p99Ms": 583.8999999999942,
+        "maxMs": 684,
+        "over25Ms": 179,
+        "over50Ms": 175,
+        "plants": {
+          "min": 6760,
+          "median": 7666,
+          "max": 8285
+        },
+        "minTreeClearance": -27.965930369849307,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 1,
+        "meanMs": 91.0117318435754,
+        "p95Ms": 216.90000000000146,
+        "p99Ms": 242,
+        "maxMs": 292,
+        "over25Ms": 179,
+        "over50Ms": 167,
+        "plants": {
+          "min": 6760,
+          "median": 7666,
+          "max": 8285
+        },
+        "minTreeClearance": -28.632304473782995,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 0,
+        "meanMs": 85.88603351955311,
+        "p95Ms": 208.5,
+        "p99Ms": 408.6999999999971,
+        "maxMs": 416.8999999999942,
+        "over25Ms": 178,
+        "over50Ms": 151,
+        "plants": {
+          "min": 6753,
+          "median": 9343,
+          "max": 10241
+        },
+        "minTreeClearance": 11.43219014597156,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 1,
+        "meanMs": 66.82569832402237,
+        "p95Ms": 175.20000000001164,
+        "p99Ms": 266.8000000000029,
+        "maxMs": 283.8000000000029,
+        "over25Ms": 176,
+        "over50Ms": 101,
+        "plants": {
+          "min": 6753,
+          "median": 9343,
+          "max": 10241
+        },
+        "minTreeClearance": 11.43219014597156,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 0,
+        "meanMs": 62.35251396648044,
+        "p95Ms": 158.39999999999782,
+        "p99Ms": 183.60000000000036,
+        "maxMs": 200.10000000000036,
+        "over25Ms": 178,
+        "over50Ms": 120,
+        "plants": {
+          "min": 6880,
+          "median": 7910,
+          "max": 8285
+        },
+        "minTreeClearance": -28.344866425833633,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 1,
+        "meanMs": 68.13072625698325,
+        "p95Ms": 175.29999999999927,
+        "p99Ms": 225.20000000000073,
+        "maxMs": 225.3000000000029,
+        "over25Ms": 178,
+        "over50Ms": 130,
+        "plants": {
+          "min": 6880,
+          "median": 7910,
+          "max": 8285
+        },
+        "minTreeClearance": -28.344866425833633,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 0,
+        "meanMs": 66.12681564245808,
+        "p95Ms": 191.90000000000146,
+        "p99Ms": 217,
+        "maxMs": 250.09999999999854,
+        "over25Ms": 177,
+        "over50Ms": 110,
+        "plants": {
+          "min": 8804,
+          "median": 9343,
+          "max": 9885
+        },
+        "minTreeClearance": 19.16889556549952,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 1,
+        "meanMs": 69.85418994413412,
+        "p95Ms": 200.3000000000029,
+        "p99Ms": 241.90000000000146,
+        "maxMs": 275.20000000001164,
+        "over25Ms": 179,
+        "over50Ms": 112,
+        "plants": {
+          "min": 8804,
+          "median": 9343,
+          "max": 9885
+        },
+        "minTreeClearance": 19.16889556549952,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      }
+    ],
+    "before-return": [
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 0,
+        "meanMs": 76.09944134078214,
+        "p95Ms": 191.90000000000146,
+        "p99Ms": 208.6999999999971,
+        "maxMs": 216.79999999999927,
+        "over25Ms": 179,
+        "over50Ms": 152,
+        "plants": {
+          "min": 6760,
+          "median": 7666,
+          "max": 8285
+        },
+        "minTreeClearance": -28.897043698590128,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 1,
+        "meanMs": 70.69329608938547,
+        "p95Ms": 175.1999999999971,
+        "p99Ms": 200.1999999999971,
+        "maxMs": 216.90000000000146,
+        "over25Ms": 178,
+        "over50Ms": 134,
+        "plants": {
+          "min": 6760,
+          "median": 7666,
+          "max": 8285
+        },
+        "minTreeClearance": -28.897043698590128,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 0,
+        "meanMs": 54.80279329608941,
+        "p95Ms": 166.89999999999418,
+        "p99Ms": 192,
+        "maxMs": 200.20000000000437,
+        "over25Ms": 174,
+        "over50Ms": 57,
+        "plants": {
+          "min": 7258,
+          "median": 9343,
+          "max": 10241
+        },
+        "minTreeClearance": 11.43219014597156,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 1,
+        "meanMs": 61.373184357541874,
+        "p95Ms": 166.8000000000029,
+        "p99Ms": 225.1999999999971,
+        "maxMs": 233.59999999999127,
+        "over25Ms": 174,
+        "over50Ms": 94,
+        "plants": {
+          "min": 6753,
+          "median": 9343,
+          "max": 10241
+        },
+        "minTreeClearance": 11.43219014597156,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 0,
+        "meanMs": 78.28994413407823,
+        "p95Ms": 200.20000000000073,
+        "p99Ms": 216.90000000000146,
+        "maxMs": 216.90000000000146,
+        "over25Ms": 179,
+        "over50Ms": 168,
+        "plants": {
+          "min": 6880,
+          "median": 7910,
+          "max": 8285
+        },
+        "minTreeClearance": -28.657655144627523,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 1,
+        "meanMs": 75.30670391061452,
+        "p95Ms": 191.8000000000029,
+        "p99Ms": 242,
+        "maxMs": 250.20000000000073,
+        "over25Ms": 178,
+        "over50Ms": 149,
+        "plants": {
+          "min": 6880,
+          "median": 7910,
+          "max": 8285
+        },
+        "minTreeClearance": -28.344866425833633,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 0,
+        "meanMs": 64.91508379888266,
+        "p95Ms": 183.59999999999854,
+        "p99Ms": 208.6999999999971,
+        "maxMs": 216.90000000000146,
+        "over25Ms": 177,
+        "over50Ms": 105,
+        "plants": {
+          "min": 8804,
+          "median": 9343,
+          "max": 9885
+        },
+        "minTreeClearance": 19.16889556549952,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 1,
+        "meanMs": 64.7284916201117,
+        "p95Ms": 208.5,
+        "p99Ms": 216.90000000000146,
+        "maxMs": 225.3000000000029,
+        "over25Ms": 177,
+        "over50Ms": 95,
+        "plants": {
+          "min": 8804,
+          "median": 9343,
+          "max": 9885
+        },
+        "minTreeClearance": 19.16889556549952,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": null,
+        "foliageMaxSliceMs": null,
+        "foliageCacheChunks": null
+      }
+    ],
+    "after-v2": [
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 0,
+        "meanMs": 47.85921787709497,
+        "p95Ms": 66.79999999999927,
+        "p99Ms": 75.09999999999854,
+        "maxMs": 75.10000000000218,
+        "over25Ms": 174,
+        "over50Ms": 70,
+        "plants": {
+          "min": 6880,
+          "median": 7910,
+          "max": 8285
+        },
+        "minTreeClearance": -28.222182540694803,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "10.100",
+        "foliageCacheChunks": "164"
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 1,
+        "meanMs": 54.103910614525134,
+        "p95Ms": 83.40000000000146,
+        "p99Ms": 91.89999999999782,
+        "maxMs": 100.09999999999854,
+        "over25Ms": 173,
+        "over50Ms": 102,
+        "plants": {
+          "min": 6950,
+          "median": 7910,
+          "max": 8369
+        },
+        "minTreeClearance": -28.632304473782995,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "10.100",
+        "foliageCacheChunks": "174"
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 0,
+        "meanMs": 36.395530726257,
+        "p95Ms": 50.10000000000582,
+        "p99Ms": 58.400000000001455,
+        "maxMs": 58.400000000001455,
+        "over25Ms": 146,
+        "over50Ms": 21,
+        "plants": {
+          "min": 7024,
+          "median": 9485,
+          "max": 10182
+        },
+        "minTreeClearance": 11.43219014597156,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "10.100",
+        "foliageCacheChunks": "256"
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "trial": 1,
+        "meanMs": 38.772067039106126,
+        "p95Ms": 50.099999999998545,
+        "p99Ms": 50.10000000000582,
+        "maxMs": 50.19999999999709,
+        "over25Ms": 162,
+        "over50Ms": 11,
+        "plants": {
+          "min": 7258,
+          "median": 9690,
+          "max": 10182
+        },
+        "minTreeClearance": 11.43219014597156,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "10.100",
+        "foliageCacheChunks": "256"
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 0,
+        "meanMs": 49.76927374301676,
+        "p95Ms": 66.70000000000073,
+        "p99Ms": 83.29999999999927,
+        "maxMs": 133.59999999999854,
+        "over25Ms": 173,
+        "over50Ms": 89,
+        "plants": {
+          "min": 6880,
+          "median": 7910,
+          "max": 8369
+        },
+        "minTreeClearance": -28.344866425833633,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "13.300",
+        "foliageCacheChunks": "163"
+      },
+      {
+        "route": "forest",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 1,
+        "meanMs": 52.47262569832404,
+        "p95Ms": 66.79999999999927,
+        "p99Ms": 75.09999999999854,
+        "maxMs": 91.80000000000291,
+        "over25Ms": 177,
+        "over50Ms": 108,
+        "plants": {
+          "min": 6880,
+          "median": 7910,
+          "max": 8285
+        },
+        "minTreeClearance": -28.737511905031866,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "13.300",
+        "foliageCacheChunks": "163"
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 0,
+        "meanMs": 29.824581005586584,
+        "p95Ms": 41.799999999995634,
+        "p99Ms": 50.10000000000582,
+        "maxMs": 58.299999999995634,
+        "over25Ms": 111,
+        "over50Ms": 2,
+        "plants": {
+          "min": 8826,
+          "median": 9343,
+          "max": 9885
+        },
+        "minTreeClearance": 24.621254181527682,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "13.300",
+        "foliageCacheChunks": "256"
+      },
+      {
+        "route": "open",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "trial": 1,
+        "meanMs": 27.960335195530693,
+        "p95Ms": 41.69999999999709,
+        "p99Ms": 41.799999999995634,
+        "maxMs": 50,
+        "over25Ms": 108,
+        "over50Ms": 0,
+        "plants": {
+          "min": 8804,
+          "median": 9343,
+          "max": 9877
+        },
+        "minTreeClearance": 23.14964717042676,
+        "visibleTreeTargets": 0,
+        "linksDuringMotion": 0,
+        "glError": 0,
+        "hitLayoutReads": "1",
+        "foliageMaxSliceMs": "13.300",
+        "foliageCacheChunks": "256"
+      }
+    ]
+  },
+  "trace": {
+    "before-clean": [
+      {
+        "timeline": {
+          "RunTask": {
+            "count": 19039,
+            "totalMs": 30411.837000000367,
+            "maxMs": 229.788
+          },
+          "FunctionCall": {
+            "count": 2348,
+            "totalMs": 12163.470999999985,
+            "maxMs": 222.336
+          },
+          "UpdateLayoutTree": {
+            "count": 268,
+            "totalMs": 2093.789,
+            "maxMs": 15.325
+          },
+          "Layout": {
+            "count": 227,
+            "totalMs": 131.89499999999998,
+            "maxMs": 1.703
+          },
+          "Paint": {
+            "count": 485,
+            "totalMs": 137.12300000000002,
+            "maxMs": 1.025
+          },
+          "MinorGC": {
+            "count": 53,
+            "totalMs": 65.67299999999997,
+            "maxMs": 7.982
+          },
+          "V8.GCScavenger": {
+            "count": 53,
+            "totalMs": 62.24200000000002,
+            "maxMs": 7.761
+          },
+          "MajorGC": {
+            "count": 12,
+            "totalMs": 52.18600000000001,
+            "maxMs": 24.116
+          }
+        },
+        "topSelfCpu": [
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "selfMs": 2994.0700000000006,
+            "samples": 1754
+          },
+          {
+            "function": "updateHitPositions",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 692,
+            "column": 37266,
+            "selfMs": 2569.1469999999954,
+            "samples": 1654
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-DP6ng6fH.js",
+            "line": 5,
+            "column": 62945,
+            "selfMs": 941.7840000000001,
+            "samples": 604
+          },
+          {
+            "function": "update",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 259,
+            "column": 300,
+            "selfMs": 818.7559999999999,
+            "samples": 524
+          },
+          {
+            "function": "traverse",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-DP6ng6fH.js",
+            "line": 5,
+            "column": 62355,
+            "selfMs": 594.2969999999997,
+            "samples": 383
+          },
+          {
+            "function": "Es",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 226,
+            "column": 8824,
+            "selfMs": 550.6939999999998,
+            "samples": 354
+          },
+          {
+            "function": "Ly",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-B5Zp878_.js",
+            "line": 50,
+            "column": 8053,
+            "selfMs": 318.671,
+            "samples": 205
+          },
+          {
+            "function": "",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 645,
+            "column": 8809,
+            "selfMs": 276.99799999999993,
+            "samples": 179
+          },
+          {
+            "function": "",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 226,
+            "column": 9123,
+            "selfMs": 240.1529999999999,
+            "samples": 155
+          },
+          {
+            "function": "multiplyMatrices",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-DP6ng6fH.js",
+            "line": 5,
+            "column": 48660,
+            "selfMs": 222.11999999999995,
+            "samples": 143
+          },
+          {
+            "function": "dispatchEvent",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "selfMs": 200.94600000000008,
+            "samples": 591
+          },
+          {
+            "function": "",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 692,
+            "column": 63429,
+            "selfMs": 199.92099999999994,
+            "samples": 129
+          },
+          {
+            "function": "zs",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-B5Zp878_.js",
+            "line": 49,
+            "column": 98164,
+            "selfMs": 193.654,
+            "samples": 123
+          },
+          {
+            "function": "frame",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 692,
+            "column": 23577,
+            "selfMs": 191.56999999999988,
+            "samples": 138
+          },
+          {
+            "function": "js",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BYIb9eph.js",
+            "line": 226,
+            "column": 9595,
+            "selfMs": 174.79200000000006,
+            "samples": 112
+          },
+          {
+            "function": "Rp",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-B5Zp878_.js",
+            "line": 50,
+            "column": 145495,
+            "selfMs": 168.80599999999984,
+            "samples": 109
+          },
+          {
+            "function": "Ps",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-DP6ng6fH.js",
+            "line": 4228,
+            "column": 35342,
+            "selfMs": 157.41699999999992,
+            "samples": 101
+          },
+          {
+            "function": "Xe",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-B5Zp878_.js",
+            "line": 50,
+            "column": 72,
+            "selfMs": 150.74899999999997,
+            "samples": 97
+          },
+          {
+            "function": "v",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-DP6ng6fH.js",
+            "line": 4204,
+            "column": 5941,
+            "selfMs": 150.61100000000002,
+            "samples": 97
+          },
+          {
+            "function": "getBoundingClientRect",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "selfMs": 149.36999999999995,
+            "samples": 109
+          }
+        ],
+        "topGlCalls": [
+          {
+            "name": "texSubImage3D",
+            "at": 108318.39999999106,
+            "ms": 2.300000011920929
+          },
+          {
+            "name": "bufferSubData",
+            "at": 107256.79999999702,
+            "ms": 1.9000000059604645
+          },
+          {
+            "name": "bufferSubData",
+            "at": 112088.20000000298,
+            "ms": 1.7999999970197678
+          },
+          {
+            "name": "bufferSubData",
+            "at": 104524.29999999702,
+            "ms": 1.7000000029802322
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 105549,
+            "ms": 1.7000000029802322
+          },
+          {
+            "name": "bufferSubData",
+            "at": 107259.5,
+            "ms": 1.7000000029802322
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 107414,
+            "ms": 1.7000000029802322
+          },
+          {
+            "name": "bufferSubData",
+            "at": 108240.59999999404,
+            "ms": 1.7000000029802322
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 111264.29999999702,
+            "ms": 1.7000000029802322
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 110751.59999999404,
+            "ms": 1.6000000089406967
+          }
+        ],
+        "trace": "docs/performance/camera-stutter/before-clean-open-trace.json.gz",
+        "profile": "docs/performance/camera-stutter/before-clean-open-cpu.json.gz"
+      }
+    ],
+    "after-v2": [
+      {
+        "timeline": {
+          "RunTask": {
+            "count": 15087,
+            "totalMs": 19238.765000000676,
+            "maxMs": 129.324
+          },
+          "FunctionCall": {
+            "count": 2260,
+            "totalMs": 6795.815000000019,
+            "maxMs": 37.756
+          },
+          "UpdateLayoutTree": {
+            "count": 156,
+            "totalMs": 137.36399999999998,
+            "maxMs": 2.469
+          },
+          "Layout": {
+            "count": 19,
+            "totalMs": 12.376999999999997,
+            "maxMs": 1.832
+          },
+          "Paint": {
+            "count": 327,
+            "totalMs": 77.30700000000003,
+            "maxMs": 1.201
+          },
+          "MinorGC": {
+            "count": 44,
+            "totalMs": 36.66899999999999,
+            "maxMs": 7.467
+          },
+          "V8.GCScavenger": {
+            "count": 44,
+            "totalMs": 34.256,
+            "maxMs": 7.262
+          },
+          "MajorGC": {
+            "count": 10,
+            "totalMs": 33.985,
+            "maxMs": 18.672
+          }
+        },
+        "topSelfCpu": [
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "selfMs": 2722.718999999996,
+            "samples": 1620
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-B-eraSEf.js",
+            "line": 5,
+            "column": 62945,
+            "selfMs": 943.9109999999998,
+            "samples": 604
+          },
+          {
+            "function": "prepareCulling",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 645,
+            "column": 8783,
+            "selfMs": 314.3919999999998,
+            "samples": 203
+          },
+          {
+            "function": "Ly",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-BTW1Bk32.js",
+            "line": 50,
+            "column": 8053,
+            "selfMs": 312.1139999999999,
+            "samples": 198
+          },
+          {
+            "function": "dispatchEvent",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "selfMs": 266.0620000000001,
+            "samples": 592
+          },
+          {
+            "function": "updateHitPositions",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 692,
+            "column": 39175,
+            "selfMs": 257.224,
+            "samples": 164
+          },
+          {
+            "function": "zs",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-BTW1Bk32.js",
+            "line": 49,
+            "column": 98164,
+            "selfMs": 204.34399999999997,
+            "samples": 132
+          },
+          {
+            "function": "",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 692,
+            "column": 65842,
+            "selfMs": 198.85999999999993,
+            "samples": 127
+          },
+          {
+            "function": "multiplyMatrices",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-B-eraSEf.js",
+            "line": 5,
+            "column": 48660,
+            "selfMs": 175.7409999999999,
+            "samples": 112
+          },
+          {
+            "function": "Rp",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-BTW1Bk32.js",
+            "line": 50,
+            "column": 145495,
+            "selfMs": 166.44400000000002,
+            "samples": 106
+          },
+          {
+            "function": "prepareWindow",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 259,
+            "column": 2078,
+            "selfMs": 164.26300000000006,
+            "samples": 106
+          },
+          {
+            "function": "Xe",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/index-BTW1Bk32.js",
+            "line": 50,
+            "column": 72,
+            "selfMs": 159.44199999999998,
+            "samples": 102
+          },
+          {
+            "function": "Ps",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-B-eraSEf.js",
+            "line": 4228,
+            "column": 35342,
+            "selfMs": 153.59,
+            "samples": 98
+          },
+          {
+            "function": "v",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-B-eraSEf.js",
+            "line": 4204,
+            "column": 5941,
+            "selfMs": 129.335,
+            "samples": 83
+          },
+          {
+            "function": "",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 692,
+            "column": 62600,
+            "selfMs": 129.32899999999998,
+            "samples": 83
+          },
+          {
+            "function": "Nu",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/production-assets-B-eraSEf.js",
+            "line": 4228,
+            "column": 42225,
+            "selfMs": 103.958,
+            "samples": 66
+          },
+          {
+            "function": "",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 27,
+            "column": 5576,
+            "selfMs": 98.23100000000002,
+            "samples": 63
+          },
+          {
+            "function": "frame",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 692,
+            "column": 24935,
+            "selfMs": 91.58999999999997,
+            "samples": 76
+          },
+          {
+            "function": "",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "selfMs": 75.637,
+            "samples": 50
+          },
+          {
+            "function": "positionHit",
+            "url": "http://127.0.0.1:4188/Fable-Crown/assets/ThreeScene-BXy00p2Y.js",
+            "line": 692,
+            "column": 42805,
+            "selfMs": 67.897,
+            "samples": 44
+          }
+        ],
+        "topGlCalls": [
+          {
+            "name": "texSubImage3D",
+            "at": 63839.20000000298,
+            "ms": 1.9000000059604645
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 63045.29999999702,
+            "ms": 1.800000011920929
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 64942.79999999702,
+            "ms": 1.800000011920929
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 64421.40000000596,
+            "ms": 1.7000000029802322
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 62657,
+            "ms": 1.6000000089406967
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 61000.60000000894,
+            "ms": 1.5999999940395355
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 62080,
+            "ms": 1.5
+          },
+          {
+            "name": "texSubImage3D",
+            "at": 59664.20000000298,
+            "ms": 1.4000000059604645
+          },
+          {
+            "name": "bufferSubData",
+            "at": 59865.29999999702,
+            "ms": 0.5
+          },
+          {
+            "name": "bufferSubData",
+            "at": 60585.10000000894,
+            "ms": 0.3999999910593033
+          }
+        ],
+        "trace": "docs/performance/camera-stutter/after-v2-open-trace.json.gz",
+        "profile": "docs/performance/camera-stutter/after-v2-open-cpu.json.gz"
+      }
+    ]
+  },
+  "intermediate": {
+    "version": "452102a4a4cd",
+    "notFinal": true,
+    "note": "The first candidate used material property accessors. A V8 fast-properties probe plus profile identified dictionary-mode matrix overhead; final candidate uses plain data properties and cached identity polling. Intermediate frame rates are not the published candidate.",
+    "updateMatrixWorldSelfMs": 1545.609,
+    "finalUpdateMatrixWorldSelfMs": 943.911,
+    "baselineUpdateMatrixWorldSelfMs": 941.784
+  },
+  "notes": [
+    "Serial before→intermediate→return-before→final; two first/repeated routes per forest/open and desktop/phone viewport. No builds/tests/other browser sessions during timing. Final is a combined optimization pass, not isolated attribution to individual code changes.",
+    "All reports share identical motion-body hash. Setup-only foliage readiness/native-content guards were added after first clean baseline; prior captured datasets satisfy content guards and baseline has no foliage queue field.",
+    "Substantial host/first-trial drift: report ranges and return control. Desktop CPU4x and phone viewport do not establish physical-phone or universal FPS/latency guarantees.",
+    "Published CPU/GPU/camera fields repeat at~500ms cadence; observed boundary crossings and loaded plant samples are not independent per-frame events. RAF intervals measure actual observed scheduling.",
+    "Open222,72 retains~9343loaded plants (final desktop medians9485/9690, phone9343); all trees remain beyond conservative horizon+5m. Retained loaded counts and settled source-count parity support coverage, not every moving-edge pixel.",
+    "Traced diagnostics are separate from untraced timings and perturb CPU behavior; timeline durations may overlap across threads and must not be summed into frame costs.",
+    "Final foliage whole-update lifetime maxima10.1desktop/13.3phone ms underCPU4x exceed the2ms soft target; atomic work and GC prevent a hard deadline guarantee.",
+    "before.json/before-open-* are rejected visibility-probe runs. after.json/after-open-* are an intermediate implementation, not final comparison evidence."
+  ]
+}

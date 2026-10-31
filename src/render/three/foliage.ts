@@ -1,4 +1,4 @@
-import { BufferGeometry, Color, DataTexture, DoubleSide, Float32BufferAttribute, InstancedBufferAttribute, InstancedMesh, Matrix4, MeshLambertMaterial, NearestFilter, NearestMipmapNearestFilter, RGBAFormat, SRGBColorSpace, Vector3, type Scene } from "three";
+import { Box3, BufferGeometry, Color, DataTexture, DoubleSide, DynamicDrawUsage, Float32BufferAttribute, InstancedBufferAttribute, InstancedMesh, Matrix4, MeshLambertMaterial, NearestFilter, NearestMipmapNearestFilter, RGBAFormat, Sphere, SRGBColorSpace, Vector3, type Scene } from "three";
 import type { Terrain, WorldDefinition } from "../../rpg/types";
 import type { VisualSettings } from "./visual-settings";
 import { groundPivotDepthGLSL } from "./pivot-depth";
@@ -8,6 +8,8 @@ import { FOLIAGE_CARD_SIZE, FOLIAGE_PIXEL_METRES, foliageAtlas, foliageVariantCo
 export const FOLIAGE_PITCH = FOLIAGE_PIXEL_METRES;
 export const FOLIAGE_RADIUS = 28;
 const WINDOW_RADIUS = 34, CAPACITY = 32000;
+const SOURCE_CHUNK = 8, MAX_SOURCE_CHUNKS = 256;
+const PREPARATION_MS = 2, TILES_PER_SLICE = 512, PLANTS_PER_SLICE = 2048, COUNTS_PER_SLICE = 512;
 export const FOLIAGE_KINDS = ["grass", "fern", "flower", "reed", "groundcover", "bush", "shortgrass"] as const;
 export type FoliageKind = typeof FOLIAGE_KINDS[number];
 export interface FoliageLayout { width: number; height: number; habitat: Uint8Array; edge: Uint8Array; seed: number }
@@ -165,21 +167,38 @@ export function foliageGeometry(kind: FoliageKind): BufferGeometry {
   geometry.computeBoundingBox(); geometry.computeBoundingSphere(); return geometry;
 }
 
+interface FoliageChunk { plants: FoliagePlant[]; colors: Float32Array; tiles: Map<number, number[]> }
+interface FoliageStage { matrices: Float32Array; colors: Float32Array; ranks: Float32Array; count: number; bounds: Box3 }
+interface FoliageWindow {
+  x: number; z: number; density: number; x0: number; z0: number; width: number; height: number; cursor: number; committed: number;
+  chunks: Map<string, FoliageChunk>;
+}
+interface FoliageCount { kind: number; index: number; visible: number; x: number; z: number; density: number }
+
 export class FoliageSystem {
-  readonly stats = { plants: 0, visiblePlants: 0, uploads: 0, windTime: 0 };
+  readonly stats = { plants: 0, visiblePlants: 0, uploads: 0, windTime: 0,
+    queued: 0, countQueued: 0, commits: 0, cancelled: 0, cacheChunks: 0, stagingBytes: 0, preparationMs: 0, maxSliceMs: 0 };
   readonly meshes: InstancedMesh[] = [];
   private layout?: FoliageLayout;
   private surface?: TerrainSurface;
   private centerX = Infinity; private centerZ = Infinity; private previousTime?: number;
   private density = -1;
   private countedAt = -Infinity;
+  private counts?: FoliageCount;
+  private chunks = new Map<string, FoliageChunk>();
+  private staging: FoliageStage[] = [];
+  private job?: FoliageWindow;
+  private pending?: { x: number; z: number; density: number };
+  private rotations = [0, 1, 2, 3].map(turn => new Float32Array(new Matrix4().makeRotationY(turn * Math.PI / 2).elements));
+  private bases = FOLIAGE_KINDS.map(kind => new Color(kind === "groundcover" ? 0x6e8749 : 0x7d944b));
+  private color = new Color();
   private uniforms = { foliageTime: { value: 0 }, foliageWind: { value: 1 }, foliageDensity: { value: 1 }, foliageTarget: { value: new Vector3() } };
   private textures: DataTexture[] = [];
   constructor(private scene: Scene) {
     for (const kind of FOLIAGE_KINDS) {
       const geometry = foliageGeometry(kind);
       const capacity = kind === "groundcover" ? 4096 : kind === "bush" ? 2048 : kind === "shortgrass" ? 16000 : CAPACITY;
-      geometry.setAttribute("foliageRank", new InstancedBufferAttribute(new Float32Array(capacity), 1));
+      geometry.setAttribute("foliageRank", new InstancedBufferAttribute(new Float32Array(capacity), 1).setUsage(DynamicDrawUsage));
       const atlas = foliageAtlas(kind);
       const texture = new DataTexture(atlas.data, atlas.width, atlas.height, RGBAFormat);
       texture.name = `foliage-card-${kind}`; texture.colorSpace = SRGBColorSpace; texture.flipY = false;
@@ -240,12 +259,123 @@ export class FoliageSystem {
       };
       material.customProgramCacheKey = () => "fable-foliage-quiet-tips-variants-v6";
       const mesh = new InstancedMesh(geometry, material, capacity); mesh.name = `wind-${kind}`; mesh.count = 0;
+      mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+      // Keep the instancing-color shader variant stable even for currently empty kinds.
+      mesh.instanceColor = new InstancedBufferAttribute(new Float32Array(capacity * 3), 3).setUsage(DynamicDrawUsage);
+      this.staging.push({ matrices: new Float32Array(0), colors: new Float32Array(0), ranks: new Float32Array(0), count: 0, bounds: new Box3() });
       mesh.castShadow = false; mesh.receiveShadow = true; mesh.raycast = () => {};
       this.meshes.push(mesh); scene.add(mesh);
     }
   }
   setWorld(world: WorldDefinition, terrain?: readonly Terrain[], surface?: TerrainSurface) {
     this.layout = buildFoliageLayout(world, terrain); this.surface = surface; this.centerX = this.centerZ = Infinity;
+    this.chunks.clear(); this.job = this.pending = undefined; this.counts = undefined;
+    this.stats.plants = this.stats.visiblePlants = this.stats.queued = this.stats.countQueued = this.stats.cacheChunks = 0;
+    for (const mesh of this.meshes) mesh.count = 0;
+    this.countedAt = -Infinity;
+  }
+
+  /** Cache stable source cells/tint once. The one-cell collision halo is identical
+   * to foliagePlants, so adjacent chunks retain exactly the same accepted cards. */
+  private chunk(x: number, z: number, job: FoliageWindow): FoliageChunk {
+    const key = `${x}:${z}`, held = job.chunks.get(key); if (held) return held;
+    let chunk = this.chunks.get(key);
+    if (chunk) this.chunks.delete(key); // Touch this chunk once per window, not per tile.
+    else {
+      const plants = foliagePlants(this.layout!, x * SOURCE_CHUNK, z * SOURCE_CHUNK, (x + 1) * SOURCE_CHUNK - 1, (z + 1) * SOURCE_CHUNK - 1);
+      const colors = new Float32Array(plants.length * 3), tiles = new Map<number, number[]>();
+      plants.forEach((plant, i) => {
+        const base = this.bases[FOLIAGE_KINDS.indexOf(plant.kind)], color = this.color;
+        if (this.surface && plant.kind !== "flower") {
+          foliageGroundColor(this.surface, plant.x, plant.z, color).lerp(base, .3);
+          color.setRGB(Math.max(.55, Math.min(1.7, color.r / base.r)), Math.max(.55, Math.min(1.7, color.g / base.g)), Math.max(.55, Math.min(1.7, color.b / base.b))).multiplyScalar(plant.tint);
+        } else color.setScalar(plant.tint);
+        if (plant.kind === "grass" || plant.kind === "shortgrass") {
+          const warmth = (random(Math.floor(plant.x * 16), Math.floor(plant.z * 16), this.layout!.seed + 4151) - .5) * .06;
+          color.setRGB(color.r * (1 + warmth), color.g, color.b * (1 - warmth * .6));
+        }
+        colors[i * 3] = color.r; colors[i * 3 + 1] = color.g; colors[i * 3 + 2] = color.b;
+        const tile = Math.round(plant.z) * this.layout!.width + Math.round(plant.x), list = tiles.get(tile);
+        if (list) list.push(i); else tiles.set(tile, [i]);
+      });
+      chunk = { plants, colors, tiles };
+    }
+    this.chunks.set(key, chunk); job.chunks.set(key, chunk);
+    while (this.chunks.size > MAX_SOURCE_CHUNKS) this.chunks.delete(this.chunks.keys().next().value!);
+    return chunk;
+  }
+  private beginWindow(request: { x: number; z: number; density: number }) {
+    const x0 = Math.max(0, Math.ceil(request.x - WINDOW_RADIUS)), z0 = Math.max(0, Math.ceil(request.z - WINDOW_RADIUS));
+    this.job = { ...request, x0, z0, width: Math.max(0, Math.min(this.layout!.width - 1, Math.floor(request.x + WINDOW_RADIUS)) - x0 + 1),
+      height: Math.max(0, Math.min(this.layout!.height - 1, Math.floor(request.z + WINDOW_RADIUS)) - z0 + 1), cursor: 0, committed: 0, chunks: new Map() };
+    for (const stage of this.staging) { stage.count = 0; stage.bounds.makeEmpty(); }
+  }
+  private prepareWindow() {
+    const job = this.job!;
+    const end = performance.now() + PREPARATION_MS; let tiles = 0, plants = 0, generated = 0;
+    while (job.cursor < job.width * job.height && tiles < TILES_PER_SLICE && plants < PLANTS_PER_SLICE) {
+      const x = job.x0 + job.cursor % job.width, z = job.z0 + Math.floor(job.cursor / job.width);
+      const cx = Math.floor(x / SOURCE_CHUNK), cz = Math.floor(z / SOURCE_CHUNK), key = `${cx}:${cz}`;
+      if (!job.chunks.has(key) && !this.chunks.has(key)) { if (generated === 2) break; generated++; }
+      const chunk = this.chunk(cx, cz, job);
+      for (const i of chunk.tiles.get(z * this.layout!.width + x) ?? []) {
+        const plant = chunk.plants[i]; plants++;
+        if (plant.rank >= job.density || Math.hypot(plant.x - job.x, plant.z - job.z) > WINDOW_RADIUS) continue;
+        const k = FOLIAGE_KINDS.indexOf(plant.kind), stage = this.staging[k], at = stage.count;
+        if (at === this.meshes[k].instanceMatrix.count) continue;
+        if (at === stage.ranks.length) {
+          const capacity = Math.min(this.meshes[k].instanceMatrix.count, Math.max(256, stage.ranks.length * 2));
+          const matrices = new Float32Array(capacity * 16), colors = new Float32Array(capacity * 3), ranks = new Float32Array(capacity);
+          matrices.set(stage.matrices); colors.set(stage.colors); ranks.set(stage.ranks);
+          stage.matrices = matrices; stage.colors = colors; stage.ranks = ranks;
+          this.stats.stagingBytes = this.staging.reduce((sum, item) => sum + item.matrices.byteLength + item.colors.byteLength + item.ranks.byteLength, 0);
+        }
+        stage.matrices.set(this.rotations[Math.round(plant.angle / (Math.PI / 2))], at * 16);
+        stage.matrices[at * 16 + 12] = plant.x; stage.matrices[at * 16 + 14] = plant.z;
+        stage.colors[at * 3] = chunk.colors[i * 3]; stage.colors[at * 3 + 1] = chunk.colors[i * 3 + 1]; stage.colors[at * 3 + 2] = chunk.colors[i * 3 + 2];
+        stage.ranks[at] = plant.rank; stage.count++;
+        const [width, height] = FOLIAGE_CARD_SIZE[plant.kind], half = width / 2;
+        stage.bounds.min.x = Math.min(stage.bounds.min.x, plant.x - half); stage.bounds.max.x = Math.max(stage.bounds.max.x, plant.x + half);
+        stage.bounds.min.z = Math.min(stage.bounds.min.z, plant.z - half); stage.bounds.max.z = Math.max(stage.bounds.max.z, plant.z + half);
+        stage.bounds.min.y = plant.kind === "groundcover" ? .012 : 0; stage.bounds.max.y = plant.kind === "groundcover" ? .012 : height;
+      }
+      job.cursor++; tiles++;
+      // Bound both deterministic work and wall time; a single tiny source chunk is atomic.
+      if (performance.now() >= end) break;
+    }
+    if (job.cursor !== job.width * job.height) return;
+    const k = job.committed++, stage = this.staging[k], mesh = this.meshes[k], rank = mesh.geometry.getAttribute("foliageRank") as InstancedBufferAttribute;
+    const upload = (attribute: InstancedBufferAttribute, source: Float32Array, count: number) => {
+      if (count) { (attribute.array as Float32Array).set(source.subarray(0, count)); attribute.clearUpdateRanges(); attribute.addUpdateRange(0, count); attribute.needsUpdate = true; }
+    };
+    upload(mesh.instanceMatrix, stage.matrices, stage.count * 16); upload(mesh.instanceColor!, stage.colors, stage.count * 3); upload(rank, stage.ranks, stage.count);
+    mesh.count = stage.count;
+    mesh.boundingBox ??= new Box3(); mesh.boundingSphere ??= new Sphere();
+    if (stage.count) { mesh.boundingBox.copy(stage.bounds); mesh.boundingBox.getBoundingSphere(mesh.boundingSphere); mesh.boundingSphere.radius += 1; }
+    else { mesh.boundingBox.set(new Vector3(), new Vector3()); mesh.boundingSphere.set(new Vector3(), 0); }
+    this.stats.commits++; this.stats.plants = this.meshes.reduce((sum, item) => sum + item.count, 0);
+    this.countedAt = -Infinity; this.counts = undefined;
+    if (job.committed === FOLIAGE_KINDS.length) {
+      this.centerX = job.x; this.centerZ = job.z; this.density = job.density; this.stats.uploads++; this.job = undefined;
+    }
+  }
+  private countVisible(time: number, target: Vector3, density: number) {
+    if (!this.counts && time - this.countedAt >= 500) {
+      this.countedAt = time; this.counts = { kind: 0, index: 0, visible: 0, x: target.x, z: target.z, density };
+    }
+    const count = this.counts; if (!count) { this.stats.countQueued = 0; return; }
+    let remaining = COUNTS_PER_SLICE;
+    while (count.kind < this.meshes.length && remaining > 0) {
+      const mesh = this.meshes[count.kind], ranks = mesh.geometry.getAttribute("foliageRank"), matrices = mesh.instanceMatrix.array;
+      while (count.index < mesh.count && remaining-- > 0) {
+        const i = count.index++, distance = Math.hypot(matrices[i * 16 + 12] - count.x, matrices[i * 16 + 14] - count.z);
+        const t = Math.max(0, Math.min(1, (distance - 18) / (FOLIAGE_RADIUS - 18))), fade = 1 - t * t * (3 - 2 * t);
+        if (ranks.getX(i) < count.density * fade) count.visible++;
+      }
+      if (count.index === mesh.count) { count.kind++; count.index = 0; }
+    }
+    if (count.kind === this.meshes.length) { this.stats.visiblePlants = count.visible; this.counts = undefined; }
+    this.stats.countQueued = this.counts ? 1 : 0;
   }
   update(time: number, target: Vector3, visual: Readonly<VisualSettings>, overview: boolean, reducedMotion = false) {
     const delta = this.previousTime === undefined ? 0 : Math.max(0, Math.min(100, time - this.previousTime)) * .001;
@@ -257,52 +387,29 @@ export class FoliageSystem {
     this.uniforms.foliageWind.value = reducedMotion ? 0 : visual.windStrength;
     this.uniforms.foliageDensity.value = visual.foliageDensity; this.uniforms.foliageTarget.value.copy(target);
     for (const mesh of this.meshes) mesh.visible = enabled;
-    if (!enabled || !this.layout) { this.stats.visiblePlants = 0; return; }
+    this.stats.preparationMs = 0;
+    if (!enabled || !this.layout) { this.stats.visiblePlants = this.stats.queued = this.stats.countQueued = 0; this.counts = undefined; this.countedAt = -Infinity; return; }
+    const began = performance.now();
     const x = Math.round(target.x / 8) * 8, z = Math.round(target.z / 8) * 8;
-    if (x !== this.centerX || z !== this.centerZ || this.density !== visual.foliageDensity) {
-      this.centerX = x; this.centerZ = z; this.density = visual.foliageDensity;
-      const plants = foliagePlants(this.layout, x - WINDOW_RADIUS, z - WINDOW_RADIUS, x + WINDOW_RADIUS, z + WINDOW_RADIUS)
-        .filter(plant => plant.rank < visual.foliageDensity && Math.hypot(plant.x - x, plant.z - z) <= WINDOW_RADIUS);
-      const matrix = new Matrix4(), color = new Color(); this.stats.plants = 0;
-      for (let k = 0; k < FOLIAGE_KINDS.length; k++) {
-        const mesh = this.meshes[k], ranks = mesh.geometry.getAttribute("foliageRank") as InstancedBufferAttribute; let count = 0;
-        const base = new Color(FOLIAGE_KINDS[k] === "groundcover" ? 0x6e8749 : 0x7d944b);
-        for (const plant of plants) {
-          if (plant.kind !== FOLIAGE_KINDS[k] || count === mesh.instanceMatrix.count) continue;
-          matrix.makeRotationY(plant.angle); matrix.setPosition(plant.x, 0, plant.z); mesh.setMatrixAt(count, matrix);
-          if (this.surface && plant.kind !== "flower") {
-            foliageGroundColor(this.surface, plant.x, plant.z, color).lerp(base, .3);
-            color.setRGB(Math.max(.55, Math.min(1.7, color.r / base.r)), Math.max(.55, Math.min(1.7, color.g / base.g)), Math.max(.55, Math.min(1.7, color.b / base.b))).multiplyScalar(plant.tint);
-          } else color.setScalar(plant.tint);
-          if (plant.kind === "grass" || plant.kind === "shortgrass") {
-            const warmth = (random(Math.floor(plant.x * 16), Math.floor(plant.z * 16), this.layout.seed + 4151) - .5) * .06;
-            color.setRGB(color.r * (1 + warmth), color.g, color.b * (1 - warmth * .6));
-          }
-          mesh.setColorAt(count, color); ranks.setX(count, plant.rank); count++;
-        }
-        mesh.count = count; mesh.instanceMatrix.needsUpdate = true; ranks.needsUpdate = true;
-        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-        mesh.computeBoundingSphere();
-        // Account for wind outside the static clump bounds in both game/reflection cameras.
-        if (mesh.boundingSphere) mesh.boundingSphere.radius += 1;
-        this.stats.plants += count;
+    const wanted = { x, z, density: visual.foliageDensity };
+    if (this.job) {
+      this.pending = x === this.job.x && z === this.job.z && wanted.density === this.job.density ? undefined : wanted;
+      // A teleport can obsolete an uncommitted window. Nearby pan work finishes,
+      // while already committed kinds always finish before the latest request.
+      if (!this.job.committed && Math.hypot(x - this.job.x, z - this.job.z) > WINDOW_RADIUS * 2) {
+        this.job = undefined; this.stats.cancelled++;
       }
-      this.stats.uploads++;
-      this.countedAt = -Infinity;
-    }
-    // Diagnostics count the same stable clump thinning used by the fragment shader.
-    if (time - this.countedAt < 500) return;
-    this.countedAt = time; this.stats.visiblePlants = 0;
-    for (const mesh of this.meshes) {
-      const ranks = mesh.geometry.getAttribute("foliageRank");
-      for (let i = 0; i < mesh.count; i++) {
-        const a = mesh.instanceMatrix.array, distance = Math.hypot(a[i * 16 + 12] - target.x, a[i * 16 + 14] - target.z);
-        const t = Math.max(0, Math.min(1, (distance - 18) / (FOLIAGE_RADIUS - 18))), fade = 1 - t * t * (3 - 2 * t);
-        if (ranks.getX(i) < visual.foliageDensity * fade) this.stats.visiblePlants++;
-      }
-    }
+    } else if (x !== this.centerX || z !== this.centerZ || this.density !== wanted.density) this.pending = wanted;
+    else this.pending = undefined;
+    if (!this.job && this.pending) { const request = this.pending; this.pending = undefined; this.beginWindow(request); }
+    if (this.job) this.prepareWindow();
+    this.countVisible(time, target, visual.foliageDensity);
+    this.stats.queued = this.job || this.pending ? 1 : 0; this.stats.cacheChunks = this.chunks.size;
+    this.stats.preparationMs = performance.now() - began; this.stats.maxSliceMs = Math.max(this.stats.maxSliceMs, this.stats.preparationMs);
   }
   dispose() {
+    this.job = this.pending = undefined; this.counts = undefined; this.chunks.clear(); this.staging = [];
+    this.stats.queued = this.stats.countQueued = this.stats.cacheChunks = this.stats.stagingBytes = 0;
     for (const mesh of this.meshes) { this.scene.remove(mesh); mesh.dispose(); mesh.geometry.dispose(); (mesh.material as MeshLambertMaterial).dispose(); }
     for (const texture of this.textures) texture.dispose();
   }

@@ -17,6 +17,7 @@ export default defineConfig({
     "**/rpg-sprite-lighting.spec.ts", "**/rpg-view-distance.spec.ts",
     "**/rpg-three.spec.ts", "**/rpg-visual-settings.spec.ts", "**/rpg-voxel*.spec.ts",
     "**/rpg-startup.spec.ts",
+    "**/rpg-camera-stutter.spec.ts",
     "**/rpg-pwa-upgrade.spec.ts",
     "**/rpg-water*.spec.ts",
   ],

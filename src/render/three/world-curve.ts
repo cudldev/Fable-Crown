@@ -1,6 +1,7 @@
 import { Box3, Color, Material, Mesh, Object3D, Sphere, Vector2, Vector3, type Ray, type WebGLProgramParametersWithUniforms } from "three";
 import { ViewDistance } from "./view-distance";
 import { FOG_GRADIENT_GLSL } from "./fog-gradient";
+import { acquireSceneRegistry, type SceneRegistryLease } from "./scene-registry";
 
 /** Zoom-dependent presentation only; authoritative coordinates stay flat. */
 export function closeCameraBlend(zoom: number): number {
@@ -14,6 +15,7 @@ export class WorldCurve {
   private originals = new Map<Material, { compile: Material["onBeforeCompile"]; key: Material["customProgramCacheKey"] }>();
   private bounds = new Map<Mesh, { original: Sphere | undefined; sphere: Sphere; culled: boolean }>();
   private point = new Vector3();
+  private registries = new Map<Object3D, { lease: SceneRegistryLease; materialsVersion: number; removeListener: () => void }>();
   private uniforms = {
     fableCurveCenter: { value: new Vector2() }, fableCurveAxis: { value: new Vector2(32, 45).normalize() },
     fableCurveStrength: { value: 0 },
@@ -46,10 +48,7 @@ export class WorldCurve {
   }
   prepareCulling(root: Object3D) {
     root.updateMatrixWorld(true);
-    const active = new Set<Mesh>();
-    root.traverse(object => {
-      if (!(object instanceof Mesh)) return;
-      active.add(object);
+    for (const object of this.registry(root).lease.registry.meshes) {
       const mesh = object as Mesh & { boundingSphere?: Sphere };
       let entry = this.bounds.get(mesh);
       if (!entry) {
@@ -57,9 +56,9 @@ export class WorldCurve {
       }
       // Voxel buckets already perform their own expanded hierarchical culling.
       // Foliage uses four bounded batches, so bypass its flat instance sphere too.
-      if ("isInstancedMesh" in mesh) { mesh.frustumCulled = this.strength > 0 ? false : entry.culled; return; }
+      if ("isInstancedMesh" in mesh) { mesh.frustumCulled = this.strength > 0 ? false : entry.culled; continue; }
       const geometry = mesh.geometry; if (!geometry.boundingSphere) geometry.computeBoundingSphere();
-      if (!geometry.boundingSphere) return;
+      if (!geometry.boundingSphere) continue;
       entry.sphere.copy(geometry.boundingSphere);
       this.point.copy(entry.sphere.center).applyMatrix4(mesh.matrixWorld);
       const scale = Math.max(1e-8, mesh.matrixWorld.getMaxScaleOnAxis()), radius = entry.sphere.radius * scale;
@@ -67,8 +66,19 @@ export class WorldCurve {
       const d = Math.abs((this.point.x - center.x) * axis.x + (this.point.z - center.y) * axis.y) + radius;
       entry.sphere.radius += this.strength * d * d / scale;
       mesh.boundingSphere = entry.sphere;
-    });
-    for (const [mesh, entry] of this.bounds) if (!active.has(mesh)) { this.restoreBounds(mesh, entry); this.bounds.delete(mesh); }
+    }
+  }
+  private registry(root: Object3D) {
+    let entry = this.registries.get(root);
+    if (!entry) {
+      const lease = acquireSceneRegistry(root);
+      const removeListener = lease.registry.onMeshRemoved(mesh => {
+        const bounds = this.bounds.get(mesh);
+        if (bounds) { this.restoreBounds(mesh, bounds); this.bounds.delete(mesh); }
+      });
+      entry = { lease, materialsVersion: -1, removeListener }; this.registries.set(root, entry);
+    }
+    return entry;
   }
   private restoreBounds(mesh: Mesh & { boundingSphere?: Sphere }, entry: { original: Sphere | undefined; culled: boolean }) {
     mesh.frustumCulled = entry.culled;
@@ -93,18 +103,18 @@ export class WorldCurve {
   }
   decorate(root: Object3D) {
     this.uniforms.fableViewEnabled.value = this.view.enabled ? 1 : 0;
-    root.traverse(object => {
-      if (!("material" in object)) return;
-      const materials = (object as Object3D & { material: Material | Material[] }).material;
-      for (const material of Array.isArray(materials) ? materials : [materials]) {
-        if (this.originals.has(material)) continue;
-        const compile = material.onBeforeCompile, key = material.customProgramCacheKey;
-        this.originals.set(material, { compile, key });
-        material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms, renderer) => {
-          compile.call(material, shader, renderer);
-          if (!shader.vertexShader.includes("#include <project_vertex>")) return; // Procedural sky.
-          Object.assign(shader.uniforms, this.uniforms);
-          shader.vertexShader = `#define FABLE_WORLD_CURVE\nvarying vec3 vFableLogicalPosition,vFableFogPosition;\nuniform vec2 fableCurveCenter,fableCurveAxis;
+    const entry = this.registry(root), registry = entry.lease.registry; registry.sync();
+    if (entry.materialsVersion === registry.version) return;
+    entry.materialsVersion = registry.version;
+    for (const material of registry.materials) {
+      if (this.originals.has(material)) continue;
+      const compile = material.onBeforeCompile, key = material.customProgramCacheKey;
+      this.originals.set(material, { compile, key });
+      material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms, renderer) => {
+        compile.call(material, shader, renderer);
+        if (!shader.vertexShader.includes("#include <project_vertex>")) return; // Procedural sky.
+        Object.assign(shader.uniforms, this.uniforms);
+        shader.vertexShader = `#define FABLE_WORLD_CURVE\nvarying vec3 vFableLogicalPosition,vFableFogPosition;\nuniform vec2 fableCurveCenter,fableCurveAxis;
 uniform float fableCurveStrength;
 vec3 fableCurvePoint(vec3 p){
  // Directional shadow cameras remain in logical space. Mirror the displacement
@@ -113,8 +123,8 @@ vec3 fableCurvePoint(vec3 p){
  if(!isOrthographic) p.y-=fableCurveStrength*d*d*(cameraPosition.y>=0.0?1.0:-1.0);
  return p;
 }\n` + shader.vertexShader;
-          const billboard = shader.vertexShader.includes("uniform vec3 unitGroundPivot;");
-          shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>", `#include <project_vertex>
+        const billboard = shader.vertexShader.includes("uniform vec3 unitGroundPivot;");
+        shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>", `#include <project_vertex>
 vec4 fableCurveWorld=vec4(transformed,1.0);
 #ifdef USE_BATCHING
  fableCurveWorld=batchingMatrix*fableCurveWorld;
@@ -128,17 +138,17 @@ ${billboard ? "vec3 fableUnitRoot=(modelMatrix*vec4(unitGroundPivot,1.0)).xyz; v
 vFableFogPosition=fableCurveWorld.xyz;
 mvPosition=viewMatrix*fableCurveWorld;
 gl_Position=projectionMatrix*mvPosition;`);
-          shader.fragmentShader = `varying vec3 vFableLogicalPosition,vFableFogPosition;
+        shader.fragmentShader = `varying vec3 vFableLogicalPosition,vFableFogPosition;
 uniform vec2 fableCurveCenter,fableViewRange;
 uniform vec3 fableViewCamera,fableViewForward;
 uniform float fableViewEnabled,fableAtmosphere,fableFogGradient;
 uniform vec3 fableFogLow,fableFogHigh;
 ${FOG_GRADIENT_GLSL}\n` + shader.fragmentShader;
-          shader.fragmentShader = shader.fragmentShader.replace("#include <clipping_planes_fragment>", `#include <clipping_planes_fragment>
+        shader.fragmentShader = shader.fragmentShader.replace("#include <clipping_planes_fragment>", `#include <clipping_planes_fragment>
 if(fableViewEnabled>.5){
  if(distance(vFableLogicalPosition.xz,fableCurveCenter)>=fableViewRange.y || dot(vFableLogicalPosition-fableViewCamera,fableViewForward)<=0.) discard;
 }`);
-          shader.fragmentShader = shader.fragmentShader.replace("#include <fog_fragment>", `
+        shader.fragmentShader = shader.fragmentShader.replace("#include <fog_fragment>", `
 #ifdef USE_FOG
  if(fableViewEnabled>.5){
   float fableDistanceFog=smoothstep(fableViewRange.x,fableViewRange.y,distance(vFableLogicalPosition.xz,fableCurveCenter));
@@ -153,16 +163,17 @@ if(fableViewEnabled>.5){
   #include <fog_fragment>
  }
 #endif`);
-        };
-        material.customProgramCacheKey = () => key.call(material) + "|fable-world-curve-atmosphere-v4";
-        material.needsUpdate = true;
-      }
-    });
+      };
+      material.customProgramCacheKey = () => key.call(material) + "|fable-world-curve-atmosphere-v4";
+      material.needsUpdate = true;
+    }
   }
   dispose() {
     for (const [material, original] of this.originals) { material.onBeforeCompile = original.compile; material.customProgramCacheKey = original.key; }
     this.originals.clear();
     for (const [mesh, entry] of this.bounds) this.restoreBounds(mesh, entry);
     this.bounds.clear();
+    for (const entry of this.registries.values()) { entry.removeListener(); entry.lease.release(); }
+    this.registries.clear();
   }
 }

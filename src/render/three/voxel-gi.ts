@@ -1,7 +1,8 @@
-import { Color, Data3DTexture, HalfFloatType, LinearFilter, Material, Mesh, RGBAFormat, ShaderChunk, Vector3, type Object3D, type WebGLRenderer, type WebGLProgramParametersWithUniforms } from "three";
+import { Color, Data3DTexture, HalfFloatType, LinearFilter, Material, RGBAFormat, ShaderChunk, Vector3, type Object3D, type WebGLRenderer, type WebGLProgramParametersWithUniforms } from "three";
 import type { GISolveConfig, GIWorldSource, V3 } from "./voxel-gi-core";
 import { resolveLighting, type LightingPreset, type SceneLamp } from "./lighting";
 import { DEFAULT_VISUAL_SETTINGS, transportSettingsKey, type VisualSettings } from "./visual-settings";
+import { acquireSceneRegistry, type SceneRegistryLease } from "./scene-registry";
 
 const declarations = `
 uniform highp sampler3D fableGITexture;
@@ -58,6 +59,7 @@ export class VoxelGI {
     fableGIPitch: { value: .5 }, fableGIReady: { value: 0 }, fableGIEnabled: { value: 1 }, fableWorldAO: { value: 1 }, fableGIStrength: { value: 1 },
   };
   private materials = new Map<Material, { compile: Material["onBeforeCompile"]; key: Material["customProgramCacheKey"] }>();
+  private registries = new Map<Object3D, { lease: SceneRegistryLease; version: number }>();
   private signature = "";
   private worldVersion = 0;
   private version = 0;
@@ -98,16 +100,19 @@ export class VoxelGI {
   }
 
   decorate(root: Object3D) {
-    root.traverse(object => {
-      if (!(object instanceof Mesh)) return;
-      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
-        if (this.materials.has(material) || !("isMeshLambertMaterial" in material || "isMeshStandardMaterial" in material)) continue;
-        const compile = material.onBeforeCompile, key = material.customProgramCacheKey;
-        this.materials.set(material, { compile, key });
-        material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms, renderer: WebGLRenderer) => {
-          compile.call(material, shader, renderer); Object.assign(shader.uniforms, this.uniforms);
-          shader.vertexShader = "varying vec3 vFableGIPosition;\n" + shader.vertexShader;
-          shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>", `#include <project_vertex>
+    let entry = this.registries.get(root);
+    if (!entry) { entry = { lease: acquireSceneRegistry(root), version: -1 }; this.registries.set(root, entry); }
+    const registry = entry.lease.registry; registry.sync();
+    if (entry.version === registry.version) return;
+    entry.version = registry.version;
+    for (const material of registry.meshMaterials) {
+      if (this.materials.has(material) || !("isMeshLambertMaterial" in material || "isMeshStandardMaterial" in material)) continue;
+      const compile = material.onBeforeCompile, key = material.customProgramCacheKey;
+      this.materials.set(material, { compile, key });
+      material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms, renderer: WebGLRenderer) => {
+        compile.call(material, shader, renderer); Object.assign(shader.uniforms, this.uniforms);
+        shader.vertexShader = "varying vec3 vFableGIPosition;\n" + shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>", `#include <project_vertex>
 vec4 fablePosition=vec4(transformed,1.0);
 #ifdef USE_BATCHING
  fablePosition=batchingMatrix*fablePosition;
@@ -116,13 +121,12 @@ vec4 fablePosition=vec4(transformed,1.0);
  fablePosition=instanceMatrix*fablePosition;
 #endif
 vFableGIPosition=(modelMatrix*fablePosition).xyz;`);
-          shader.fragmentShader = declarations + shader.fragmentShader;
-          shader.fragmentShader = shader.fragmentShader.replace("#include <lights_fragment_end>", lighting + ShaderChunk.lights_fragment_end);
-        };
-        material.customProgramCacheKey = () => key.call(material) + "|fable-cached-gi-v1";
-        material.needsUpdate = true;
-      }
-    });
+        shader.fragmentShader = declarations + shader.fragmentShader;
+        shader.fragmentShader = shader.fragmentShader.replace("#include <lights_fragment_end>", lighting + ShaderChunk.lights_fragment_end);
+      };
+      material.customProgramCacheKey = () => key.call(material) + "|fable-cached-gi-v1";
+      material.needsUpdate = true;
+    }
   }
 
   update(center: Vector3, preset: LightingPreset, lamps: readonly SceneLamp[], depleted: string[], gi: boolean, ao: boolean, overview: boolean, visual: Readonly<VisualSettings> = DEFAULT_VISUAL_SETTINGS) {
@@ -156,5 +160,7 @@ vFableGIPosition=(modelMatrix*fablePosition).xyz;`);
     this.worker.terminate(); this.field.dispose();
     for (const [material, original] of this.materials) { material.onBeforeCompile = original.compile; material.customProgramCacheKey = original.key; }
     this.materials.clear();
+    for (const entry of this.registries.values()) entry.lease.release();
+    this.registries.clear();
   }
 }

@@ -277,7 +277,7 @@ for (const mode of ["perspective", "orthographic"] as const) {
           const canvas = document.querySelector<HTMLCanvasElement>('[data-testid="rpg-world"] canvas')!;
           const actor = document.querySelector<HTMLElement>('[data-testid="rpg-world"] [aria-label="Inspect Alden"]')!;
           const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
-          const position = () => ({ x: parseFloat(actor.style.left), y: parseFloat(actor.style.top) });
+          const position = () => { const box = actor.getBoundingClientRect(); return { x: box.x + box.width / 2, y: box.y + box.height / 2 }; };
           await frame(); await frame();
           const before = position();
           const samples = [];

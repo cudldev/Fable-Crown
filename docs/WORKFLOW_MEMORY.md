@@ -152,3 +152,5 @@
 - PWA upgrades: Cache.addAll default may reuse fresh old HTTP-cache index/world-assets. Install with Request(cache:'reload'); include pwa.mjs source in APP hash so installer-only fixes invalidate caches. Keep rpg-pwa-upgrade local regression (oldHTTP prime→update→newmanifest/index/offline); assert target cachedmanifest, not just target cache names.
 
 - FPS stays visible throughout gameplay on desktop/mobile, above panels; mobile tools start below its reserved row. Keep meter hidden during asset preparation. Existing FPS/frame-ms sample window/500ms refresh unchanged; mobile HUD/startup browser checks cover this.
+
+- Camera stutter: HitDimensions caches intrinsic sizes viaResizeObserver; position hits with CSStranslate while preserving authored anchors. SceneRegistry tracks child events and polls cached material identities; never redefine Mesh.material (V8 dictionary mode slows matrices). Foliage caches8m source chunks/tint, slices~2ms softtarget andcommits1kind/frame; drainqueued understartup. Benchmarkforest+tree-freegrassland with frozenbefore/after/return controls; see performance/camera-stutter.

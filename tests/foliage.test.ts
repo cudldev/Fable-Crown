@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest";
-import { DataTexture, DoubleSide, MeshLambertMaterial, Scene, Vector3 } from "three";
+import { DataTexture, DoubleSide, InstancedBufferAttribute, Matrix4, MeshLambertMaterial, Scene, Vector3 } from "three";
 import { buildFoliageLayout, foliageGeometry, foliageGroundColor, foliagePlants, FoliageSystem, FOLIAGE_KINDS, FOLIAGE_PITCH } from "../src/render/three/foliage";
 import type { TerrainSurface } from "../src/render/three/terrain-tiles";
 import { DEFAULT_VISUAL_SETTINGS, normalizeVisualSettings, transportSettingsKey, visualPresetJSON, DEFAULT_VISUAL_PRESET } from "../src/render/three/visual-settings";
@@ -8,6 +8,40 @@ import { FOLIAGE_ART, FOLIAGE_CARD_SIZE, foliageAtlas, foliagePixels, foliageVar
 
 function world(): WorldDefinition {
   return { id: "foliage-test", name: "Test", width: 32, height: 32, chunkSize: 16, terrain: Array(1024).fill("grass"), collision: Array(1024).fill(0), objects: [], spawns: [], portals: [] };
+}
+
+function settle(system: FoliageSystem, time: number, target: Vector3, visual = DEFAULT_VISUAL_SETTINGS, reducedMotion = false) {
+  for (let frame = 0; frame < 1000; frame++) {
+    system.update(time, target, visual, false, reducedMotion);
+    if (!system.stats.queued && !system.stats.countQueued) return frame + 1;
+  }
+  throw Error("Foliage preparation did not settle.");
+}
+
+function largeWorld(size = 96): WorldDefinition {
+  return { ...world(), width: size, height: size, terrain: Array(size * size).fill("grass"), collision: Array(size * size).fill(0) };
+}
+
+function snapshot(system: FoliageSystem) {
+  return system.meshes.map(mesh => ({ count: mesh.count,
+    matrices: (mesh.instanceMatrix.array as Float32Array).slice(0, mesh.count * 16),
+    colors: (mesh.instanceColor!.array as Float32Array).slice(0, mesh.count * 3),
+    ranks: (mesh.geometry.getAttribute("foliageRank").array as Float32Array).slice(0, mesh.count) }));
+}
+
+function expectWindow(system: FoliageSystem, w: WorldDefinition, target: Vector3, density = DEFAULT_VISUAL_SETTINGS.foliageDensity) {
+  const x = Math.round(target.x / 8) * 8, z = Math.round(target.z / 8) * 8;
+  const expected = foliagePlants(buildFoliageLayout(w), x - 34, z - 34, x + 34, z + 34).filter(plant => plant.rank < density && Math.hypot(plant.x - x, plant.z - z) <= 34);
+  const matrix = new Matrix4();
+  for (const [k, mesh] of system.meshes.entries()) {
+    const plants = expected.filter(plant => plant.kind === FOLIAGE_KINDS[k]).slice(0, mesh.instanceMatrix.count);
+    expect(mesh.count, FOLIAGE_KINDS[k]).toBe(plants.length);
+    const matrices = new Float32Array(plants.length * 16), ranks = new Float32Array(plants.length);
+    plants.forEach((plant, i) => { matrix.makeRotationY(plant.angle).setPosition(plant.x, 0, plant.z); matrices.set(matrix.elements, i * 16); ranks[i] = plant.rank; });
+    expect(Buffer.from(mesh.instanceMatrix.array.buffer, mesh.instanceMatrix.array.byteOffset, matrices.byteLength).equals(Buffer.from(matrices.buffer)), FOLIAGE_KINDS[k] + " transforms").toBe(true);
+    const actualRanks = mesh.geometry.getAttribute("foliageRank").array;
+    expect(Buffer.from(actualRanks.buffer, actualRanks.byteOffset, ranks.byteLength).equals(Buffer.from(ranks.buffer)), FOLIAGE_KINDS[k] + " ranks").toBe(true);
+  }
 }
 test("habitats exclude paths, paving, water, collision and service footprints without mutating the world", () => {
   const w = world();
@@ -117,7 +151,7 @@ test("ground tint samples the actual atlas beneath a card and retains individual
   const north = foliageGroundColor(surface, 0, -.3), south = foliageGroundColor(surface, 0, .3);
   expect(north.g).toBeGreaterThan(north.r); expect(south.r).toBeGreaterThan(south.g);
   const system = new FoliageSystem(new Scene()); system.setWorld(world(), undefined, surface);
-  system.update(0, new Vector3(16, 0, 16), DEFAULT_VISUAL_SETTINGS, false);
+  settle(system, 0, new Vector3(16, 0, 16));
   const colors = system.meshes[0].instanceColor!;
   expect(new Set(Array.from(colors.array).filter((_, i) => i % 3 === 0).slice(0, system.meshes[0].count)).size).toBeGreaterThan(10);
   system.dispose(); surface.dispose();
@@ -134,13 +168,13 @@ test("bare edges grade into short grass before the taller interior layers", () =
 });
 test("wind freezes, density thins stable plants, uploads stay cached, and disabled/overview vegetation draws nothing", () => {
   const scene = new Scene(), system = new FoliageSystem(scene), target = new Vector3(16, 0, 16);
-  system.setWorld(world()); system.update(0, target, DEFAULT_VISUAL_SETTINGS, false); system.update(100, target, DEFAULT_VISUAL_SETTINGS, false);
+  system.setWorld(world()); settle(system, 0, target); system.update(100, target, DEFAULT_VISUAL_SETTINGS, false);
   for (const mesh of system.meshes) {
     const material = mesh.material as MeshLambertMaterial;
     expect(material.alphaTest).toBe(.5); expect(material.transparent).toBe(false); expect(material.side).toBe(DoubleSide); expect(material.map).not.toBeNull();
   }
   expect(system.stats.windTime).toBe(.1); const count = system.stats.visiblePlants, uploads = system.stats.uploads;
-  system.update(700, target, { ...DEFAULT_VISUAL_SETTINGS, windStrength: 0, foliageDensity: .2 }, false);
+  settle(system, 700, target, { ...DEFAULT_VISUAL_SETTINGS, windStrength: 0, foliageDensity: .2 });
   expect(system.stats.windTime).toBe(.1); expect(system.stats.visiblePlants).toBeLessThan(count); expect(system.stats.uploads).toBe(uploads + 1);
   system.update(750, target, { ...DEFAULT_VISUAL_SETTINGS, windStrength: 0, foliageDensity: .2 }, false); expect(system.stats.uploads).toBe(uploads + 1);
   system.update(800, target, DEFAULT_VISUAL_SETTINGS, false, true); expect(system.stats.windTime).toBe(.1);
@@ -156,4 +190,60 @@ test("old presets acquire bounded local foliage settings without changing GI tra
   expect(visual).toMatchObject({ foliageEnabled: false, foliageDensity: 0, windStrength: 2 });
   expect(transportSettingsKey(visual)).toBe(transportSettingsKey(DEFAULT_VISUAL_SETTINGS));
   expect(JSON.parse(visualPresetJSON({ ...DEFAULT_VISUAL_PRESET, visual })).visual.foliageEnabled).toBe(false);
+});
+
+test("source chunks preserve exact accepted window transforms/ranks while preparation and uploads span frames", () => {
+  const w = largeWorld(), scene = new Scene(), system = new FoliageSystem(scene), target = new Vector3(40, 0, 40);
+  system.setWorld(w);
+  system.update(0, target, DEFAULT_VISUAL_SETTINGS, false);
+  expect(system.stats.queued).toBe(1); expect(system.meshes.every(mesh => mesh.count === 0)).toBe(true);
+  let frames = 0;
+  do {
+    const versions = system.meshes.map(mesh => mesh.instanceMatrix.version), commits = system.stats.commits;
+    system.update(0, target, DEFAULT_VISUAL_SETTINGS, false); frames++;
+    expect(system.stats.commits - commits).toBeLessThanOrEqual(1);
+    expect(system.meshes.filter((mesh, i) => mesh.instanceMatrix.version !== versions[i]).length).toBeLessThanOrEqual(1);
+    expect(frames).toBeLessThan(500);
+  } while (system.stats.queued || system.stats.countQueued);
+  expect(frames).toBeGreaterThan(FOLIAGE_KINDS.length);
+  expect(system.stats.uploads).toBe(1); expect(system.stats.commits).toBe(FOLIAGE_KINDS.length);
+  expectWindow(system, w, target);
+  for (const mesh of system.meshes) if (mesh.count) {
+    expect(mesh.instanceMatrix.updateRanges).toEqual([{ start: 0, count: mesh.count * 16 }]);
+    expect(mesh.instanceColor!.updateRanges).toEqual([{ start: 0, count: mesh.count * 3 }]);
+    expect((mesh.geometry.getAttribute("foliageRank") as InstancedBufferAttribute).updateRanges).toEqual([{ start: 0, count: mesh.count }]);
+    expect(mesh.boundingSphere!.radius).toBeGreaterThan(1);
+  }
+  const versions = system.meshes.map(mesh => mesh.instanceMatrix.version), uploads = system.stats.uploads;
+  settle(system, 1000, target);
+  expect(system.meshes.map(mesh => mesh.instanceMatrix.version)).toEqual(versions); expect(system.stats.uploads).toBe(uploads);
+  system.dispose();
+});
+
+test("camera boundary preparation retains live buffers, coalesces nearby requests and restores exact cached colors on return", () => {
+  const w = largeWorld(), system = new FoliageSystem(new Scene()), first = new Vector3(40, 0, 40), next = new Vector3(48, 0, 40);
+  system.setWorld(w); settle(system, 0, first); const original = snapshot(system);
+  system.update(1, next, DEFAULT_VISUAL_SETTINGS, false);
+  expect(system.stats.queued).toBe(1); expect(snapshot(system)).toEqual(original);
+  for (const x of [56, 40, 48, 56, 48, 40]) system.update(2, new Vector3(x, 0, 40), DEFAULT_VISUAL_SETTINGS, false);
+  settle(system, 3, first);
+  expectWindow(system, w, first); expect(snapshot(system)).toEqual(original);
+  expect(system.stats.cancelled).toBe(0); expect(system.stats.cacheChunks).toBeLessThanOrEqual(256);
+  const lower = { ...DEFAULT_VISUAL_SETTINGS, foliageDensity: .2 };
+  settle(system, 4, next, lower); expectWindow(system, w, next, .2);
+  settle(system, 5, first); expect(snapshot(system)).toEqual(original);
+  system.dispose();
+});
+
+test("far obsolete uncommitted preparation cancels safely and a changed world discards source/tint caches", () => {
+  const w = largeWorld(160), system = new FoliageSystem(new Scene()), first = new Vector3(24, 0, 24), far = new Vector3(128, 0, 128);
+  system.setWorld(w); settle(system, 0, first); const original = snapshot(system);
+  system.update(1, new Vector3(32, 0, 24), DEFAULT_VISUAL_SETTINGS, false);
+  system.update(2, far, DEFAULT_VISUAL_SETTINGS, false);
+  expect(system.stats.cancelled).toBe(1); expect(snapshot(system)).toEqual(original);
+  settle(system, 3, far); expectWindow(system, w, far);
+  const nextWorld = { ...world(), id: "new-foliage-seed" };
+  system.setWorld(nextWorld); expect(system.stats.cacheChunks).toBe(0); expect(system.meshes.every(mesh => mesh.count === 0)).toBe(true);
+  settle(system, 4, new Vector3(16, 0, 16)); expectWindow(system, nextWorld, new Vector3(16, 0, 16));
+  system.dispose(); expect(system.stats.queued).toBe(0); expect(system.stats.stagingBytes).toBe(0);
 });

@@ -26,6 +26,7 @@ import { clampGameplayZoom, gameplaySpan } from "../camera-limits";
 import { ContactDetail } from "./contact-detail";
 import { layoutFeedback, type FeedbackAnchor, type FeedbackRect } from "../feedback-layout";
 import { FloatingVials } from "./floating-vials";
+import { HitDimensions } from "./hit-dimensions";
 
 export type CameraMode = "perspective" | "orthographic";
 export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode; gi?: boolean; ao?: boolean; visual?: Readonly<VisualSettings> }
@@ -61,6 +62,8 @@ export class ThreeRuntime {
   private enemyMotion = new Map<string, { x: number; z: number; fromX: number; fromZ: number; at: number; moving: boolean; health: number; hitUntil: number; deathUntil: number }>();
   private rig = new LightingRig(this.scene);
   private vials?: FloatingVials;
+  private hitDimensions = new HitDimensions();
+  private translateHits = typeof CSS !== "undefined" && CSS.supports("translate", "1px 1px");
   private workAnchors = new WeakMap<ObjectArt, THREE.Vector3>();
   private sky = new SkySystem(this.scene);
   private foliage = new FoliageSystem(this.scene);
@@ -227,7 +230,15 @@ export class ThreeRuntime {
       // Overview changes fog and shadow defines; warm it before the HUD is exposed.
       for (const overview of [false, true]) {
         this.props = { ...original, camera: { ...original.camera, overview, follow: !overview && original.camera.follow } };
-        this.frame(performance.now(), false); this.scene.updateMatrixWorld(true);
+        this.frame(performance.now(), false);
+        // All foliage variants and their real instance buffers must be ready
+        // beneath the preparation screen before compiling/rendering this view.
+        let foliagePreparationFrames = 0;
+        while (this.foliage.stats.queued && isCurrent()) {
+          if (++foliagePreparationFrames > 512) throw Error("The ground cover could not finish preparing. Reload to retry.");
+          await this.nextPreparationFrame(); this.frame(performance.now(), false);
+        }
+        this.scene.updateMatrixWorld(true);
         await this.renderer.compileAsync(this.scene, this.camera);
         if (!overview) await this.post.prepareWorld(this.renderer, this.scene, this.camera, isCurrent);
         if (!isCurrent()) return;
@@ -711,6 +722,7 @@ export class ThreeRuntime {
       Object.assign(this.root.dataset, {
         cpuUpdatesMs: (costs.updates / costs.samples).toFixed(3), cpuVoxelsMs: (costs.voxels / costs.samples).toFixed(3),
         cpuGiMs: (costs.gi / costs.samples).toFixed(3), cpuRenderMs: (costs.render / costs.samples).toFixed(3), cpuHitsMs: (costs.hits / costs.samples).toFixed(3),
+        hitLayoutReads: String(this.hitDimensions.reads), hitLayoutObserved: String(this.hitDimensions.count),
         fps: timing.fps.toFixed(1), frameMeanMs: timing.meanMs.toFixed(2), frameP95Ms: timing.p95Ms.toFixed(2), gpuMs: this.gpuMeter.milliseconds?.toFixed(3) ?? "unavailable",
         activeLights: String(this.rig.activeCount), shadowLights: String(this.rig.shadowCount),
         drawCalls: String(this.renderer.info.render.calls), triangles: String(this.renderer.info.render.triangles),
@@ -718,6 +730,10 @@ export class ThreeRuntime {
         skyEnabled: String(visual.skyEnabled), cloudCoverage: String(visual.cloudCoverage), cloudTime: this.sky.stats.cloudTime.toFixed(3),
         foliagePlants: String(this.foliage.stats.plants), foliageVisible: String(this.foliage.stats.visiblePlants),
         foliageUploads: String(this.foliage.stats.uploads), windTime: this.foliage.stats.windTime.toFixed(3),
+        foliageQueued: String(this.foliage.stats.queued), foliageCountQueued: String(this.foliage.stats.countQueued),
+        foliageCommits: String(this.foliage.stats.commits), foliageCancelled: String(this.foliage.stats.cancelled),
+        foliagePreparationMs: this.foliage.stats.preparationMs.toFixed(3), foliageMaxSliceMs: this.foliage.stats.maxSliceMs.toFixed(3),
+        foliageStagingBytes: String(this.foliage.stats.stagingBytes), foliageCacheChunks: String(this.foliage.stats.cacheChunks),
         waterReflectionMs: this.waterSystem.stats.reflectionMs.toFixed(3),
         waterReflectionSize: `${this.waterSystem.stats.reflectionWidth}x${this.waterSystem.stats.reflectionHeight}`,
         frameMs: elapsed.toFixed(2), cameraX: this.target.x.toFixed(2), cameraY: this.target.z.toFixed(2),
@@ -784,6 +800,11 @@ export class ThreeRuntime {
     return anchor;
   }
   private updateHitPositions(time: number) {
+    // Cache only the labels participating in collision layout. Plain hit targets
+    // have no size reads, and moving a label never invalidates its intrinsic size.
+    const measured: HTMLElement[] = [];
+    for (const [key, element] of this.hits) if (key.startsWith("health-") || key === "work-player" || key.startsWith("feedback-")) measured.push(element);
+    this.hitDimensions.prepare(measured);
     this.vials ??= new FloatingVials(this.root);
     this.vials.beginFrame(time, this.rig, this.camera);
     const feedback: FeedbackAnchor[] = [], reserved: FeedbackRect[] = [];
@@ -825,12 +846,12 @@ export class ThreeRuntime {
           element.style.opacity = String(this.reducedMotion ? 1 : clamp((2000 - age) / 350, 0, 1));
         }
       }
-      if (!position || !this.curve.view.pickable(position)) { element.hidden = true; continue; }
+      if (!position || !this.curve.view.pickable(position)) { if (!element.hidden) element.hidden = true; continue; }
       const projected = position === temp ? temp : temp.copy(position);
       projected.y += height; this.curve.bend(projected); projected.project(this.camera);
       this.post.sceneToScreen(projected);
       const visible = projected.z > -1 && projected.z < 1 && Math.abs(projected.x) < 1.12 && Math.abs(projected.y) < 1.12;
-      element.hidden = !visible;
+      if (element.hidden !== !visible) element.hidden = !visible;
       if (visible) {
         const x = (projected.x + 1) * this.width / 2, y = (1 - projected.y) * this.height / 2;
         if (key.startsWith("feedback-")) {
@@ -840,18 +861,23 @@ export class ThreeRuntime {
           if (free) {
             const direction = (floater.targetId === "player" ? -1 : 1);
             const drift = this.reducedMotion ? 0 : direction * Math.min(1, Math.max(0, time - floater.startedAt) / 900) * 32;
-            element.style.left = `${x + drift}px`; element.style.top = `${y}px`;
-          } else feedback.push({ id: key, x, y, width: element.offsetWidth, height: element.offsetHeight });
+            this.positionHit(element, x + drift, y);
+          } else {
+            const size = this.hitDimensions.get(element);
+            if (size.width && size.height) feedback.push({ id: key, x, y, ...size });
+            else this.positionHit(element, x, y); // Let a newly revealed label acquire its first observed size.
+          }
         }
         else {
-          element.style.left = `${x}px`; element.style.top = `${y}px`;
+          this.positionHit(element, x, y);
           if (key.startsWith("health-") || key === "work-player") {
             this.vials.update(element, position, this.rig);
-            const point = key === "work-player" && element.dataset.anchor === "object" ? { x, y } :
-              layoutFeedback([{ id: key, x, y, width: element.offsetWidth, height: element.offsetHeight }], reserved, this.width, this.height).get(key);
+            const size = this.hitDimensions.get(element);
+            const point = key === "work-player" && element.dataset.anchor === "object" || !size.width || !size.height ? { x, y } :
+              layoutFeedback([{ id: key, x, y, ...size }], reserved, this.width, this.height).get(key);
             if (!point) { element.hidden = true; continue; }
-            element.style.left = `${point.x}px`; element.style.top = `${point.y}px`;
-            reserved.push({ x: point.x - element.offsetWidth / 2, y: point.y - element.offsetHeight, width: element.offsetWidth, height: element.offsetHeight });
+            this.positionHit(element, point.x, point.y);
+            if (size.width && size.height) reserved.push({ x: point.x - size.width / 2, y: point.y - size.height, ...size });
           }
         }
       }
@@ -860,9 +886,23 @@ export class ThreeRuntime {
     const placed = layoutFeedback(feedback, reserved, this.width, this.height);
     for (const anchor of feedback) {
       const element = this.hits.get(anchor.id)!, point = placed.get(anchor.id);
-      element.hidden = !point;
-      if (point) { element.style.left = `${point.x}px`; element.style.top = `${point.y}px`; }
+      if (element.hidden !== !point) element.hidden = !point;
+      if (point) this.positionHit(element, point.x, point.y);
     }
+  }
+  private positionHit(element: HTMLElement, x: number, y: number) {
+    const left = `${Math.round(x * 100) / 100}px`, top = `${Math.round(y * 100) / 100}px`;
+    if (this.translateHits) {
+      // Preserve each label's authored percentage anchor/animation transform.
+      // Moving the hit plane then needs no layout-position changes.
+      if (element.style.left !== "0px") element.style.left = "0px";
+      if (element.style.top !== "0px") element.style.top = "0px";
+      const translation = `${left} ${top}`;
+      if (element.style.translate !== translation) element.style.translate = translation;
+      return;
+    }
+    if (element.style.left !== left) element.style.left = left;
+    if (element.style.top !== top) element.style.top = top;
   }
   private groundAt(clientX: number, clientY: number) {
     const rect = this.canvas.getBoundingClientRect();
@@ -1001,6 +1041,7 @@ export class ThreeRuntime {
     return () => { clearHold(); this.root.removeEventListener("contextmenu", context); window.removeEventListener("keydown", cancelInput); this.root.removeEventListener("pointerdown", down); this.root.removeEventListener("pointermove", move); this.root.removeEventListener("pointerup", up); this.root.removeEventListener("pointercancel", up); this.root.removeEventListener("wheel", wheel); this.root.removeEventListener("keydown", key); };
   }
   dispose() {
+    this.hitDimensions.dispose();
     if (this.disposed) return;
     this.disposed = true; this.startupAbort.abort(); cancelAnimationFrame(this.raf); this.resizeObserver.disconnect(); this.inputDispose();
     this.canvas.removeEventListener("webglcontextlost", this.contextLost);

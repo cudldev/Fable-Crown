@@ -1,0 +1,4688 @@
+{
+  "results": [
+    {
+      "route": {
+        "name": "forest",
+        "x": 42,
+        "z": 90
+      },
+      "initial": {
+        "testid": "rpg-world",
+        "renderer": "3d",
+        "renderStyle": "smooth",
+        "status": "ready",
+        "lighting": "dusk",
+        "assets": "blender",
+        "productionAssets": "bank,forge,lantern,tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "voxelAssets": "tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "characterStyle": "pixel",
+        "characterReady": "true",
+        "actorStyle": "pixel-billboard",
+        "billboardMode": "screen-aligned",
+        "spriteCellMeters": "0.0625",
+        "spriteGrid": "voxel",
+        "terrainSource": "vox",
+        "terrainVersion": "2116774b22a19f79",
+        "terrainFilter": "nearest",
+        "terrainBakes": "1",
+        "terrainChunks": "76",
+        "terrainTextureBytes": "1396736",
+        "terrainModules": "288",
+        "terrainVariants": "649",
+        "terrainQuietedTiles": "1597",
+        "terrainBakeMs": "69.40",
+        "terrainGeometry": "flat-top-surfaces",
+        "terrainElevation": "flat",
+        "voxelObjectCounts": "{\"anvil\":3,\"tree\":240,\"ore-copper\":12,\"ore-tin\":6,\"ore-iron\":6,\"ore-coal\":6,\"supplies\":7}",
+        "renderWidth": "1280",
+        "renderHeight": "800",
+        "preparation": "ready",
+        "characterRig": "billboard",
+        "characterClip": "idle",
+        "spriteFrame": "0",
+        "spriteFlipX": "false",
+        "billboardYaw": "0.6181",
+        "billboardCount": "42",
+        "spriteNormalStrength": "0.85",
+        "combatEffects": "0",
+        "voxelCancelled": "0",
+        "voxelPendingAgeMs": "0.0",
+        "voxelTransitions": "0",
+        "voxelTransitionCells": "0",
+        "voxelClosestTreeId": "oakrest-tree-10",
+        "voxelClosestTreeLod": "0",
+        "voxelClosestTreeDesiredLod": "0",
+        "cpuUpdatesMs": "0.438",
+        "cpuVoxelsMs": "0.587",
+        "cpuGiMs": "1.048",
+        "cpuRenderMs": "3.237",
+        "cpuHitsMs": "0.532",
+        "hitLayoutReads": "1",
+        "hitLayoutObserved": "1",
+        "fps": "110.7",
+        "frameMeanMs": "9.04",
+        "frameP95Ms": "16.70",
+        "gpuMs": "5.027",
+        "activeLights": "4",
+        "shadowLights": "1",
+        "drawCalls": "346",
+        "triangles": "746298",
+        "waterReflectionState": "offscreen",
+        "waterReflectionPasses": "0",
+        "skyEnabled": "true",
+        "cloudCoverage": "0.55",
+        "cloudTime": "4.404",
+        "foliagePlants": "7910",
+        "foliageVisible": "2997",
+        "foliageUploads": "3",
+        "windTime": "2.949",
+        "foliageQueued": "0",
+        "foliageCountQueued": "0",
+        "foliageCommits": "21",
+        "foliageCancelled": "0",
+        "foliagePreparationMs": "0.000",
+        "foliageMaxSliceMs": "2.800",
+        "foliageStagingBytes": "901120",
+        "foliageCacheChunks": "129",
+        "waterReflectionMs": "0.000",
+        "waterReflectionSize": "0x0",
+        "frameMs": "8.40",
+        "cameraX": "42.00",
+        "cameraY": "90.00",
+        "cameraSpan": "12.00",
+        "cameraDistance": "34.03",
+        "cameraZoom": "2.0000",
+        "cameraMode": "perspective",
+        "cameraPitch": "28.825",
+        "worldCurve": "0.008000",
+        "visibilityNear": "10.80",
+        "visibilityFar": "24.00",
+        "visibilityPickEnd": "22.15",
+        "postPasses": "4",
+        "postSize": "1280x800",
+        "lightRayPasses": "1",
+        "celestialBody": "sun",
+        "voxelBuckets": "8",
+        "voxelInstances": "40",
+        "voxelRenderer": "shared-static-meshes",
+        "voxelTemplates": "37",
+        "voxelTemplateBuilds": "37",
+        "voxelGeometryBytes": "7419720",
+        "voxelInstanceBytes": "84252",
+        "voxelDrawInstances": "40",
+        "voxelEquivalentCells": "244556",
+        "voxelColorTriangles": "678918",
+        "voxelShadowTriangles": "6626",
+        "voxelLods": "2,6,0,0,0",
+        "voxelUploads": "71",
+        "voxelBudgetExceeded": "false",
+        "voxelVisibleObjects": "40",
+        "voxelRequestedCells": "902744",
+        "voxelNativeTrees": "3",
+        "voxelBudgetCoarsenedObjects": "36",
+        "voxelObjectLods": "4,36,0,0,0",
+        "voxelLargestCellPixels": "8.843",
+        "voxelParentBuckets": "0",
+        "voxelChildBuckets": "8",
+        "voxelResidentBuckets": "63",
+        "voxelResidentCells": "44943",
+        "voxelQueued": "0",
+        "voxelStagedCells": "0",
+        "voxelCommits": "0",
+        "voxelPreparationMs": "0.500",
+        "giState": "ready",
+        "giVersion": "3",
+        "giApplied": "3",
+        "giSolveMs": "461.70",
+        "giTextureBytes": "3442688",
+        "giMaxSliceMs": "4.700",
+        "giYields": "110",
+        "giBounces": "1",
+        "dayNightCycle": "true",
+        "dayHour": "16.0143",
+        "giProbes": "1252",
+        "giEnabled": "true",
+        "aoEnabled": "true",
+        "giLighting": "dusk",
+        "giDepleted": "0",
+        "visualSettings": "{\"renderStyle\":\"smooth\",\"spriteNormalStrength\":0.85,\"bloom\":0.12,\"chromaticAberration\":0.18,\"lensDistortion\":0.15,\"depthOfField\":0.25,\"worldCurvature\":2,\"exposure\":1.05,\"sunStrength\":1,\"ambientStrength\":0.85,\"lampStrength\":1,\"sunAzimuth\":23.3,\"sunElevation\":62.3,\"sunTint\":null,\"ambientTint\":null,\"skyTint\":null,\"shadowResolution\":2048,\"shadowSoftness\":3.5,\"shadowCoverage\":79,\"shadowBias\":-0.003,\"shadowNormalBias\":0.055,\"giStrength\":1.3,\"aoStrength\":0.1,\"aoDistance\":0.125,\"fogEnabled\":true,\"fogReach\":60,\"waterReflections\":true,\"waterReflectionStrength\":0.65,\"waterRippleStrength\":0.35,\"waterReflectionResolution\":0,\"waterReflectionRate\":0,\"skyEnabled\":true,\"cloudCoverage\":0.55,\"cloudSpeed\":1,\"cloudScale\":1,\"lightRays\":0.65,\"fogGradient\":0.7,\"foliageEnabled\":true,\"foliageDensity\":0.7,\"windStrength\":1,\"contactStrength\":0.45,\"atmosphereStrength\":0.65,\"colorBalance\":0.35,\"dayNightCycle\":true,\"dayTime\":16,\"cycleMinutes\":30,\"giBounces\":1}",
+        "sunPower": "2.100",
+        "exposure": "1.05",
+        "shadowMapSize": "2048",
+        "fogActive": "true",
+        "startupPrograms": "63"
+      },
+      "moving": {
+        "samples": [
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 38.65,
+            "z": 89.82,
+            "plants": 7910
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 33.82,
+            "z": 89.74,
+            "plants": 7928
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 43.03,
+            "z": 89.98,
+            "plants": 7910
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 50.76,
+            "z": 90.89,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 49.04,
+            "z": 90.63,
+            "plants": 7666
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          },
+          {
+            "x": 42,
+            "z": 90,
+            "plants": 7910
+          }
+        ],
+        "offsetReads": 0,
+        "glError": 0
+      },
+      "final": {
+        "testid": "rpg-world",
+        "renderer": "3d",
+        "renderStyle": "smooth",
+        "status": "ready",
+        "lighting": "dusk",
+        "assets": "blender",
+        "productionAssets": "bank,forge,lantern,tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "voxelAssets": "tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "characterStyle": "pixel",
+        "characterReady": "true",
+        "actorStyle": "pixel-billboard",
+        "billboardMode": "screen-aligned",
+        "spriteCellMeters": "0.0625",
+        "spriteGrid": "voxel",
+        "terrainSource": "vox",
+        "terrainVersion": "2116774b22a19f79",
+        "terrainFilter": "nearest",
+        "terrainBakes": "1",
+        "terrainChunks": "76",
+        "terrainTextureBytes": "1396736",
+        "terrainModules": "288",
+        "terrainVariants": "649",
+        "terrainQuietedTiles": "1597",
+        "terrainBakeMs": "69.40",
+        "terrainGeometry": "flat-top-surfaces",
+        "terrainElevation": "flat",
+        "voxelObjectCounts": "{\"anvil\":3,\"tree\":240,\"ore-copper\":12,\"ore-tin\":6,\"ore-iron\":6,\"ore-coal\":6,\"supplies\":7}",
+        "renderWidth": "1280",
+        "renderHeight": "800",
+        "preparation": "ready",
+        "characterRig": "billboard",
+        "characterClip": "idle",
+        "spriteFrame": "0",
+        "spriteFlipX": "false",
+        "billboardYaw": "0.6181",
+        "billboardCount": "42",
+        "spriteNormalStrength": "0.85",
+        "combatEffects": "0",
+        "voxelCancelled": "0",
+        "voxelPendingAgeMs": "0.0",
+        "voxelTransitions": "0",
+        "voxelTransitionCells": "0",
+        "voxelClosestTreeId": "oakrest-tree-10",
+        "voxelClosestTreeLod": "0",
+        "voxelClosestTreeDesiredLod": "0",
+        "cpuUpdatesMs": "0.333",
+        "cpuVoxelsMs": "0.485",
+        "cpuGiMs": "0.880",
+        "cpuRenderMs": "2.390",
+        "cpuHitsMs": "0.427",
+        "hitLayoutReads": "1",
+        "hitLayoutObserved": "1",
+        "fps": "119.9",
+        "frameMeanMs": "8.34",
+        "frameP95Ms": "8.40",
+        "gpuMs": "4.500",
+        "activeLights": "4",
+        "shadowLights": "1",
+        "drawCalls": "334",
+        "triangles": "746218",
+        "waterReflectionState": "offscreen",
+        "waterReflectionPasses": "0",
+        "skyEnabled": "true",
+        "cloudCoverage": "0.55",
+        "cloudTime": "8.908",
+        "foliagePlants": "7910",
+        "foliageVisible": "2997",
+        "foliageUploads": "7",
+        "windTime": "7.454",
+        "foliageQueued": "0",
+        "foliageCountQueued": "1",
+        "foliageCommits": "49",
+        "foliageCancelled": "0",
+        "foliagePreparationMs": "0.000",
+        "foliageMaxSliceMs": "2.800",
+        "foliageStagingBytes": "901120",
+        "foliageCacheChunks": "130",
+        "waterReflectionMs": "0.000",
+        "waterReflectionSize": "0x0",
+        "frameMs": "8.30",
+        "cameraX": "42.00",
+        "cameraY": "90.00",
+        "cameraSpan": "12.00",
+        "cameraDistance": "34.03",
+        "cameraZoom": "2.0000",
+        "cameraMode": "perspective",
+        "cameraPitch": "28.825",
+        "worldCurve": "0.008000",
+        "visibilityNear": "10.80",
+        "visibilityFar": "24.00",
+        "visibilityPickEnd": "22.15",
+        "postPasses": "4",
+        "postSize": "1280x800",
+        "lightRayPasses": "1",
+        "celestialBody": "sun",
+        "voxelBuckets": "8",
+        "voxelInstances": "40",
+        "voxelRenderer": "shared-static-meshes",
+        "voxelTemplates": "37",
+        "voxelTemplateBuilds": "37",
+        "voxelGeometryBytes": "7419720",
+        "voxelInstanceBytes": "86156",
+        "voxelDrawInstances": "40",
+        "voxelEquivalentCells": "244556",
+        "voxelColorTriangles": "678918",
+        "voxelShadowTriangles": "6626",
+        "voxelLods": "2,6,0,0,0",
+        "voxelUploads": "198",
+        "voxelBudgetExceeded": "false",
+        "voxelVisibleObjects": "40",
+        "voxelRequestedCells": "902744",
+        "voxelNativeTrees": "3",
+        "voxelBudgetCoarsenedObjects": "36",
+        "voxelObjectLods": "4,36,0,0,0",
+        "voxelLargestCellPixels": "8.843",
+        "voxelParentBuckets": "0",
+        "voxelChildBuckets": "8",
+        "voxelResidentBuckets": "67",
+        "voxelResidentCells": "44943",
+        "voxelQueued": "0",
+        "voxelStagedCells": "0",
+        "voxelCommits": "0",
+        "voxelPreparationMs": "0.500",
+        "giState": "ready",
+        "giVersion": "5",
+        "giApplied": "5",
+        "giSolveMs": "402.80",
+        "giTextureBytes": "3442688",
+        "giMaxSliceMs": "4.400",
+        "giYields": "97",
+        "giBounces": "1",
+        "dayNightCycle": "true",
+        "dayHour": "16.0746",
+        "giProbes": "1252",
+        "giEnabled": "true",
+        "aoEnabled": "true",
+        "giLighting": "dusk",
+        "giDepleted": "0",
+        "visualSettings": "{\"renderStyle\":\"smooth\",\"spriteNormalStrength\":0.85,\"bloom\":0.12,\"chromaticAberration\":0.18,\"lensDistortion\":0.15,\"depthOfField\":0.25,\"worldCurvature\":2,\"exposure\":1.05,\"sunStrength\":1,\"ambientStrength\":0.85,\"lampStrength\":1,\"sunAzimuth\":23.3,\"sunElevation\":62.3,\"sunTint\":null,\"ambientTint\":null,\"skyTint\":null,\"shadowResolution\":2048,\"shadowSoftness\":3.5,\"shadowCoverage\":79,\"shadowBias\":-0.003,\"shadowNormalBias\":0.055,\"giStrength\":1.3,\"aoStrength\":0.1,\"aoDistance\":0.125,\"fogEnabled\":true,\"fogReach\":60,\"waterReflections\":true,\"waterReflectionStrength\":0.65,\"waterRippleStrength\":0.35,\"waterReflectionResolution\":0,\"waterReflectionRate\":0,\"skyEnabled\":true,\"cloudCoverage\":0.55,\"cloudSpeed\":1,\"cloudScale\":1,\"lightRays\":0.65,\"fogGradient\":0.7,\"foliageEnabled\":true,\"foliageDensity\":0.7,\"windStrength\":1,\"contactStrength\":0.45,\"atmosphereStrength\":0.65,\"colorBalance\":0.35,\"dayNightCycle\":true,\"dayTime\":16,\"cycleMinutes\":30,\"giBounces\":1}",
+        "sunPower": "2.098",
+        "exposure": "1.05",
+        "shadowMapSize": "2048",
+        "fogActive": "true",
+        "startupPrograms": "63"
+      },
+      "projection": {
+        "xDelta": 0,
+        "healthBottom": 331.30999755859375,
+        "actorBottom": 386.44000244140625,
+        "inside": true
+      }
+    },
+    {
+      "route": {
+        "name": "open",
+        "x": 222,
+        "z": 72
+      },
+      "initial": {
+        "testid": "rpg-world",
+        "renderer": "3d",
+        "renderStyle": "smooth",
+        "status": "ready",
+        "lighting": "dusk",
+        "assets": "blender",
+        "productionAssets": "bank,forge,lantern,tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "voxelAssets": "tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "characterStyle": "pixel",
+        "characterReady": "true",
+        "actorStyle": "pixel-billboard",
+        "billboardMode": "screen-aligned",
+        "spriteCellMeters": "0.0625",
+        "spriteGrid": "voxel",
+        "terrainSource": "vox",
+        "terrainVersion": "2116774b22a19f79",
+        "terrainFilter": "nearest",
+        "terrainBakes": "1",
+        "terrainChunks": "76",
+        "terrainTextureBytes": "1396736",
+        "terrainModules": "288",
+        "terrainVariants": "649",
+        "terrainQuietedTiles": "1597",
+        "terrainBakeMs": "69.40",
+        "terrainGeometry": "flat-top-surfaces",
+        "terrainElevation": "flat",
+        "voxelObjectCounts": "{\"anvil\":3,\"tree\":240,\"ore-copper\":12,\"ore-tin\":6,\"ore-iron\":6,\"ore-coal\":6,\"supplies\":7}",
+        "renderWidth": "1280",
+        "renderHeight": "800",
+        "preparation": "ready",
+        "characterRig": "billboard",
+        "characterClip": "idle",
+        "spriteFrame": "0",
+        "spriteFlipX": "false",
+        "billboardYaw": "0.6181",
+        "billboardCount": "42",
+        "spriteNormalStrength": "0.85",
+        "combatEffects": "0",
+        "voxelCancelled": "0",
+        "voxelPendingAgeMs": "0.0",
+        "voxelTransitions": "0",
+        "voxelTransitionCells": "0",
+        "voxelClosestTreeId": "",
+        "voxelClosestTreeLod": "-1",
+        "voxelClosestTreeDesiredLod": "-1",
+        "cpuUpdatesMs": "0.285",
+        "cpuVoxelsMs": "0.382",
+        "cpuGiMs": "0.947",
+        "cpuRenderMs": "1.090",
+        "cpuHitsMs": "0.240",
+        "hitLayoutReads": "1",
+        "hitLayoutObserved": "1",
+        "fps": "119.9",
+        "frameMeanMs": "8.34",
+        "frameP95Ms": "8.50",
+        "gpuMs": "2.634",
+        "activeLights": "4",
+        "shadowLights": "1",
+        "drawCalls": "68",
+        "triangles": "46135",
+        "waterReflectionState": "offscreen",
+        "waterReflectionPasses": "0",
+        "skyEnabled": "true",
+        "cloudCoverage": "0.55",
+        "cloudTime": "10.910",
+        "foliagePlants": "9343",
+        "foliageVisible": "4981",
+        "foliageUploads": "8",
+        "windTime": "9.456",
+        "foliageQueued": "0",
+        "foliageCountQueued": "0",
+        "foliageCommits": "56",
+        "foliageCancelled": "0",
+        "foliagePreparationMs": "0.000",
+        "foliageMaxSliceMs": "2.800",
+        "foliageStagingBytes": "1413120",
+        "foliageCacheChunks": "220",
+        "waterReflectionMs": "0.000",
+        "waterReflectionSize": "0x0",
+        "frameMs": "8.30",
+        "cameraX": "222.00",
+        "cameraY": "72.00",
+        "cameraSpan": "12.00",
+        "cameraDistance": "34.03",
+        "cameraZoom": "2.0000",
+        "cameraMode": "perspective",
+        "cameraPitch": "28.825",
+        "worldCurve": "0.008000",
+        "visibilityNear": "10.80",
+        "visibilityFar": "24.00",
+        "visibilityPickEnd": "22.15",
+        "postPasses": "4",
+        "postSize": "1280x800",
+        "lightRayPasses": "1",
+        "celestialBody": "sun",
+        "voxelBuckets": "0",
+        "voxelInstances": "0",
+        "voxelRenderer": "shared-static-meshes",
+        "voxelTemplates": "37",
+        "voxelTemplateBuilds": "37",
+        "voxelGeometryBytes": "7419720",
+        "voxelInstanceBytes": "86156",
+        "voxelDrawInstances": "0",
+        "voxelEquivalentCells": "0",
+        "voxelColorTriangles": "0",
+        "voxelShadowTriangles": "0",
+        "voxelLods": "0,0,0,0,0",
+        "voxelUploads": "198",
+        "voxelBudgetExceeded": "false",
+        "voxelVisibleObjects": "0",
+        "voxelRequestedCells": "0",
+        "voxelNativeTrees": "0",
+        "voxelBudgetCoarsenedObjects": "0",
+        "voxelObjectLods": "0,0,0,0,0",
+        "voxelLargestCellPixels": "0.000",
+        "voxelParentBuckets": "0",
+        "voxelChildBuckets": "0",
+        "voxelResidentBuckets": "67",
+        "voxelResidentCells": "44943",
+        "voxelQueued": "0",
+        "voxelStagedCells": "0",
+        "voxelCommits": "0",
+        "voxelPreparationMs": "0.400",
+        "giState": "ready",
+        "giVersion": "6",
+        "giApplied": "6",
+        "giSolveMs": "218.80",
+        "giTextureBytes": "3442688",
+        "giMaxSliceMs": "4.200",
+        "giYields": "53",
+        "giBounces": "1",
+        "dayNightCycle": "true",
+        "dayHour": "16.0171",
+        "giProbes": "1600",
+        "giEnabled": "true",
+        "aoEnabled": "true",
+        "giLighting": "dusk",
+        "giDepleted": "0",
+        "visualSettings": "{\"renderStyle\":\"smooth\",\"spriteNormalStrength\":0.85,\"bloom\":0.12,\"chromaticAberration\":0.18,\"lensDistortion\":0.15,\"depthOfField\":0.25,\"worldCurvature\":2,\"exposure\":1.05,\"sunStrength\":1,\"ambientStrength\":0.85,\"lampStrength\":1,\"sunAzimuth\":23.3,\"sunElevation\":62.3,\"sunTint\":null,\"ambientTint\":null,\"skyTint\":null,\"shadowResolution\":2048,\"shadowSoftness\":3.5,\"shadowCoverage\":79,\"shadowBias\":-0.003,\"shadowNormalBias\":0.055,\"giStrength\":1.3,\"aoStrength\":0.1,\"aoDistance\":0.125,\"fogEnabled\":true,\"fogReach\":60,\"waterReflections\":true,\"waterReflectionStrength\":0.65,\"waterRippleStrength\":0.35,\"waterReflectionResolution\":0,\"waterReflectionRate\":0,\"skyEnabled\":true,\"cloudCoverage\":0.55,\"cloudSpeed\":1,\"cloudScale\":1,\"lightRays\":0.65,\"fogGradient\":0.7,\"foliageEnabled\":true,\"foliageDensity\":0.7,\"windStrength\":1,\"contactStrength\":0.45,\"atmosphereStrength\":0.65,\"colorBalance\":0.35,\"dayNightCycle\":true,\"dayTime\":16,\"cycleMinutes\":30,\"giBounces\":1}",
+        "sunPower": "2.100",
+        "exposure": "1.05",
+        "shadowMapSize": "2048",
+        "fogActive": "true",
+        "startupPrograms": "63"
+      },
+      "moving": {
+        "samples": [
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 213.82,
+            "z": 71.74,
+            "plants": 9877
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 230.76,
+            "z": 72.89,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 228.63,
+            "z": 72.58,
+            "plants": 8071
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          },
+          {
+            "x": 222,
+            "z": 72,
+            "plants": 9343
+          }
+        ],
+        "offsetReads": 0,
+        "glError": 0
+      },
+      "final": {
+        "testid": "rpg-world",
+        "renderer": "3d",
+        "renderStyle": "smooth",
+        "status": "ready",
+        "lighting": "dusk",
+        "assets": "blender",
+        "productionAssets": "bank,forge,lantern,tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "voxelAssets": "tree,anvil,barrel,crate,ore-copper,ore-tin,ore-iron,ore-coal,ore-depleted,supplies",
+        "characterStyle": "pixel",
+        "characterReady": "true",
+        "actorStyle": "pixel-billboard",
+        "billboardMode": "screen-aligned",
+        "spriteCellMeters": "0.0625",
+        "spriteGrid": "voxel",
+        "terrainSource": "vox",
+        "terrainVersion": "2116774b22a19f79",
+        "terrainFilter": "nearest",
+        "terrainBakes": "1",
+        "terrainChunks": "76",
+        "terrainTextureBytes": "1396736",
+        "terrainModules": "288",
+        "terrainVariants": "649",
+        "terrainQuietedTiles": "1597",
+        "terrainBakeMs": "69.40",
+        "terrainGeometry": "flat-top-surfaces",
+        "terrainElevation": "flat",
+        "voxelObjectCounts": "{\"anvil\":3,\"tree\":240,\"ore-copper\":12,\"ore-tin\":6,\"ore-iron\":6,\"ore-coal\":6,\"supplies\":7}",
+        "renderWidth": "1280",
+        "renderHeight": "800",
+        "preparation": "ready",
+        "characterRig": "billboard",
+        "characterClip": "idle",
+        "spriteFrame": "0",
+        "spriteFlipX": "false",
+        "billboardYaw": "0.6181",
+        "billboardCount": "42",
+        "spriteNormalStrength": "0.85",
+        "combatEffects": "0",
+        "voxelCancelled": "0",
+        "voxelPendingAgeMs": "0.0",
+        "voxelTransitions": "0",
+        "voxelTransitionCells": "0",
+        "voxelClosestTreeId": "",
+        "voxelClosestTreeLod": "-1",
+        "voxelClosestTreeDesiredLod": "-1",
+        "cpuUpdatesMs": "0.220",
+        "cpuVoxelsMs": "0.297",
+        "cpuGiMs": "0.690",
+        "cpuRenderMs": "0.863",
+        "cpuHitsMs": "0.192",
+        "hitLayoutReads": "1",
+        "hitLayoutObserved": "1",
+        "fps": "119.9",
+        "frameMeanMs": "8.34",
+        "frameP95Ms": "8.40",
+        "gpuMs": "2.903",
+        "activeLights": "4",
+        "shadowLights": "1",
+        "drawCalls": "68",
+        "triangles": "46135",
+        "waterReflectionState": "offscreen",
+        "waterReflectionPasses": "0",
+        "skyEnabled": "true",
+        "cloudCoverage": "0.55",
+        "cloudTime": "14.414",
+        "foliagePlants": "9343",
+        "foliageVisible": "4981",
+        "foliageUploads": "12",
+        "windTime": "12.959",
+        "foliageQueued": "0",
+        "foliageCountQueued": "0",
+        "foliageCommits": "84",
+        "foliageCancelled": "0",
+        "foliagePreparationMs": "0.000",
+        "foliageMaxSliceMs": "2.800",
+        "foliageStagingBytes": "1413120",
+        "foliageCacheChunks": "230",
+        "waterReflectionMs": "0.000",
+        "waterReflectionSize": "0x0",
+        "frameMs": "8.40",
+        "cameraX": "222.00",
+        "cameraY": "72.00",
+        "cameraSpan": "12.00",
+        "cameraDistance": "34.03",
+        "cameraZoom": "2.0000",
+        "cameraMode": "perspective",
+        "cameraPitch": "28.825",
+        "worldCurve": "0.008000",
+        "visibilityNear": "10.80",
+        "visibilityFar": "24.00",
+        "visibilityPickEnd": "22.15",
+        "postPasses": "4",
+        "postSize": "1280x800",
+        "lightRayPasses": "1",
+        "celestialBody": "sun",
+        "voxelBuckets": "0",
+        "voxelInstances": "0",
+        "voxelRenderer": "shared-static-meshes",
+        "voxelTemplates": "37",
+        "voxelTemplateBuilds": "37",
+        "voxelGeometryBytes": "7419720",
+        "voxelInstanceBytes": "86156",
+        "voxelDrawInstances": "0",
+        "voxelEquivalentCells": "0",
+        "voxelColorTriangles": "0",
+        "voxelShadowTriangles": "0",
+        "voxelLods": "0,0,0,0,0",
+        "voxelUploads": "198",
+        "voxelBudgetExceeded": "false",
+        "voxelVisibleObjects": "0",
+        "voxelRequestedCells": "0",
+        "voxelNativeTrees": "0",
+        "voxelBudgetCoarsenedObjects": "0",
+        "voxelObjectLods": "0,0,0,0,0",
+        "voxelLargestCellPixels": "0.000",
+        "voxelParentBuckets": "0",
+        "voxelChildBuckets": "0",
+        "voxelResidentBuckets": "67",
+        "voxelResidentCells": "44943",
+        "voxelQueued": "0",
+        "voxelStagedCells": "0",
+        "voxelCommits": "0",
+        "voxelPreparationMs": "0.100",
+        "giState": "ready",
+        "giVersion": "8",
+        "giApplied": "8",
+        "giSolveMs": "199.30",
+        "giTextureBytes": "3442688",
+        "giMaxSliceMs": "4.100",
+        "giYields": "48",
+        "giBounces": "1",
+        "dayNightCycle": "true",
+        "dayHour": "16.0638",
+        "giProbes": "1600",
+        "giEnabled": "true",
+        "aoEnabled": "true",
+        "giLighting": "dusk",
+        "giDepleted": "0",
+        "visualSettings": "{\"renderStyle\":\"smooth\",\"spriteNormalStrength\":0.85,\"bloom\":0.12,\"chromaticAberration\":0.18,\"lensDistortion\":0.15,\"depthOfField\":0.25,\"worldCurvature\":2,\"exposure\":1.05,\"sunStrength\":1,\"ambientStrength\":0.85,\"lampStrength\":1,\"sunAzimuth\":23.3,\"sunElevation\":62.3,\"sunTint\":null,\"ambientTint\":null,\"skyTint\":null,\"shadowResolution\":2048,\"shadowSoftness\":3.5,\"shadowCoverage\":79,\"shadowBias\":-0.003,\"shadowNormalBias\":0.055,\"giStrength\":1.3,\"aoStrength\":0.1,\"aoDistance\":0.125,\"fogEnabled\":true,\"fogReach\":60,\"waterReflections\":true,\"waterReflectionStrength\":0.65,\"waterRippleStrength\":0.35,\"waterReflectionResolution\":0,\"waterReflectionRate\":0,\"skyEnabled\":true,\"cloudCoverage\":0.55,\"cloudSpeed\":1,\"cloudScale\":1,\"lightRays\":0.65,\"fogGradient\":0.7,\"foliageEnabled\":true,\"foliageDensity\":0.7,\"windStrength\":1,\"contactStrength\":0.45,\"atmosphereStrength\":0.65,\"colorBalance\":0.35,\"dayNightCycle\":true,\"dayTime\":16,\"cycleMinutes\":30,\"giBounces\":1}",
+        "sunPower": "2.099",
+        "exposure": "1.05",
+        "shadowMapSize": "2048",
+        "fogActive": "true",
+        "startupPrograms": "63"
+      },
+      "projection": {
+        "xDelta": 0,
+        "healthBottom": 331.30999755859375,
+        "actorBottom": 386.44000244140625,
+        "inside": true
+      }
+    }
+  ],
+  "errors": [],
+  "note": "Functional GPU check only: settled forest/open native pointer pans retain plants, cross8m windows, perform no recurring offset dimension reads, preserve projected label bounds and actual actor hit targeting. Endpoint holds avoid500ms diagnostic aliasing; no frame-rate assertion."
+}
