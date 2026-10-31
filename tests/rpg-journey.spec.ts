@@ -13,7 +13,7 @@ async function importState(page: Page, state: unknown) {
   });
 }
 
-async function snapshot(page: Page): Promise<RpgState> {
+async function snapshot(page: Page, keepOpen = false): Promise<RpgState> {
   if (!(await page.getByRole("button", { name: "Save on device" }).isVisible()))
     await page.getByRole("button", { name: "Open game menu" }).click();
   await page.getByRole("button", { name: "Save on device" }).click();
@@ -34,7 +34,7 @@ async function snapshot(page: Page): Promise<RpgState> {
         request.onerror = () => reject(request.error);
       }),
   );
-  await page.getByRole("button", { name: "Close panel" }).click();
+  if (!keepOpen) await page.getByRole("button", { name: "Close panel" }).click();
   return value as RpgState;
 }
 
@@ -91,10 +91,11 @@ test("minimap shows frontier markers and previews travel until confirmed", async
   await page.screenshot({ path: "docs/screenshots/journey-portrait.png" });
   await preview.getByRole("button", { name: "Travel here" }).click();
   await expect
-    .poll(async () => (await snapshot(page)).player.position.x, {
+    .poll(async () => (await snapshot(page, true)).player.position.x, {
       timeout: 12000,
     })
     .toBe(target.x);
+  await page.getByRole("button", { name: "Close panel" }).click();
   await map.getByRole("button", { name: "Shrink map" }).click();
 });
 
@@ -122,7 +123,7 @@ test("using the bronze pickaxe on copper starts the matching gathering goal and 
     .getByRole("button", { name: "Use bronze pickaxe · gather here" })
     .click();
   await expect
-    .poll(async () => (await snapshot(page)).control.goal)
+    .poll(async () => (await snapshot(page, true)).control.goal)
     .toMatchObject({
       kind: "gather",
       resourceId: "copper",
@@ -194,7 +195,7 @@ test("sound settings persist and missing AudioContext leaves gameplay available"
   ).toBeVisible();
   const before = (await snapshot(fallback)).tick;
   await expect
-    .poll(async () => (await snapshot(fallback)).tick, { timeout: 5000 })
+    .poll(async () => (await snapshot(fallback, true)).tick, { timeout: 5000 })
     .toBeGreaterThan(before);
   expect(errors).toEqual([]);
   await fallback.close();

@@ -76,3 +76,5 @@
 - Release gate unfinished31Oct: acfa1dd on main; managed voxel-default-release worktree owns latest fixes. CI41142685175 has a saved-state observation failure; do not call voxel live. Resume from PROGRESS release checkpoint, then verify fresh/offline and cached upgrade.
 
 - User authorized a temporary skip of only the healing/combat-style saved-row browser case31Oct; keep other gates and restore it after diagnosis.
+
+- CI persistence polls: keep the save menu open between reads. Closing it can submit a slow software GPU frame and exhaust the polling deadline before a later saved row is observed. Trace worker + saved-read timestamps before diagnosing data loss.

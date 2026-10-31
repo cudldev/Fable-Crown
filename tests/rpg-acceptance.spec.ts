@@ -88,7 +88,7 @@ async function snapshot(page: Page): Promise<RpgState> {
     entries.push({ event: "snapshot", at: performance.now(), tick: saved.tick, hp: saved.player.health, attack: saved.player.skills.attack, savedAt: saved.savedAt, position: saved.player.position });
     sessionStorage.setItem("save-observation-trace", JSON.stringify(entries.slice(-160)));
   }, value as RpgState);
-  await page.getByRole("button", { name: "Close panel" }).click();
+  // Keep the save menu open while polling; closing it submits an unrelated GPU frame.
   return value as RpgState;
 }
 

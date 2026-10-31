@@ -21,7 +21,7 @@ async function importState(page: Page, state: unknown) {
   });
 }
 
-async function storedState(page: Page): Promise<RpgState> {
+async function storedState(page: Page, keepOpen = false): Promise<RpgState> {
   if (!(await page.getByRole("button", { name: "Save on device" }).isVisible()))
     await page.getByRole("button", { name: "Open game menu" }).click();
   await page.getByRole("button", { name: "Save on device" }).click();
@@ -42,7 +42,7 @@ async function storedState(page: Page): Promise<RpgState> {
         request.onerror = () => reject(request.error);
       }),
   );
-  await page.getByRole("button", { name: "Close panel" }).click();
+  if (!keepOpen) await page.getByRole("button", { name: "Close panel" }).click();
   return value as RpgState;
 }
 
@@ -93,14 +93,14 @@ test("equip a bow and ammunition, choose ranged styles, hit at seven tiles, and 
   await page.getByRole("button", { name: "Cooked shrimp, 1" }).first().click();
   await page.getByRole("button", { name: "Eat" }).click();
   await expect
-    .poll(async () => (await storedState(page)).player.health)
+    .poll(async () => (await storedState(page, true)).player.health)
     .toBeGreaterThan(7);
 
   await page.getByRole("button", { name: "Open inventory" }).click();
   await page.getByRole("button", { name: "Mosswood shortbow, 1" }).click();
   await page.getByRole("button", { name: "Equip", exact: true }).click();
   await expect
-    .poll(async () => (await storedState(page)).player.equipment.weapon)
+    .poll(async () => (await storedState(page, true)).player.equipment.weapon)
     .toBe("shortbow");
   await page.getByRole("button", { name: "Open inventory" }).click();
   await page
@@ -118,17 +118,17 @@ test("equip a bow and ammunition, choose ranged styles, hit at seven tiles, and 
   ]);
   await style.selectOption("accurate");
   await expect
-    .poll(async () => (await storedState(page)).control.style)
+    .poll(async () => (await storedState(page, true)).control.style)
     .toBe("accurate");
   await page.getByRole("button", { name: "Open inventory" }).click();
   await style.selectOption("rapid");
   await expect
-    .poll(async () => (await storedState(page)).control.style)
+    .poll(async () => (await storedState(page, true)).control.style)
     .toBe("rapid");
   await page.getByRole("button", { name: "Open inventory" }).click();
   await style.selectOption("longrange");
   await expect
-    .poll(async () => (await storedState(page)).control.style)
+    .poll(async () => (await storedState(page, true)).control.style)
     .toBe("longrange");
 
   const prepared = await storedState(page);
@@ -168,7 +168,7 @@ test("equip a bow and ammunition, choose ranged styles, hit at seven tiles, and 
     .getByRole("button", { name: "Attack now" })
     .click();
   await expect
-    .poll(async () => (await storedState(page)).player.skills.ranged, {
+    .poll(async () => (await storedState(page, true)).player.skills.ranged, {
       timeout: 20000,
     })
     .toBeGreaterThan(0);
@@ -264,7 +264,7 @@ test("original V3 saves migrate to V5, remain playable, and preserve the V3 reco
   await page.getByRole("button", { name: "Cooked shrimp, 1" }).first().click();
   await page.getByRole("button", { name: "Eat" }).click();
   await expect
-    .poll(async () => (await storedState(page)).player.health, {
+    .poll(async () => (await storedState(page, true)).player.health, {
       timeout: 10000,
     })
     .toBeGreaterThan(2);

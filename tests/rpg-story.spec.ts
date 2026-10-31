@@ -13,7 +13,7 @@ async function importState(page: Page, state: unknown) {
   });
 }
 
-async function snapshot(page: Page): Promise<RpgState> {
+async function snapshot(page: Page, keepOpen = false): Promise<RpgState> {
   if (!(await page.getByRole("button", { name: "Save on device" }).isVisible()))
     await page.getByRole("button", { name: "Open game menu" }).click();
   await page.getByRole("button", { name: "Save on device" }).click();
@@ -34,7 +34,7 @@ async function snapshot(page: Page): Promise<RpgState> {
         request.onerror = () => reject(request.error);
       }),
   );
-  await page.getByRole("button", { name: "Close panel" }).click();
+  if (!keepOpen) await page.getByRole("button", { name: "Close panel" }).click();
   return value as RpgState;
 }
 
@@ -89,7 +89,7 @@ test("inspecting Ren’s charcoal ledger advances the accepted forge to supplies
     .getByRole("button", { name: "Do now" })
     .click();
   await expect
-    .poll(async () => (await snapshot(page)).quests.forge.stageId, {
+    .poll(async () => (await snapshot(page, true)).quests.forge.stageId, {
       timeout: 12000,
     })
     .toBe("supplies");
@@ -137,7 +137,7 @@ test("River Letters dialogue records the chosen scouting branch", async ({
     .getByRole("button", { name: "Scout three river markers" })
     .click();
   await expect
-    .poll(async () => (await snapshot(page)).quests.letters, { timeout: 10000 })
+    .poll(async () => (await snapshot(page, true)).quests.letters, { timeout: 10000 })
     .toMatchObject({
       accepted: true,
       stageId: "scout-reed",

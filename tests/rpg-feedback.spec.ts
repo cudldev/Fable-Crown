@@ -14,7 +14,7 @@ async function importState(page: Page, state: unknown) {
   });
 }
 
-async function savedState(page: Page): Promise<RpgState> {
+async function savedState(page: Page, keepOpen = false): Promise<RpgState> {
   if (!(await page.getByRole("button", { name: "Save on device" }).isVisible()))
     await page.getByRole("button", { name: "Open game menu" }).click();
   await page.getByRole("button", { name: "Save on device" }).click();
@@ -35,7 +35,7 @@ async function savedState(page: Page): Promise<RpgState> {
         request.onerror = () => reject(request.error);
       }),
   );
-  await page.getByRole("button", { name: "Close panel" }).click();
+  if (!keepOpen) await page.getByRole("button", { name: "Close panel" }).click();
   return value as RpgState;
 }
 
@@ -72,7 +72,7 @@ test("clicked copper node offers and persists the matching training ambition", a
   ).toBeVisible();
   await actions.getByRole("button", { name: "Train Mining to 2" }).click();
   await expect
-    .poll(async () => (await savedState(page)).control.goal)
+    .poll(async () => (await savedState(page, true)).control.goal)
     .toMatchObject({
       kind: "skill",
       skill: "mining",
@@ -111,7 +111,7 @@ test("mining shows progress then announces one copper and the level-up reward", 
     .toBeGreaterThan(firstProgress);
   await page.screenshot({ path: "docs/screenshots/interaction-cycle.png" });
   await expect
-    .poll(async () => (await savedState(page)).player.skills.mining, {
+    .poll(async () => (await savedState(page, true)).player.skills.mining, {
       timeout: 15000,
     })
     .toBe(XP_THRESHOLDS[1] + 75);
@@ -228,13 +228,13 @@ test("Walk recovers energy and Run consumes it while the movement choice persist
     .click();
   await page.getByRole("button", { name: "Do now" }).click();
   await expect
-    .poll(async () => (await savedState(page)).player.runEnergy)
+    .poll(async () => (await savedState(page, true)).player.runEnergy)
     .toBeGreaterThan(5000);
   const walking = await savedState(page);
   expect(walking.control.running).toBe(false);
   await page.getByRole("button", { name: "Toggle running" }).click();
   await expect
-    .poll(async () => (await savedState(page)).player.runEnergy)
+    .poll(async () => (await savedState(page, true)).player.runEnergy)
     .toBeLessThan(walking.player.runEnergy);
   await page.reload();
   await expect(page.getByTestId("rpg-world")).toBeVisible();

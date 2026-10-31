@@ -23,7 +23,7 @@ async function importState(page: Page, state: unknown) {
   });
 }
 
-async function saveState(page: Page): Promise<RpgState> {
+async function saveState(page: Page, keepOpen = false): Promise<RpgState> {
   if (!(await page.getByRole("button", { name: "Save on device" }).isVisible()))
     await page.getByRole("button", { name: "Open game menu" }).click();
   await page.getByRole("button", { name: "Save on device" }).click();
@@ -44,7 +44,7 @@ async function saveState(page: Page): Promise<RpgState> {
         request.onerror = () => reject(request.error);
       }),
   );
-  await page.getByRole("button", { name: "Close panel" }).click();
+  if (!keepOpen) await page.getByRole("button", { name: "Close panel" }).click();
   return value as RpgState;
 }
 
@@ -119,10 +119,11 @@ test("manual map movement is acknowledged and reaches its tile across mobile lay
     "Accepted",
   );
   await expect
-    .poll(async () => (await saveState(page)).player.position, {
+    .poll(async () => (await saveState(page, true)).player.position, {
       timeout: 10000,
     })
     .toEqual(target);
+  await page.getByRole("button", { name: "Close panel" }).click();
 
   await page.screenshot({ path: "docs/screenshots/feel-desktop.png" });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -180,7 +181,7 @@ test("rapid bow and arrow equip conserves all gear without waiting between comma
 
   await expect
     .poll(async () => {
-      const saved = await saveState(page);
+      const saved = await saveState(page, true);
       return { weapon: saved.player.equipment.weapon, ammo: saved.player.ammo };
     })
     .toEqual({
