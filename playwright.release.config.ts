@@ -8,6 +8,6 @@ export default defineConfig({
   projects: [
     { name: "core", testMatch: "**/rpg-acceptance.spec.ts" },
     { name: "controls", testMatch: "**/rpg-inputs.spec.ts", grep: /left click mines|touch hold/ },
-    { name: "shell", testMatch: "**/rpg-three.spec.ts", grep: /world shell and save controls|voxel is the default|3D camera and touch|default voxel world reloads offline|unavailable WebGL/ },
+    { name: "shell", testMatch: "**/rpg-three.spec.ts", grep: /world shell and save controls|default voxel world reloads offline|unavailable WebGL/ },
   ],
 });

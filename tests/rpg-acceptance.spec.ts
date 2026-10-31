@@ -199,14 +199,14 @@ test("quest ambition persists and real carried supplies complete a delivery", as
 }) => {
   await page.goto("./?chapter=3");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
+  // Freeze the real worker only while checking durable ambition storage.
+  await page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
   const state = fixture();
   const giver = objectById("quest-forge")!;
   state.player.position = { ...interactionTiles(giver)[0]! };
   state.player.previousPosition = { ...state.player.position };
-  state.player.inventory.push(
-    { itemId: "logs", quantity: 6 },
-    { itemId: "bronze-bar", quantity: 6 },
-  );
+  // Keep this first ambition unfinished while the persisted goal is observed.
+  // The separate delivery fixture below carries the complete supplies.
   await importState(page, state);
   await page.getByRole("button", { name: /Inspect Master smith Ren/ }).click({ button: "right" });
   await page.getByRole("menuitem", { name: "More options", exact: true }).click();
@@ -226,6 +226,8 @@ test("quest ambition persists and real carried supplies complete a delivery", as
   if (await dismiss.isVisible()) await dismiss.click();
   await importState(page, delivery);
   await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  // The delivery phase must advance normally, including its real material use.
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
   await page.getByRole("button", { name: "Inspect Master smith Ren" }).click({ button: "right" });
   await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.evaluate(() => {

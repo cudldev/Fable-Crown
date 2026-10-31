@@ -12,7 +12,7 @@ export default defineConfig({
     "**/rpg-pixel-cast.spec.ts", "**/rpg-render-style.spec.ts",
     "**/rpg-shore-outline.spec.ts", "**/rpg-sky.spec.ts",
     "**/rpg-sprite-lighting.spec.ts", "**/rpg-view-distance.spec.ts",
-    "**/rpg-visual-settings.spec.ts", "**/rpg-voxel*.spec.ts",
+    "**/rpg-three.spec.ts", "**/rpg-visual-settings.spec.ts", "**/rpg-voxel*.spec.ts",
     "**/rpg-water*.spec.ts",
   ],
 });
