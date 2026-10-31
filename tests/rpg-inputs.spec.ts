@@ -23,6 +23,10 @@ test("left click mines, right click offers options without acting, Escape cancel
   await node.click({ button: "right" });
   const menu = page.getByRole("menu", { name: "World actions" });
   await expect(menu.getByRole("menuitem", { name: `Mine ${ore.name}`, exact: true })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveCount(0);
+  await node.click({ button: "right" });
+  await expect(menu).toBeVisible();
   await expect(page.getByTestId("hud-work-status")).toHaveCount(0);
   await menu.getByRole("menuitem", { name: "Examine", exact: true }).click();
   await expect(page.getByRole("region", { name: "Object actions" })).toContainText("Requires mining");

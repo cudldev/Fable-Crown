@@ -786,6 +786,9 @@ export class ThreeRuntime {
       if (selected) { contextAt = performance.now(); this.props.onContextMenu?.(selected, { x: event.clientX, y: event.clientY }); }
     };
     const down = (event: PointerEvent) => {
+      // A new secondary click is a fresh request, even just after a prior menu.
+      // Keep the touch-hold guard for its synthesized contextmenu event only.
+      if (event.button === 2) { contextAt = -Infinity; return; }
       if (event.button !== 0) return;
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       this.clearClickIndicator();

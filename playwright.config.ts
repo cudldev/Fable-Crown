@@ -6,6 +6,7 @@ export default defineConfig({
   timeout: process.env.CI ? 300000 : 150000,
   expect: { timeout: process.env.CI ? 60000 : 5000 },
   use: {
+    actionTimeout: process.env.CI ? 60000 : 20000,
     baseURL: process.env.DEMO_URL || "http://127.0.0.1:4174/",
     channel: process.env.CI ? undefined : "chrome",
     headless: true,

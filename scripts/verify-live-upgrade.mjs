@@ -48,7 +48,11 @@ try {
   } else {
     const before = JSON.parse(await readFile(baselinePath, 'utf8'));
     await page.evaluate(async () => (await navigator.serviceWorker.ready).update());
-    const expected = JSON.parse(await readFile('dist/world-assets.json', 'utf8'));
+    const localAssets = JSON.parse(await readFile('dist/world-assets.json', 'utf8'));
+    const response = await context.request.get(base + 'world-assets.json?release=' + Date.now());
+    expect(response.ok()).toBe(true);
+    const expected = await response.json();
+    expect(expected.files).toEqual(localAssets.files);
     await expect.poll(() => page.evaluate(() => caches.keys()), { timeout: 120000 }).toContain('fable-art-' + expected.version);
     await page.reload({ waitUntil: 'domcontentloaded' });
     const world = page.getByTestId('rpg-world');

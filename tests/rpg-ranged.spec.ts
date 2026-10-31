@@ -163,6 +163,8 @@ test("equip a bow and ammunition, choose ranged styles, hit at seven tiles, and 
       Math.abs(prepared.player.position.y - enemy.position.y),
     ),
   ).toBe(7);
+  // Keep the seven-tile target clear of HUD overlays at the new close starting zoom.
+  for (let i = 0; i < 4; i++) await page.getByRole("button", { name: "Zoom out", exact: true }).click();
   await page.getByRole("button", { name: /Inspect Moss boar/ }).click({ button: "right" });
   await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page

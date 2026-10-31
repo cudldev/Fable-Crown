@@ -5,17 +5,14 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
-  id-token: write
 concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      demo_url: ${{ steps.build.outputs.demo_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,29 +28,79 @@ jobs:
       - name: Test
         run: npm run test -- --run
       - name: Build for repository URL
+        id: build
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           REPO="${GITHUB_REPOSITORY#*/}"
           OWNER="${GITHUB_REPOSITORY%%/*}"
-          if [ "$REPO" = "$OWNER.github.io" ]; then BASE="/"; else BASE="/$REPO/"; fi
+          if [ "${REPO,,}" = "${OWNER,,}.github.io" ]; then BASE="/"; else BASE="/$REPO/"; fi
           echo "Building with Vite base $BASE"
-          echo "DEMO_URL=http://127.0.0.1:4174$BASE" >> "$GITHUB_ENV"
+          echo "demo_url=http://127.0.0.1:4174$BASE" >> "$GITHUB_OUTPUT"
           npm run build -- --base="$BASE"
       - name: Validate built asset paths and PWA scope
         run: npm run check:dist
+      - name: Share validated site
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-site
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+
+  browser:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    env:
+      DEMO_URL: ${{ needs.validate.outputs.demo_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Download validated site
+        uses: actions/download-artifact@v4
+        with:
+          name: validated-site
+          path: dist/
       - name: Install browser for acceptance checks
         run: npx playwright install --with-deps chromium
       - name: Verify playable demo
         timeout-minutes: 60
-        run: npm run test:browser -- --max-failures=1
+        run: npm run test:browser -- --shard=${{ matrix.shard }}/4 --max-failures=1
       - name: Save browser failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-failure-evidence
+          name: browser-failure-evidence-${{ matrix.shard }}
           path: test-results/
           retention-days: 7
+
+  deploy:
+    needs: [validate, browser]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download validated site
+        uses: actions/download-artifact@v4
+        with:
+          name: validated-site
+          path: dist/
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
