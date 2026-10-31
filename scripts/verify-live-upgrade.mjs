@@ -54,8 +54,15 @@ try {
     expect(response.ok()).toBe(true);
     const expected = await response.json();
     expect(expected.files).toEqual(localAssets.files);
-    await expect.poll(() => page.evaluate(() => caches.keys()), { timeout: 120000 }).toContain('fable-art-' + expected.version);
-    // Opening a cache precedes addAll and activation; wait for the real swap.
+    const expectedCaches = ['fable-art-' + expected.version, 'fable-v3-' + expected.version].sort();
+    // An opened target cache plus an old activated worker is not a completed
+    // upgrade. Installation can still be running (or have failed).
+    await expect.poll(() => page.evaluate(async () => (await caches.keys()).filter(key => key.startsWith('fable-')).sort()), { timeout: 120000 }).toEqual(expectedCaches);
+    await expect.poll(() => page.evaluate(async version => {
+      const cache = await caches.open('fable-v3-' + version);
+      const manifest = await cache.match(new URL('world-assets.json', location.href));
+      return manifest ? (await manifest.json()).version : null;
+    }, expected.version), { timeout: 120000 }).toBe(expected.version);
     await page.waitForFunction(async () => {
       const registration = await navigator.serviceWorker.ready;
       return !registration.installing && !registration.waiting && registration.active?.state === 'activated';
@@ -64,12 +71,13 @@ try {
     const world = page.getByTestId('rpg-world');
     await expect(world).toHaveAttribute('data-status', 'ready', { timeout: 60000 });
     await expect(world).toHaveAttribute('data-terrain-source', 'vox', { timeout: 60000 });
+    expect(await page.evaluate(async () => (await (await fetch('world-assets.json')).json()).version)).toBe(expected.version);
     const after = await readSave(page);
     expect(after.player.inventory).toEqual(before.state.player.inventory);
     expect(after.player.skills).toEqual(before.state.player.skills);
     expect(after.player.equipment).toEqual(before.state.player.equipment);
     const cacheKeys = await page.evaluate(() => caches.keys());
-    expect(cacheKeys.filter(k => k.startsWith('fable-')).sort()).toEqual(['fable-art-' + expected.version, 'fable-v3-' + expected.version].sort());
+    expect(cacheKeys.filter(k => k.startsWith('fable-')).sort()).toEqual(expectedCaches);
     await context.setOffline(true);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(world).toHaveAttribute('data-status', 'ready', { timeout: 60000 });

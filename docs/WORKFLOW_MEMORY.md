@@ -133,10 +133,11 @@
 
 - Final CI boundary: test:release has2non-GPU worker/save/offline/mobile smoke cases. GPU interactions and visual/performance suites are local; verify real public WebGL after publish.
 
-- Current live releasebc8d95f / Actions41193001537 verified2026-10-31; d3e8285fd472. Canonical integrated checkout tmp/release-publication. CI2non-GPU smoke cases; visual/GPU suites local. Wait for SW activation before upgrade reload; hold save fixtures via real Pause/Save.
+- Current live release69ec2b0 / Actions41207899992 verified2026-10-31;6f743b19f563. Canonical integrated checkout tmp/release-publication. CI2non-GPU smoke cases; visual/GPU suites local. Wait for SW activation before upgrade reload; hold save fixtures via real Pause/Save.
 
 - Async rendering: voxel assets decode in a worker; runtime LOD stages at2ms/32768cells and commits≤1replacement/frame; started visible jobs finish first, with stable4m batches,6m prefetch and140ms opaque dither swaps. GI slices at~4ms; final GPU uploads remain synchronous. Keep identical capped levels shared.
 - Streaming benchmark: scripts/benchmark-streaming.mjs LABEL; BENCH_DIST selects an isolated original. Run original→changed→original serially; see performance/async-streaming. Pass is integrated and published from tmp/release-publication. New local GPU regression: rpg-voxel-streaming.spec.ts; mobile controls use Tools.
 - First overview hitch diagnosed: shader-profile.json records934ms frame/~880ms waiting on11new shader programs. Startup now warms direct/HDR/overview/post variants before HUD; first overview links0new programs. See performance/async-streaming/README.md; diagnosis only.
 - Startup now gates all HUD/world input through ScenePreparation; initial HTML also explains loading. Precompile actual direct/HDR/overview/post targets before ready; abort context loss, require current GI version. New rpg-startup tests cover offline/error/noHUDflash and0first-overview links.
 - Combined release is now live from tmp/release-publication, including latest glass-vial/action-ring UI. Publish only after other project chats finish; local visual coverage77active/1priorwaiver, release CI stays2non-GPU smoke cases.
+- LOD continuity benchmark: performance/voxel-continuity; adequate detail means actualLOD≤budget target. Global pending age includes prefetch. Upgrade verification waits for the exact target caches and cached manifest, not merely an activated old worker. Use NODE_USE_SYSTEM_CA=1 for Node HTTPS here.
