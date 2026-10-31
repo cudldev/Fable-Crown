@@ -1,5 +1,7 @@
 # Camera-motion stutter pass
 
+Published [bb15261](https://github.com/cudldev/Fable-Crown/commit/bb152612ffa8337a162f5dc52a08db3584561d19), [CI/deployment](https://github.com/cudldev/Fable-Crown/actions/runs/41240407019) passed. Public artifact `769d378dd7f6` verified 2026-10-31: actual WebGL, desktop/phone orientations, FPS visibility, offline reload and previous cached-save upgrade; zero page/console/GL/request/external errors. No physical-phone performance claim.
+
 Real held-pointer pans cross8m/16m world boundaries in the actual game. Forest anchor42,90; open grassland222,72 has zero visible tree targets and at least11.4m observed clearance beyond a conservative horizon+5m bound. Open loaded-plant medians remain9343phone/9485–9690desktop versus9343baseline, so the comparison retains meaningful ground foliage. All trials keep37native templates, native terrain, zero new motion shader links and zero GL errors.
 
 Chrome/headless on i9-10850K/RTX5070Ti, CPU4×, DPR1,1280×800 and390×844. Two180-frame trials per route/profile; table shows first / repeat. No builds/tests/other browsers run concurrently with timing. NPCs continue600ms ticks; different wall durations can change their positions. This is host emulation, not physical-mobile measurement.
