@@ -140,7 +140,8 @@ test("talking to a nearby villager adds one dialogue entry to the message log", 
   npc.bank = [{ itemId: "logs", quantity: 64 }];
   await importState(page, state);
 
-  await page.getByRole("button", { name: `Inspect ${npc.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${npc.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   const details = page.getByRole("region", { name: "Character details" });
   await expect(details).toContainText(npc.name);
   await details.getByRole("button", { name: "Talk" }).click();
@@ -180,7 +181,8 @@ test("mining reward stays in world feedback while an expanded message log remain
   await page
     .getByRole("button", { name: `Inspect ${node.name}` })
     .first()
-    .click();
+    .click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   const actions = page.getByRole("region", { name: "Object actions" });
   await actions.getByLabel("Quantity").selectOption("1");
   await actions.getByRole("button", { name: "Gather 1 Copper ore" }).click();

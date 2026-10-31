@@ -1,0 +1,195 @@
+{
+  "version": "1c5e92e6f77bda4d",
+  "files": [
+    "art3d/voxel/tree.vox",
+    "art3d/voxel/anvil.vox",
+    "art3d/voxel/barrel.vox",
+    "art3d/voxel/crate.vox",
+    "art3d/voxel/ore-copper.vox",
+    "art3d/voxel/ore-tin.vox",
+    "art3d/voxel/ore-iron.vox",
+    "art3d/voxel/ore-coal.vox",
+    "art3d/voxel/ore-depleted.vox"
+  ],
+  "assets": [
+    {
+      "id": "tree",
+      "file": "tree.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        34,
+        35,
+        0
+      ],
+      "cutHeight": 0.5
+    },
+    {
+      "id": "anvil",
+      "file": "anvil.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        11,
+        6,
+        0
+      ]
+    },
+    {
+      "id": "barrel",
+      "file": "barrel.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        7,
+        7,
+        0
+      ]
+    },
+    {
+      "id": "crate",
+      "file": "crate.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        7,
+        7,
+        0
+      ]
+    },
+    {
+      "id": "ore-copper",
+      "file": "ore-copper.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        13,
+        14,
+        0
+      ],
+      "depletedAsset": "ore-depleted"
+    },
+    {
+      "id": "ore-tin",
+      "file": "ore-tin.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        13,
+        14,
+        0
+      ],
+      "depletedAsset": "ore-depleted"
+    },
+    {
+      "id": "ore-iron",
+      "file": "ore-iron.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        13,
+        14,
+        0
+      ],
+      "depletedAsset": "ore-depleted"
+    },
+    {
+      "id": "ore-coal",
+      "file": "ore-coal.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        13,
+        14,
+        0
+      ],
+      "depletedAsset": "ore-depleted"
+    },
+    {
+      "id": "ore-depleted",
+      "file": "ore-depleted.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        13,
+        14,
+        0
+      ]
+    }
+  ],
+  "source": "assets/explorations/voxel/trellis-oak-softlight-v1/vox-01/asset.vox",
+  "sources": {
+    "anvil": {
+      "source": "assets/explorations/voxel/prop-batch-anvil-v1/vox-02/asset.vox",
+      "sha256": "aa96d16b59254bf4c7b890b3da5023ebabc800e702134726c3b0185b70d1580c",
+      "operation": "Exact native source copy"
+    },
+    "barrel": {
+      "source": "assets/explorations/voxel/prop-batch-barrel-v1/vox-02/asset.vox",
+      "sha256": "36d4a899ac22b37dd563e4394c469d125b9994c2279336a5c94470123ef6e28e",
+      "operation": "Exact native source copy"
+    },
+    "crate": {
+      "source": "assets/explorations/voxel/prop-batch-crate-v1/vox-02/asset.vox",
+      "sha256": "e4f461ba55d7189999c82fcccef11fce1ebb320464ffabcc720befa9f66b7d89",
+      "operation": "Exact native source copy"
+    },
+    "ore-copper": {
+      "source": "assets/explorations/voxel/prop-batch-copper-ore-v1/vox-02/asset.vox",
+      "sha256": "82cb10275c54167a436043d50ab4de7fa91c3baa6984d3d7815df4ed7b47b6ab",
+      "operation": "Reviewed copper geometry; only copper-group palette entries changed to copper",
+      "grid": [
+        26,
+        28,
+        12
+      ],
+      "occupiedCells": 3932,
+      "components": 1,
+      "groundCells": 550
+    },
+    "ore-tin": {
+      "source": "assets/explorations/voxel/prop-batch-copper-ore-v1/vox-02/asset.vox",
+      "sha256": "905eb1b000110638aba8c9d8a79ffeae4df32daf92b408774e1618f4858b2d59",
+      "operation": "Reviewed copper geometry; only copper-group palette entries changed to tin",
+      "grid": [
+        26,
+        28,
+        12
+      ],
+      "occupiedCells": 3932,
+      "components": 1,
+      "groundCells": 550
+    },
+    "ore-iron": {
+      "source": "assets/explorations/voxel/prop-batch-copper-ore-v1/vox-02/asset.vox",
+      "sha256": "8764f77d76a8109c80d2e6cd97fa9a155be9059c6ed841501922a2267b1ad754",
+      "operation": "Reviewed copper geometry; only copper-group palette entries changed to iron",
+      "grid": [
+        26,
+        28,
+        12
+      ],
+      "occupiedCells": 3932,
+      "components": 1,
+      "groundCells": 550
+    },
+    "ore-coal": {
+      "source": "assets/explorations/voxel/prop-batch-copper-ore-v1/vox-02/asset.vox",
+      "sha256": "0f305b3e4e82f59d0751b2e90c8ad9588909e351109f5035b0ee3d8d08e21b4f",
+      "operation": "Reviewed copper geometry; only copper-group palette entries changed to coal",
+      "grid": [
+        26,
+        28,
+        12
+      ],
+      "occupiedCells": 3932,
+      "components": 1,
+      "groundCells": 550
+    },
+    "ore-depleted": {
+      "source": "assets/explorations/voxel/prop-batch-copper-ore-v1/vox-02/asset.vox",
+      "sha256": "4320e2c04fb91091cf0a46df0ae80bb8ab4ec0128a223fde4ce583c6d95c9062",
+      "operation": "Explicit neutral mined-rock state: grouped stepped tops at4–6cells (0.25–0.375m); original grid/pivot retained",
+      "grid": [
+        26,
+        28,
+        12
+      ],
+      "occupiedCells": 2545,
+      "components": 1,
+      "groundCells": 550
+    }
+  },
+  "publication": "Reviewed first prop batch at shared0.0625m pitch; ore variants/depleted state are explicit native derivatives"
+}

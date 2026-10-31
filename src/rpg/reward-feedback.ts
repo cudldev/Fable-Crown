@@ -63,6 +63,23 @@ export function rewardFeedback(
         startedAt: now,
       });
   }
+  // Damage follows committed hits, never a guessed animation or a health snapshot.
+  for (const effect of next.effects) {
+    if (effect.id <= previous.effectSequence || effect.kind !== "hit" || !effect.targetPosition) continue;
+    const damage = effect.amount ?? 0;
+    floaters.push({
+      id: `hit-${effect.id}`,
+      text: damage > 0 ? `−${damage}` : "Miss",
+      tone: damage > 0 ? effect.targetId === "player" ? "player-damage" : "damage" : "miss",
+      position: { ...effect.targetPosition },
+      targetId: effect.targetId,
+      startedAt: now,
+    });
+  }
+  if (next.player.health > previous.player.health && next.player.position.worldId === previous.player.position.worldId) {
+    floaters.push({ id: `heal-${next.tick}-${next.player.health}`, text: `+${next.player.health - previous.player.health} HP`,
+      tone: "heal", position: { ...next.player.position }, startedAt: now });
+  }
   return {
     floaters: floaters.slice(-8),
     gains,

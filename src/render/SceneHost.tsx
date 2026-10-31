@@ -1,10 +1,10 @@
 import { Component, lazy, Suspense, type ReactNode } from "react";
-import TileScene, { type TileSceneProps } from "./TileScene";
+import type { TileSceneProps } from "./scene-types";
 
 const ThreeScene = lazy(() => import("./ThreeScene"));
 
 class RendererBoundary extends Component<
-  { children: ReactNode; onFallback: () => void },
+  { children: ReactNode },
   { failed: boolean }
 > {
   state = { failed: false };
@@ -12,24 +12,20 @@ class RendererBoundary extends Component<
   render() {
     return this.state.failed ? (
       <div className="loading-screen" role="alert">
-        <h2>The 3D view could not start</h2>
-        <p>Your journey can continue in the painterly view.</p>
-        <button onClick={this.props.onFallback}>Use painterly renderer</button>
+        <h2>The voxel world could not start</h2>
+        <p>Try reloading with WebGL2 enabled. Your saved chapter is kept on this device.</p>
+        <button onClick={() => location.reload()}>Retry voxel renderer</button>
       </div>
     ) : this.props.children;
   }
 }
 
-/** Both views consume the same snapshots; switching never restarts the worker. */
-export function SceneHost({ mode, onFallback, ...props }: TileSceneProps & {
-  mode: "painterly" | "3d";
-  onFallback: () => void;
-}) {
-  if (mode !== "3d") return <TileScene {...props} />;
+/** Rendering consumes immutable snapshots independently of the simulation worker. */
+export function SceneHost(props: TileSceneProps) {
   return (
-    <RendererBoundary onFallback={onFallback}>
-      <Suspense fallback={<div className="loading-screen">Opening the 3D village…</div>}>
-        <ThreeScene {...props} onFallback={onFallback} />
+    <RendererBoundary>
+      <Suspense fallback={<div className="loading-screen">Opening the voxel village…</div>}>
+        <ThreeScene {...props} />
       </Suspense>
     </RendererBoundary>
   );

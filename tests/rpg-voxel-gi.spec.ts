@@ -1,0 +1,56 @@
+import { test, expect } from "@playwright/test";
+import { mkdir, writeFile } from "node:fs/promises";
+import { createRpg } from "../src/rpg/engine";
+
+test("cached GI, AO and FPS work in the actual world with independent controls and invalidation", async ({ page, context }) => {
+  const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
+  page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d");
+  const world = page.getByTestId("rpg-world"); await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
+  const fixture = createRpg(Date.now(), 8128);
+  Object.assign(fixture.control, { waiting: true, goal: null, active: null, source: null, queue: [], thought: null, thinkingUntil: 1_000_000_000 }); fixture.player.path = [];
+  await page.getByRole("button", { name: "Open game menu" }).click();
+  await page.locator('input[type="file"]').setInputFiles({ name: "lighting-fixture.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(fixture)) });
+  await expect(page.getByRole("status")).toContainText("Chronicle restored"); await page.getByRole("button", { name: "Close panel" }).click();
+  await page.getByRole("button", { name: "Day lighting" }).click();
+  await expect.poll(async () => Number(await world.getAttribute("data-gi-applied")), { timeout: 60000 }).toBeGreaterThan(0);
+  await expect(page.getByTestId("fps-indicator")).toHaveText(/\d+ FPS · \d+\.\d ms/);
+  const version = Number(await world.getAttribute("data-gi-applied")); expect(version).toBeGreaterThan(0);
+  const output = "docs/art-audit/voxel-lighting-v1"; await mkdir(output, { recursive: true });
+  const sample = async () => page.evaluate(async () => {
+    const intervals: number[] = []; let previous = performance.now();
+    for (let i = 0; i < 90; i++) { const now = await new Promise<number>(resolve => requestAnimationFrame(resolve)); intervals.push(now - previous); previous = now; }
+    intervals.sort((a, b) => a - b);
+    const gl = document.querySelector<HTMLCanvasElement>('[data-testid="three-canvas"]')!.getContext("webgl2")!, extension = gl.getExtension("WEBGL_debug_renderer_info");
+    return { counters: { ...document.querySelector<HTMLElement>('[data-renderer="3d"]')!.dataset }, rafMedianMs: intervals[45], rafP95Ms: intervals[85], viewport: [innerWidth, innerHeight], gpu: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : "unavailable", browser: navigator.userAgent };
+  });
+  const both = await sample(); await page.screenshot({ path: output + "/world-gi-ao.png" });
+  await page.getByRole("button", { name: "Global illumination", exact: true }).click();
+  const ao = await sample(); await page.screenshot({ path: output + "/world-ao.png" });
+  await page.getByRole("button", { name: "Ambient occlusion", exact: true }).click();
+  const off = await sample(); await page.screenshot({ path: output + "/world-off.png" });
+  expect(Number(await world.getAttribute("data-gi-applied"))).toBeGreaterThanOrEqual(version);
+  await page.getByRole("button", { name: "Global illumination", exact: true }).click();
+  const gi = await sample(); await page.screenshot({ path: output + "/world-gi.png" });
+  await page.getByRole("button", { name: "Ambient occlusion", exact: true }).click();
+  await page.getByRole("button", { name: "Night lighting" }).click();
+  await expect(world).toHaveAttribute("data-gi-lighting", "night", { timeout: 60000 });
+  const night = await sample(); await page.screenshot({ path: output + "/world-night.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByTestId("fps-indicator")).toBeVisible(); const phone = await sample(); await page.screenshot({ path: output + "/world-phone.png" });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
+  const depletedBefore = Number(await world.getAttribute("data-gi-depleted"));
+  Object.values(fixture.resources).forEach(resource => { resource.available = false; resource.respawnAt = 1_000_000_000; });
+  await page.getByRole("button", { name: "Open game menu" }).click();
+  await page.locator('input[type="file"]').setInputFiles({ name: "lighting-harvest.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(fixture)) });
+  await expect(page.getByRole("status")).toContainText("Chronicle restored"); await page.getByRole("button", { name: "Close panel" }).click();
+  await expect.poll(async () => Number(await world.getAttribute("data-gi-depleted")), { timeout: 60000 }).toBeGreaterThan(depletedBefore + 10);
+  const harvested = await sample(); await page.screenshot({ path: output + "/world-harvested.png" });
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  await context.setOffline(true); await page.reload();
+  await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
+  await expect.poll(async () => Number(await world.getAttribute("data-gi-applied")), { timeout: 60000 }).toBeGreaterThan(0);
+  await expect(page.getByTestId("fps-indicator")).toHaveText(/\d+ FPS · \d+\.\d ms/);
+  expect(errors).toEqual([]);
+  await writeFile(output + "/browser-review.json", JSON.stringify({ both, ao, off, gi, night, phone, harvested, errors, offlineGIRebuild: true, physicalPhoneTest: false, note: "Host-browser frame cadence and asynchronous GPU timing, not physical mobile performance. Solve time is worker latency, not per-frame GPU time. Sampled GPU readings vary with the rest of the scene and do not isolate effect overhead." }, null, 2) + "\n");
+});

@@ -4,6 +4,8 @@ import "./intention-readout.css";
 interface Props {
   view: IntentionView;
   waiting: boolean;
+  autoplay: boolean;
+  onAutoplay: () => void;
   onThoughts: () => void;
   onFocus: () => void;
   onWait: () => void;
@@ -12,6 +14,8 @@ interface Props {
 export function IntentionReadout({
   view,
   waiting,
+  autoplay,
+  onAutoplay,
   onThoughts,
   onFocus,
   onWait,
@@ -30,6 +34,7 @@ export function IntentionReadout({
         <small className="plan-source">
           {waiting
             ? "ALDEN IS PAUSED"
+            : !autoplay ? "MANUAL CONTROL"
             : view.source === "player"
               ? "YOUR ORDER"
               : "ALDEN’S PLAN"}
@@ -59,6 +64,9 @@ export function IntentionReadout({
         )}
       </button>
       <div className="plan-controls">
+        <button aria-label="Autoplay" aria-pressed={autoplay} onClick={onAutoplay}>
+          Autoplay {autoplay ? "on" : "off"}
+        </button>
         <button
           aria-label="Show Alden's destination"
           disabled={!view.targetPosition}

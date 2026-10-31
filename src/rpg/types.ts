@@ -232,18 +232,22 @@ export type RpgOrder =
       objectId: string;
       verb: "talk" | "inspect" | "use" | "practice";
       itemId?: string;
+      /** A default click talks once, without authorizing autonomous quest pursuit. */
+      once?: boolean;
     }
   | { type: "travel-service"; objectId: string }
   | { type: "talk-actor"; actorId: number }
   | { type: "gate"; objectId: string; open: boolean };
 export type RpgCommand =
   | RpgOrder
+  | { type: "cancel" }
   | { type: "enqueue"; order: RpgOrder }
   | { type: "goal"; goal: Ambition }
   | { type: "planner-profile"; profile: PlannerProfile }
   | { type: "reconsider" }
   | { type: "style"; skill: CombatStyle }
   | { type: "run"; enabled: boolean }
+  | { type: "autoplay"; enabled: boolean }
   | { type: "dialogue-choice"; choiceId: string }
   | { type: "cancel-order"; index: number }
   | { type: "reorder-order"; index: number; direction: -1 | 1 }
@@ -362,8 +366,16 @@ export interface RpgState {
     retryAt: number;
   } | null;
   control: {
+    /** Missing in older chapters means enabled. Manual world orders turn it off until explicitly enabled. */
+    autoplay?: boolean;
+    /** Permission to finish one explicitly chosen ambition while autoplay is off. */
+    manualGoal?: boolean;
     /** Older V3 saves default to running when energy permits. */
     running?: boolean;
+    /** Safe autonomous travel recovery; the route and committed order stay intact. */
+    staminaResting?: boolean;
+    /** A manual Run/Walk choice holds until the current intention finishes. */
+    paceOverride?: boolean;
     waiting: boolean;
     active: RpgOrder | null;
     source?: "player" | "autonomous" | null;

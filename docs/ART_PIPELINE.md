@@ -1,4 +1,10 @@
-# Blender MCP asset workflow
+# Blender MCP asset workflow (legacy models and review tools)
+
+Current art direction: [warm storybook voxel fantasy](ART_DIRECTION.md). Use [colored image -> TRELLIS -> VOX](VOXEL_PIPELINE.md), with [source-image rules](VOXEL_REFERENCE_GENERATION.md) and [migration gates](VOXEL_ASSET_MIGRATION.md). The Blender/GLB workflow below documents retained models and review tools, not the current visual target.
+
+Earlier non-voxel character studies follow [the researched sculpt-to-game workflow](CHARACTER_MODELING_WORKFLOW.md): approve the sculpted form, then retopologize, test deformation, unwrap and paint/bake. Review small actual Blender previews with the user before advancing. The ink blockout is rejected as the final topology; its successful export is only a technical test. Voxel characters require reviewed proportions and articulated parts before replacing existing animation.
+
+Proposed image-assisted sculpt generation: [local tool design](LOCAL_SCULPT_TOOL.md). No generator is installed or verified yet.
 
 This is the editable workflow for the optional 3D experiment. Current deliverables are reviewed drafts, not a claim that the target art quality or a complete production animation library has been achieved.
 

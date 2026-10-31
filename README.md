@@ -1,8 +1,11 @@
 # Fable Crown
 
+> Current actor update (2026-10-30): the user approved the full pixel billboard cast in the voxel world. See [cast implementation](docs/PIXEL_CAST.md) and [generation skill](skills/fable-pixel-characters/SKILL.md). Earlier voxel-volume/rig requirements for characters and enemies below are superseded; environment migration and gameplay contracts remain.
+
+
 [Play the demo](https://cudldev.github.io/Fable-Crown/) · [Tile RPG plan](docs/TILE_RPG_PLAN.md) · [Progress](docs/PROGRESS.md)
 
-A painterly autonomous RPG on a 256 × 192 isometric tile world with three settlements and 24 characters. Alden follows persistent ambitions; you guide his thoughts or give direct and queued orders. The Old School RuneScape reference informs tile movement, skills and preparation; the setting, quests and generated art are original.
+An autonomous RPG targeting warm storybook voxel fantasy on a 256 × 192 tile world with three settlements and 24 characters. Alden follows persistent ambitions; you guide his thoughts or give direct and queued orders. The Old School RuneScape reference informs tile movement, skills and preparation; the setting, quests and generated art are original.
 
 Ten skills progress separately: Woodcutting, Mining, Smithing, Fishing, Cooking, Attack, Strength, Defence, Hitpoints and Ranged. Gather trees, ores and fish with appropriate tools; smelt, smith and cook; trade real supplies for tools, armour, bows and ammunition. A 28-slot backpack, separate equipment and connected personal bank support longer journeys. Villagers keep their own supplies.
 
@@ -16,7 +19,7 @@ Oakrest’s paths connect the manor, workshop, woods, quarry, farm and riverbank
 
 Tap a resource to choose a goal such as gathering ore or reaching a Mining level. Alden handles tools, prerequisites, travel, depleted nodes and full backpacks. Direct single actions and queued orders remain available. Circular rings show action cycles; reward floaters show items, XP and level-ups. The dock tracks the latest skill and XP remaining to its next level. Ores, logs and food occupy one backpack slot per item; coins, bait and feathers stack. Bank totals remain aggregated.
 
-Messages expands a persistent history of conversations, quest progress, discoveries, level-ups and important problems. All/Events/Dialogue filters keep it readable. Routine item and XP gains stay in the world. Painted action phases, contact sounds, arrows and hit reactions follow committed simulation results.
+Messages expands a persistent history of conversations, quest progress, discoveries, level-ups and important problems. All/Events/Dialogue filters keep it readable. Routine item and XP gains stay in the world. Visible action phases, contact sounds, arrows and hit reactions follow committed simulation results.
 
 Walk/Run shows remaining energy. Running takes up to two legal tile steps and consumes energy; exhaustion switches to walking. Walking, waiting and stationary work restore energy. The chosen movement mode persists across reloads. A new ambition replaces the current action, and pending orders remain editable. Quest visits retain that quest as an ambition. Automatic banking stores spare tools when they obstruct crafting; completed quests show delivered supplies instead of an empty requirement count.
 
@@ -32,12 +35,12 @@ Progress saves in IndexedDB. V5 copies existing V4/V3 progress while retaining e
 
 ## Development and hosting
 
-An optional [3D renderer test](docs/THREE_RENDERER_TEST.md) is available locally with `?renderer=3d`, or through **Game menu → Use 3D test renderer**. It uses original low-poly pixel-textured assets and realtime lighting while sharing the existing simulation and saves. Add `&assetReview=1` for the independent art workbench. Seven editable Blender models, the [Blender MCP workflow](docs/ART_PIPELINE.md), and a [modeling skill](skills/fable-3d-art/SKILL.md) support further art iteration. The painterly view remains the default; switch back in the menu. This test is not a claim of a new public deployment.
+The voxel world with the approved pixel billboard cast is the only gameplay renderer. It opens at the ordinary game URL; old renderer/character query parameters cannot restore retired styles. Native VOX trees and flat ground are integrated; remaining buildings/props still use environment placeholders. Open `?assetReview=1` for the read-only art workbench. Painterly and ink/fitted character experiments are excluded from the release; source artwork stays archived.
 
 Node 22.15+: `npm ci`, then `npm run dev`. Checks: `npm test`, `npm run typecheck`, `npm run build`, `npm run check:dist`, `npm run test:browser`. Chrome is used locally; CI installs Chromium. Playwright starts production preview. For Pages subpath verification set `GITHUB_REPOSITORY=cudldev/Fable-Crown` when building, and `DEMO_URL=http://127.0.0.1:4174/Fable-Crown/` for browser tests. Rebuild after changing the base; do not share a build directory across concurrent builds.
 
 GitHub Settings → Pages → Source: **GitHub Actions**. Push to main runs the gates and deploys. `GITHUB_REPOSITORY` derives the subpath; `VITE_BASE_PATH` overrides it. PWA scope is relative. No server, secret, API key, telemetry, hosted inference or required third-party runtime call.
 
-The deterministic TypeScript simulation is independent of rendering and uses 600 ms integer ticks. Canvas projects logical tiles into the painterly isometric view. [Original artwork and exact prompts](assets/generated/README.md) remain versioned. Characters use limited painted-cutout animation. Multiplayer, Grand Exchange, advanced combat, detailed social routines and optional browser-local narrative models remain outside this slice. Browser emulation is tested; no physical-device/FPS claim is made. Use one game tab per device.
+The deterministic TypeScript simulation is independent of rendering and uses 600 ms integer ticks. Three.js presents the voxel world independently of the simulation. [Original artwork and exact prompts](assets/generated/README.md) remain versioned. Characters use the approved pixel billboards and separate held tools. Multiplayer, Grand Exchange, advanced combat, detailed social routines and optional browser-local narrative models remain outside this slice. Browser emulation is tested; no physical-device/FPS claim is made. Use one game tab per device.
 
 React/React DOM and Three.js are MIT licensed; dependency licenses accompany npm packages. Reference collages and older generated backdrops are retained as sources and never loaded by the tile game.

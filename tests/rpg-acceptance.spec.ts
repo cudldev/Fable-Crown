@@ -94,7 +94,8 @@ test("enemy inspection, combat XP and loot, plus recoverable grave UI", async ({
   state.player.previousPosition = { ...adjacent! };
   enemy.health = 1;
   await importState(page, state);
-  await page.getByRole("button", { name: /Inspect Moss boar/ }).click();
+  await page.getByRole("button", { name: /Inspect Moss boar/ }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Enemy actions" }),
   ).toContainText("Health 1/");
@@ -124,7 +125,8 @@ test("enemy inspection, combat XP and loot, plus recoverable grave UI", async ({
   await importState(page, recoverable);
   await page
     .getByRole("button", { name: "Inspect your backpack grave" })
-    .click();
+    .click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Recovery actions" }),
   ).toContainText("Logs ×2");
@@ -146,7 +148,8 @@ test("quest ambition persists and real carried supplies complete a delivery", as
     { itemId: "bronze-bar", quantity: 6 },
   );
   await importState(page, state);
-  await page.getByRole("button", { name: /Inspect Master smith Ren/ }).click();
+  await page.getByRole("button", { name: /Inspect Master smith Ren/ }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByRole("button", { name: "Make this my ambition" }).click();
   await expect
     .poll(async () => (await snapshot(page)).control.goal?.questId)
@@ -163,7 +166,8 @@ test("quest ambition persists and real carried supplies complete a delivery", as
   if (await dismiss.isVisible()) await dismiss.click();
   await importState(page, delivery);
   await expect(page.getByRole("status")).toContainText("Chronicle restored");
-  await page.getByRole("button", { name: "Inspect Master smith Ren" }).click();
+  await page.getByRole("button", { name: "Inspect Master smith Ren" }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByRole("button", { name: "Do now" }).click();
   await expect
     .poll(async () => (await snapshot(page)).quests.forge?.accepted)
@@ -242,14 +246,12 @@ test("world assets install to cache and shell reloads offline", async ({
   const decoded = await page.evaluate(async () => {
     const base = new URL("./", location.href);
     const manifest = await (
-      await fetch(new URL("art/manifest.json", base))
+      await fetch(new URL("world-assets.json", base))
     ).json();
     return Promise.all(
       manifest.files.map(async (path: string) => {
-        const image = new Image();
-        image.src = new URL(path, base).href;
-        await image.decode();
-        return image.naturalWidth > 0;
+        const response = await fetch(new URL(path, base));
+        return response.ok && (await response.arrayBuffer()).byteLength > 0;
       }),
     );
   });

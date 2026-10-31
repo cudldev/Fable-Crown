@@ -1,5 +1,11 @@
 # Optional 3D renderer test
 
+> Current renderer update — 2026-10-30: The former 3D test is now the default and only gameplay renderer. Open the ordinary game URL; `?assetReview=1` opens the current workbench. Historical switching and character-study instructions below are retired.
+
+> Rendering update (2026-10-30): the game now uses normal display resolution with antialiasing and a 2× density cap. Pixelated mode and its selector are removed; old device preferences cannot enable it. Character sprites and voxel artwork are preserved.
+
+> Current direction (2026-10-30): [warm storybook voxel fantasy](ART_DIRECTION.md). This document records the earlier renderer experiment and existing switch/default behavior. Pixel-textured low-poly assets and painterly artwork below are retained fallbacks during the [voxel migration](VOXEL_ASSET_MIGRATION.md).
+
 User-authorized experiment, 2026-10-30: chunky RuneScape-inspired 3D shapes, coarse pixel textures, compact JRPG characters, muted colours and atmospheric realtime lighting. The existing painterly renderer remains the default. This is a presentation experiment on the current RPG, not a new progression chapter.
 
 ## Open the test

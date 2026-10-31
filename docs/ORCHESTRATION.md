@@ -1,5 +1,7 @@
 # Codex Handover — Lead Orchestrator and Specialist Subagents
 
+> Art update (2026-10-30): [warm storybook voxel fantasy](ART_DIRECTION.md) is current. Earlier painterly/illustrated presentation wording below is historical; gameplay and simulation contracts remain in force. See [voxel migration](VOXEL_ASSET_MIGRATION.md).
+
 ## Objective
 Use one lead Codex agent to coordinate the autonomous HD-2D RPG implementation, delegating bounded tasks to specialist subagents when the installed Codex environment supports them. The lead remains responsible for design consistency, integration, verification, and milestone acceptance. This is a **development-time** arrangement; it is unrelated to the browser-local Qwen narrative model used by the game at runtime.
 

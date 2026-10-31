@@ -83,7 +83,8 @@ test("inspecting Ren’s charcoal ledger advances the accepted forge to supplies
   state.player.position = { ...interactionTiles(ledger)[0]! };
   state.player.previousPosition = { ...state.player.position };
   await importState(page, state);
-  await page.getByRole("button", { name: `Inspect ${ledger.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${ledger.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page
     .getByRole("region", { name: "Object actions" })
     .getByRole("button", { name: "Do now" })
@@ -124,7 +125,8 @@ test("River Letters dialogue records the chosen scouting branch", async ({
   state.player.position = { ...interactionTiles(giver)[0]! };
   state.player.previousPosition = { ...state.player.position };
   await importState(page, state);
-  await page.getByRole("button", { name: `Inspect ${giver.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${giver.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page
     .getByRole("region", { name: "Object actions" })
     .getByRole("button", { name: "Talk" })
@@ -149,6 +151,23 @@ test("River Letters dialogue records the chosen scouting branch", async ({
 test("ferry passage stays locked until River Letters is complete, then charges five coins", async ({
   page,
 }) => {
+  // Observe committed worker snapshots: autonomy can move on before a slow save/UI
+  // round trip samples the brief arrival tile. The journey itself must still occur.
+  await page.addInitScript(() => {
+    const GameWorker = window.Worker;
+    window.Worker = class extends GameWorker {
+      constructor(...args: ConstructorParameters<typeof Worker>) {
+        super(...args);
+        this.addEventListener("message", event => {
+          const state = event.data?.state as RpgState | undefined;
+          if (!state?.player) return;
+          const samples = JSON.parse(sessionStorage.getItem("ferry-test-snapshots") || "[]");
+          samples.push({ position: state.player.position, coins: state.player.inventory.find(item => item.itemId === "coins")?.quantity });
+          sessionStorage.setItem("ferry-test-snapshots", JSON.stringify(samples.slice(-64)));
+        });
+      }
+    };
+  });
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("./?chapter=3");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
@@ -162,7 +181,8 @@ test("ferry passage stays locked until River Letters is complete, then charges f
   if (lockedCoins) lockedCoins.quantity = 10;
   else locked.player.inventory.push({ itemId: "coins", quantity: 10 });
   await importState(page, locked);
-  await page.getByRole("button", { name: `Inspect ${ferry.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${ferry.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   const actions = page.getByRole("region", { name: "Object actions" });
   await actions.getByRole("button", { name: "Examine" }).click();
   await expect(actions).toContainText(
@@ -195,24 +215,18 @@ test("ferry passage stays locked until River Letters is complete, then charges f
   if (coins) coins.quantity = 10;
   else unlocked.player.inventory.push({ itemId: "coins", quantity: 10 });
   await importState(page, unlocked);
-  await page.getByRole("button", { name: `Inspect ${ferry.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${ferry.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page
     .getByRole("region", { name: "Object actions" })
     .getByRole("button", { name: "Do now" })
     .click();
   await expect
     .poll(
-      async () => {
-        const result = await snapshot(page);
-        return {
-          position: result.player.position,
-          coins: result.player.inventory.find((item) => item.itemId === "coins")
-            ?.quantity,
-        };
-      },
+      () => page.evaluate(() => JSON.parse(sessionStorage.getItem("ferry-test-snapshots") || "[]")),
       { timeout: 12000 },
     )
-    .toEqual({
+    .toContainEqual({
       position: FERRIES["ferry-west"].destination,
       coins: 5,
     });

@@ -15,6 +15,11 @@ export const ASSET_CATALOG = Object.freeze({
   crate: { footprint: [1, 1], requiredNodes: [], maxTriangles: 1500, maxNodes: 100, height: [.2, 2], maxSpan: 2.5 },
   lantern: { footprint: [1, 1], requiredNodes: [], maxTriangles: 1500, maxNodes: 100, height: [.15, 2], maxSpan: 2.5 },
 });
+// Separate opt-in experiment: do not add it to the seven-model pixel catalog.
+export const INK_STUDY_SPEC = Object.freeze({
+  footprint: [1, 1], requiredNodes: ["body", "leftArm", "rightArm", "leftLeg", "rightLeg", "tool", "cape"],
+  maxTriangles: 32000, maxNodes: 180, height: [1.3, 2.5], maxSpan: 2,
+});
 const validInteger = (value) => Number.isSafeInteger(value) && value >= 0;
 const finiteArray = (value, size) => Array.isArray(value) && value.length === size && value.every(Number.isFinite);
 const fail = (message) => { throw Error(message); };
@@ -23,20 +28,21 @@ const components = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT2: 4, MAT3: 9, MAT
 const componentBytes = { 5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4 };
 const componentReaders = { 5120: "readInt8", 5121: "readUInt8", 5122: "readInt16LE", 5123: "readUInt16LE", 5125: "readUInt32LE", 5126: "readFloatLE" };
 
-export function inspectPng(buffer) {
+export function inspectPng(buffer, requiredSize = 512) {
   demand(buffer.length >= 33 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) && buffer.toString("ascii", 12, 16) === "IHDR", "Atlas is not a complete PNG header.");
   const width = buffer.readUInt32BE(16), height = buffer.readUInt32BE(20);
-  demand(width === 512 && height === 512, `Atlas must be 512x512, got ${width}x${height}.`);
+  demand(width === requiredSize && height === requiredSize, `Atlas must be ${requiredSize}x${requiredSize}, got ${width}x${height}.`);
   return { width, height, bytes: buffer.length };
 }
 
 /** Check the exported payload, not an importer mock. Does not mutate files or invoke Blender. */
 export function inspectGlb(input, id) {
-  const spec = ASSET_CATALOG[id];
+  const inkStudy = id === "alden-ink";
+  const spec = inkStudy ? INK_STUDY_SPEC : ASSET_CATALOG[id];
   demand(spec, `Unknown asset ${id}.`);
   const buffer = Buffer.from(input);
   demand(buffer.length >= 28, `${id}: truncated GLB header.`);
-  demand(buffer.length < 1024 * 1024, `${id}: GLB exceeds the 1MiB budget.`);
+  demand(buffer.length < (inkStudy ? 3 : 1) * 1024 * 1024, `${id}: GLB exceeds the ${inkStudy ? 3 : 1}MiB budget.`);
   demand(buffer.readUInt32LE(0) === 0x46546c67 && buffer.readUInt32LE(4) === 2, `${id}: expected glTF2 binary magic/version.`);
   demand(buffer.readUInt32LE(8) === buffer.length, `${id}: declared GLB length differs from payload.`);
   const chunks = [];
@@ -86,9 +92,9 @@ export function inspectGlb(input, id) {
     } };
   });
   demand(Array.isArray(json.meshes) && json.meshes.length > 0, `${id}: missing meshes.`);
-  demand(Array.isArray(json.materials) && json.materials.length > 0 && json.materials.length <= 2, `${id}: expected one atlas material, at most two with emission.`);
-  if (json.materials.length === 2) demand(json.materials.some(material => material.emissiveTexture || material.emissiveFactor?.some(value => value > 0)), `${id}: a second material requires emission.`);
-  demand(Array.isArray(json.samplers) && json.samplers.length === 1 && json.samplers[0].magFilter === 9728 && [9728, 9984].includes(json.samplers[0].minFilter), `${id}: use one shared nearest pixel sampler.`);
+  demand(Array.isArray(json.materials) && json.materials.length > 0 && json.materials.length <= (inkStudy ? 4 : 2), `${id}: ${inkStudy ? "expected at most four authored ink/paint materials" : "expected one atlas material, at most two with emission"}.`);
+  if (!inkStudy && json.materials.length === 2) demand(json.materials.some(material => material.emissiveTexture || material.emissiveFactor?.some(value => value > 0)), `${id}: a second material requires emission.`);
+  demand(Array.isArray(json.samplers) && json.samplers.length === 1 && json.samplers[0].magFilter === (inkStudy ? 9729 : 9728) && (inkStudy ? [9729, 9985, 9987] : [9728, 9984]).includes(json.samplers[0].minFilter), `${id}: use one shared ${inkStudy ? "linear watercolor" : "nearest pixel"} sampler.`);
   demand(Array.isArray(json.images) && json.images.length === 1 && Array.isArray(json.textures) && json.textures.length >= 1, `${id}: expected one embedded atlas image.`);
   const atlas = json.images[0];
   let atlasBytes;
@@ -99,7 +105,7 @@ export function inspectGlb(input, id) {
     demand(atlas.mimeType === "image/png" && validInteger(atlas.bufferView) && views[atlas.bufferView], `${id}: atlas must be an embedded PNG buffer view.`);
     atlasBytes = views[atlas.bufferView].data;
   }
-  inspectPng(atlasBytes);
+  const atlasMetrics = inspectPng(atlasBytes, inkStudy ? 1024 : 512);
   for (const texture of json.textures) demand((texture.sampler ?? 0) === 0 && texture.source === 0, `${id}: all textures must use the shared pixel atlas and sampler.`);
   for (const material of json.materials) demand(validInteger(material.pbrMetallicRoughness?.baseColorTexture?.index) && json.textures[material.pbrMetallicRoughness.baseColorTexture.index], `${id}: material must reference the atlas texture.`);
   let primitives = 0, triangles = 0, vertices = 0;
@@ -165,7 +171,7 @@ export function inspectGlb(input, id) {
   demand(bounds.min.y >= -.08 && bounds.min.y <= .15, `${id}: model feet/base must meet Y=0 (minimum ${bounds.min.y}).`);
   demand(size.y >= spec.height[0] && size.y <= spec.height[1] && size.x >= .05 && size.z >= .05 && size.x <= spec.maxSpan && size.z <= spec.maxSpan, `${id}: implausible Y-up model bounds (${size.toArray()}).`);
   return { bytes: buffer.length, triangles, vertices, meshes: json.meshes.length, primitives, nodes: json.nodes.length, materials: json.materials.length,
-    bounds: { min: bounds.min.toArray(), max: bounds.max.toArray(), size: size.toArray() }, atlas: { width: 512, height: 512 } };
+    bounds: { min: bounds.min.toArray(), max: bounds.max.toArray(), size: size.toArray() }, atlas: { width: atlasMetrics.width, height: atlasMetrics.height } };
 }
 
 export async function checkArt3d({ write = false } = {}) {

@@ -230,7 +230,7 @@ select {
   min-width: 230px;
   padding: 10px 12px;
 }
-.hero-status img {
+.hero-status :is(img, .unit-portrait) {
   width: 40px;
   height: 56px;
   object-fit: cover;
@@ -776,7 +776,7 @@ hr {
     gap: 7px;
     max-width: calc(100% - 174px);
   }
-  .hero-status img {
+  .hero-status :is(img, .unit-portrait) {
     width: 28px;
     height: 43px;
   }
@@ -878,7 +878,7 @@ hr {
   }
 }
 @media (max-width: 370px) {
-  .hero-status img {
+  .hero-status :is(img, .unit-portrait) {
     display: none;
   }
   .hero-status strong {
@@ -916,7 +916,7 @@ hr {
   .hero-status {
     padding: 7px 12px;
   }
-  .hero-status img {
+  .hero-status :is(img, .unit-portrait) {
     height: 42px;
   }
   .camera-controls {

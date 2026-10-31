@@ -52,4 +52,18 @@ describe("presentation of committed rewards", () => {
       remaining: 0,
     });
   });
+  it("shows committed hits at victims once, distinguishes misses and player damage", () => {
+    const before = createRpg(NOW), after = structuredClone(before);
+    const target = after.enemies[0];
+    after.effectSequence = 3;
+    after.effects = [
+      { id: 1, tick: 1, kind: "hit", actorId: "player", position: before.player.position, targetId: target.id, targetPosition: target.position, amount: 3, success: true },
+      { id: 2, tick: 1, kind: "hit", actorId: target.id, position: target.position, targetId: "player", targetPosition: after.player.position, amount: 2, success: true },
+      { id: 3, tick: 1, kind: "hit", actorId: "player", position: before.player.position, targetId: target.id, targetPosition: target.position, amount: 0, success: false },
+    ];
+    const result = rewardFeedback(before, after, 200);
+    expect(result.floaters.map(value => [value.text, value.tone])).toEqual([["−3", "damage"], ["−2", "player-damage"], ["Miss", "miss"]]);
+    expect(result.floaters[0].position).toEqual(target.position);
+    expect(rewardFeedback(after, after, 300).floaters).toEqual([]);
+  });
 });

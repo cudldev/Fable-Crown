@@ -1,5 +1,7 @@
 # Tile RPG implementation — approved 2026-10-29
 
+> Art update (2026-10-30): [warm storybook voxel fantasy](ART_DIRECTION.md) is current. Earlier painterly/illustrated presentation wording below is historical; gameplay and simulation contracts remain in force. See [voxel migration](VOXEL_ASSET_MIGRATION.md).
+
 Character-first, painterly isometric OSRS-style autonomous RPG. Pure tile simulation separate from rendering; 600ms ticks. Main world256×192,32×32 chunks,24 actors,three settlements. Nine skills:Woodcutting,Mining,Smithing,Fishing,Cooking,Attack,Strength,Defence,Hitpoints. Bronze/iron/steel tiers,28-slot bag, equipment, connected personal bank, NPC shops, resource depletion/respawn, seeded actions, melee/food/loot and recoverable backpack graves. Old chapters archived; V3 starts fresh. Quest/service/route unlocks replace settlement-first progression. Persistent ambitions and prerequisite planning drive autonomous play;2–3 meaningful thought choices never block progress. Approved current artwork and original setting retained; no pixel art, paid API or required LLM.
 
 Stages/gates:1 tile foundation+save+sample chunk;2 items/skills/logistics/autonomous tool acquisition;3 combat/quests/ambitions;4 art/UI/mobile/offline/public verification. Every gate runnable, testable, typechecked and built. Current live release stays on main until all gates pass. Keep the full approved scope if allowance runs out: checkpoint, no paid/banked reset, no claim of completion.

@@ -6,6 +6,11 @@
   margin: 3px;
   border-radius: 3px;
 }
+.world-context-menu { position: fixed; z-index: 30; width: 236px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow: auto; padding: 5px; background: #24373b; color: #f5e6bd; border: 1px solid #c4ae74; border-radius: 4px; box-shadow: 0 5px 18px #10253070; }
+.world-context-menu small { display: block; padding: 7px 8px; font: 11px system-ui; color: #c4b790; }
+.world-context-menu button { display: block; width: 100%; min-height: 44px; text-align: left; border: 0; border-radius: 2px; background: transparent; color: inherit; padding: 8px; font: 12px/1.4 system-ui; }
+.world-context-menu button:hover, .world-context-menu button:focus-visible { background: #4b6055; outline: 1px solid #c4ae74; }
+.world-context-menu button:first-of-type { color: #ffe0a0; font-weight: 700; }
 .rpg-skill-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -117,6 +122,44 @@
 .rpg-backpack .item-food {
   background: #e8d4ba;
 }
+.rpg-shell .rpg-backpack { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.rpg-shell .rpg-backpack button { min-height: 76px; height: auto; text-align: left; padding: 8px; border-bottom-width: 3px; }
+.rpg-shell .rpg-backpack span { font: 600 11px/1.35 system-ui; overflow-wrap: anywhere; }
+.rpg-shell .rpg-backpack small { margin-top: 6px; font: 10px/1.2 system-ui; color: #4b5a50; }
+.rpg-shell .rpg-backpack .empty { min-height: 48px; }
+.bag-capacity { display: block; width: 100%; height: 9px; accent-color: #75885e; }
+.bag-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; margin: 12px 0; }
+.bag-tools label { display: grid; gap: 5px; min-width: 0; font: 11px system-ui; }
+.bag-tools label:first-child { grid-column: auto; }
+.bag-tools input, .bag-tools select { box-sizing: border-box; width: 100%; min-height: 44px; margin: 0; padding: 8px; background: #fcf5e5; color: #354945; border: 1px solid #a99a72; border-radius: 3px; }
+.bag-tools button { grid-column: auto; min-height: 44px; }
+.rpg-shell .inventory-drawer { width: 440px; }
+.bag-tools button[aria-pressed="true"] { background: #d5dfc5; }
+.bag-help { display: block; font: 11px/1.5 system-ui; }
+.hero-health { display: block; width: 100%; height: 8px; margin-top: 4px; accent-color: #7cca9a; }
+.hero-health::-webkit-progress-bar { background: #3c4f56; border-radius: 2px; }
+.hero-health::-webkit-progress-value { background: #7cca9a; transition: width .2s; border-radius: 2px; }
+.hero-health.low::-webkit-progress-value { background: #ef907d; }
+.hud-work { display: block; margin-top: 4px; }
+.hud-work progress { display: block; width: 100%; height: 8px; accent-color: #edc45e; }
+.hud-work progress::-webkit-progress-bar { background: #3c4f56; }
+.hud-work progress::-webkit-progress-value { background: #edc45e; transition: width .5s linear; }
+.hud-work small { font: 9px/1.5 system-ui; color: #f3d996; }
+.intention-dock[data-working="true"] .rpg-xp-inline progress, .intention-dock[data-working="true"] .rpg-xp-inline small { display: none; }
+.rpg-shell .rpg-messages, .rpg-shell .camera-controls { bottom: calc(var(--dock-height, 100px) + 26px); }
+.rpg-shell .thought-peek { bottom: calc(var(--dock-height, 100px) + 78px); }
+.rpg-shell[data-panel-open="true"] .thought-peek { bottom: calc(var(--dock-height, 100px) + 26px); }
+@media (max-width: 760px) {
+  .rpg-shell .inventory-drawer { width: auto; }
+  .rpg-shell .rpg-messages, .rpg-shell .camera-controls { bottom: calc(var(--dock-height, 100px) + 16px); }
+  .rpg-shell .drawer, .rpg-shell .context-panel, .rpg-shell .thought-panel { bottom: calc(var(--dock-height, 100px) + 16px); }
+  .rpg-shell .thought-peek { bottom: calc(var(--dock-height, 100px) + 66px); }
+  .rpg-shell[data-messages-open="true"] .thought-peek { bottom: calc(var(--dock-height, 100px) + 24px + min(320px, 45dvh)); }
+  .rpg-shell[data-panel-open="true"] .thought-peek { bottom: auto; }
+}
+.intention-readout button[aria-label="Autoplay"] { font-weight: 700; background: #ddd2b2; }
+.intention-readout button[aria-label="Autoplay"][aria-pressed="true"] { background: #d0ddbd; }
+@media (prefers-reduced-motion: reduce) { .hero-health::-webkit-progress-value, .hud-work progress::-webkit-progress-value { transition: none; } }
 .rpg-unlock {
   color: #82682f;
 }
@@ -341,7 +384,7 @@
     min-width: 0;
     padding: 6px 8px;
   }
-  .rpg-shell .hero-status img {
+  .rpg-shell .hero-status :is(img, .unit-portrait) {
     display: none;
   }
   .rpg-shell .doing-now {

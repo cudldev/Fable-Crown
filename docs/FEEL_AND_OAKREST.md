@@ -1,5 +1,7 @@
 # Approved gameplay feel and Oakrest release
 
+> Art update (2026-10-30): [warm storybook voxel fantasy](ART_DIRECTION.md) is current. Earlier painterly/illustrated presentation wording below is historical; gameplay and simulation contracts remain in force. See [voxel migration](VOXEL_ASSET_MIGRATION.md).
+
 Current user-approved scope: natural Alden movement first; OSRS tick rhythm with smooth painterly visuals; autonomous play with direct overrides; mixed village adventure; compact expandable prominent-message panel. Preserve the entire256×192 world, original art direction, all progression and old save archives. No new skills, Magic/Prayer, dungeons, hosted services or runtime APIs in this release.
 
 Sequential gates:

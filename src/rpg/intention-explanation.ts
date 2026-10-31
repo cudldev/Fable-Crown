@@ -109,8 +109,11 @@ function context(s: RpgState, goal: Ambition | null, depth = 0): Context {
 
 /** Read-only facts about the committed order and current state, never a planner or a narrative model. */
 export function explainIntention(s: RpgState): IntentionView {
-  const p = s.player, goal = s.control.goal, order = s.control.active, objective = context(s, goal);
-  const source = s.control.waiting ? "player" : s.control.source ?? "autonomous";
+  const p = s.player, goal = s.control.goal, order = s.control.active;
+  const objective: Context = s.control.autoplay === false && !s.control.manualGoal
+    ? { reason: "Autoplay is off; this is your selected task.", next: "Wait for your next order.", tag: "manual" }
+    : context(s, goal);
+  const source = s.control.waiting || s.control.autoplay === false && !s.control.active && !s.control.manualGoal ? "player" : s.control.source ?? "autonomous";
   const direct = source === "player" ? "Your order. " : "";
   let title = "Ready for the next requirement", reason = objective.reason, next = objective.next;
   let phase: IntentionView["phase"] = "ready", tag = order?.type ?? "goal", targetId: string | undefined, targetPosition: TilePosition | undefined;
@@ -164,7 +167,7 @@ export function explainIntention(s: RpgState): IntentionView {
     const enemy = s.enemies.find((entry) => entry.id === order.enemyId);
     if (enemy) { targetId = enemy.id; targetPosition = { ...enemy.position }; title = `${p.path.length ? "Approaching" : "Fighting"} ${ENEMIES[enemy.definitionId].name}`; }
     else blocked = "The selected enemy is no longer present.";
-    reason = `${direct}${objective.reason} Health ${p.health}/${levelForXp(p.skills.hitpoints)}; carried meals ${meals(s)}${ITEMS[p.equipment.weapon ?? ""]?.weaponType === "bow" ? `; loaded arrows ${p.ammo?.quantity ?? 0}` : ""}. Combat style: ${s.control.style}.`;
+    reason = `${direct}${s.control.autoplay === false && !s.control.manualGoal ? "Fight the selected enemy." : objective.reason} Health ${p.health}/${levelForXp(p.skills.hitpoints)}; carried meals ${meals(s)}${ITEMS[p.equipment.weapon ?? ""]?.weaponType === "bow" ? `; loaded arrows ${p.ammo?.quantity ?? 0}` : ""}. Combat style: ${s.control.style}.`;
     next = s.tick < s.control.eatReadyAt ? `Recover from the meal for ${Math.ceil((s.control.eatReadyAt - s.tick) * .6)} more seconds before attacking.` : objective.next;
   } else if (order?.type === "recover") {
     title = `${p.path.length ? "Approaching" : "Recovering"} the backpack grave`; targetId = "grave"; targetPosition = s.grave ? { ...s.grave.position } : undefined;
@@ -198,18 +201,32 @@ export function explainIntention(s: RpgState): IntentionView {
   } else if (s.dialogue) {
     phase = "wait"; tag = "dialogue"; title = "Choosing how to reply"; targetId = s.dialogue.targetId; targetPosition = { ...objectById(targetId)!.position };
     reason = s.dialogue.text; next = `Choose an option, or Alden will take “${s.dialogue.choices[0].label}” in ${Math.ceil(Math.max(0, s.dialogue.expiresAt - s.tick) * .6)} seconds.`;
+  } else if (s.control.autoplay === false && !s.control.manualGoal) {
+    title = "Ready for your next move"; tag = "manual";
+    reason = "Autoplay is off. Alden stays here between your orders.";
+    next = "Click or tap a tile, use WASD, or inspect a target. Turn Autoplay on to let Alden choose.";
   } else {
     target(objective.target);
     title = goal && goalMet(s, goal) ? `Finished ${goal.title}` : goal ? `Ready to continue ${goal.title}` : "Ready for an intention";
     if (s.grave && s.tick >= s.grave.retryAt) { title = "Ready to recover the backpack"; targetId = "grave"; targetPosition = { ...s.grave.position }; reason = "Backpack belongings remain at the grave; recovery takes priority when its retry window opens."; next = "Recover the remaining belongings before resuming the ambition."; tag = "recover"; }
     if (!(goal && goalMet(s, goal)) && /^(Blocked:|Cannot |No safe |No arrows |You need |Missing |Requires |Backpack full|Recover Iori|Prepare .*obtain|.*: need \d)/.test(s.control.reason)) blocked = s.control.reason;
   }
-  if (!s.control.waiting && p.path.length) {
+  if (!s.control.waiting && s.control.source === "autonomous" && s.control.staminaResting) {
+    phase = "wait"; tag = "stamina-rest"; title = "Resting to recover run energy";
+    reason = `Run energy ${Math.floor(p.runEnergy / 100)}%. Alden is saving strength for the long journey. His route and ambition are retained.`;
+    next = "Resume the same route at 60% run energy. Danger or a direct order interrupts the break.";
+    progress = { label: "Run energy recovery", value: Math.min(p.runEnergy, 6000), max: 6000 };
+    blocked = "";
+  } else if (!s.control.waiting && p.path.length) {
     phase = "travel";
     if (!/^(Travelling|Going to|Approaching|Retreating)/.test(title)) title = `Going to ${targetId ? objectById(targetId)?.name ?? title : title}`;
     const trace = p.movement?.tick === s.tick ? p.movement : null;
     progress = { label: `${p.path.length} tiles remaining`, value: trace ? trace.tiles.length - 1 : 0,
       max: trace ? trace.mode === "run" ? 2 : 1 : s.control.running !== false && p.runEnergy >= 60 ? 2 : 1 };
+    if (source === "autonomous") reason += s.control.paceOverride
+      ? " Following your Run/Walk choice for this intention."
+      : s.control.running !== false ? " Running to reach the next requirement sooner."
+      : " Walking to recover energy or finish a short approach; running resumes once energy reaches 40%.";
   } else if (!s.control.waiting && p.action && phase !== "wait") {
     phase = "work"; progress = { label: "Action progress", value: p.action.duration - p.action.remaining, max: p.action.duration };
   }
@@ -222,6 +239,8 @@ export function explainIntention(s: RpgState): IntentionView {
   if (result?.kind === "action-result" && result.actionKind === "craft" && result.success === false && result.tick === s.tick && !s.control.waiting)
     reason = `The last crafting attempt failed and awarded no success XP. ${reason}`;
   if (!s.control.waiting && s.control.queue.length) next = `Next queued: ${s.control.queue.slice(0, 2).map((pending) => orderName(s, pending)).join("; then ")}${s.control.queue.length > 2 ? "; further accepted orders remain" : ""}.`;
+  else if (!s.control.waiting && s.control.autoplay === false && !s.control.manualGoal && order && !bankDetour && !blocked && phase !== "wait")
+    next = "Finish this order, then stay here. Autoplay remains off.";
   const queueKey = s.control.queue.map((pending) => JSON.stringify(pending, (key, value) => key === "quantity" ? undefined : value)).join("|");
   const semantic = [source, goal?.id, objective.tag, targetId, order?.type === "move" ? order.position : "", order?.type === "craft" ? order.recipeId : "", order?.type === "equip" || order?.type === "eat" ? order.itemId : "", order?.type === "buy" || order?.type === "sell" || order?.type === "withdraw" ? order.itemId : "", order?.type === "attack" ? s.control.style : "", blocked.replace(/\d+/g, "#"), queueKey];
   return { tick: s.tick, key: `intent:${phase}:${tag}:${signature(JSON.stringify(semantic))}`, source, title: trim(title, 200), reason: trim(reason, 1000), next: trim(next, 500), phase,
