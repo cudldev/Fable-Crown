@@ -1,3 +1,4 @@
+import { uiTimeout } from "./ui-timeout";
 import { test, expect, type Page } from "@playwright/test";
 import {
   applyRpgCommand,
@@ -134,7 +135,7 @@ test("full backpack explains the bank detour and Pause holds Alden while the wor
           next.player.position.y === paused.player.position.y
         );
       },
-      { timeout: 15000 },
+      { timeout: uiTimeout(15000) },
     )
     .toBe(true);
   await expect
@@ -149,7 +150,7 @@ test("full backpack explains the bank detour and Pause holds Alden while the wor
           );
         });
       },
-      { timeout: 20000 },
+      { timeout: uiTimeout(20000) },
     )
     .toBe(true);
 
@@ -165,7 +166,7 @@ test("full backpack explains the bank detour and Pause holds Alden while the wor
             next.player.position.y !== held.player.position.y)
         );
       },
-      { timeout: 20000 },
+      { timeout: uiTimeout(20000) },
     )
     .toBe(true);
 });
@@ -199,7 +200,7 @@ test("forge explanation and actual plan history remain readable across desktop a
     .click();
   await expect
     .poll(async () => (await readSaved(page)).control.decisions?.length ?? 0, {
-      timeout: 15000,
+      timeout: uiTimeout(15000),
     })
     .toBeGreaterThan(decisionsBefore);
   await page.getByRole("button", { name: "Open thoughts" }).click();
@@ -339,7 +340,7 @@ test("personality preview applies without changing progress, and Alden's explici
           chosenId: saved.control.deliberation?.chosenId,
         };
       },
-      { timeout: 15000 },
+      { timeout: uiTimeout(15000) },
     )
     .toEqual({
       goalId: previewId,

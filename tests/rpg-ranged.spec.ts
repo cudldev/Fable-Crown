@@ -1,3 +1,4 @@
+import { uiTimeout } from "./ui-timeout";
 import { readFileSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { calendarDate, createRpg } from "../src/rpg/engine";
@@ -169,7 +170,7 @@ test("equip a bow and ammunition, choose ranged styles, hit at seven tiles, and 
     .click();
   await expect
     .poll(async () => (await storedState(page, true)).player.skills.ranged, {
-      timeout: 20000,
+      timeout: uiTimeout(20000),
     })
     .toBeGreaterThan(0);
   const fought = await storedState(page);
@@ -265,7 +266,7 @@ test("original V3 saves migrate to V5, remain playable, and preserve the V3 reco
   await page.getByRole("button", { name: "Eat" }).click();
   await expect
     .poll(async () => (await storedState(page, true)).player.health, {
-      timeout: 10000,
+      timeout: uiTimeout(10000),
     })
     .toBeGreaterThan(2);
   await page.reload();

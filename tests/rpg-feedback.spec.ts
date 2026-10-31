@@ -1,3 +1,4 @@
+import { uiTimeout } from "./ui-timeout";
 import { test, expect, type Page } from "@playwright/test";
 import { applyRpgCommand, createRpg } from "../src/rpg/engine";
 import { XP_THRESHOLDS } from "../src/rpg/skills";
@@ -98,6 +99,20 @@ test("mining shows progress then announces one copper and the level-up reward", 
     .click();
   const actions = page.getByRole("region", { name: "Object actions" });
   await actions.getByLabel("Quantity").selectOption("1");
+  // Observe real transient feedback before slow screenshots/save round trips can outlast it.
+  await page.evaluate(() => {
+    const xp = document.querySelector<HTMLElement>('[aria-label="Recent skill experience"]')!;
+    const announcement = document.querySelector<HTMLElement>('[aria-live="polite"][aria-atomic="true"]')!;
+    const samples = { xp: [] as string[], announcements: [] as string[] };
+    const capture = () => {
+      samples.xp.push(xp.textContent || ""); samples.announcements.push(announcement.textContent || "");
+      if (samples.xp.length > 30) samples.xp.shift(); if (samples.announcements.length > 30) samples.announcements.shift();
+    };
+    const observer = new MutationObserver(capture);
+    for (const target of [xp, announcement]) observer.observe(target, { subtree: true, childList: true, characterData: true });
+    (window as Window & { miningFeedbackSamples?: typeof samples }).miningFeedbackSamples = samples;
+    capture();
+  });
   await actions.getByRole("button", { name: "Gather 1 Copper ore" }).click();
   const progress = page.getByRole("progressbar", {
     name: "Mining action progress",
@@ -106,22 +121,22 @@ test("mining shows progress then announces one copper and the level-up reward", 
   const firstProgress = Number(await progress.getAttribute("aria-valuenow"));
   await expect
     .poll(async () => Number(await progress.getAttribute("aria-valuenow")), {
-      timeout: 10000,
+      timeout: uiTimeout(10000),
     })
     .toBeGreaterThan(firstProgress);
   await page.screenshot({ path: "docs/screenshots/interaction-cycle.png" });
   await expect
     .poll(async () => (await savedState(page, true)).player.skills.mining, {
-      timeout: 15000,
+      timeout: uiTimeout(15000),
     })
     .toBe(XP_THRESHOLDS[1] + 75);
-  const announcer = page.locator('[aria-live="polite"][aria-atomic="true"]');
-  await expect(announcer).toContainText("+1 Copper ore");
-  await expect(announcer).toContainText("+17.5 Mining XP");
-  await expect(announcer).toContainText("Mining level 2");
-  const xp = page.getByLabel("Recent skill experience");
-  await expect(xp).toContainText("Mining 2");
-  await expect(xp).toContainText("+17.5 XP");
+  await expect.poll(() => page.evaluate(() => {
+    const samples = (window as Window & { miningFeedbackSamples?: { xp: string[]; announcements: string[] } }).miningFeedbackSamples;
+    return {
+      announcement: samples?.announcements.some(text => text.includes("+1 Copper ore") && text.includes("+17.5 Mining XP") && text.includes("Mining level 2")) ?? false,
+      xp: samples?.xp.some(text => text.includes("Mining 2") && text.includes("+17.5 XP")) ?? false,
+    };
+  })).toEqual({ announcement: true, xp: true });
   await page.getByRole("button", { name: "Open inventory" }).click();
   await expect(
     page.getByRole("button", { name: /Copper ore, 1/ }),
@@ -272,7 +287,7 @@ test("Alden explains a stamina break and resumes autonomous running offline", as
   try {
     await page.reload();
     await expect(page.getByTestId("rpg-world")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Toggle running" })).toHaveAttribute("aria-pressed", "true", { timeout: 15000 });
+    await expect(page.getByRole("button", { name: "Toggle running" })).toHaveAttribute("aria-pressed", "true", { timeout: uiTimeout(15000) });
     const running = await savedState(page);
     expect(running.player.position).not.toEqual(state.player.position);
     expect(running.control.staminaResting).toBeUndefined();

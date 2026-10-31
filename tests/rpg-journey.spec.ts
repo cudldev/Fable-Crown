@@ -1,3 +1,4 @@
+import { uiTimeout } from "./ui-timeout";
 import { test, expect, type Page } from "@playwright/test";
 import { createRpg } from "../src/rpg/engine";
 import { interactionTiles, WORLD } from "../src/rpg/world";
@@ -92,7 +93,7 @@ test("minimap shows frontier markers and previews travel until confirmed", async
   await preview.getByRole("button", { name: "Travel here" }).click();
   await expect
     .poll(async () => (await snapshot(page, true)).player.position.x, {
-      timeout: 12000,
+      timeout: uiTimeout(12000),
     })
     .toBe(target.x);
   await page.getByRole("button", { name: "Close panel" }).click();
@@ -195,7 +196,7 @@ test("sound settings persist and missing AudioContext leaves gameplay available"
   ).toBeVisible();
   const before = (await snapshot(fallback)).tick;
   await expect
-    .poll(async () => (await snapshot(fallback, true)).tick, { timeout: 5000 })
+    .poll(async () => (await snapshot(fallback, true)).tick, { timeout: uiTimeout(5000) })
     .toBeGreaterThan(before);
   expect(errors).toEqual([]);
   await fallback.close();

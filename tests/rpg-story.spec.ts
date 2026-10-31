@@ -1,3 +1,4 @@
+import { uiTimeout } from "./ui-timeout";
 import { test, expect, type Page } from "@playwright/test";
 import { createRpg } from "../src/rpg/engine";
 import { FERRIES, interactionTiles, objectById } from "../src/rpg/world";
@@ -90,7 +91,7 @@ test("inspecting Ren’s charcoal ledger advances the accepted forge to supplies
     .click();
   await expect
     .poll(async () => (await snapshot(page, true)).quests.forge.stageId, {
-      timeout: 12000,
+      timeout: uiTimeout(12000),
     })
     .toBe("supplies");
 
@@ -137,7 +138,7 @@ test("River Letters dialogue records the chosen scouting branch", async ({
     .getByRole("button", { name: "Scout three river markers" })
     .click();
   await expect
-    .poll(async () => (await snapshot(page, true)).quests.letters, { timeout: 10000 })
+    .poll(async () => (await snapshot(page, true)).quests.letters, { timeout: uiTimeout(10000) })
     .toMatchObject({
       accepted: true,
       stageId: "scout-reed",
@@ -220,7 +221,7 @@ test("ferry passage stays locked until River Letters is complete, then charges f
   await expect
     .poll(
       () => page.evaluate(() => JSON.parse(sessionStorage.getItem("ferry-test-snapshots") || "[]")),
-      { timeout: 12000 },
+      { timeout: uiTimeout(12000) },
     )
     .toContainEqual({
       position: FERRIES["ferry-west"].destination,

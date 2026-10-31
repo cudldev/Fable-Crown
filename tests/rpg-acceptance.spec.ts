@@ -1,3 +1,4 @@
+import { uiTimeout } from "./ui-timeout";
 import { test, expect, type Page } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
@@ -83,11 +84,6 @@ async function snapshot(page: Page): Promise<RpgState> {
       attack: saved.player.skills.attack, savedAt: saved.savedAt, position: saved.player.position });
     sessionStorage.setItem("save-observation-trace", JSON.stringify(entries.slice(-160)));
   }, value as RpgState);
-  await page.evaluate(saved => {
-    const entries = JSON.parse(sessionStorage.getItem("save-observation-trace") || "[]");
-    entries.push({ event: "snapshot", at: performance.now(), tick: saved.tick, hp: saved.player.health, attack: saved.player.skills.attack, savedAt: saved.savedAt, position: saved.player.position });
-    sessionStorage.setItem("save-observation-trace", JSON.stringify(entries.slice(-160)));
-  }, value as RpgState);
   // Keep the save menu open while polling; closing it submits an unrelated GPU frame.
   return value as RpgState;
 }
@@ -121,7 +117,7 @@ test.skip("combat style selection and cooked food healing are authoritative", as
   await page.getByRole("button", { name: /Cooked shrimp, 1/ }).click();
   await page.getByRole("button", { name: "Eat" }).click();
   await expect
-    .poll(async () => (await snapshot(page)).player.health, { timeout: 15000 })
+    .poll(async () => (await snapshot(page)).player.health, { timeout: uiTimeout(15000) })
     .toBeGreaterThanOrEqual(5);
   const saved = await snapshot(page);
   expect(saved.control.style).toBe("defence");
@@ -156,7 +152,7 @@ test("enemy inspection, combat XP and loot, plus recoverable grave UI", async ({
   await page.getByRole("button", { name: "Attack now" }).click();
   await expect
     .poll(async () => (await snapshot(page)).player.skills.attack, {
-      timeout: 20000,
+      timeout: uiTimeout(20000),
     })
     .toBeGreaterThan(0);
   const fought = await snapshot(page);
@@ -234,7 +230,7 @@ test("quest ambition persists and real carried supplies complete a delivery", as
 
   await expect
     .poll(async () => (await snapshot(page)).quests.forge?.complete, {
-      timeout: 30000,
+      timeout: uiTimeout(30000),
     })
     .toBe(true);
   const done = await snapshot(page);
@@ -273,14 +269,14 @@ test("world assets install to cache and shell reloads offline", async ({
   await expect
     .poll(
       () => page.evaluate(() => Boolean(navigator.serviceWorker?.controller)),
-      { timeout: 15000 },
+      { timeout: uiTimeout(15000) },
     )
     .toBe(true);
   await page.getByRole("button", { name: "Open game menu" }).click();
   await page.getByRole("button", { name: /Save world offline/ }).click();
   await expect(
     page.getByRole("button", { name: "World saved offline" }),
-  ).toBeVisible({ timeout: 60000 });
+  ).toBeVisible({ timeout: uiTimeout(60000) });
   const cached = await page.evaluate(async () => {
     const keys = await caches.keys();
     const names = keys.filter((key) => key.startsWith("fable-art-"));
@@ -293,7 +289,7 @@ test("world assets install to cache and shell reloads offline", async ({
   expect(cached.count).toBeGreaterThan(10);
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByTestId("rpg-world")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("rpg-world")).toBeVisible({ timeout: uiTimeout(15000) });
   const decoded = await page.evaluate(async () => {
     const base = new URL("./", location.href);
     const manifest = await (
@@ -352,7 +348,7 @@ test("portrait and landscape fit, controls stay touch sized, and no remote runti
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
   await expect(page.locator(".doing-now")).not.toContainText("Considering", {
-    timeout: 10000,
+    timeout: uiTimeout(10000),
   });
   if (
     await page.getByRole("button", { name: "Dismiss notification" }).isVisible()

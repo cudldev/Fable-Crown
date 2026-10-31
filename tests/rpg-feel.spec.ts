@@ -1,3 +1,4 @@
+import { uiTimeout } from "./ui-timeout";
 import { readFileSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { calendarDate, createRpg } from "../src/rpg/engine";
@@ -120,7 +121,7 @@ test("manual map movement is acknowledged and reaches its tile across mobile lay
   );
   await expect
     .poll(async () => (await saveState(page, true)).player.position, {
-      timeout: 10000,
+      timeout: uiTimeout(10000),
     })
     .toEqual(target);
   await page.getByRole("button", { name: "Close panel" }).click();
