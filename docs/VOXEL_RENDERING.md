@@ -1,6 +1,6 @@
 # Voxel runtime and migration
 
-Static-prop candidate (2026-10-31): native VOX remains the source. A worker bakes exposed, greedily joined surfaces once per asset/LOD; whole-prop instances share their buffers. New props wait for the requested template and fade in, with no coarse placeholder. Startup warms the actual shared geometry before exposing the HUD. Previous cube-bucket sections below are historical; `VoxelMeshes` is the new gameplay path, with `VoxelBuckets` retained for reference/workbench tests.
+Shared static prop release (2026-10-31): native VOX remains the source. A worker bakes exposed, greedily joined surfaces once per asset/LOD; whole-prop instances share their buffers. New props wait for the requested template and fade in, with no coarse placeholder. Startup warms the actual shared geometry before exposing the HUD. Previous cube-bucket sections below are historical; `VoxelMeshes` is the new gameplay path, with `VoxelBuckets` retained for reference/workbench tests.
 
 Visible pigment, corner AO and voxel steps are preserved. Separate shadow-only geometry is used when cheaper; native oak uses a validated1,972-triangle density proxy (2,000target), versus9,806for exact greedy shadows. Visible oak remains49,656triangles. Shadow masks overlap the exact reference by92–94% across three measured sun directions; unsafe reductions retain finer geometry. Whole-prop instance counts, voxel-equivalent LOD budgets and unique geometry bytes are separate diagnostics. No source VOX, simulation or save contract changed.
 

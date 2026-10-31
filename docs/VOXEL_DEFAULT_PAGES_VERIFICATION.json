@@ -1,6 +1,10 @@
 {
   "url": "https://cudldev.github.io/Fable-Crown/",
-  "artVersion": "8c43a9d4ae95",
+  "artVersion": "97acb2e6696e",
+  "renderer": "shared-static-meshes",
+  "templates": 37,
+  "geometryBytes": 7419720,
+  "glError": 0,
   "desktop": true,
   "phoneViewport": true,
   "landscape": true,
@@ -11,5 +15,5 @@
   "external": [],
   "failed": [],
   "retiredRequests": [],
-  "verifiedAt": "2026-10-31T16:14:37.786Z"
+  "verifiedAt": "2026-10-31T18:24:18.856Z"
 }
