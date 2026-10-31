@@ -103,6 +103,30 @@ test("camera LOD changes let valid in-flight detail finish before following the 
   } finally { buckets.dispose(); time.mockRestore(); }
 });
 
+test("an obsolete downgrade cannot replace visible fine detail when the fine target returns", () => {
+  const time = vi.spyOn(performance, "now").mockReturnValue(0), frames = new Frames();
+  const scene = new Scene(), source = model(), art = voxelObject({ model: source }), c = camera();
+  art.group.position.x = 2; scene.add(art.group);
+  const buckets = new VoxelBuckets(scene, 48, 100000, 250000, true);
+  try {
+    buckets.replace([{ art }]); settle(buckets, c, frames);
+    const fine = meshes(scene)[0], uploads = buckets.stats.uploads;
+    c.left = c.bottom = -100; c.right = c.top = 100; c.updateProjectionMatrix();
+    let checks = 0;
+    time.mockImplementation(() => checks++ < 3 ? 0 : 3);
+    frames.tick(buckets, c);
+    expect(buckets.stats.queued).toBe(1); expect(buckets.stats.committed).toBe(0);
+    expect(buckets.stats.stagedCells).toBe(source.levels[1].count);
+    time.mockReturnValue(0);
+    c.left = c.bottom = -5; c.right = c.top = 5; c.updateProjectionMatrix();
+    frames.tick(buckets, c);
+    expect(buckets.stats.committed, "discard a stale downgrade instead of fading fine → coarse → fine").toBe(0);
+    expect(buckets.stats.queued).toBe(0); expect(buckets.stats.transitions).toBe(0);
+    expect(buckets.stats.uploads).toBe(uploads); expect(meshes(scene)).toEqual([fine]);
+    expect(buckets.stats.instances).toBe(source.levels[0].count);
+  } finally { buckets.dispose(); time.mockRestore(); }
+});
+
 test("returning to an already rendered LOD cannot repeatedly erase a partially prepared upgrade", () => {
   const time = vi.spyOn(performance, "now").mockReturnValue(0), frames = new Frames();
   const scene = new Scene(), source = model(), art = voxelObject({ model: source }), c = camera();

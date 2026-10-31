@@ -228,7 +228,11 @@ export class VoxelBuckets {
           bucket.objectLods=objects.map((object,i)=>object.model?fallbackLods[i]:-1); bucket.token='coarse:'+state; this.uploads++;
           if (objects.every((object,i)=>!object.model || object.model.levels[object.lod]===object.model.levels[fallbackLods[i]])) { bucket.token=token; bucket.objectLods=objectLods; }
         }
-        if (bucket.pending && (bucket.pending.state!==state || !bucket.pending.mesh && bucket.token===token)) this.cancelWork(bucket);
+        const obsoleteDowngrade = bucket.pending?.objectLods.some((prepared,i) =>
+          prepared > objectLods[i] && prepared > (bucket.objectLods?.[i] ?? prepared));
+        // Keep useful upgrades across camera changes, but never replace finer
+        // visible geometry with a downgrade the newest target no longer wants.
+        if (bucket.pending && (bucket.pending.state!==state || obsoleteDowngrade || !bucket.pending.mesh && bucket.token===token)) this.cancelWork(bucket);
         // Do not cancel a valid in-flight build for every fractional camera change.
         // Finish it, then compare against the newest desired detail next frame.
         if (bucket.token!==token && !bucket.pending) {
