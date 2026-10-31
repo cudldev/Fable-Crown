@@ -57,11 +57,11 @@ jobs:
       matrix:
         include:
           - name: core-save-offline
-            command: npm run test:browser -- tests/rpg-acceptance.spec.ts --max-failures=1
+            project: core
           - name: world-inputs
-            command: npm run test:browser -- tests/rpg-inputs.spec.ts --grep "left click mines|touch hold" --max-failures=1
+            project: controls
           - name: renderer-mobile-offline
-            command: npm run test:browser -- tests/rpg-three.spec.ts --grep "world shell and save controls|voxel is the default|3D camera and touch|default voxel world reloads offline|unavailable WebGL" --max-failures=1
+            project: shell
     env:
       DEMO_URL: ${{ needs.validate.outputs.demo_url }}
     steps:
@@ -83,7 +83,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify playable demo
         timeout-minutes: 60
-        run: ${{ matrix.command }}
+        run: npm run test:release -- --project=${{ matrix.project }} --max-failures=1
       - name: Save browser failure evidence
         if: failure()
         uses: actions/upload-artifact@v4

@@ -47,3 +47,5 @@ https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-
 
 ## Combined voxel release validation
 The workflow validates/builds once and tests the exact artifact in three focused release groups: core gameplay/save/offline, world inputs, and default renderer/mobile/offline/recovery. All groups must pass before Pages publication. The full95-case visual/developer suite remains available through npm run test:browser;94active scenarios passed locally, with1existing user-approved skip. Detailed visual and timing comparisons are outside the automatic deployment gate.
+
+Commands: npm run test:release runs the bounded CI projects (core, controls, shell); npm run test:visual runs local visual/GPU/art/performance review. npm run test:browser runs the full local suite. Add new visual cases to playwright.visual.config.ts; publication scope is explicit in playwright.release.config.ts.

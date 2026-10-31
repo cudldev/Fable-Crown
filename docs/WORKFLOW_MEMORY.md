@@ -124,3 +124,5 @@
 - Click feedback: primary clicks/taps/keyboard show a brief screen-position X (enemy red, otherwise yellow); no drag/pinch/context marker. Effects layer is isolated below status/HUD, never catches input. Damage bypasses collision layout and drifts from victim; XP/items avoid status bars. Combat has no redundant overhead work card. Regression: rpg-click-feedback.spec.ts.
 
 - Combined release: tmp/release-publication on codex/live-update-20261031 integrates finished chats with prior release fixes. Live status follows the latest PROGRESS entry. Preserve authoring workspace; transient quest/arrival assertions observe worker snapshots, then separately verify persisted outcomes.
+
+- Test boundary: npm run test:visual is local art/GPU/performance review; npm run test:release is bounded core/PWA CI. Full test:browser remains local. Keep new visual cases out of deployment.
