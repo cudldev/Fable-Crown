@@ -128,3 +128,5 @@
 - Test boundary: npm run test:visual is local art/GPU/performance review; npm run test:release is bounded core/PWA CI. Full test:browser remains local. Keep new visual cases out of deployment.
 
 - Final CI boundary: test:release has2non-GPU worker/save/offline/mobile smoke cases. GPU interactions and visual/performance suites are local; verify real public WebGL after publish.
+
+- Live3145104 / CI41156022977 verified2026-10-31; asset version e9d6b83674ae. Local GPU suites; CI2non-GPU smoke cases. Upgrade checks must await SW activation and hold saves through real Pause/Save commands; do not mutate IndexedDB behind a running worker.
