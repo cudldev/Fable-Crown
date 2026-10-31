@@ -1,4 +1,5 @@
 import { uiTimeout } from "./ui-timeout";
+import { arrivalTick, trackPlayerPositions } from "./worker-positions";
 import { test, expect, type Page } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
@@ -275,6 +276,8 @@ test("quest ambition persists and real carried supplies complete a delivery", as
 test("invalid import preserves the current chapter", async ({ page }) => {
   await page.goto("./?chapter=3");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
+  // Compare the rejected import against one stable saved chapter.
+  await page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
   const before = await snapshot(page);
   await importState(page, { version: 3, player: { health: -999 } });
   await expect(page.getByRole("status")).toContainText("invalid");
@@ -383,6 +386,7 @@ test("portrait and landscape fit, controls stay touch sized, and no remote runti
 test("pending intentions can be reordered, held and resumed through thought controls", async ({
   page,
 }) => {
+  await trackPlayerPositions(page);
   await page.goto("./");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const s = fixture();
@@ -409,7 +413,7 @@ test("pending intentions can be reordered, held and resumed through thought cont
     page.getByRole("region", { name: "thoughts panel" }),
   ).toContainText("Next orders · 1/8");
   await page.getByRole("button", { name: "Let Alden decide" }).click();
-  await expect
-    .poll(async () => (await snapshot(page)).player.position.y)
-    .toBe(s.player.position.y + 3);
+  const destination = { ...s.player.position, y: s.player.position.y + 3 };
+  await expect.poll(() => arrivalTick(page, destination)).not.toBeNull();
+  expect((await snapshot(page)).tick).toBeGreaterThanOrEqual((await arrivalTick(page, destination))!);
 });
