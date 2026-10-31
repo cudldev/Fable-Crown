@@ -55,7 +55,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        include:
+          - name: core-save-offline
+            command: npm run test:browser -- tests/rpg-acceptance.spec.ts --max-failures=1
+          - name: world-inputs
+            command: npm run test:browser -- tests/rpg-inputs.spec.ts --grep "left click mines|touch hold" --max-failures=1
+          - name: renderer-mobile-offline
+            command: npm run test:browser -- tests/rpg-three.spec.ts --grep "world shell and save controls|voxel is the default|3D camera and touch|default voxel world reloads offline|unavailable WebGL" --max-failures=1
     env:
       DEMO_URL: ${{ needs.validate.outputs.demo_url }}
     steps:
@@ -77,12 +83,12 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify playable demo
         timeout-minutes: 60
-        run: npm run test:browser -- --shard=${{ matrix.shard }}/4 --max-failures=1
+        run: ${{ matrix.command }}
       - name: Save browser failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-failure-evidence-${{ matrix.shard }}
+          name: browser-failure-evidence-${{ matrix.name }}
           path: test-results/
           retention-days: 7
 

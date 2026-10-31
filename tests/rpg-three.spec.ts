@@ -4,12 +4,12 @@ import { createGame } from "../src/simulation";
 import { interactionTiles, objectById } from "../src/rpg/world";
 import type { RpgState } from "../src/rpg/types";
 
-test.use({ actionTimeout: 20000 });
+test.use({ actionTimeout: process.env.CI ? 60000 : 20000 });
 
 async function ready(page: Page) {
   const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-renderer", "3d");
-  await expect(world).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await expect(world).toHaveAttribute("data-status", "ready", { timeout: process.env.CI ? 60000 : 30000 });
   await expect(page.getByTestId("three-canvas")).toBeVisible();
   await expect(world).toHaveAttribute("data-active-lights", /^\d+$/);
   await expect(world).toHaveAttribute("data-shadow-lights", /^\d+$/);

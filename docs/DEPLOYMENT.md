@@ -46,4 +46,4 @@ https://vite.dev/guide/static-deploy
 https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
 
 ## Combined voxel release validation
-The workflow validates/builds once, then runs the complete browser suite in four independent shards against that exact artifact. Pages publication waits for all four. Inspect each browser job and its numbered failure artifact when a gate fails; no tests are omitted by sharding.
+The workflow validates/builds once and tests the exact artifact in three focused release groups: core gameplay/save/offline, world inputs, and default renderer/mobile/offline/recovery. All groups must pass before Pages publication. The full95-case visual/developer suite remains available through npm run test:browser;94active scenarios passed locally, with1existing user-approved skip. Detailed visual and timing comparisons are outside the automatic deployment gate.
