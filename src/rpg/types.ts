@@ -336,6 +336,8 @@ export interface DialogueState {
   expiresAt: number;
 }
 export interface RpgState {
+  /** Present only in the continuous-action chapter; settlement code must not move/fight the player. */
+  action?: import("../action/contracts").ActionState;
   version: 5;
   /** Additive geometry migration for earlier V5 chapters. */
   worldRevision: 2;

@@ -18,6 +18,11 @@ export type TileSelection =
 export type PreparationStage = "chapter" | "assets" | "world" | "shaders" | "lighting" | "ready" | "unavailable";
 export interface ScenePreparation { stage: PreparationStage; message?: string }
 export interface TileSceneProps {
+  /** Optional chapter-specific world and fast authoritative actor snapshots. */
+  worldOverride?: import("../rpg/types").WorldDefinition;
+  actionState?: import("../action/contracts").ActionState;
+  readAction?: () => import("../action/contracts").ActionState | undefined;
+  sampleGround?: (x: number, z: number) => number;
   state: RpgState;
   camera: TileCamera;
   onCamera: (update: TileCamera | ((current: TileCamera) => TileCamera)) => void;

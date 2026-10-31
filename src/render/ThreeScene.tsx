@@ -71,7 +71,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
   const [failure, setFailure] = useState("");
   const latest = useRef<RuntimeInput>({ ...props, lighting, shadows, cameraMode, gi, ao, visual });
   latest.current = { ...props, lighting, shadows, cameraMode, gi, ao, visual };
-  const world = worldForState(props.state);
+  const world = props.worldOverride ?? worldForState(props.state);
   const work = actionFeedback(props.state);
   const maxHealth = levelForXp(props.state.player.skills.hitpoints);
   useEffect(() => {

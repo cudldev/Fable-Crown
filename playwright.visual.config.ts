@@ -5,6 +5,7 @@ import config from "./playwright.config";
 export default defineConfig({
   ...config,
   testMatch: [
+    "**/rpg-action.spec.ts",
     "**/rpg-floating-ui.spec.ts",
     "**/rpg-mobile-hud.spec.ts",
     "**/rpg-acceptance.spec.ts", "**/rpg-inputs.spec.ts", "**/rpg-gameplay-feel.spec.ts",

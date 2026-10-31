@@ -1,5 +1,7 @@
 # Fable Crown — Game Design (CURRENT)
 
+> Approved implementation2026-11-01: freely placed tent in an empty owned safe valley,royal account→cottage→optional public development; continuous60Hz actions and600ms settlement; per-press tools,guard stamina,gamepad/virtual joystick,limited terraforming,wilderness-only optional combat. See VALLEY_IMPLEMENTATION.md. Earlier movement/control/onboarding descriptions below are historical. Existing art,zero-cost,offline and archive guarantees remain.
+
 > Current actor update (2026-10-30): the user approved the full pixel billboard cast in the voxel world. See [cast implementation](PIXEL_CAST.md) and [generation skill](../skills/fable-pixel-characters/SKILL.md). Earlier voxel-volume/rig requirements for characters and enemies below are superseded; environment migration and gameplay contracts remain.
 
 

@@ -2189,8 +2189,8 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
   for (let n = 0; n < count; n++) {
     s.tick++;
     if (s.dialogue && s.tick >= s.dialogue.expiresAt) chooseDialogue(s, s.dialogue.choices[0].id);
-    enemyStep(s);
-    if (s.tick % 100 === 0)
+    if (!s.action) enemyStep(s);
+    if (!s.action && s.tick % 100 === 0)
       s.player.health = Math.min(maxHealth(s.player), s.player.health + 1);
     for (const r of Object.values(s.resources))
       if (!r.available && s.tick >= r.respawnAt) {
@@ -2204,6 +2204,7 @@ export function stepRpg(s: RpgState, count = 1): RpgState {
         shop.restockAt = s.tick + 100;
       }
     for (const p of [s.player, ...s.npcs]) {
+      if (p.id === 0 && s.action) continue;
       p.previousPosition = { ...p.position };
       p.movement = null;
       if (p.id === 0 && s.control.waiting) {

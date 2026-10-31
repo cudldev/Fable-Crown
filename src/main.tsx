@@ -3,11 +3,13 @@ import { createRoot } from "react-dom/client";
 import RpgApp from "./rpg/RpgApp";
 import "./style.css";
 const AssetReview = lazy(() => import("./render/AssetReview"));
+const ActionPrototype = lazy(() => import("./action/ActionPrototype"));
 const reviewAssets = new URLSearchParams(location.search).get("assetReview") === "1";
+const actionPrototype = new URLSearchParams(location.search).get("actionPrototype") === "1";
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Suspense fallback={<div className="loading-screen">Opening the art review scene…</div>}>
-      {reviewAssets ? <AssetReview /> : <RpgApp />}
+      {reviewAssets ? <AssetReview /> : actionPrototype ? <ActionPrototype /> : <RpgApp />}
     </Suspense>
   </React.StrictMode>,
 );

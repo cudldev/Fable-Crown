@@ -1,0 +1,28 @@
+{
+  "kind": "synthetic keydown to first changed rendered world pose",
+  "samplesMs": [
+    161.09999999403954,
+    24.900000005960464,
+    33.30000001192093,
+    32.70000000298023,
+    31.600000008940697,
+    28.700000002980232,
+    32,
+    30.100000008940697,
+    22.19999998807907,
+    31.899999991059303,
+    29.700000002980232,
+    24.19999998807907
+  ],
+  "p50Ms": 31.600000008940697,
+  "p95Ms": 161.09999999403954,
+  "viewport": [
+    1280,
+    720
+  ],
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+  "hardwareConcurrency": 20,
+  "actionFrame": "151",
+  "fps": "76.9",
+  "frameMs": "25.10"
+}

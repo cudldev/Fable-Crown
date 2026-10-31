@@ -118,6 +118,7 @@ export class ThreeRuntime {
   private raf = 0;
   private disposed = false;
   private previousTime = 0;
+  private fastPlayer?: { frame: number; at: number; fromX: number; fromZ: number; fromY: number; x: number; z: number; y: number };
   private metricsAt = 0;
   private visibilityAt = 0;
   private ready = false;
@@ -137,7 +138,7 @@ export class ThreeRuntime {
     this.canvas = canvas; this.root = root; this.props = initial; this.hits = hits; this.onError = onError;
     this.pixelUnits = new PixelBillboards(art ?? createArtLibrary());
     this.art = this.pixelUnits.library; this.root.dataset.actorStyle = "pixel-billboard"; this.root.dataset.billboardMode = "screen-aligned"; this.root.dataset.spriteCellMeters = String(UNIT_PIXEL_METRES); this.root.dataset.spriteGrid = "voxel";
-    this.world = worldForState(initial.state);
+    this.world = initial.worldOverride ?? worldForState(initial.state);
     // Capability errors are caught by the React host without changing game state.
     // Render the world at display resolution with hardware antialiasing.
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -447,7 +448,7 @@ export class ThreeRuntime {
     const tickChanged = this.observedState?.tick !== state.tick || resetPresentation;
     this.observedState = state; this.observedEpoch = presentationEpoch;
     if (tickChanged) this.observedAt = time;
-    const world = worldForState(state);
+    const world = this.props.worldOverride ?? worldForState(state);
     if (this.world !== world) {
       this.world = world; this.buildTerrain();
       const ids = new Set(world.objects.map(object => object.id));
@@ -539,6 +540,32 @@ export class ThreeRuntime {
   }
   private clearEffects() { for (const effect of this.transients) { this.scene.remove(effect.group); effect.material.dispose(); } this.transients = []; }
   private pose(actor: ActorState, entry: Person, time: number) {
+    const fast = actor.id === 0 ? this.props.readAction?.() ?? this.props.actionState : undefined;
+    if (fast) {
+      const p = fast.player, old = this.fastPlayer;
+      if (!old || old.frame !== fast.frame) this.fastPlayer = { frame: fast.frame, at: time,
+        fromX: old && fast.frame - old.frame < 6 ? old.x : p.x,
+        fromZ: old && fast.frame - old.frame < 6 ? old.z : p.z,
+        fromY: old && fast.frame - old.frame < 6 ? old.y : p.height,
+        x: p.x, z: p.z, y: p.height };
+      const sample = this.fastPlayer!, fraction = Math.min(1, Math.max(0, (time - sample.at) / (1000 / 60)));
+      const x = sample.fromX + (sample.x - sample.fromX) * fraction;
+      const z = sample.fromZ + (sample.z - sample.fromZ) * fraction;
+      const y = sample.fromY + (sample.y - sample.fromY) * fraction;
+      const moving = Math.hypot(sample.x - sample.fromX, sample.z - sample.fromZ) > .0001;
+      entry.art.group.position.set(x, y, z);
+      const frame = p.swing > 0 ? p.swing > 24 ? 6 : 7 : p.blocking ? 5 : moving ? 1 + Math.floor(fast.frame / 8) % 4 : 0;
+      const facing = p.facingX * this.camera.matrixWorld.elements[0] + p.facingZ * this.camera.matrixWorld.elements[2];
+      if (Math.abs(facing) > .01) entry.flipX = facing < 0;
+      const worked = this.objects.get(actor.action?.targetId ?? "")?.object ?? this.world.objects.find(object => object.resourceId && Math.hypot(object.position.x-p.x,object.position.y-p.z)<1.7);
+      const toolPose = worked?.kind === "rock" ? "mine" : worked?.kind === "fish" ? "fish" : "cut";
+      this.pixelUnits.frame(entry.art.group, frame, 0, undefined, heldToolForActor(actor,fast.swingTool && p.swing>0 ? toolPose : undefined), entry.flipX ?? false);
+      this.playerRing.position.set(x, y + .035, z);
+      this.root.dataset.characterClip = p.swing ? "strike" : p.blocking ? "block" : moving ? "walk" : "idle";
+      this.root.dataset.actionFrame = String(fast.frame);
+      this.root.dataset.continuousX = x.toFixed(4); this.root.dataset.continuousZ = z.toFixed(4);
+      return;
+    }
     const motion = sampleActorMotion(entry.timeline!, time, this.reducedMotion), { art } = entry;
     const oldX = art.group.position.x, oldZ = art.group.position.z;
     art.group.position.set(motion.position.x, 0, motion.position.y);
@@ -586,7 +613,7 @@ export class ThreeRuntime {
     const player = this.people.get(0)?.art.group.position;
     const aspect = this.width / this.height;
     const span = view.overview ? Math.max(this.world.height * 1.05, this.world.width / aspect) : gameplaySpan(view.zoom, aspect);
-    this.target.set(view.overview ? this.world.width / 2 : view.follow && player ? player.x : view.x, 0,
+    this.target.set(view.overview ? this.world.width / 2 : view.follow && player ? player.x : view.x, player?.y ?? 0,
       view.overview ? this.world.height / 2 : view.follow && player ? player.z : view.y);
     const usePerspective = cameraMode === "perspective" && !view.overview;
     this.camera = usePerspective ? this.perspectiveCamera : this.orthographicCamera;
@@ -608,6 +635,13 @@ export class ThreeRuntime {
     this.root.dataset.spriteNormalStrength = String(this.props.visual?.spriteNormalStrength ?? .35);
     for (const enemy of state.enemies) {
       const group = this.enemies.get(enemy.id), motion = this.enemyMotion.get(enemy.id); if (!group || !motion) continue;
+      const fastEnemy = (this.props.readAction?.() ?? this.props.actionState)?.enemies.find(value => value.id === enemy.id);
+      if (fastEnemy) {
+        group.position.set(fastEnemy.x, this.props.sampleGround?.(fastEnemy.x, fastEnemy.z) ?? 0, fastEnemy.z);
+        group.visible = !fastEnemy.defeated;
+        this.pixelUnits.frame(group, fastEnemy.windup > 0 ? 5 : 0, 0, undefined, heldToolForEnemy(enemy.definitionId));
+        continue;
+      }
       const fraction = this.reducedMotion ? 1 : clamp((time - motion.at) / 600, 0, 1);
       group.position.set(motion.fromX + (motion.x - motion.fromX) * fraction, 0, motion.fromZ + (motion.z - motion.fromZ) * fraction);
       const dead = enemy.health <= 0; group.visible = !dead || time < motion.deathUntil;
