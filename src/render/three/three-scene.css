@@ -66,32 +66,12 @@
 @media (prefers-reduced-motion: reduce) { .three-feedback .floater-number { animation: none; } }
 .three-feedback-miss { color: #d7dfe0; font-style: italic; }
 .three-feedback-heal { color: #bcf2c2; }
-.world-health, .world-work { position: absolute; transform: translate(-50%, -100%); pointer-events: none; width: max-content; max-width: 190px; min-width: 84px; padding: 1px 2px; color: #fff2d3; background: transparent; border: 0; font: 10px/1.35 system-ui; z-index: 2; text-align: center; --vial-color: #d78268; }
+.world-health, .world-work { position: absolute; transform: translate(-50%, -100%); pointer-events: none; width: max-content; max-width: 190px; min-width: 84px; padding: 1px 2px; color: #fff2d3; background: transparent; border: 0; font: 10px/1.35 system-ui; z-index: 2; text-align: center; --vial-color: #cd443e; }
 .world-health b, .world-work b { display: block; font-weight: 600; }
 .world-health em { font-style: normal; font-variant-numeric: tabular-nums; margin-left: 6px; }
-.world-health progress {
-  display: block; width: 100%; height: 9px; margin-top: 3px; appearance: none; overflow: hidden; border-radius: 5px;
-  border: 1px solid color-mix(in srgb, var(--vial-light, #a9bdc8) 50%, #14232b);
-  background: #14232b70; box-shadow: 0 1px 2px #14232b80, inset 0 1px #ffffff25;
-  --vial-liquid: color-mix(in srgb, var(--vial-color) 80%, var(--vial-light, #a9bdc8));
-  --vial-sheen: linear-gradient(var(--vial-light-angle, 145deg), #ffffff60, #ffffff00 45%, #00000024);
-}
-/* A rounded reflection sits on the glass front, including its unfilled portion. */
-.world-health::after {
-  content: ""; position: absolute; left: 2px; right: 2px; bottom: 1px; height: 9px; border-radius: 5px; pointer-events: none;
-  --vial-glint-x: calc(50% + 30% * sin(var(--vial-light-angle, 145deg)));
-  --vial-glint: color-mix(in srgb, var(--vial-light, #a9bdc8) 65%, #ffffff);
-  background:
-    radial-gradient(ellipse 4px 1.8px at var(--vial-glint-x) 30%, var(--vial-glint) 0% 15%, color-mix(in srgb, var(--vial-glint) 65%, transparent) 38%, transparent 100%),
-    radial-gradient(ellipse 38% 80% at var(--vial-glint-x) 0%, color-mix(in srgb, var(--vial-glint) 24%, transparent), transparent 85%);
-}
-.world-health-player { --vial-color: #7cca9a; }
-.world-work { display: flex; align-items: center; gap: 5px; min-width: 0; text-align: left; color: #ffe8aa; --vial-color: #edc45e; }
-.world-work b { max-width: 145px; }
-.world-health progress::-webkit-progress-bar { background: var(--vial-sheen); border-radius: 4px; }
-.world-health progress::-webkit-progress-value { background: var(--vial-sheen), var(--vial-liquid); border-radius: 4px; transition: width .2s ease-out; }
-.world-health progress::-moz-progress-bar { background: var(--vial-sheen), var(--vial-liquid); border-radius: 4px; }
-@media (prefers-reduced-motion: reduce) { .world-health progress::-webkit-progress-value { transition: none; } }
+.world-health-player { --vial-color: #22b86b; }
+.world-work { display: block; width: 24px; height: 24px; min-width: 0; max-width: none; padding: 0; color: #ffe8aa; }
+.world-work b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .three-test-note { position: absolute; bottom: 192px; left: 18px; font: 10px system-ui; color: #e5dfc8; text-shadow: 0 1px 3px #172c35; pointer-events: none; }
 .three-fallback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 32px)); padding: 24px; background: #eee5cf; color: #31434a; border: 1px solid #9f8b5e; border-radius: 8px; z-index: 4; }
 .three-fallback p { word-break: break-word; }

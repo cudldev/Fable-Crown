@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ActionCycle } from "./ActionCycle";
+import { HealthVial } from "./HealthVial";
 import type { TileSceneProps, TileSelection } from "./scene-types";
 import { worldForState } from "../rpg/world";
 import { ENEMIES } from "../rpg/content";
@@ -173,7 +174,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
         <div className="world-status-layer" data-testid="world-status-layer">
           {!props.camera.overview && <span ref={bind("health-player")} className="world-health world-health-player" aria-label={`Alden health ${props.state.player.health} of ${maxHealth}`}>
             <b>Alden <em>{props.state.player.health}/{maxHealth}</em></b>
-            <progress aria-label="Alden world health" value={props.state.player.health} max={maxHealth} />
+            <HealthVial label="Alden world health" value={props.state.player.health} max={maxHealth} />
           </span>}
           {!props.camera.overview && props.state.enemies.filter(enemy => enemy.health > 0).map(enemy => {
             const definition = ENEMIES[enemy.definitionId];
@@ -182,7 +183,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
               props.state.control.active?.type === "attack" && props.state.control.active.enemyId === enemy.id;
             return engaged && <span key={`health-${enemy.id}`} ref={bind(`health-${enemy.id}`)} className="world-health world-health-enemy">
               <b>{definition.name} <em>{enemy.health}/{definition.health}</em></b>
-              <progress aria-label={`${definition.name} health`} value={enemy.health} max={definition.health} />
+              <HealthVial label={`${definition.name} health`} value={enemy.health} max={definition.health} />
             </span>;
           })}
           {!props.camera.overview && work && props.state.player.action?.kind !== "fight" && <span ref={bind("work-player")} className="world-work" data-testid="world-work-status">

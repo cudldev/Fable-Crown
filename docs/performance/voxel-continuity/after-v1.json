@@ -1,0 +1,14 @@
+{
+  "label": "after-v1",
+  "complete": false,
+  "summaryOnly": true,
+  "cpuRate": 4,
+  "dist": "dist",
+  "reason": "Stopped after three completed desktop trials for further scheduler optimization. The original harness retained raw samples in memory until completion; these console summaries preserve the completed observations, but no raw frame samples or matching fraction were recovered. Do not use interrupted-segment counts as mismatch fraction.",
+  "results": [
+    { "viewport": { "width": 1280, "height": 800 }, "trial": 0, "meanMs": 129.88635097493037, "p99Ms": 275.3000000000029, "over50Ms": 358, "uiInventoryLatencyMs": 171.89999999850988, "completedRefinementSegments": 0 },
+    { "viewport": { "width": 1280, "height": 800 }, "trial": 1, "meanMs": 120.77827298050137, "p99Ms": 250.3000000000029, "over50Ms": 351, "uiInventoryLatencyMs": 80.90000000596046, "completedRefinementSegments": 1, "observedCompletedRefinementMs": 675.7000000000044 },
+    { "viewport": { "width": 1280, "height": 800 }, "trial": 2, "meanMs": 132.39582172701947, "p99Ms": 267, "over50Ms": 345, "uiInventoryLatencyMs": 77.29999999701977, "completedRefinementSegments": 0 }
+  ],
+  "scope": "Whole-game host Chrome under CPU4x emulation, seed8128, forest pan/zoom. Not physical-phone performance. Poor first candidate was not accepted as a performance improvement. before.json remains unchanged."
+}

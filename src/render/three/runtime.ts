@@ -61,6 +61,7 @@ export class ThreeRuntime {
   private enemyMotion = new Map<string, { x: number; z: number; fromX: number; fromZ: number; at: number; moving: boolean; health: number; hitUntil: number; deathUntil: number }>();
   private rig = new LightingRig(this.scene);
   private vials?: FloatingVials;
+  private workAnchors = new WeakMap<ObjectArt, THREE.Vector3>();
   private sky = new SkySystem(this.scene);
   private foliage = new FoliageSystem(this.scene);
   private props: RuntimeInput;
@@ -245,7 +246,7 @@ export class ThreeRuntime {
       const visual = this.props.visual ?? DEFAULT_VISUAL_SETTINGS;
       const needsGI = !this.props.camera.overview && ((this.props.gi !== false && visual.giStrength > 0) || (this.props.ao !== false && visual.aoStrength > 0));
       const lightingReady = this.gi.stats.appliedVersion > 0 && this.gi.stats.appliedVersion === this.gi.stats.version;
-      if (!this.voxelBuckets.stats.queued && (!needsGI || lightingReady || this.gi.stats.state === "error")) break;
+      if (!this.voxelBuckets.stats.queued && !this.voxelBuckets.stats.transitions && (!needsGI || lightingReady || this.gi.stats.state === "error")) break;
       if (activePreparationMs > 20000) {
         if (this.voxelBuckets.stats.queued) throw Error("The world is taking too long to prepare. Reload to retry.");
         this.root.dataset.startupLightingFallback = "true"; break;
@@ -665,7 +666,15 @@ export class ThreeRuntime {
     const voxelStart = performance.now();
     this.foliage.update(time, this.target, visual, view.overview, this.reducedMotion);
     this.voxelBuckets.setAO(this.props.ao !== false, visual.aoStrength, visual.aoDistance);
-    this.voxelBuckets.update(this.camera, this.height, this.curve);
+    this.voxelBuckets.update(this.camera, this.height, this.curve, time);
+    // Continuity probes need frame-level observations; avoid unchanged DOM writes.
+    const voxel = this.voxelBuckets.stats;
+    for (const [key, value] of Object.entries({
+      voxelCancelled: String(voxel.cancelled), voxelPendingAgeMs: voxel.pendingAgeMs.toFixed(1),
+      voxelTransitions: String(voxel.transitions), voxelTransitionCells: String(voxel.transitionCells),
+      voxelClosestTreeId: voxel.closestTreeId, voxelClosestTreeLod: String(voxel.closestTreeLod),
+      voxelClosestTreeDesiredLod: String(voxel.closestTreeDesiredLod),
+    })) if (this.root.dataset[key] !== value) this.root.dataset[key] = value;
     const giStart = performance.now();
     this.gi.decorate(this.scene);
     this.curve.decorate(this.scene);
@@ -750,6 +759,22 @@ export class ThreeRuntime {
     if (selection.kind === "tile") return temp.set(selection.position.x, 0, selection.position.y);
     return null;
   }
+  private workAnchor(prop: Prop) {
+    let anchor = this.workAnchors.get(prop.art);
+    if (anchor) return anchor;
+    anchor = prop.art.group.position.clone();
+    const level = prop.art.voxels?.model.levels[0];
+    if (level) {
+      let top = 0;
+      for (let i = 1; i < level.centers.length; i += 3) top = Math.max(top, level.centers[i] + level.pitch / 2);
+      anchor.y += top * prop.art.group.scale.y + .12;
+    } else {
+      const bounds = new THREE.Box3().setFromObject(prop.art.group);
+      anchor.y = bounds.isEmpty() ? anchor.y + .7 : bounds.max.y + .12;
+    }
+    this.workAnchors.set(prop.art, anchor);
+    return anchor;
+  }
   private updateHitPositions(time: number) {
     this.vials ??= new FloatingVials(this.root);
     this.vials.beginFrame(time, this.rig, this.camera);
@@ -769,6 +794,10 @@ export class ThreeRuntime {
         if (key === "work-player") {
           const action = this.props.state.player.action;
           if (action) {
+            const target = this.objects.get(action.targetId ?? "");
+            if (target?.art.group.visible) { position = this.workAnchor(target); height = 0; }
+            element.dataset.anchor = target ? "object" : "actor";
+            element.dataset.targetId = target?.object.id ?? "player";
             const fraction = clamp((action.duration - action.remaining + clamp((time - this.observedAt) / 600, 0, 1)) / Math.max(1, action.duration), 0, 1);
             element.style.setProperty("--work-progress", String(fraction));
             const progress = element.querySelector("progress"); if (progress) { progress.max = action.duration; progress.value = fraction * action.duration; }
@@ -810,7 +839,8 @@ export class ThreeRuntime {
           element.style.left = `${x}px`; element.style.top = `${y}px`;
           if (key.startsWith("health-") || key === "work-player") {
             this.vials.update(element, position, this.rig);
-            const point = layoutFeedback([{ id: key, x, y, width: element.offsetWidth, height: element.offsetHeight }], reserved, this.width, this.height).get(key);
+            const point = key === "work-player" && element.dataset.anchor === "object" ? { x, y } :
+              layoutFeedback([{ id: key, x, y, width: element.offsetWidth, height: element.offsetHeight }], reserved, this.width, this.height).get(key);
             if (!point) { element.hidden = true; continue; }
             element.style.left = `${point.x}px`; element.style.top = `${point.y}px`;
             reserved.push({ x: point.x - element.offsetWidth / 2, y: point.y - element.offsetHeight, width: element.offsetWidth, height: element.offsetHeight });

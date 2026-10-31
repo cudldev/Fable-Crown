@@ -1,0 +1,61 @@
+import { BoxGeometry, InstancedMesh, Matrix4, MeshBasicMaterial, MeshDepthMaterial, ShaderLib, type BufferAttribute, type WebGLProgramParametersWithUniforms, type WebGLRenderer } from "three";
+import { expect, test, vi } from "vitest";
+import { clearVoxelTransition, createVoxelTransitionDepthMaterial, installVoxelTransition, setVoxelTransition, VOXEL_TRANSITION_ATTRIBUTE } from "../src/render/three/voxel-transition";
+import { voxelMaterial } from "../src/render/three/voxel-ao";
+import { WorldCurve } from "../src/render/three/world-curve";
+import { Scene } from "three";
+
+test("fade updates only the batch's 96-byte scalar buffer and preserves geometry, instances and opaque depth", () => {
+  const material = installVoxelTransition(new MeshBasicMaterial()), mesh = new InstancedMesh(new BoxGeometry(), material, 2);
+  const vertices = mesh.geometry.getAttribute("position").array.slice(), matrices = mesh.instanceMatrix.array.slice();
+  mesh.setMatrixAt(1, new Matrix4().makeTranslation(2, 0, 0));
+  const transforms = mesh.instanceMatrix.array.slice(), materialVersion = material.version;
+  clearVoxelTransition(mesh);
+  const attribute = mesh.geometry.getAttribute(VOXEL_TRANSITION_ATTRIBUTE) as BufferAttribute;
+  expect(attribute.array.byteLength).toBe(96);
+  expect([...attribute.array]).toEqual(Array(24).fill(0));
+  setVoxelTransition(mesh, .5, true); expect([...attribute.array]).toEqual(Array(24).fill(-.5));
+  const version = attribute.version;
+  setVoxelTransition(mesh, .5, true); expect(attribute.version).toBe(version);
+  setVoxelTransition(mesh, .5, false); expect([...attribute.array]).toEqual(Array(24).fill(.5));
+  setVoxelTransition(mesh, 3, true); expect([...attribute.array]).toEqual(Array(24).fill(0));
+  setVoxelTransition(mesh, -2, true); expect([...attribute.array]).toEqual(Array(24).fill(-1));
+  clearVoxelTransition(mesh); expect(mesh.geometry.getAttribute(VOXEL_TRANSITION_ATTRIBUTE)).toBe(attribute);
+  expect([...attribute.array]).toEqual(Array(24).fill(0));
+  expect(mesh.geometry.getAttribute("position").array).toEqual(vertices);
+  expect(mesh.instanceMatrix.array).toEqual(transforms); expect(transforms).not.toEqual(matrices);
+  expect(material.version).toBe(materialVersion); expect(material.transparent).toBe(false); expect(material.depthWrite).toBe(true);
+  expect(mesh.count).toBe(2);
+  mesh.dispose(); mesh.geometry.dispose(); material.dispose();
+});
+
+test("the hook chains existing AO/lighting/curve work, stays idempotent and handles directional depth", () => {
+  const material = voxelMaterial(), originalCompile = material.onBeforeCompile;
+  const prior = vi.fn((shader: WebGLProgramParametersWithUniforms, renderer: WebGLRenderer) => {
+    originalCompile(shader, renderer); shader.uniforms.testGI = { value: 1 };
+  });
+  material.onBeforeCompile = prior;
+  installVoxelTransition(material);
+  const compile = material.onBeforeCompile, key = material.customProgramCacheKey(), version = material.version;
+  installVoxelTransition(material); expect(material.onBeforeCompile).toBe(compile); expect(material.version).toBe(version);
+  expect(material.customProgramCacheKey()).toBe(key);
+  const scene = new Scene(), mesh = new InstancedMesh(new BoxGeometry(), material, 1), curve = new WorldCurve();
+  scene.add(mesh); curve.decorate(scene);
+  const shader = { vertexShader: ShaderLib.lambert.vertexShader, fragmentShader: ShaderLib.lambert.fragmentShader, uniforms: {} } as WebGLProgramParametersWithUniforms;
+  material.onBeforeCompile(shader, {} as WebGLRenderer);
+  expect(prior).toHaveBeenCalledOnce(); expect(shader.uniforms.testGI).toEqual({ value: 1 });
+  expect(shader.vertexShader).toContain("vVoxelAO="); expect(shader.vertexShader).toContain("fableCurveWorld");
+  expect(shader.vertexShader).toContain("vVoxelTransition=voxelTransition;");
+  expect(shader.fragmentShader).toContain("fableVoxelThreshold(gl_FragCoord.xy)");
+  expect(shader.fragmentShader).toContain("threshold>=1.+vVoxelTransition");
+  expect(shader.fragmentShader).toContain("threshold<vVoxelTransition");
+  expect(shader.fragmentShader.indexOf("fableVoxelThreshold(gl_FragCoord.xy)")).toBeLessThan(shader.fragmentShader.indexOf("#include <lights_lambert_fragment>"));
+  const depth = createVoxelTransitionDepthMaterial(); expect(depth).toBeInstanceOf(MeshDepthMaterial);
+  const depthShader = { vertexShader: ShaderLib.depth.vertexShader, fragmentShader: ShaderLib.depth.fragmentShader, uniforms: {} } as WebGLProgramParametersWithUniforms;
+  depth.onBeforeCompile(depthShader, {} as WebGLRenderer);
+  expect(depthShader.vertexShader).toContain("vVoxelTransition=voxelTransition;");
+  expect(depthShader.fragmentShader).toContain("fableVoxelThreshold(gl_FragCoord.xy)");
+  expect(depthShader.vertexShader).not.toContain("fableCurveWorld");
+  expect((material as typeof material & { defaultAttributeValues: Record<string, number[]> }).defaultAttributeValues.voxelTransition).toEqual([0]);
+  curve.dispose(); mesh.dispose(); mesh.geometry.dispose(); material.dispose(); depth.dispose();
+});

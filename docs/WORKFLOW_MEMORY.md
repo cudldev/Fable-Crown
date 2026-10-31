@@ -1,6 +1,6 @@
 # Working notes
 
-- Floating UI: no plates on health/work/name/reward/combat labels; halo for text. Nine-pixel health vials use FloatingVials (sun/fill +4existing lamps,10Hz, cached CSS writes); rounded front glint follows light angle/tint. Skilling uses ActionCycle SVG rings in world/HUD; world arc follows actual interpolated attempt fraction and resets at the next attempt. Keep liquid readability floor; no backdrop blur/captures. Review rpg-floating-ui and actual day/night/action screenshots.
+- Floating UI: no plates; text halo. HealthVial uses separate12px SVG glass/liquid surfaces, deep saturated radial centre, lighter edges and light-reactive front reflection (FloatingVials: sun/fill+4lamps,10Hz). Skilling ring sits on actual target-model top, with cached bounds and no detached world caption; HUD keeps details. Arc follows real attempt/reset. Review partial-health day/night and tree/ore/phone captures; no backdrop blur/captures.
 
 - Mobile UI: `mobile-hud.css` covers ≤760px or ≤500px height. Default HUD stays under25% coverage; Tools reveals map/camera/visuals, Thoughts holds details. Run rpg-mobile-hud + visual-settings + mobile three/messages checks locally; keep GPU coverage out of release CI.
 
@@ -135,7 +135,7 @@
 
 - Current live releasebc8d95f / Actions41193001537 verified2026-10-31; d3e8285fd472. Canonical integrated checkout tmp/release-publication. CI2non-GPU smoke cases; visual/GPU suites local. Wait for SW activation before upgrade reload; hold save fixtures via real Pause/Save.
 
-- Async rendering: voxel assets decode in a worker; runtime LOD stages at2ms/8192cells and commits≤1replacement/frame, retaining prior/coarse coverage. GI slices at~4ms; final GPU uploads remain synchronous. Keep identical capped levels shared.
+- Async rendering: voxel assets decode in a worker; runtime LOD stages at2ms/32768cells and commits≤1replacement/frame; started visible jobs finish first, with stable4m batches,6m prefetch and140ms opaque dither swaps. GI slices at~4ms; final GPU uploads remain synchronous. Keep identical capped levels shared.
 - Streaming benchmark: scripts/benchmark-streaming.mjs LABEL; BENCH_DIST selects an isolated original. Run original→changed→original serially; see performance/async-streaming. Pass is integrated and published from tmp/release-publication. New local GPU regression: rpg-voxel-streaming.spec.ts; mobile controls use Tools.
 - First overview hitch diagnosed: shader-profile.json records934ms frame/~880ms waiting on11new shader programs. Startup now warms direct/HDR/overview/post variants before HUD; first overview links0new programs. See performance/async-streaming/README.md; diagnosis only.
 - Startup now gates all HUD/world input through ScenePreparation; initial HTML also explains loading. Precompile actual direct/HDR/overview/post targets before ready; abort context loss, require current GI version. New rpg-startup tests cover offline/error/noHUDflash and0first-overview links.

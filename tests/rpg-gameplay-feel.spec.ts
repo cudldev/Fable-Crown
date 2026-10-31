@@ -30,12 +30,21 @@ test("harvesting has readable world and HUD cycles in all three professions", as
     expect(applyRpgCommand(state, { type: "gather", objectId: node.id, quantity: 10 }).ok).toBe(true);
     await restore(page, state);
     await expect(page.getByTestId("world-work-status")).toContainText(label);
+    const indicator = page.getByTestId("world-work-status");
+    await expect(indicator).toHaveAttribute("data-anchor", "object");
+    await expect(indicator).toHaveAttribute("data-target-id", node.id);
+    const target = page.locator(`[data-three-selection='${JSON.stringify({ kind: "object", id: node.id })}']`);
+    const ringBox = (await indicator.boundingBox())!, targetBox = (await target.boundingBox())!;
+    expect(Math.abs(ringBox.x + ringBox.width / 2 - (targetBox.x + targetBox.width / 2))).toBeLessThan(24);
+    expect(ringBox.y + ringBox.height).toBeLessThan(targetBox.y + targetBox.height / 2);
     await expect(page.getByTestId("hud-work-status")).toBeVisible();
     const dock = await page.locator(".intention-dock").boundingBox();
     const messages = await page.locator(".rpg-messages").boundingBox();
     expect(messages!.y + messages!.height).toBeLessThanOrEqual(dock!.y);
     const bar = page.getByTestId("world-work-status").getByRole("progressbar");
     await expect(bar).toHaveAttribute("aria-label", `${label} world progress`);
+    const notification = page.getByRole("button", { name: "Dismiss notification", exact: true });
+    if (await notification.isVisible()) await notification.click();
     await page.screenshot({ path: `docs/screenshots/gameplay-${resource}.png` });
   }
   expect(errors).toEqual([]); expect(external).toEqual([]);

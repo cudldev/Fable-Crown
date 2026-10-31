@@ -1,0 +1,15 @@
+.health-vial { display: block; position: relative; width: 100%; height: 12px; margin-top: 3px; --vial-reflection: color-mix(in srgb, var(--vial-light, #b6ccda) 50%, white); }
+.health-vial svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1px 1px #07161d99); }
+.vial-shell { fill: #172c3659; stroke: #10232dd9; stroke-width: 1; }
+.vial-liquid-edge { stop-color: color-mix(in srgb, var(--vial-color) 60%, var(--vial-light, #b6ccda)); }
+.vial-liquid-body { stop-color: color-mix(in srgb, var(--vial-color) 92%, var(--vial-light, #b6ccda)); }
+.vial-liquid-depth { stop-color: color-mix(in srgb, var(--vial-color) 66%, #031b20); }
+.vial-liquid { transition: width .2s ease-out; }
+.vial-upper-rim, .vial-lower-rim { fill: none; stroke-linecap: round; stroke-width: .8; }
+.vial-upper-rim { stroke: var(--vial-reflection); opacity: .8; }
+.vial-lower-rim { stroke: var(--vial-light, #b6ccda); opacity: .5; }
+.vial-reflection-soft, .vial-reflection-core { cx: calc(50% + 26% * sin(var(--vial-light-angle, 145deg))); fill: var(--vial-reflection); }
+.vial-reflection-soft { opacity: .24; }
+.vial-reflection-core { opacity: .95; }
+.health-vial > progress { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; clip-path: inset(50%); }
+@media (prefers-reduced-motion: reduce) { .vial-liquid { transition: none; } }
