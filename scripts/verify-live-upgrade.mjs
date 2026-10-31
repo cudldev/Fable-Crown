@@ -2,6 +2,7 @@ import { chromium, expect } from '@playwright/test';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const base = 'https://cudldev.github.io/Fable-Crown/';
+const builtDir = process.env.RELEASE_DIST || 'dist';
 const baselinePath = 'tmp/live-upgrade-baseline.json';
 await mkdir('tmp', { recursive: true });
 const context = await chromium.launchPersistentContext('tmp/live-upgrade-profile', {
@@ -48,7 +49,7 @@ try {
   } else {
     const before = JSON.parse(await readFile(baselinePath, 'utf8'));
     await page.evaluate(async () => (await navigator.serviceWorker.ready).update());
-    const localAssets = JSON.parse(await readFile('dist/world-assets.json', 'utf8'));
+    const localAssets = JSON.parse(await readFile(builtDir + '/world-assets.json', 'utf8'));
     const response = await context.request.get(base + 'world-assets.json?release=' + Date.now());
     expect(response.ok()).toBe(true);
     const expected = await response.json();

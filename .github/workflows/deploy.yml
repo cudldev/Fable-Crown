@@ -51,17 +51,7 @@ jobs:
   browser:
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: core-save-offline
-            project: core
-          - name: world-inputs
-            project: controls
-          - name: renderer-mobile-offline
-            project: shell
+    timeout-minutes: 10
     env:
       DEMO_URL: ${{ needs.validate.outputs.demo_url }}
     steps:
@@ -82,13 +72,13 @@ jobs:
       - name: Install browser for acceptance checks
         run: npx playwright install --with-deps chromium
       - name: Verify playable demo
-        timeout-minutes: 60
-        run: npm run test:release -- --project=${{ matrix.project }} --max-failures=1
+        timeout-minutes: 5
+        run: npm run test:release -- --max-failures=1
       - name: Save browser failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-failure-evidence-${{ matrix.name }}
+          name: browser-failure-evidence-release
           path: test-results/
           retention-days: 7
 

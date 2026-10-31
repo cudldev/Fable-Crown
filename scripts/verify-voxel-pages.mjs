@@ -1,7 +1,8 @@
 import { chromium, expect } from '@playwright/test';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 const base='https://cudldev.github.io/Fable-Crown/';
-const expected=JSON.parse(await readFile('dist/world-assets.json','utf8'));
+const builtDir = process.env.RELEASE_DIST || 'dist';
+const expected=JSON.parse(await readFile(builtDir + '/world-assets.json','utf8'));
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const context=await browser.newContext({viewport:{width:1280,height:800}});
 const page=await context.newPage();const errors=[],external=[],failed=[],retired=[];
@@ -10,10 +11,10 @@ page.on('request',r=>{const u=new URL(r.url());if(u.protocol.startsWith('http')&
 page.on('response',r=>{if(r.status()>=400)failed.push({url:r.url(),status:r.status()});});
 try{
 const shell = await context.request.get(base + '?release=' + Date.now()); expect(shell.ok()).toBe(true); const html = await shell.text();
-const localHTML = await readFile('dist/index.html', 'utf8');
+const localHTML = await readFile(builtDir + '/index.html', 'utf8');
 for (const match of localHTML.matchAll(/(?:src|href)="([^"]*assets\/[^"]+)"/g)) expect(html).toContain(match[1]);
-const response=await context.request.get(base+'world-assets.json?release='+Date.now());expect(response.ok()).toBe(true);const installed=await response.json();expect(installed.files).toEqual(expected.files);
-for(const path of ["art3d/voxel/manifest.json","art3d/terrain/manifest.json"]){const local=JSON.parse(await readFile("dist/"+path,"utf8"));const remote=await (await context.request.get(base+path+"?release="+Date.now())).json();expect(remote.version).toBe(local.version);}
+const response=await context.request.get(base+'world-assets.json?release='+Date.now());expect(response.ok()).toBe(true);const installed=await response.json();expect(installed.files).toEqual(expected.files);if(process.env.RELEASE_DIST)expect(installed.version).toBe(expected.version);
+for(const path of ["art3d/voxel/manifest.json","art3d/terrain/manifest.json"]){const local=JSON.parse(await readFile(builtDir+"/"+path,"utf8"));const remote=await (await context.request.get(base+path+"?release="+Date.now())).json();expect(remote.version).toBe(local.version);}
 await page.goto(base,{waitUntil:'domcontentloaded'});
 const world=page.getByTestId('rpg-world');await expect(world).toHaveAttribute('data-status','ready',{timeout:60000});await expect(world).toHaveAttribute('data-actor-style','pixel-billboard');await expect(world).toHaveAttribute('data-character-style','pixel');await expect(world).toHaveAttribute('data-terrain-source','vox');await expect(world).toHaveAttribute('data-voxel-assets',/\btree\b/);await expect(world).toHaveAttribute('data-voxel-assets',/\banvil\b/);await expect(world).toHaveAttribute('data-day-night-cycle','true');await expect(page.getByRole('button',{name:'Autoplay',exact:true})).toBeVisible();
 await page.getByRole('button',{name:'Open game menu',exact:true}).click();await expect(page.getByRole('button',{name:/Use painterly|Use compatibility|Use 3D test renderer/})).toHaveCount(0);await page.getByRole('button',{name:'Save on device',exact:true}).click();await expect(page.getByRole('status')).toContainText('Chronicle saved');await page.getByRole('button',{name:'Close panel',exact:true}).click();

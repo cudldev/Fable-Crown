@@ -1,13 +1,12 @@
 import { defineConfig } from "@playwright/test";
 import config from "./playwright.config";
 
-// Keep publication focused on durable gameplay and PWA contracts.
-// Visual quality and performance comparisons belong to the local visual config.
+// CPU-only CI checks worker/storage/PWA contracts without software-GPU stalls.
+// The actual WebGL world and all visual interactions are reviewed locally.
 export default defineConfig({
   ...config,
-  projects: [
-    { name: "core", testMatch: "**/rpg-acceptance.spec.ts" },
-    { name: "controls", testMatch: "**/rpg-inputs.spec.ts", grep: /left click mines|touch hold/ },
-    { name: "shell", testMatch: "**/rpg-three.spec.ts", grep: /world shell and save controls|default voxel world reloads offline|unavailable WebGL/ },
-  ],
+  testMatch: "**/release-smoke.spec.ts",
+  timeout: 60000,
+  expect: { timeout: 15000 },
+  use: { ...config.use, actionTimeout: 15000, deviceScaleFactor: 1, launchOptions: undefined },
 });

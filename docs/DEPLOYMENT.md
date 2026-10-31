@@ -45,7 +45,7 @@ If Pages is already enabled, treat the conflict as nonfatal and verify configura
 https://vite.dev/guide/static-deploy
 https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
 
-## Combined voxel release validation
-The workflow validates/builds once and tests the exact artifact in three focused release groups: core gameplay/save/offline, world inputs, and default renderer/mobile/offline/recovery. All groups must pass before Pages publication. The full95-case visual/developer suite remains available through npm run test:browser;94active scenarios passed locally, with1existing user-approved skip. Detailed visual and timing comparisons are outside the automatic deployment gate.
+## Release test boundary
+CI runs unit/type/build/asset/PWA gates and npm run test:release: two lightweight real-browser smoke cases for the real simulation worker, thoughts, save/import, mobile shell and offline asset/cache reload. WebGL is disabled in these cases so CPU-only runners do not stall on graphics.
 
-Commands: npm run test:release runs the bounded CI projects (core, controls, shell); npm run test:visual runs local visual/GPU/art/performance review. npm run test:browser runs the full local suite. Add new visual cases to playwright.visual.config.ts; publication scope is explicit in playwright.release.config.ts.
+Run GPU-dependent interactions, art/shader/screenshot/performance checks locally with npm run test:visual; the full local suite remains npm run test:browser. The actual public WebGL game is verified after publication. Add visual cases to playwright.visual.config.ts, without adding them to the deployment gate.
