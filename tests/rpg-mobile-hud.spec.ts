@@ -1,6 +1,16 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createRpg } from "../src/rpg/engine";
 
+async function fpsVisible(page: Page) {
+  const meter = page.getByTestId("fps-indicator");
+  await expect(meter).toBeVisible();
+  await expect(meter).toHaveText(/\d+ FPS · \d+\.\d ms/);
+  expect(await meter.evaluate(node => {
+    const box = node.getBoundingClientRect();
+    return box.left >= 0 && box.top >= 0 && box.right <= innerWidth && box.bottom <= innerHeight;
+  })).toBe(true);
+}
+
 async function start(page: Page) {
   await page.goto("./");
   await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready");
@@ -17,14 +27,16 @@ async function start(page: Page) {
 
 test("phone HUD leaves the world clear with no overlapping or undersized controls", async ({ page }) => {
   await start(page);
+  await fpsVisible(page);
   const measurements = [];
   for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 667, height: 375 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport);
     await expect(page.getByRole("button", { name: "World tools", exact: true })).toHaveAttribute("aria-expanded", "false");
-    for (const selector of [".rpg-minimap", ".camera-controls", ".three-light-controls", ".three-performance", ".three-test-note", ".plan-why", ".plan-next"])
+    for (const selector of [".rpg-minimap", ".camera-controls", ".three-light-controls", ".three-test-note", ".plan-why", ".plan-next"])
       await expect(page.locator(selector)).toBeHidden();
+    await fpsVisible(page);
     const result = await page.evaluate(() => {
-      const boxes = [...document.querySelectorAll<HTMLElement>(".world-header button,.intention-dock,.intention-readout,.rpg-messages")]
+      const boxes = [...document.querySelectorAll<HTMLElement>(".world-header button,.intention-dock,.intention-readout,.rpg-messages,.three-performance")]
         .filter(node => node.checkVisibility()).map(node => node.getBoundingClientRect());
       const overlap = boxes.some((a, i) => boxes.slice(i + 1).some(b => Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1));
       return { coverage: boxes.reduce((sum, box) => sum + box.width * box.height, 0) / (innerWidth * innerHeight), overlap,
@@ -51,6 +63,7 @@ test("mobile tools, thoughts and drawers remain usable through rotation", async 
   await start(page);
   const tools = page.getByRole("button", { name: "World tools", exact: true });
   await tools.click();
+  await fpsVisible(page);
   await expect(page.getByRole("complementary", { name: "Frontier minimap" })).toBeVisible();
   await page.screenshot({ path: "docs/screenshots/mobile-ui/tools-portrait.png" });
   const world = page.getByTestId("rpg-world");
@@ -66,6 +79,7 @@ test("mobile tools, thoughts and drawers remain usable through rotation", async 
   await expect(world).toHaveAttribute("data-camera-mode", "orthographic");
   await page.setViewportSize({ width: 844, height: 390 });
   await expect(visual).toBeVisible();
+  await fpsVisible(page);
   expect(await visual.locator(".visual-settings-body").evaluate(node => node.clientHeight)).toBeGreaterThan(100);
   await page.screenshot({ path: "docs/screenshots/mobile-ui/settings-landscape.png" });
   await visual.getByRole("button", { name: "Close visual settings" }).click();
@@ -82,6 +96,7 @@ test("mobile tools, thoughts and drawers remain usable through rotation", async 
   await expect(page.locator(".intention-readout")).toBeHidden();
   await page.getByRole("button", { name: "Collapse messages", exact: true }).click();
   await page.getByRole("button", { name: "Open inventory", exact: true }).click();
+  await fpsVisible(page);
   await expect(page.locator(".intention-readout")).toBeHidden();
   await page.getByRole("button", { name: "Close panel", exact: true }).click();
   await expect(page.getByRole("button", { name: "Autoplay", exact: true })).toHaveAttribute("aria-pressed", "false");

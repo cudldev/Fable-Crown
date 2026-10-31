@@ -36,7 +36,7 @@
 .visual-copy-result p { font: 12px system-ui; }
 .visual-copy-result textarea { box-sizing: border-box; display: block; width: 100%; min-height: 130px; padding: 7px; border: 1px solid #948c6a; border-radius: 4px; background: #14242b; color: #ecdfbd; font: 10px ui-monospace, monospace; resize: vertical; }
 .game-shell[data-panel-open="true"] .three-visual-settings { display: none; }
-.three-performance { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 5; padding: 5px 9px; border: 1px solid #8d866766; border-radius: 4px; background: #172b32df; color: #e8e8d5; font: 11px/1.3 ui-monospace, monospace; font-variant-numeric: tabular-nums; pointer-events: none; }
+.three-performance { position: fixed; top: max(18px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 60; padding: 5px 9px; border: 1px solid #8d866766; border-radius: 4px; background: #172b32df; color: #e8e8d5; font: 11px/1.3 ui-monospace, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
 .three-world > canvas { image-rendering: auto; }
 .three-world > canvas:focus-visible { outline: 2px solid #e0c68b; outline-offset: -3px; }
 .three-light-controls {
@@ -80,7 +80,6 @@
   .three-visual-settings { top: 81px; right: 10px; width: calc(100% - 20px); max-height: calc(100% - 275px); }
   .three-visual-settings button, .three-visual-settings select { min-height: 44px; }
   .three-light-controls .visual-settings-trigger { grid-column: 1 / -1; }
-  .three-performance { top: 249px; left: 10px; transform: none; font-size: 10px; }
   .three-light-controls { top: 81px; right: 10px; max-width: 160px; gap: 2px; padding: 3px; display: grid; grid-template-columns: repeat(3, 44px); }
   .three-light-controls > span { display: none; }
   .three-light-controls button { padding: 6px 8px; font-size: 10px; }

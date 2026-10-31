@@ -6,6 +6,7 @@ const expected=JSON.parse(await readFile(builtDir + '/world-assets.json','utf8')
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const context=await browser.newContext({viewport:{width:1280,height:800}});
 const page=await context.newPage();const errors=[],external=[],failed=[],retired=[],nativeRequests=[];
+const fpsVisible=async()=>{await expect(page.getByTestId('fps-indicator')).toBeVisible();await expect(page.getByTestId('fps-indicator')).toHaveText(/\d+ FPS · \d+\.\d ms/);};
 page.on('pageerror',e=>errors.push(e.message));
 page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
 page.on('request',r=>{const u=new URL(r.url());if(/\.vox$|\/tiles\.bin$/.test(u.pathname))nativeRequests.push(u.href);if(u.protocol.startsWith('http')&&u.origin!==new URL(base).origin)external.push(u.href);if(/\/art\/|\/(ink|fitted)\/|alden(?:-ink|-fitted)?\.glb/.test(u.pathname))retired.push(u.href);});
@@ -22,13 +23,13 @@ await expect(world).toHaveAttribute('data-voxel-renderer','shared-static-meshes'
 await expect.poll(async()=>Number(await world.getAttribute('data-voxel-templates'))).toBeGreaterThan(0);
 const templates=Number(await world.getAttribute('data-voxel-templates')),geometryBytes=Number(await world.getAttribute('data-voxel-geometry-bytes'));
 await page.getByRole('button',{name:'Open game menu',exact:true}).click();await expect(page.getByRole('button',{name:/Use painterly|Use compatibility|Use 3D test renderer/})).toHaveCount(0);await page.getByRole('button',{name:'Save on device',exact:true}).click();await expect(page.getByRole('status')).toContainText('Chronicle saved');await page.getByRole('button',{name:'Close panel',exact:true}).click();
-await mkdir('docs/screenshots',{recursive:true});await page.screenshot({path:'docs/screenshots/voxel-default-pages-desktop.png'});
-await page.setViewportSize({width:390,height:844});await expect(world).toHaveAttribute('data-status','ready');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'docs/screenshots/voxel-default-pages-phone.png'});
-await page.setViewportSize({width:844,height:390});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'docs/screenshots/voxel-default-pages-landscape.png'});
+await mkdir('docs/screenshots',{recursive:true});await fpsVisible();await page.screenshot({path:'docs/screenshots/voxel-default-pages-desktop.png'});
+await page.setViewportSize({width:390,height:844});await expect(world).toHaveAttribute('data-status','ready');await fpsVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'docs/screenshots/voxel-default-pages-phone.png'});
+await page.setViewportSize({width:844,height:390});await fpsVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'docs/screenshots/voxel-default-pages-landscape.png'});
 await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),{timeout:60000}).toBe(true);const scope=await page.evaluate(async()=>(await navigator.serviceWorker.ready).scope);expect(scope).toBe(base);
 await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await expect(world).toHaveAttribute('data-status','ready',{timeout:60000});await expect(world).toHaveAttribute('data-terrain-source','vox');await expect(world).toHaveAttribute('data-actor-style','pixel-billboard');await context.setOffline(false);
 expect(errors).toEqual([]);expect(external).toEqual([]);expect(failed).toEqual([]);expect(retired).toEqual([]);expect(nativeRequests).toEqual([]);expect(templates).toBe(37);
 await expect(world).toHaveAttribute('data-voxel-renderer','shared-static-meshes');
 const glError=await page.getByTestId('three-canvas').evaluate(canvas=>canvas.getContext('webgl2')?.getError()??-1);expect(glError).toBe(0);expect(errors).toEqual([]);
-const report={url:base,artVersion:installed.version,renderer:'shared-static-meshes',templates,geometryBytes,glError,desktop:true,phoneViewport:true,landscape:true,currentShellAssetPaths:true,offlineReload:true,serviceWorkerScope:scope,errors,external,failed,retiredRequests:retired,nativeRequests,verifiedAt:new Date().toISOString()};await writeFile('docs/VOXEL_DEFAULT_PAGES_VERIFICATION.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+await fpsVisible();const report={url:base,artVersion:installed.version,renderer:'shared-static-meshes',templates,geometryBytes,glError,desktop:true,phoneViewport:true,landscape:true,fpsAlwaysVisible:true,currentShellAssetPaths:true,offlineReload:true,serviceWorkerScope:scope,errors,external,failed,retiredRequests:retired,nativeRequests,verifiedAt:new Date().toISOString()};await writeFile('docs/VOXEL_DEFAULT_PAGES_VERIFICATION.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }finally{await browser.close();}

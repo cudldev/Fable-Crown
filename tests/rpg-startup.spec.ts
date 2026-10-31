@@ -55,6 +55,7 @@ async function auditStartup(page: Page) {
 }
 
 async function hiddenHUD(page: Page) {
+  await expect(page.getByTestId("fps-indicator")).toBeHidden();
   for (const name of ["Open game menu", "Open inventory", "Open thoughts", "Open messages"])
     await expect(page.getByRole("button", { name, exact: true })).toBeHidden();
   await expect(page.locator(".intention-dock")).toBeHidden();

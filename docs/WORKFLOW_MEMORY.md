@@ -150,3 +150,5 @@
 - Camera input: onCamera accepts functional updates. Native drag changes onlypanfields; wheel/pinch scalequeuedcurrent.zoom withcaptureddeltas, never spread runtime.props.camera snapshots. Mixed heldpan+wheel regression covers52→0zoomreversions and3-event accumulation. Static perf: scripts/build-voxel-reference-control.mjs isolatescube rendererwithsamecamerafix; don'tattributeinput/foliagefixgainssolelytomeshes. See performance/voxel-static/README.md; no phoneaverageFPSwin established.
 
 - PWA upgrades: Cache.addAll default may reuse fresh old HTTP-cache index/world-assets. Install with Request(cache:'reload'); include pwa.mjs source in APP hash so installer-only fixes invalidate caches. Keep rpg-pwa-upgrade local regression (oldHTTP prime→update→newmanifest/index/offline); assert target cachedmanifest, not just target cache names.
+
+- FPS stays visible throughout gameplay on desktop/mobile, above panels; mobile tools start below its reserved row. Keep meter hidden during asset preparation. Existing FPS/frame-ms sample window/500ms refresh unchanged; mobile HUD/startup browser checks cover this.
