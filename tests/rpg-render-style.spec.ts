@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { openWorldTools } from "./world-tools";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
-import { VOXEL_VERSION } from "../src/render/three/voxel-version";
+import { VOXEL_BAKE_VERSION } from "../src/render/three/voxel-bake-version";
 
 test.use({ deviceScaleFactor: 2, actionTimeout: 15000 });
 test.setTimeout(60000);
@@ -56,7 +56,7 @@ test("normal rendering follows display density and ignores legacy pixelation thr
     await page.screenshot({ path: output + (viewport.width === 390 ? "/smooth-portrait.png" : "/smooth-landscape.png") });
   }
   await page.waitForFunction(async () => !!(await navigator.serviceWorker.getRegistration())?.active, null, { timeout: 15000 });
-  await expect.poll(() => page.evaluate(async version => { const url = new URL("art3d/voxel/tree.vox", location.href); url.searchParams.set("v", version); return !!(await caches.match(url.href)); }, VOXEL_VERSION)).toBe(true);
+  await expect.poll(() => page.evaluate(async version => { const url = new URL("art3d/voxel/meshes.bin", location.href); url.searchParams.set("v", version); return !!(await caches.match(url.href)); }, VOXEL_BAKE_VERSION)).toBe(true);
   await context.setOffline(true); await page.reload({ waitUntil: "domcontentloaded", timeout: 15000 });
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   await expect(world).toHaveAttribute("data-render-style", "smooth");

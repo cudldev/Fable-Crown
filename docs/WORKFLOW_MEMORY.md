@@ -1,5 +1,7 @@
 # Working notes
 
+- Full voxel bake: `npm run voxel:bake` compiles all props/LODs/states/supplies/shadows/GI inputs and terrain pigment; `voxel:check-bake` verifies deterministic artifacts. Runtime loads versioned baked.json/meshes.bin and terrain surface.json/bin; no raw VOX downloads or meshing. Use .bin for application-gzip payloads (.gz may be transparently decoded by static servers). Keep37templates/GPUwarmup; world atlas and GI remain dynamic. See performance/voxel-bake.
+
 - Floating UI: no plates; text halo. HealthVial uses separate12px SVG glass/liquid surfaces, deep saturated radial centre, lighter edges and light-reactive front reflection (FloatingVials: sun/fill+4lamps,10Hz). Skilling ring sits on actual target-model top, with cached bounds and no detached world caption; HUD keeps details. Arc follows real attempt/reset. Review partial-health day/night and tree/ore/phone captures; no backdrop blur/captures.
 
 - Mobile UI: `mobile-hud.css` covers ≤760px or ≤500px height. Default HUD stays under25% coverage; Tools reveals map/camera/visuals, Thoughts holds details. Run rpg-mobile-hud + visual-settings + mobile three/messages checks locally; keep GPU coverage out of release CI.

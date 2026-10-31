@@ -1,13 +1,17 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { afterEach, expect, test, vi } from "vitest";
 import { NearestFilter, NearestMipmapNearestFilter, SRGBColorSpace } from "three";
-import { buildTerrainSurface, loadTerrainTiles, parseTerrainTiles, terrainTileChoice, type TerrainTiles, type TerrainWorld } from "../src/render/three/terrain-tiles";
+import { buildTerrainSurface, compileTerrainTiles, loadTerrainTiles, parseCompiledTerrain, parseTerrainTiles, terrainTileChoice, type TerrainTiles, type TerrainWorld } from "../src/render/three/terrain-tiles";
+import { TERRAIN_SURFACE_VERSION } from "../src/render/three/terrain-surface-version";
 import type { Terrain } from "../src/rpg/types";
 
 const manifest = JSON.parse(readFileSync("public/art3d/terrain/manifest.json", "utf8"));
 const bytes = readFileSync("public/art3d/terrain/tiles.bin");
 const pack = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
 const tiles = parseTerrainTiles(manifest, pack);
+const compiled = compileTerrainTiles(tiles);
+const compiledManifest = { ...compiled.metadata, version: TERRAIN_SURFACE_VERSION, packSha256: createHash("sha256").update(new Uint8Array(compiled.pack)).digest("hex") };
 const world = (width: number, height: number, terrain: Terrain[]): TerrainWorld => ({ width, height, terrain });
 const neighbourWorld = (cards: number, diagonals = 0): TerrainWorld => {
   const data: Terrain[] = new Array(9).fill("grass"), cardinal = [1, 5, 7, 3], diagonal = [0, 2, 8, 6];
@@ -39,21 +43,64 @@ test("native terrain pack retains verified flat supports and rejects paths, rang
   expect(() => parseTerrainTiles(manifest, changed)).toThrow(/frame/);
 });
 
-test("the loader fetches only the local manifest and native pack, preserving abort signal and rejecting remote pack references", async () => {
-  const fetcher = vi.fn(async (input: URL) => new Response(input.pathname.endsWith("manifest.json") ? JSON.stringify(manifest) : bytes, { status: 200 }));
+test("the loader fetches only compiled local surface data, preserving abort signal and rejecting remote pack references", async () => {
+  const fetcher = vi.fn(async (input: URL) => new Response(input.pathname.endsWith("surface.json") ? JSON.stringify(compiledManifest) : compiled.pack, { status: 200 }));
   vi.stubGlobal("fetch", fetcher); const signal = new AbortController().signal;
-  expect((await loadTerrainTiles(new URL("http://local.test/Fable-Crown/art3d/terrain/"), signal)).grids.size).toBe(288);
-  expect(fetcher.mock.calls.map(args => String(args[0]))).toEqual([`http://local.test/Fable-Crown/art3d/terrain/manifest.json?v=${manifest.version}`, `http://local.test/Fable-Crown/art3d/terrain/tiles.bin?v=${manifest.version}`]);
+  const loaded = await loadTerrainTiles(new URL("http://local.test/Fable-Crown/art3d/terrain/"), signal);
+  expect(loaded.grids.size).toBe(0); expect(loaded.tops!.size).toBe(288);
+  expect(fetcher.mock.calls.map(args => String(args[0]))).toEqual([`http://local.test/Fable-Crown/art3d/terrain/surface.json?v=${TERRAIN_SURFACE_VERSION}`, `http://local.test/Fable-Crown/art3d/terrain/surface.bin?v=${TERRAIN_SURFACE_VERSION}`]);
   expect(fetcher).toHaveBeenNthCalledWith(2, expect.any(URL), { signal });
-  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ ...manifest, pack: "https://remote.test/tiles.bin" }))));
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ ...compiledManifest, pack: "https://remote.test/surface.bin" }))));
   await expect(loadTerrainTiles(new URL("http://local.test/"), signal)).rejects.toThrow(/contract/);
 });
 
-test("stale cached terrain metadata is rejected before mixing it with this build's native pack", async () => {
-  const fetcher = vi.fn(async () => new Response(JSON.stringify({ ...manifest, version: "0000000000000000" })));
+test("stale cached terrain metadata is rejected before mixing it with this build's compiled pack", async () => {
+  const fetcher = vi.fn(async () => new Response(JSON.stringify({ ...compiledManifest, version: TERRAIN_SURFACE_VERSION.replace(/^./, first => first === "0" ? "1" : "0") })));
   vi.stubGlobal("fetch", fetcher);
   await expect(loadTerrainTiles(new URL("http://local.test/"), new AbortController().signal)).rejects.toThrow(/cache version/);
   expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+test("compiled terrain preserves exact pigment, linear GI means, painted joins, UVs and all guarded mips", () => {
+  const loaded = parseCompiledTerrain(compiledManifest, compiled.pack);
+  expect(loaded.grids.size).toBe(0); expect(loaded.version).toBe(tiles.version);
+  for (const kind of ["grass", "dirt", "stone", "sand"] as const) expect(loaded.meanColors[kind].toArray()).toEqual(tiles.meanColors[kind].toArray());
+  expect(loaded.tops!.values().next().value!.buffer).toBe(compiled.pack);
+  const choices: Terrain[] = ["grass", "dirt", "stone", "sand", "water"];
+  const fixture = world(33, 29, Array.from({ length: 33 * 29 }, (_, at) => choices[(at * 19 + Math.floor(at / 33) * 7) % choices.length]));
+  for (const quietDirtSpeckles of [false, true]) {
+    const native = buildTerrainSurface(tiles, fixture, { quietDirtSpeckles }), baked = buildTerrainSurface(loaded, fixture, { quietDirtSpeckles });
+    expect(baked.stats).toEqual(native.stats); expect(baked.presentationTerrain).toEqual(native.presentationTerrain);
+    expect(baked.texture.mipmaps).toHaveLength(native.texture.mipmaps.length);
+    for (let level = 0; level < native.texture.mipmaps.length; level++) {
+      const a = native.texture.mipmaps[level] as unknown as { data: Uint8Array; width: number; height: number };
+      const b = baked.texture.mipmaps[level] as unknown as { data: Uint8Array; width: number; height: number };
+      expect([b.width, b.height]).toEqual([a.width, a.height]); expect(Buffer.from(b.data).equals(Buffer.from(a.data))).toBe(true);
+    }
+    for (let y = 0; y < fixture.height; y++) for (let x = 0; x < fixture.width; x++) if (fixture.terrain[y * fixture.width + x] !== "water") expect(baked.uvAt(x, y)).toEqual(native.uvAt(x, y));
+    native.dispose(); baked.dispose();
+  }
+});
+
+test("compiled terrain rejects malformed range, phases, linear color, opacity and source versions", () => {
+  const malformed = (change: (value: typeof compiledManifest) => void) => { const value = structuredClone(compiledManifest); change(value); return value; };
+  expect(() => parseCompiledTerrain(malformed(value => { value.bytes--; }), compiled.pack)).toThrow(/metadata/);
+  expect(() => parseCompiledTerrain(malformed(value => { value.assets[1] = value.assets[0]; }), compiled.pack)).toThrow(/metadata/);
+  expect(() => parseCompiledTerrain(malformed(value => { value.variants.grass.pop(); }), compiled.pack)).toThrow(/phase/);
+  expect(() => parseCompiledTerrain(malformed(value => { value.meanColors.grass[0] = NaN; }), compiled.pack)).toThrow(/pigment/);
+  expect(() => parseCompiledTerrain(malformed(value => { value.sourceVersion = "0000000000000000"; }), compiled.pack)).toThrow(/cache version/);
+  expect(() => parseCompiledTerrain(compiledManifest, compiled.pack.slice(0, -1))).toThrow(/Truncated/);
+  const changed = compiled.pack.slice(0); new Uint8Array(changed)[3] = 0;
+  expect(() => parseCompiledTerrain(compiledManifest, changed)).toThrow(/opaque/);
+});
+
+test("compiled surface load rejects modified bytes and already-aborted loads without source fallback", async () => {
+  const changed = compiled.pack.slice(0); new Uint8Array(changed)[0] ^= 1;
+  const fetcher = vi.fn(async (input: URL) => new Response(input.pathname.endsWith("surface.json") ? JSON.stringify(compiledManifest) : changed));
+  vi.stubGlobal("fetch", fetcher);
+  await expect(loadTerrainTiles(new URL("http://local.test/"), new AbortController().signal)).rejects.toThrow(/integrity/);
+  const controller = new AbortController(); controller.abort(); fetcher.mockClear();
+  await expect(loadTerrainTiles(new URL("http://local.test/"), controller.signal)).rejects.toThrow(); expect(fetcher).not.toHaveBeenCalled();
 });
 
 test("world phases preserve native pixel orientation, share repeated atlas variants and reject out-of-world coordinates", () => {

@@ -43,6 +43,8 @@ Accepted as the baseline with residual baked shading, color variation, detached 
 
 ## Reuse
 
+Runtime delivery now uses the [full build-time bake](performance/voxel-bake/README.md): after native source/version validation run `npm run voxel:bake`. Mesh/LOD/depleted/shadow/GI arrays and terrain pigment ship ready-made; editable native VOX stays the source. Production builds regenerate and version the packages automatically.
+
 The [first prop batch](../assets/explorations/voxel/prop-batch-v1/README.md) now exercises this same reconstruction path on anvil,barrel,crate and copper ore at shared16cells/metre. Raw inferred faces were too dark; a separate explicit native palette pass improves readability while preserving raw outputs and all geometry. This does not establish automatic de-lighting. Ore's inferred footprint is larger than its brief; common-scale review must catch this before binding. Props are comparison drafts,not yet game-integrated.
 
 - [Source image skill](../skills/fable-voxel-reference/SKILL.md): generation rules, prompt and size/style planning.

@@ -1,4 +1,6 @@
 import { readFile, access, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { gunzipSync } from "node:zlib";
 import { checkTerrainAssets } from "./check-terrain-assets.mjs";
 const html = await readFile("dist/index.html", "utf8");
 const paths = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]);
@@ -35,19 +37,27 @@ for (const path of models.files) {
   await access("dist/" + path);
   if (!sw.includes("./" + path)) throw new Error("3D artwork missing from offline cache");
 }
-const voxels = JSON.parse(await readFile("dist/art3d/voxel/manifest.json", "utf8"));
-const terrain = JSON.parse(await readFile("dist/art3d/terrain/manifest.json", "utf8"));
-for (const path of ["art3d/terrain/manifest.json", ...terrain.files]) {
-  if (!/^art3d\/terrain\/(manifest\.json|tiles\.bin)$/.test(path)) throw Error("Terrain path escaped deployment base");
-  await access("dist/" + path);
-  if (!sw.includes("./" + path + "?v=" + terrain.version)) throw Error("Versioned native terrain source cache missing from offline cache");
+const voxels = JSON.parse(await readFile("dist/art3d/voxel/baked.json", "utf8"));
+const terrain = JSON.parse(await readFile("dist/art3d/terrain/surface.json", "utf8"));
+await checkTerrainAssets("public/art3d/terrain");
+for (const [kind, compiled, manifest, pack, generated] of [
+  ["voxel", voxels, "baked.json", "meshes.bin", "voxel-bake-version.ts"],
+  ["terrain", terrain, "surface.json", "surface.bin", "terrain-surface-version.ts"],
+]) {
+  const native = JSON.parse(await readFile(`public/art3d/${kind}/manifest.json`, "utf8"));
+  const versionSource = await readFile("src/render/three/" + generated, "utf8");
+  if (compiled.format !== 1 || compiled.sourceVersion !== native.version || compiled.pack !== pack || !versionSource.includes('"' + compiled.version + '"')) throw Error("Stale compiled " + kind);
+  for (const name of [manifest, pack]) {
+    const path = `art3d/${kind}/${name}?v=${compiled.version}`;
+    if (!sw.includes("./" + path) || !art.files.includes(path)) throw Error("Compiled asset missing from offline cache: " + path);
+  }
+  const bytes = await readFile(`dist/art3d/${kind}/${pack}`);
+  if (bytes.length !== compiled.bytes || createHash("sha256").update(bytes).digest("hex") !== compiled.packSha256) throw Error("Invalid compiled " + kind + " payload");
+  if (kind === "voxel" && gunzipSync(bytes).length !== compiled.decodedBytes) throw Error("Invalid voxel bake decompressed size");
 }
-await checkTerrainAssets("dist/art3d/terrain");
-for (const path of ["art3d/voxel/manifest.json", ...voxels.files]) {
-  if (!/^art3d\/voxel\/(manifest\.json|[a-z0-9-]+\.vox)$/.test(path)) throw Error("Voxel path escaped deployment base");
-  await access("dist/" + path);
-  if (!sw.includes("./" + path + "?v=" + voxels.version)) throw Error("Versioned voxel source missing from offline cache");
-}
+if (art.files.some(path => /\.vox(?:\?|$)|tiles\.bin/.test(path))) throw Error("Raw voxel sources must not be downloaded for gameplay");
+for (const path of ["art3d/voxel/manifest.json", "art3d/voxel/tree.vox", "art3d/terrain/manifest.json", "art3d/terrain/tiles.bin"])
+  if (await access("dist/" + path).then(() => true, () => false)) throw Error("Raw voxel source shipped: " + path);
 console.log(
   `Verified ${paths.length} HTML asset URLs, ${art.files.length} artwork files, manifest and worker cache scope at ${base}`,
 );

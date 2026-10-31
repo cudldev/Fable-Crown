@@ -1,6 +1,7 @@
 import { Group } from "three";
-import { type VoxelModel, type VoxelObject } from "./voxel-data";
-import { VoxelAssetDecoder } from "./voxel-decoder";
+import { type VoxelObject } from "./voxel-data";
+import { VoxelBakeDecoder } from "./voxel-bake-decoder";
+import { VOXEL_BAKE_VERSION } from "./voxel-bake-version";
 import { VOXEL_VERSION } from "./voxel-version";
 import type { WorldObject } from "../../rpg/types";
 
@@ -31,30 +32,34 @@ export function voxelAssetSpecs(value: unknown): VoxelAssetSpec[] {
 }
 
 export async function loadVoxelAssets(base: URL, signal: AbortSignal): Promise<Map<string, VoxelObject>> {
-  const manifestURL = new URL("manifest.json", base); manifestURL.searchParams.set("v", VOXEL_VERSION);
+  const manifestURL = new URL("baked.json", base); manifestURL.searchParams.set("v", VOXEL_BAKE_VERSION);
   const response = await fetch(manifestURL, { signal });
   if (!response.ok) throw Error("Voxel asset manifest unavailable.");
   const manifest = await response.json();
-  if (manifest.version !== VOXEL_VERSION) throw Error("Native voxel cache version differs from this build.");
-  const specs = voxelAssetSpecs(manifest), result = new Map<string, VoxelObject>();
-  const models = new Map<string, VoxelModel>();
-  const sizes = new Map<string, readonly number[]>();
-  const decoder = new VoxelAssetDecoder(signal);
+  if (manifest.version !== VOXEL_BAKE_VERSION || manifest.sourceVersion !== VOXEL_VERSION) throw Error("Baked voxel cache version differs from this build.");
+  if (manifest.format !== 1 || manifest.pack !== "meshes.bin" || manifest.encoding !== "gzip" || !Number.isSafeInteger(manifest.bytes) || manifest.bytes < 1 || manifest.bytes > 16 * 1024 * 1024 || !Number.isSafeInteger(manifest.decodedBytes) || manifest.decodedBytes < 1 || manifest.decodedBytes > 64 * 1024 * 1024 || typeof manifest.packSha256 !== "string" || !/^[a-f0-9]{64}$/.test(manifest.packSha256) || !Array.isArray(manifest.assets) || !manifest.assets.length || manifest.assets.length > 256) throw Error("Invalid baked voxel manifest.");
+  const ids = new Set<string>();
+  for (const asset of manifest.assets) {
+    if (!asset || typeof asset.id !== "string" || !/^[a-z0-9-]+$/.test(asset.id) || ids.has(asset.id) || !Array.isArray(asset.size) || asset.size.length !== 3 || asset.size.some((n: number) => !Number.isInteger(n) || n < 1 || n > 256)) throw Error("Invalid baked voxel binding.");
+    ids.add(asset.id);
+  }
+  const url = new URL(manifest.pack, base); url.searchParams.set("v", VOXEL_BAKE_VERSION);
+  const packed = await fetch(url, { signal }); if (!packed.ok) throw Error("Baked voxel meshes unavailable.");
+  const buffer = await packed.arrayBuffer(); signal.throwIfAborted();
+  if (buffer.byteLength !== manifest.bytes) throw Error("Baked voxel download size differs from this build.");
+  const decoder = new VoxelBakeDecoder(signal);
   try {
-  for (const spec of specs) {
-    const url = new URL(spec.file, base); url.searchParams.set("v", VOXEL_VERSION);
-    const file = await fetch(url, { signal }); if (!file.ok) throw Error(`${spec.id}: native VOX unavailable.`);
-    const decoded = await decoder.decode(await file.arrayBuffer(), spec); signal.throwIfAborted();
-    sizes.set(spec.id, decoded.size); models.set(spec.id, decoded.voxels.model);
-    result.set(spec.id, decoded.voxels);
-  }
+    const decoded = await decoder.decode(buffer, VOXEL_VERSION, manifest.decodedBytes, manifest.packSha256); signal.throwIfAborted();
+    if (decoded.assets.length !== ids.size) throw Error("Baked voxel binding count differs.");
+    const result = new Map<string, VoxelObject>();
+    for (const asset of decoded.assets) {
+      const spec = manifest.assets.find((entry: { id: string }) => entry.id === asset.id);
+      if (!spec || result.has(asset.id) || asset.size.some((n, i) => n !== spec.size[i])) throw Error("Baked voxel binding differs from the manifest.");
+      for (const model of [asset.voxels.model, asset.voxels.depleted]) if (model && model.surfaces?.length !== model.levels.length) throw Error("A voxel binding is missing baked surfaces.");
+      result.set(asset.id, asset.voxels);
+    }
+    return result;
   } finally { decoder.dispose(); }
-  for (const spec of specs) if (spec.depletedAsset) {
-    const depletedSize = sizes.get(spec.depletedAsset)!;
-    if (sizes.get(spec.id)!.some((size, i) => size !== depletedSize[i])) throw Error("Depleted voxel asset must share its native coordinate frame.");
-    result.get(spec.id)!.depleted = models.get(spec.depletedAsset)!;
-  }
-  return result;
 }
 
 /** Native prop bindings precede legacy templates; resource identity stays authoritative. */

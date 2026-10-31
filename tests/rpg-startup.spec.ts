@@ -104,7 +104,7 @@ test.describe("protected game preparation", () => {
     const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
     let release!: () => void, held = false;
     const gate = new Promise<void>(resolve => { release = resolve; });
-    await page.route(/\/art3d\/voxel\/tree\.vox(?:\?|$)/, async route => { held = true; await gate; await route.continue(); });
+    await page.route(/\/art3d\/voxel\/meshes\.bin(?:\?|$)/, async route => { held = true; await gate; await route.continue(); });
     try {
       await page.goto("./", { waitUntil: "domcontentloaded" });
       const screen = page.getByTestId("startup-screen");

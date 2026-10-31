@@ -6,7 +6,6 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { createArtLibrary } from "./art";
 import { loadVoxelAssets, voxelBindingId, voxelObject } from "./voxel-assets";
-import { composeVoxelModels } from "./voxel-data";
 import { loadTerrainTiles, type TerrainTiles } from "./terrain-tiles";
 import { standaloneVoxel } from "./voxel-buckets";
 import type { VoxelObject } from "./voxel-data";
@@ -253,8 +252,7 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
     const material = new MeshLambertMaterial({ color: terrainTiles.meanColors[kind] });
     material.name = `native-ground-mean-${kind}`; materials.add(material); terrain[kind] = material;
   }
-  const bindingModels = new Map(voxelModels), crate = voxelModels.get("crate"), barrel = voxelModels.get("barrel");
-  if (crate && barrel) bindingModels.set("supplies", { model: composeVoxelModels([{ model: crate.model, offset: [-.5, 0, -.125] }, { model: barrel.model, offset: [.5, 0, .125] }]) });
+  const bindingModels = voxelModels;
   const library: ArtLibrary = {
     terrain, terrainTiles,
     createObject(object: WorldObject, options): ObjectArt {

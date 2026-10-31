@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import { WORLD, interactionTiles, tile } from "../src/rpg/world";
-import { VOXEL_VERSION } from "../src/render/three/voxel-version";
+import { VOXEL_BAKE_VERSION } from "../src/render/three/voxel-bake-version";
 import { VOXEL_RESIDENT_CELL_BUDGET } from "../src/render/three/voxel-buckets";
 import type { RpgState, TilePosition } from "../src/rpg/types";
 
@@ -57,18 +57,19 @@ test("reviewed voxel props replace world bindings, deplete and survive stale-cac
   await expect.poll(async () => Number(await world.getAttribute("data-gi-depleted")), { timeout: 60000 }).toBe(0);
   const respawned = await sample(page); await page.screenshot({ path: `${output}/ore-respawned-phone.png` });
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await expect.poll(() => page.evaluate(async version => { const url = new URL("art3d/voxel/ore-depleted.vox", location.href); url.searchParams.set("v", version); return !!(await caches.match(url.href)); }, VOXEL_VERSION)).toBe(true);
+  await expect.poll(() => page.evaluate(async version => { const url = new URL("art3d/voxel/meshes.bin", location.href); url.searchParams.set("v", version); return !!(await caches.match(url.href)); }, VOXEL_BAKE_VERSION)).toBe(true);
   await page.evaluate(async () => {
     const name = (await caches.keys()).find(key => key.startsWith("fable-art-"))!, cache = await caches.open(name);
-    await cache.put(new URL("art3d/voxel/manifest.json", location.href).href, new Response(JSON.stringify({ version: "old-tree-only", assets: [] })));
-    await cache.put(new URL("art3d/voxel/ore-copper.vox", location.href).href, new Response(new Uint8Array([0, 1, 2, 3])));
+    await cache.put(new URL("art3d/voxel/baked.json", location.href).href, new Response(JSON.stringify({ version: "old-tree-only", assets: [] })));
+    await cache.put(new URL("art3d/voxel/meshes.bin", location.href).href, new Response(new Uint8Array([0, 1, 2, 3])));
   });
   await context.setOffline(true); await page.reload(); await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await expect.poll(async () => JSON.parse((await world.getAttribute("data-voxel-object-counts"))!)).toEqual(expected);
   const offline = await sample(page);
   for (const result of [supplies, available, depleted, phone, respawned, offline]) { expect(result.glError).toBe(0); expect(Number(result.counters.voxelResidentCells)).toBeLessThanOrEqual(VOXEL_RESIDENT_CELL_BUDGET); }
-  expect(requests.some(url => url.endsWith("ore-depleted.vox?v=" + VOXEL_VERSION))).toBe(true);
+  expect(requests.some(url => url.endsWith("meshes.bin?v=" + VOXEL_BAKE_VERSION))).toBe(true);
+  expect(requests.some(url => /\.vox(?:\?|$)/.test(url))).toBe(false);
   expect(errors).toEqual([]); expect(external).toEqual([]);
-  await writeFile(`${output}/review.json`, JSON.stringify({ expected, supplies, available, depleted, phone, respawned, offline, requests, errors, external, version: VOXEL_VERSION,
+  await writeFile(`${output}/review.json`, JSON.stringify({ expected, supplies, available, depleted, phone, respawned, offline, requests, errors, external, version: VOXEL_BAKE_VERSION,
     note: "Actual game/native bindings, color variants, depletion, phone viewport and stale unversioned-cache offline check. Observed host frames are not isolated overhead or physical-phone benchmarks." }, null, 2) + "\n");
 });

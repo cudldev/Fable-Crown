@@ -1,4 +1,4 @@
-import { readFile, writeFile, rm } from "node:fs/promises";
+import { readFile, writeFile, rm, readdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
 
 // Keep authoring history in public/; only current renderer assets ship to Pages.
@@ -9,4 +9,9 @@ manifest.version = createHash("sha256").update(JSON.stringify(manifest.assets)).
 await writeFile("dist/art3d/manifest.json", JSON.stringify(manifest, null, 2) + "\n");
 for (const path of ["dist/art", "dist/art3d/ink", "dist/art3d/fitted", "dist/art3d/alden.glb", "dist/art3d/tree.glb"])
   await rm(path, { recursive: true, force: true });
+// Editable sources remain in public/assets; gameplay downloads ready buffers only.
+for (const name of await readdir("dist/art3d/voxel")) if (name.endsWith(".vox") || name === "manifest.json")
+  await rm("dist/art3d/voxel/" + name);
+for (const path of ["dist/art3d/terrain/manifest.json", "dist/art3d/terrain/tiles.bin"])
+  await rm(path, { force: true });
 console.log("Release art: voxel world, pixel cast and remaining environment models only.");

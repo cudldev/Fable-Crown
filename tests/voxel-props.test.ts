@@ -1,41 +1,42 @@
 import { afterEach, beforeAll, expect, test, vi } from "vitest";
 import { readFile } from "node:fs/promises";
 import { MeshLambertMaterial } from "three";
-import { composeVoxelModels, type VoxelObject } from "../src/render/three/voxel-data";
+import { type VoxelObject } from "../src/render/three/voxel-data";
 import { loadVoxelAssets, voxelAssetSpecs, voxelBindingId, voxelObject } from "../src/render/three/voxel-assets";
-import { VOXEL_VERSION } from "../src/render/three/voxel-version";
+import { VOXEL_BAKE_VERSION } from "../src/render/three/voxel-bake-version";
 import { WORLD } from "../src/rpg/world";
 import { captureGIWorld } from "../src/render/three/voxel-gi-source";
-import { decodeVoxelAsset } from "../src/render/three/voxel-decode";
+import { unpackVoxelBake } from "../src/render/three/voxel-bake-unpack";
 
 let models: Map<string, VoxelObject>;
 const urls: string[] = [];
 beforeAll(async () => {
-  // Node lacks browser Worker; exercise the real decoder behind an async transport.
+  // Exercise real bounded decompression/validation behind an async worker transport.
   class DecoderTransport {
-    onmessage?: (event: { data: ReturnType<typeof decodeVoxelAsset> }) => void;
+    onmessage?: (event: { data: Awaited<ReturnType<typeof unpackVoxelBake>> }) => void;
     terminated = false;
-    postMessage({ buffer, spec }: { buffer: ArrayBuffer; spec: Parameters<typeof decodeVoxelAsset>[1] }) {
-      queueMicrotask(() => { if (!this.terminated) this.onmessage?.({ data: decodeVoxelAsset(buffer, spec) }); });
+    async postMessage({ buffer, sourceVersion, decodedBytes, sha256 }: { buffer: ArrayBuffer; sourceVersion: string; decodedBytes: number; sha256: string }) {
+      const data = await unpackVoxelBake(buffer, sourceVersion, decodedBytes, sha256);
+      if (!this.terminated) this.onmessage?.({ data });
     }
     terminate() { this.terminated = true; }
   }
   vi.stubGlobal("Worker", DecoderTransport);
-  const manifest = JSON.parse(await readFile(new URL("../public/art3d/voxel/manifest.json", import.meta.url), "utf8"));
-  const files = new Map<string, Uint8Array>();
-  for (const asset of manifest.assets) files.set(asset.file, Uint8Array.from(await readFile(new URL("../public/art3d/voxel/" + asset.file, import.meta.url))));
+  const manifest = JSON.parse(await readFile(new URL("../public/art3d/voxel/baked.json", import.meta.url), "utf8"));
+  const pack = Uint8Array.from(await readFile(new URL("../public/art3d/voxel/meshes.bin", import.meta.url)));
   vi.stubGlobal("fetch", vi.fn(async (input: URL) => {
     const url = new URL(String(input)); urls.push(url.href);
     const name = url.pathname.split("/").at(-1)!;
-    return new Response(name === "manifest.json" ? JSON.stringify(manifest) : files.get(name)!.buffer as ArrayBuffer);
+    return new Response(name === "baked.json" ? JSON.stringify(manifest) : pack.buffer);
   }));
   models = await loadVoxelAssets(new URL("https://local.test/art3d/voxel/"), new AbortController().signal); vi.unstubAllGlobals();
 });
 afterEach(() => vi.unstubAllGlobals());
 
 test("reviewed props load with versioned local URLs and preserve metre-scale grounding", () => {
-  expect(models.size).toBe(9); expect(urls).toHaveLength(10);
-  for (const url of urls) expect(new URL(url).searchParams.get("v")).toBe(VOXEL_VERSION);
+  expect(models.size).toBe(10); expect(urls).toHaveLength(2);
+  expect(urls.some(url => /\.vox(?:\?|$)/.test(url))).toBe(false);
+  for (const url of urls) expect(new URL(url).searchParams.get("v")).toBe(VOXEL_BAKE_VERSION);
   for (const [id, height] of [["anvil", 1], ["barrel", .9375], ["crate", .75], ["ore-copper", .75]] as const) {
     const level = models.get(id)!.model.levels[0], ys = Array.from({ length: level.count }, (_, i) => level.centers[i * 3 + 1]);
     expect(level.pitch).toBe(.0625); expect(Math.min(...ys) - level.pitch / 2).toBe(0); expect(Math.max(...ys) + level.pitch / 2).toBe(height);
@@ -68,7 +69,7 @@ test("ore identities retain geometry while sharing a low neutral depleted model 
 
 test("supply composition retains both original props at shared pitch without overlap or per-axis scaling", () => {
   const crate = models.get("crate")!.model, barrel = models.get("barrel")!.model;
-  const composite = composeVoxelModels([{ model: crate, offset: [-.5, 0, -.125] }, { model: barrel, offset: [.5, 0, .125] }]);
+  const composite = models.get("supplies")!.model;
   const level = composite.levels[0]; expect(level.count).toBe(crate.levels[0].count + barrel.levels[0].count); expect(level.pitch).toBe(.0625);
   const xs = Array.from({ length: level.count }, (_, i) => level.centers[i * 3]);
   expect(Math.max(...xs) - Math.min(...xs) + level.pitch).toBe(1.875);

@@ -2,6 +2,7 @@ import { ClampToEdgeWrapping, Color, DataTexture, NearestFilter, NearestMipmapNe
 import type { Terrain } from "../../rpg/types";
 import { parseVox, type VoxelGrid } from "./voxel-data";
 import { TERRAIN_VERSION } from "./terrain-version";
+import { TERRAIN_SURFACE_VERSION } from "./terrain-surface-version";
 
 type DryTerrain = Exclude<Terrain, "water">;
 type Family = "grass" | "dirt" | "cobble" | "sand";
@@ -11,6 +12,8 @@ export interface TerrainTiles {
   version: string; style: string; variantPeriod: number; grids: Map<string, VoxelGrid>; variants: Record<string, string[]>;
   /** Linear diffuse averages, for the coarse GI ground field; no atlas-centre sampling. */
   meanColors: Record<DryTerrain, Color>;
+  /** Offline-compiled native top pigment. Gameplay never needs the source voxel grids. */
+  tops?: Map<string, Uint32Array>;
 }
 export interface TerrainWorld { width: number; height: number; terrain: readonly Terrain[] }
 export interface TerrainTileChoice { family: Family; phase: number; pair: string; cards: number; diagonals: number; key: string }
@@ -83,17 +86,84 @@ export function parseTerrainTiles(value: unknown, pack: ArrayBuffer): TerrainTil
   return { version: manifest.version, style: manifest.style, variantPeriod: 4, grids, variants: manifest.variants, meanColors };
 }
 
+export interface CompiledTerrainManifest {
+  format: 1; version: string; sourceVersion: string; style: string; variantPeriod: 4;
+  pack: "surface.bin"; bytes: number; packSha256: string; assets: string[];
+  variants: Record<string, string[]>; meanColors: Record<DryTerrain, [number, number, number]>;
+}
+
+function nativeTop(grid: VoxelGrid): Uint32Array {
+  const top = new Uint32Array(256);
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    // Stairs are retained in the source inventory, but the flat world only paints flat families.
+    let z = 7; while (z > 0 && !grid.cells[index(x, y, z)]) z--;
+    const at = (grid.cells[index(x, y, z)] - 1) * 4;
+    top[y * 16 + x] = (grid.palette[at] | grid.palette[at + 1] << 8 | grid.palette[at + 2] << 16 | 255 << 24) >>> 0;
+  }
+  return top;
+}
+
+/** Build-only palette resolution. The returned pack contains no VOX source or meshing work. */
+export function compileTerrainTiles(tiles: TerrainTiles) {
+  const assets = [...tiles.grids.keys()], pack = new ArrayBuffer(assets.length * 1024), view = new DataView(pack);
+  assets.forEach((id, i) => nativeTop(tiles.grids.get(id)!).forEach((value, pixel) => view.setUint32(i * 1024 + pixel * 4, value, true)));
+  const meanColors = {} as CompiledTerrainManifest["meanColors"];
+  for (const kind of ["grass", "dirt", "stone", "sand"] as const) {
+    const color = tiles.meanColors[kind]; meanColors[kind] = [color.r, color.g, color.b];
+  }
+  return { pack, metadata: { format: 1 as const, sourceVersion: tiles.version, style: tiles.style,
+    variantPeriod: 4 as const, pack: "surface.bin" as const, bytes: pack.byteLength, assets, variants: tiles.variants, meanColors } };
+}
+
+function compiledManifest(value: unknown, expectedVersion: string, expectedSourceVersion: string): CompiledTerrainManifest {
+  if (!value || typeof value !== "object") throw Error("Invalid compiled terrain manifest.");
+  const manifest = value as CompiledTerrainManifest;
+  if (manifest.format !== 1 || manifest.pack !== "surface.bin" || typeof manifest.version !== "string" || !/^[a-f0-9]{16}$/.test(manifest.version) || typeof manifest.sourceVersion !== "string" || !/^[a-f0-9]{16}$/.test(manifest.sourceVersion)) throw Error("Invalid compiled terrain contract.");
+  if (manifest.version !== expectedVersion || manifest.sourceVersion !== expectedSourceVersion) throw Error("Compiled terrain cache version differs from this build.");
+  if (typeof manifest.style !== "string" || !/^[a-z0-9-]+$/.test(manifest.style) || manifest.variantPeriod !== 4 || !Array.isArray(manifest.assets) || !manifest.assets.length || manifest.assets.length > 1024 || manifest.assets.some(id => typeof id !== "string" || !/^[a-z0-9-]+$/.test(id)) || new Set(manifest.assets).size !== manifest.assets.length || manifest.bytes !== manifest.assets.length * 1024 || typeof manifest.packSha256 !== "string" || !/^[a-f0-9]{64}$/.test(manifest.packSha256) || !manifest.variants || typeof manifest.variants !== "object" || Array.isArray(manifest.variants) || !manifest.meanColors || typeof manifest.meanColors !== "object") throw Error("Invalid compiled terrain metadata.");
+  const ids = new Set(manifest.assets);
+  for (const family of requiredFamilies) {
+    const variants = manifest.variants[family];
+    if (!Array.isArray(variants) || variants.length !== 16 || new Set(variants).size !== 16 || variants.some(id => !ids.has(id))) throw Error("Missing compiled terrain phase family: " + family);
+  }
+  for (const kind of ["grass", "dirt", "stone", "sand"] as const) {
+    const rgb = manifest.meanColors[kind];
+    if (!Array.isArray(rgb) || rgb.length !== 3 || rgb.some(value => !Number.isFinite(value) || value < 0 || value > 1)) throw Error("Invalid compiled terrain linear pigment.");
+  }
+  return manifest;
+}
+
+/** Zero source parsing: expose immutable top-pigment views for world-specific atlas assembly. */
+export function parseCompiledTerrain(value: unknown, pack: ArrayBuffer, expectedVersion = TERRAIN_SURFACE_VERSION, expectedSourceVersion = TERRAIN_VERSION): TerrainTiles {
+  const manifest = compiledManifest(value, expectedVersion, expectedSourceVersion);
+  if (pack.byteLength !== manifest.bytes) throw Error("Truncated or surplus compiled terrain pack.");
+  const littleEndian = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1, tops = new Map<string, Uint32Array>();
+  manifest.assets.forEach((id, i) => {
+    const top = littleEndian ? new Uint32Array(pack, i * 1024, 256) : Uint32Array.from({ length: 256 }, (_, pixel) => new DataView(pack).getUint32(i * 1024 + pixel * 4, true));
+    for (const pixel of top) if (pixel >>> 24 !== 255) throw Error("Compiled terrain pigment must be opaque.");
+    tops.set(id, top);
+  });
+  const meanColors = {} as TerrainTiles["meanColors"];
+  for (const kind of ["grass", "dirt", "stone", "sand"] as const) meanColors[kind] = new Color(...manifest.meanColors[kind]);
+  return { version: manifest.sourceVersion, style: manifest.style, variantPeriod: 4, grids: new Map(), tops, variants: manifest.variants, meanColors };
+}
+
 export async function loadTerrainTiles(base: URL, signal: AbortSignal): Promise<TerrainTiles> {
-  const manifestURL = new URL("manifest.json", base); manifestURL.searchParams.set("v", TERRAIN_VERSION);
+  signal.throwIfAborted();
+  const manifestURL = new URL("surface.json", base); manifestURL.searchParams.set("v", TERRAIN_SURFACE_VERSION);
   const response = await fetch(manifestURL, { signal });
   if (!response.ok) throw Error("Native terrain manifest unavailable.");
-  const value: unknown = await response.json(), manifest = manifestValue(value);
-  if (manifest.version !== TERRAIN_VERSION) throw Error("Native terrain cache version differs from this build.");
-  const packURL = new URL(manifest.pack, base); packURL.searchParams.set("v", TERRAIN_VERSION);
+  const value: unknown = await response.json(), manifest = compiledManifest(value, TERRAIN_SURFACE_VERSION, TERRAIN_VERSION);
+  const packURL = new URL(manifest.pack, base); packURL.searchParams.set("v", TERRAIN_SURFACE_VERSION);
   const packed = await fetch(packURL, { signal });
-  if (!packed.ok) throw Error("Native terrain VOX pack unavailable.");
+  if (!packed.ok) throw Error("Compiled terrain surface pack unavailable.");
   const buffer = await packed.arrayBuffer();
-  return parseTerrainTiles(value, buffer);
+  signal.throwIfAborted();
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  const hash = Array.from(new Uint8Array(digest), value => value.toString(16).padStart(2, "0")).join("");
+  if (hash !== manifest.packSha256) throw Error("Compiled terrain pack integrity differs from its manifest.");
+  signal.throwIfAborted();
+  return parseCompiledTerrain(value, buffer);
 }
 
 /** N/E/S/W bits, followed by NW/NE/SE/SW. Only the latter need an inside-corner stamp. */
@@ -137,11 +207,7 @@ function paintTile(tiles: TerrainTiles, choice: TerrainTileChoice, topCache: Map
   const grid = (family: string) => {
     const id = tiles.variants[family][choice.phase]; let top = topCache.get(id);
     if (!top) {
-      const source = tiles.grids.get(id)!; top = new Uint32Array(256);
-      for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
-        const at = (source.cells[index(x, y, 7)] - 1) * 4;
-        top[y * 16 + x] = (source.palette[at] | source.palette[at + 1] << 8 | source.palette[at + 2] << 16 | 255 << 24) >>> 0;
-      }
+      top = tiles.tops?.get(id) ?? nativeTop(tiles.grids.get(id)!);
       topCache.set(id, top);
     }
     return top;
@@ -239,7 +305,7 @@ export function buildTerrainSurface(tiles: TerrainTiles, world: TerrainWorld, op
       const guard = 1 / 64, sx = slot % cols * 16, sy = Math.floor(slot / cols) * 16;
       return [(sx + guard) / width, (sy + guard) / height, (sx + 16 - guard) / width, (sy + 16 - guard) / height];
     },
-    stats: { textureBytes: mipmaps.reduce((sum, mip) => sum + mip.data.byteLength, 0), sourceModules: tiles.grids.size, paintedVariants: choices.length, width, height, tiles: slots.reduce((count, slot) => count + Number(slot >= 0), 0), quietedDirtTiles },
+    stats: { textureBytes: mipmaps.reduce((sum, mip) => sum + mip.data.byteLength, 0), sourceModules: tiles.tops?.size ?? tiles.grids.size, paintedVariants: choices.length, width, height, tiles: slots.reduce((count, slot) => count + Number(slot >= 0), 0), quietedDirtTiles },
     dispose() { texture.dispose(); },
   };
 }

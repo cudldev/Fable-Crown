@@ -447,7 +447,7 @@ test("art workbench is isolated from gameplay and cached models reload offline",
     expect(await readChronicle()).toBe(before);
   } finally { await context.setOffline(false); }
   // The read-only asset decoder may start; gameplay/GI workers must stay absent.
-  expect(workers.every(url => /voxel-assets\.worker-/.test(url))).toBe(true);
+  expect(workers.every(url => /voxel-bake\.worker-/.test(url))).toBe(true);
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
 });

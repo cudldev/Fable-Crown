@@ -1,0 +1,95 @@
+{
+  "format": 1,
+  "version": "211a169cfa8230cd",
+  "sourceVersion": "1c5e92e6f77bda4d",
+  "pack": "meshes.bin",
+  "encoding": "gzip",
+  "bytes": 1682622,
+  "decodedBytes": 10591132,
+  "packSha256": "97352a60580d52e2d1726db51b10f929c79754f3bbc361aa3e59e7b92e3523d4",
+  "assets": [
+    {
+      "id": "tree",
+      "size": [
+        68,
+        70,
+        64
+      ]
+    },
+    {
+      "id": "anvil",
+      "size": [
+        22,
+        12,
+        16
+      ]
+    },
+    {
+      "id": "barrel",
+      "size": [
+        14,
+        14,
+        15
+      ]
+    },
+    {
+      "id": "crate",
+      "size": [
+        14,
+        14,
+        12
+      ]
+    },
+    {
+      "id": "ore-copper",
+      "size": [
+        26,
+        28,
+        12
+      ]
+    },
+    {
+      "id": "ore-tin",
+      "size": [
+        26,
+        28,
+        12
+      ]
+    },
+    {
+      "id": "ore-iron",
+      "size": [
+        26,
+        28,
+        12
+      ]
+    },
+    {
+      "id": "ore-coal",
+      "size": [
+        26,
+        28,
+        12
+      ]
+    },
+    {
+      "id": "ore-depleted",
+      "size": [
+        26,
+        28,
+        12
+      ]
+    },
+    {
+      "id": "supplies",
+      "size": [
+        30,
+        15,
+        18
+      ]
+    }
+  ],
+  "files": [
+    "art3d/voxel/meshes.bin"
+  ]
+}

@@ -1,13 +1,13 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 const art3d = JSON.parse(await readFile("dist/art3d/manifest.json", "utf8"));
-const voxels = JSON.parse(await readFile("dist/art3d/voxel/manifest.json", "utf8"));
-const terrain = JSON.parse(await readFile("dist/art3d/terrain/manifest.json", "utf8"));
+const voxels = JSON.parse(await readFile("dist/art3d/voxel/baked.json", "utf8"));
+const terrain = JSON.parse(await readFile("dist/art3d/terrain/surface.json", "utf8"));
 const coreArt = [
   "art3d/manifest.json", ...art3d.files,
-  "art3d/voxel/manifest.json?v=" + voxels.version, ...voxels.files.map(file => file + "?v=" + voxels.version),
-  "art3d/terrain/manifest.json?v=" + terrain.version,
-  ...terrain.files.map(file => file + "?v=" + terrain.version),
+  "art3d/voxel/baked.json?v=" + voxels.version, ...voxels.files.map(file => file + "?v=" + voxels.version),
+  "art3d/terrain/surface.json?v=" + terrain.version,
+  "art3d/terrain/" + terrain.pack + "?v=" + terrain.version,
 ];
 const hash = createHash("sha256").update(await readFile("dist/index.html"));
 let bytes = 0;

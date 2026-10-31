@@ -5,17 +5,17 @@ const builtDir = process.env.RELEASE_DIST || 'dist';
 const expected=JSON.parse(await readFile(builtDir + '/world-assets.json','utf8'));
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const context=await browser.newContext({viewport:{width:1280,height:800}});
-const page=await context.newPage();const errors=[],external=[],failed=[],retired=[];
+const page=await context.newPage();const errors=[],external=[],failed=[],retired=[],nativeRequests=[];
 page.on('pageerror',e=>errors.push(e.message));
 page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
-page.on('request',r=>{const u=new URL(r.url());if(u.protocol.startsWith('http')&&u.origin!==new URL(base).origin)external.push(u.href);if(/\/art\/|\/(ink|fitted)\/|alden(?:-ink|-fitted)?\.glb/.test(u.pathname))retired.push(u.href);});
+page.on('request',r=>{const u=new URL(r.url());if(/\.vox$|\/tiles\.bin$/.test(u.pathname))nativeRequests.push(u.href);if(u.protocol.startsWith('http')&&u.origin!==new URL(base).origin)external.push(u.href);if(/\/art\/|\/(ink|fitted)\/|alden(?:-ink|-fitted)?\.glb/.test(u.pathname))retired.push(u.href);});
 page.on('response',r=>{if(r.status()>=400)failed.push({url:r.url(),status:r.status()});});
 try{
 const shell = await context.request.get(base + '?release=' + Date.now()); expect(shell.ok()).toBe(true); const html = await shell.text();
 const localHTML = await readFile(builtDir + '/index.html', 'utf8');
 for (const match of localHTML.matchAll(/(?:src|href)="([^"]*assets\/[^"]+)"/g)) expect(html).toContain(match[1]);
 const response=await context.request.get(base+'world-assets.json?release='+Date.now());expect(response.ok()).toBe(true);const installed=await response.json();expect(installed.files).toEqual(expected.files);if(process.env.RELEASE_DIST)expect(installed.version).toBe(expected.version);
-for(const path of ["art3d/voxel/manifest.json","art3d/terrain/manifest.json"]){const local=JSON.parse(await readFile(builtDir+"/"+path,"utf8"));const remote=await (await context.request.get(base+path+"?release="+Date.now())).json();expect(remote.version).toBe(local.version);}
+for(const path of ["art3d/voxel/baked.json","art3d/terrain/surface.json"]){const local=JSON.parse(await readFile(builtDir+"/"+path,"utf8"));const remote=await (await context.request.get(base+path+"?release="+Date.now())).json();expect(remote.version).toBe(local.version);}
 await page.goto(base,{waitUntil:'domcontentloaded'});
 const world=page.getByTestId('rpg-world');await expect(world).toHaveAttribute('data-status','ready',{timeout:60000});await expect(world).toHaveAttribute('data-actor-style','pixel-billboard');await expect(world).toHaveAttribute('data-character-style','pixel');await expect(world).toHaveAttribute('data-terrain-source','vox');await expect(world).toHaveAttribute('data-voxel-assets',/\btree\b/);await expect(world).toHaveAttribute('data-voxel-assets',/\banvil\b/);await expect(world).toHaveAttribute('data-day-night-cycle','true');await expect(page.getByRole('button',{name:'Autoplay',exact:true})).toBeVisible();
 await expect(world).toHaveAttribute('data-voxel-renderer','shared-static-meshes');
@@ -27,8 +27,8 @@ await page.setViewportSize({width:390,height:844});await expect(world).toHaveAtt
 await page.setViewportSize({width:844,height:390});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'docs/screenshots/voxel-default-pages-landscape.png'});
 await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),{timeout:60000}).toBe(true);const scope=await page.evaluate(async()=>(await navigator.serviceWorker.ready).scope);expect(scope).toBe(base);
 await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await expect(world).toHaveAttribute('data-status','ready',{timeout:60000});await expect(world).toHaveAttribute('data-terrain-source','vox');await expect(world).toHaveAttribute('data-actor-style','pixel-billboard');await context.setOffline(false);
-expect(errors).toEqual([]);expect(external).toEqual([]);expect(failed).toEqual([]);expect(retired).toEqual([]);
+expect(errors).toEqual([]);expect(external).toEqual([]);expect(failed).toEqual([]);expect(retired).toEqual([]);expect(nativeRequests).toEqual([]);expect(templates).toBe(37);
 await expect(world).toHaveAttribute('data-voxel-renderer','shared-static-meshes');
 const glError=await page.getByTestId('three-canvas').evaluate(canvas=>canvas.getContext('webgl2')?.getError()??-1);expect(glError).toBe(0);expect(errors).toEqual([]);
-const report={url:base,artVersion:installed.version,renderer:'shared-static-meshes',templates,geometryBytes,glError,desktop:true,phoneViewport:true,landscape:true,currentShellAssetPaths:true,offlineReload:true,serviceWorkerScope:scope,errors,external,failed,retiredRequests:retired,verifiedAt:new Date().toISOString()};await writeFile('docs/VOXEL_DEFAULT_PAGES_VERIFICATION.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+const report={url:base,artVersion:installed.version,renderer:'shared-static-meshes',templates,geometryBytes,glError,desktop:true,phoneViewport:true,landscape:true,currentShellAssetPaths:true,offlineReload:true,serviceWorkerScope:scope,errors,external,failed,retiredRequests:retired,nativeRequests,verifiedAt:new Date().toISOString()};await writeFile('docs/VOXEL_DEFAULT_PAGES_VERIFICATION.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }finally{await browser.close();}

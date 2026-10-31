@@ -49,7 +49,7 @@ async function sample(page: Page, frames = 45) {
 
 test("native VOX terrain paints the actual flat world crisply, reuses its bake and reloads offline", async ({ page, context }) => {
   const errors: string[] = [], external: string[] = [], terrainRequests: string[] = [];
-  const published = JSON.parse(await readFile("public/art3d/terrain/manifest.json", "utf8")) as { version: string };
+  const published = JSON.parse(await readFile("public/art3d/terrain/surface.json", "utf8")) as { version: string; sourceVersion: string };
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
   page.on("request", request => {
@@ -66,7 +66,7 @@ test("native VOX terrain paints the actual flat world crisply, reuses its bake a
   await expect(world).toHaveAttribute("data-terrain-filter", "nearest");
   await expect(world).toHaveAttribute("data-terrain-elevation", "flat");
   await expect(world).toHaveAttribute("data-terrain-geometry", "flat-top-surfaces");
-  await expect(world).toHaveAttribute("data-terrain-version", published.version);
+  await expect(world).toHaveAttribute("data-terrain-version", published.sourceVersion);
   await expect.poll(async () => Number(await world.getAttribute("data-terrain-texture-bytes"))).toBeGreaterThan(0);
   await expect.poll(async () => Number(await world.getAttribute("data-terrain-chunks"))).toBeGreaterThan(0);
   await restore(page, fixture());
@@ -100,7 +100,7 @@ test("native VOX terrain paints the actual flat world crisply, reuses its bake a
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
   await expect.poll(() => page.evaluate(async () => !!navigator.serviceWorker.controller)).toBe(true);
   await expect.poll(() => page.evaluate(async version => {
-    const url = new URL("art3d/terrain/tiles.bin", location.href); url.searchParams.set("v", version);
+    const url = new URL("art3d/terrain/surface.bin", location.href); url.searchParams.set("v", version);
     return !!(await caches.match(url.href));
   }, published.version)).toBe(true);
   // Reproduce stale unversioned terrain entries without touching the real user's cache.
@@ -108,7 +108,7 @@ test("native VOX terrain paints the actual flat world crisply, reuses its bake a
   await page.evaluate(async version => {
     const name = (await caches.keys()).find(key => key.startsWith("fable-art-"));
     if (!name) throw Error("Missing active PWA art cache");
-    const cache = await caches.open(name), manifest = new URL("art3d/terrain/manifest.json", location.href), pack = new URL("art3d/terrain/tiles.bin", location.href);
+    const cache = await caches.open(name), manifest = new URL("art3d/terrain/surface.json", location.href), pack = new URL("art3d/terrain/surface.bin", location.href);
     const versioned = new URL(manifest); versioned.searchParams.set("v", version);
     const response = await cache.match(versioned.href); if (!response) throw Error("Missing versioned terrain manifest");
     const stale = await response.json(); stale.version = "0000000000000000";
@@ -119,10 +119,10 @@ test("native VOX terrain paints the actual flat world crisply, reuses its bake a
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await expect(world).toHaveAttribute("data-terrain-source", "vox");
   await expect(world).toHaveAttribute("data-terrain-filter", "nearest");
-  await expect(world).toHaveAttribute("data-terrain-version", published.version);
+  await expect(world).toHaveAttribute("data-terrain-version", published.sourceVersion);
   const offline = await sample(page);
-  expect(terrainRequests.some(url => url.endsWith("/manifest.json?v=" + published.version))).toBe(true);
-  expect(terrainRequests.some(url => url.endsWith("/tiles.bin?v=" + published.version))).toBe(true);
+  expect(terrainRequests.some(url => url.endsWith("/surface.json?v=" + published.version))).toBe(true);
+  expect(terrainRequests.some(url => url.endsWith("/surface.bin?v=" + published.version))).toBe(true);
   expect(errors).toEqual([]); expect(external).toEqual([]);
   await writeFile(output + "/browser-review.json", JSON.stringify({ initial, dusk, orthographic, overview, phone, landscape, offline, terrainRequests, errors, externalRequests: external,
     bakeStableAcrossCameraAndLighting: true, offlineNativeTerrain: true, staleUnversionedTerrainIgnored: true, preservedPlayerState: before, physicalPhoneTest: false,
@@ -134,7 +134,7 @@ test.describe("native terrain fallback", () => {
   test("an unavailable native pack keeps the game drawable with explicit fallback", async ({ page }) => {
     await mkdir(output, { recursive: true });
     const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
-    await page.route("**/art3d/terrain/tiles.bin*", route => route.abort());
+    await page.route("**/art3d/terrain/surface.bin*", route => route.abort());
     await page.goto("./?renderer=3d");
     const world = page.getByTestId("rpg-world");
     await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });

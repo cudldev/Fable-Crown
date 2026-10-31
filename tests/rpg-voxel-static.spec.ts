@@ -24,10 +24,10 @@ async function settled(page:Page) {
 
 test("the real game reuses baked meshes through camera changes, harvest, phone layouts and offline startup",async({page,context})=>{
   test.setTimeout(210000);await mkdir(output,{recursive:true});
-  const errors:string[]=[],external:string[]=[],workers:string[]=[];
+  const errors:string[]=[],external:string[]=[],workers:string[]=[],nativeRequests:string[]=[];
   page.on("pageerror",error=>errors.push(error.message));page.on("console",message=>{if(message.type()==="error")errors.push(message.text());});
   page.on("worker",worker=>workers.push(worker.url()));
-  page.on("request",request=>{const url=new URL(request.url());if(url.protocol.startsWith("http")&&page.url().startsWith("http")&&url.origin!==new URL(page.url()).origin)external.push(url.href);});
+  page.on("request",request=>{const url=new URL(request.url());if(/\.vox$|\/tiles\.bin$/.test(url.pathname))nativeRequests.push(url.href);if(url.protocol.startsWith("http")&&page.url().startsWith("http")&&url.origin!==new URL(page.url()).origin)external.push(url.href);});
   await page.setViewportSize({width:1280,height:800});await page.goto("./?renderer=3d");
   const world=page.getByTestId("rpg-world"),canvas=page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status","ready",{timeout:120000});
@@ -83,7 +83,12 @@ test("the real game reuses baked meshes through camera changes, harvest, phone l
   const build=await page.evaluate(async()=>await(await fetch(new URL("world-assets.json",location.href))).json());
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
   await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:60000}).toBe(true);
-  const decoder=workers.find(url=>/voxel-assets\.worker-/.test(url));expect(decoder).toBeTruthy();
+  const decoder=workers.find(url=>/voxel-bake\.worker-/.test(url));expect(decoder).toBeTruthy();
+  expect(workers.some(url=>/voxel-assets\.worker-/.test(url))).toBe(false);
+  expect(nativeRequests).toEqual([]);
+  expect(build.files.some((file:string)=>/\.vox(?:\?|$)|tiles\.bin/.test(file))).toBe(false);
+  expect(build.files.some((file:string)=>file.includes("voxel/meshes.bin?v="))).toBe(true);
+  expect(build.files.some((file:string)=>file.includes("terrain/surface.bin?v="))).toBe(true);
   expect(await page.evaluate(async url=>!!await caches.match(url),decoder!)).toBe(true);
   await context.setOffline(true);await page.reload();
   await expect(world).toHaveAttribute("data-status","ready",{timeout:120000});
@@ -92,8 +97,8 @@ test("the real game reuses baked meshes through camera changes, harvest, phone l
   const offline=await settled(page);
   expect(Number(offline.counters.voxelTemplateBuilds)).toBe(builds);
   for(const sample of [initial,...views,overview,harvested,restored,...phones,offline])expect(sample.glError).toBe(0);
-  expect(errors).toEqual([]);expect(external).toEqual([]);
-  await writeFile(`${output}/runtime-review.json`,JSON.stringify({build:build.version,initial,views,overview,harvested,restored,phones,offline,workers,errors,external,
+  expect(errors).toEqual([]);expect(external).toEqual([]);expect(nativeRequests).toEqual([]);
+  await writeFile(`${output}/runtime-review.json`,JSON.stringify({build:build.version,initial,views,overview,harvested,restored,phones,offline,workers,errors,external,nativeRequests,
     note:"Actual production static-mesh renderer/native bindings, stable geometry cache through zoom/overview/harvest, phone orientations and cached worker restart offline. Geometry/whole-object counters are distinct from voxel-equivalent LOD budgets. Functional GPU checks; no physical-phone or frame-rate guarantee."},null,2));
 });
 

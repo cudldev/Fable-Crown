@@ -3,7 +3,7 @@ import { renderFrameCount } from "./render-profile";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import { worldForState } from "../src/rpg/world";
-import { VOXEL_VERSION } from "../src/render/three/voxel-version";
+import { VOXEL_BAKE_VERSION } from "../src/render/three/voxel-bake-version";
 
 test("native VOX trees use chunk instances/LOD in the real world and reload offline", async ({ page, context }) => {
   const errors: string[] = [], sources: string[] = [], external: string[] = [];
@@ -50,11 +50,11 @@ test("native VOX trees use chunk instances/LOD in the real world and reload offl
   await page.getByRole("button", { name: "Open game menu" }).click();
   await page.locator('input[type="file"]').setInputFiles({ name: "stump-fixture.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(fixture)) });
   await expect(page.getByRole("status")).toContainText("Chronicle restored"); await page.getByRole("button", { name: "Close panel" }).click();
-  await expect.poll(async () => Number(await world.getAttribute("data-voxel-instances"))).toBeLessThan(Number(phone.counters.voxelInstances));
+  await expect.poll(async () => Number(await world.getAttribute("data-voxel-equivalent-cells"))).toBeLessThan(Number(phone.counters.voxelEquivalentCells));
   const depleted = await measure(); await page.screenshot({ path: output + "/world-stumps.png" });
-  expect(sources.some(url => url.endsWith("/art3d/voxel/tree.vox"))).toBe(true);
+  expect(sources).toEqual([]);
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await expect.poll(() => page.evaluate(async version => { const url = new URL("art3d/voxel/tree.vox", location.href); url.searchParams.set("v", version); return !!(await caches.match(url.href)); }, VOXEL_VERSION)).toBe(true);
+  await expect.poll(() => page.evaluate(async version => { const url = new URL("art3d/voxel/meshes.bin", location.href); url.searchParams.set("v", version); return !!(await caches.match(url.href)); }, VOXEL_BAKE_VERSION)).toBe(true);
   await context.setOffline(true); await page.reload();
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 }); await expect(world).toHaveAttribute("data-voxel-assets", /\btree\b/);
   expect(errors).toEqual([]); expect(external).toEqual([]);
