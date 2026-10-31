@@ -352,14 +352,14 @@ test("unavailable WebGL keeps menus usable and retries the voxel world", async (
   await ready(page);
 });
 
-test("all Blender assets load and switching camera projection preserves the saved character", async ({ page }) => {
+test("all current environment assets load and switching camera projection preserves the saved character", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("./?renderer=3d");
   const world = await ready(page);
   await expect(world).toHaveAttribute("data-assets", "blender");
   const ids = (await world.getAttribute("data-production-assets"))!.split(",").sort();
-  expect(ids).toEqual(["anvil", "bank", "crate", "forge", "lantern", "tree"]);
+  expect(ids).toEqual(["anvil", "bank", "barrel", "crate", "forge", "lantern", "ore-coal", "ore-copper", "ore-depleted", "ore-iron", "ore-tin", "tree"]);
   await restore(page, waitingFixture());
   const before = await saved(page);
   for (const mode of ["orthographic", "perspective"] as const) {
@@ -394,7 +394,7 @@ test("art workbench is isolated from gameplay and cached models reload offline",
   await expect(review).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   await expect(review).toHaveAttribute("data-assets", "blender");
   expect((await review.getAttribute("data-production-assets"))!.split(",").sort())
-    .toEqual(["anvil", "bank", "crate", "forge", "lantern", "tree"]);
+    .toEqual(["anvil", "bank", "barrel", "crate", "forge", "lantern", "ore-coal", "ore-copper", "ore-depleted", "ore-iron", "ore-tin", "tree"]);
   expect(page.workers()).toHaveLength(0);
   page.on("worker", worker => workers.push(worker.url()));
   const readChronicle = () => page.evaluate(() => new Promise<string>((resolve, reject) => {
