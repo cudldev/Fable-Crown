@@ -39,12 +39,22 @@ export default function VisualSettingsPanel({ id, settings, preset, shadows, gi,
     onKeyDown={event => { event.stopPropagation(); if (event.key === "Escape") { event.preventDefault(); onClose(); } }}>
     <header><div><strong>Visual settings</strong><small data-visual-performance>Live preview</small></div><button type="button" aria-label="Close visual settings" onClick={onClose}>×</button></header>
     <div className="visual-settings-body">
+      <fieldset><legend>Lens & world</legend>
+        {slider("bloom", "Bloom")}{slider("chromaticAberration", "Chromatic aberration", " px")}
+        {slider("lensDistortion", "Lens distortion")}
+        {slider("depthOfField", "Depth of field")}{slider("worldCurvature", "World curvature")}
+        <small>A gentle glow, subtle barrel distortion and round distant bokeh. Set Lens distortion to 0 to turn it off. Closer zoom lowers the camera slightly and rounds the distant ground.</small>
+      </fieldset>
       <fieldset><legend>Sprite lighting</legend>
         {slider("spriteNormalStrength", "Sprite depth")}
         <small>Subtle surface normals react to world lighting. Set to zero for flat pixel shapes.</small>
       </fieldset>
       <fieldset><legend>Lighting</legend>
+        <label className="visual-toggle"><input type="checkbox" checked={settings.dayNightCycle} onChange={event => onChange({ dayNightCycle: event.currentTarget.checked })} />Day–night cycle</label>
+        {slider("dayTime", "Starting hour", " h")}{slider("cycleMinutes", "Day length", " min")}
+        <small>One day takes this many active game minutes. Saved ticks preserve its phase. Fixed lighting buttons pause the cycle.</small>
         {slider("exposure", "Exposure")}{slider("sunStrength", "Sun brightness")}{slider("ambientStrength", "Ambient brightness")}{slider("lampStrength", "Lamp brightness")}
+        {slider("colorBalance", "Warm light / cool shadows")}
         {slider("sunAzimuth", "Sun direction", "°")}{slider("sunElevation", "Sun elevation", "°")}
         <div className="visual-colors">{color("sunTint", "Sun tint", LIGHTING_PRESETS[preset].sun)}{color("ambientTint", "Ambient tint", LIGHTING_PRESETS[preset].fill)}{color("skyTint", "Sky color", LIGHTING_PRESETS[preset].sky)}</div>
         <button type="button" onClick={() => onChange({ sunTint: null, ambientTint: null, skyTint: null })}>Use preset colors</button>
@@ -60,9 +70,13 @@ export default function VisualSettingsPanel({ id, settings, preset, shadows, gi,
       <fieldset><legend>Indirect light & occlusion</legend>
         <label className="visual-toggle"><input type="checkbox" checked={gi} onChange={event => onGI(event.currentTarget.checked)} />Enable bounced light</label>
         {slider("giStrength", "Bounced light strength")}
+        <label className="visual-select">Diffuse bounces<select aria-label="Diffuse bounces" value={settings.giBounces} onChange={event => onChange({ giBounces: Number(event.currentTarget.value) })}>
+          <option value={1}>1 · Default</option><option value={2}>2 · Softer fill</option><option value={3}>3 · Compare</option>
+        </select></label>
         <label className="visual-toggle"><input type="checkbox" checked={ao} onChange={event => onAO(event.currentTarget.checked)} />Enable ambient occlusion</label>
         {slider("aoStrength", "Occlusion strength", "%")}
         {slider("aoDistance", "AO distance", " m")}
+        {slider("contactStrength", "Ground contact shading")}
       </fieldset>
       <fieldset><legend>Water</legend>
         <label className="visual-toggle"><input type="checkbox" checked={settings.waterReflections} onChange={event => onChange({ waterReflections: event.currentTarget.checked })} />Enable water reflections</label>
@@ -80,6 +94,9 @@ export default function VisualSettingsPanel({ id, settings, preset, shadows, gi,
         {slider("cloudCoverage", "Cloud coverage")}{slider("cloudSpeed", "Cloud speed")}{slider("cloudScale", "Cloud size")}
         <label className="visual-toggle"><input type="checkbox" checked={settings.fogEnabled} onChange={event => onChange({ fogEnabled: event.currentTarget.checked })} />Enable fog</label>
         {slider("fogReach", "Fog reach", " m")}
+        {slider("atmosphereStrength", "Layered ground haze")}
+        {slider("lightRays", "Light rays")}
+        {slider("fogGradient", "Fog color gradient")}
       </fieldset>
       <fieldset><legend>Vegetation</legend>
         <label className="visual-toggle"><input type="checkbox" checked={settings.foliageEnabled} onChange={event => onChange({ foliageEnabled: event.currentTarget.checked })} />Enable ground foliage</label>

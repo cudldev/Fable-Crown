@@ -154,7 +154,8 @@ test("enemy inspection, combat XP and loot, plus recoverable grave UI", async ({
   state.player.previousPosition = { ...adjacent! };
   enemy.health = 1;
   await importState(page, state);
-  await page.getByRole("button", { name: "Inspect Moss boar, 1 health", exact: true }).click();
+  await page.getByRole("button", { name: "Inspect Moss boar, 1 health", exact: true }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Enemy actions" }),
   ).toContainText("Health 1/");
@@ -184,7 +185,8 @@ test("enemy inspection, combat XP and loot, plus recoverable grave UI", async ({
   await importState(page, recoverable);
   await page
     .getByRole("button", { name: "Inspect your backpack grave" })
-    .click();
+    .click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Recovery actions" }),
   ).toContainText("Logs ×2");
@@ -206,7 +208,8 @@ test("quest ambition persists and real carried supplies complete a delivery", as
     { itemId: "bronze-bar", quantity: 6 },
   );
   await importState(page, state);
-  await page.getByRole("button", { name: /Inspect Master smith Ren/ }).click();
+  await page.getByRole("button", { name: /Inspect Master smith Ren/ }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByRole("button", { name: "Make this my ambition" }).click();
   await expect
     .poll(async () => (await snapshot(page)).control.goal?.questId)
@@ -223,7 +226,8 @@ test("quest ambition persists and real carried supplies complete a delivery", as
   if (await dismiss.isVisible()) await dismiss.click();
   await importState(page, delivery);
   await expect(page.getByRole("status")).toContainText("Chronicle restored");
-  await page.getByRole("button", { name: "Inspect Master smith Ren" }).click();
+  await page.getByRole("button", { name: "Inspect Master smith Ren" }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.evaluate(() => {
     sessionStorage.removeItem("first-forge-acceptance");
     sessionStorage.setItem("watch-forge-acceptance", "true");

@@ -1,4 +1,15 @@
-.three-world { background: #8f9aa4; touch-action: auto; }
+.three-world { background: #8f9aa4; touch-action: auto; isolation: isolate; }
+.three-hit-layer { z-index: 1; }
+.world-status-layer, .world-effects-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.world-status-layer { z-index: 3; }
+.world-effects-layer { z-index: 2; }
+.world-effects-layer *, .world-status-layer * { pointer-events: none; }
+.world-effects-layer [hidden], .world-status-layer [hidden] { display: none; }
+.world-click-indicator { position: absolute; width: 28px; height: 28px; transform: translate(-50%, -50%); color: #f7d45b; filter: drop-shadow(0 1px 1px #17232b); }
+.world-click-indicator[data-tone="hostile"] { color: #f16a57; }
+.world-click-indicator svg { display: block; }
+.world-effects-layer .three-feedback-player-damage { color: #ff9b86; }
+.world-effects-layer .three-feedback-damage, .world-effects-layer .three-feedback-player-damage, .world-effects-layer .three-feedback-miss, .world-effects-layer .three-feedback-heal { background: transparent; border: 0; padding: 0 3px; text-shadow: -1px -1px #14232b, 1px -1px #14232b, -1px 1px #14232b, 1px 1px #14232b, 0 2px 3px #14232b; }
 .three-world > canvas, .three-hit-layer { touch-action: none; }
 .three-visual-settings { position: absolute; top: 146px; right: 18px; z-index: 7; display: flex; flex-direction: column; width: min(350px, calc(100% - 36px)); max-height: min(64dvh, calc(100% - 210px)); overflow: hidden; border: 1px solid #a89c78; border-radius: 7px; color: #ece4cf; background: #1d3036f7; box-shadow: 0 8px 30px #101b2766; user-select: text; touch-action: pan-y; }
 .three-visual-settings:focus { outline: none; }
@@ -47,6 +58,27 @@
 .three-feedback { position: absolute; pointer-events: none; transform: translate(-50%, -100%); white-space: nowrap; font: 600 13px system-ui; color: #fff0c0; text-shadow: 0 2px 2px #182834, 1px 0 #182834; }
 .three-feedback-xp { color: #bde4e5; }
 .three-feedback-level { color: #ffe094; font-size: 17px; }
+.three-feedback { z-index: 4; max-width: 220px; white-space: normal; text-align: center; line-height: 1.3; padding: 3px 7px; border-radius: 4px; background: #132630df; font-variant-numeric: tabular-nums; }
+.three-feedback-damage, .three-feedback-player-damage { font: 800 23px/1.15 system-ui; color: #ffe9a6; border: 1px solid #f3bf68; }
+.three-feedback-player-damage { color: #fff0e8; background: #792d2df2; border-color: #ffb8a0; }
+.three-feedback-damage .floater-number, .three-feedback-player-damage .floater-number { display: inline-block; animation: damage-number-pop 300ms ease-out both; transform-origin: center bottom; }
+@keyframes damage-number-pop { 0% { transform: scale(.72) translateY(3px); } 45% { transform: scale(1.16) translateY(-3px); } 100% { transform: scale(1) translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .three-feedback .floater-number { animation: none; } }
+.three-feedback-miss { color: #d7dfe0; font-style: italic; }
+.three-feedback-heal { color: #bcf2c2; }
+.world-health, .world-work { position: absolute; transform: translate(-50%, -100%); pointer-events: none; width: max-content; max-width: 190px; min-width: 100px; padding: 4px 6px; color: #fff2d3; background: #16272ff0; border: 1px solid #d4c49b; border-radius: 4px; font: 10px/1.35 system-ui; z-index: 2; text-align: center; }
+.world-health b, .world-work b { display: block; font-weight: 600; }
+.world-health em { font-style: normal; font-variant-numeric: tabular-nums; margin-left: 6px; }
+.world-health progress, .world-work progress { display: block; width: 100%; height: 8px; margin-top: 3px; accent-color: #d78268; }
+.world-health-player { border-color: #8fc4b3; }
+.world-health-player progress { accent-color: #7cca9a; }
+.world-work { min-width: 145px; border-color: #e6c77f; color: #ffe8aa; }
+.world-work progress { accent-color: #edc45e; height: 9px; }
+.world-health progress::-webkit-progress-bar, .world-work progress::-webkit-progress-bar { background: #39454a; border-radius: 2px; }
+.world-health progress::-webkit-progress-value, .world-work progress::-webkit-progress-value { background: #d78268; border-radius: 2px; transition: width .2s ease-out; }
+.world-health-player progress::-webkit-progress-value { background: #7cca9a; }
+.world-work progress::-webkit-progress-value { background: #edc45e; transition-duration: .5s; }
+@media (prefers-reduced-motion: reduce) { .world-health progress::-webkit-progress-value, .world-work progress::-webkit-progress-value { transition: none; } }
 .three-test-note { position: absolute; bottom: 192px; left: 18px; font: 10px system-ui; color: #e5dfc8; text-shadow: 0 1px 3px #172c35; pointer-events: none; }
 .three-fallback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 32px)); padding: 24px; background: #eee5cf; color: #31434a; border: 1px solid #9f8b5e; border-radius: 8px; z-index: 4; }
 .three-fallback p { word-break: break-word; }

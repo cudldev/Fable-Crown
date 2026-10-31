@@ -89,7 +89,7 @@ test.describe("delayed renderer loading", () => {
 test("voxel is the default, draws with WebGL and preserves the chapter with legacy URLs", async ({ page }) => {
   const errors: string[] = [], obsoleteAssets: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  page.on("request", request => { if (/\/(art|ink|fitted)\/|alden(?:-ink|-fitted)?\.glb/.test(request.url())) obsoleteAssets.push(request.url()); });
+  page.on("request", request => { if (/\/(ink|fitted)\/|alden(?:-ink|-fitted)?\.glb/.test(request.url())) obsoleteAssets.push(request.url()); });
   await page.goto("./");
   await ready(page);
   const fixture = waitingFixture();
@@ -158,7 +158,8 @@ test("real smelting works in 3D and lighting controls do not grant items or XP",
   state.player.previousPosition = { ...state.player.position };
   state.player.inventory.push({ itemId: "copper-ore", quantity: 6 }, { itemId: "tin-ore", quantity: 6 });
   await restore(page, state);
-  await page.getByRole("button", { name: "Inspect Oakrest furnace", exact: true }).click();
+  await page.getByRole("button", { name: "Inspect Oakrest furnace", exact: true }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByRole("button", { name: "Craft here" }).click();
   await page.getByLabel("Craft quantity").selectOption("1");
   await page.locator(".rpg-shop-list article").filter({ hasText: "Smelt bronze bar" })

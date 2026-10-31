@@ -43,6 +43,8 @@ Accepted as the baseline with residual baked shading, color variation, detached 
 
 ## Reuse
 
+The [first prop batch](../assets/explorations/voxel/prop-batch-v1/README.md) now exercises this same reconstruction path on anvil,barrel,crate and copper ore at shared16cells/metre. Raw inferred faces were too dark; a separate explicit native palette pass improves readability while preserving raw outputs and all geometry. This does not establish automatic de-lighting. Ore's inferred footprint is larger than its brief; common-scale review must catch this before binding. Props are comparison drafts,not yet game-integrated.
+
 - [Source image skill](../skills/fable-voxel-reference/SKILL.md): generation rules, prompt and size/style planning.
 - [Image-to-mesh skill](../skills/fable-image-to-mesh/SKILL.md): actual mesh generation, review and optional VOX conversion.
 - [Local commands and runtime](../tools/trellis-vox/README.md).

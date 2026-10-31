@@ -163,6 +163,7 @@ export function createRpg(now: number, seed = 1234567): RpgState {
     ),
     grave: null,
     control: {
+      autoplay: true,
       waiting: false,
       running: true,
       active: null,
@@ -1235,7 +1236,7 @@ function execute(s: RpgState, order: RpgOrder) {
       appendGameMessage(s, "dialogue", `sign-${target.id}`, `${target.name}: ${target.description ?? "An old village sign."}`);
       finish(s, `Read ${target.name}.`); return;
     }
-    if (target.questId && order.verb === "talk" && !s.quests[target.questId].complete && s.control.source === "player") {
+    if (target.questId && order.verb === "talk" && !order.once && !s.quests[target.questId].complete && s.control.source === "player") {
       const q = QUESTS[target.questId];
       s.control.goal = { id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name };
       s.control.goalSource = "player";
@@ -1517,6 +1518,22 @@ function execute(s: RpgState, order: RpgOrder) {
   finish(s, "This adventure is not yet available");
 }
 function autoOrder(s: RpgState): RpgOrder | null {
+  if (s.control.autoplay === false) {
+    const goal = s.control.goal;
+    if (!s.control.manualGoal || !goal) return null;
+    if (goalMet(s, goal)) {
+      delete s.control.manualGoal;
+      s.journal.push(`Ambition achieved: ${goal.title}`);
+      s.journal = s.journal.slice(-60);
+      s.control.reason = `Finished ${goal.title}. Manual control is active.`;
+      s.player.activity = "Waiting for your next order";
+      return null;
+    }
+    s.control.steps = goalSteps(s, goal);
+    s.control.reason = goal.title;
+    if (!objectiveProgress(s, goal)) return null;
+    return planGoal(s, goal);
+  }
   if (s.grave && s.tick >= s.grave.retryAt)
     return inventorySlots(s.player.inventory) >= 28
       ? { type: "bank" }
@@ -2390,6 +2407,7 @@ function validOrder(v: unknown, w: WorldDefinition = WORLD): v is RpgOrder {
     case "interact":
       return typeof v.objectId === "string" && !!objectById(v.objectId) &&
         ["talk", "inspect", "use", "practice"].includes(v.verb as string) &&
+        (v.once === undefined || typeof v.once === "boolean") &&
         (v.itemId === undefined || typeof v.itemId === "string" && Object.hasOwn(ITEMS, v.itemId));
     case "travel-service": return typeof v.objectId === "string" && Object.hasOwn(FERRIES, v.objectId);
     case "move":
@@ -2591,12 +2609,14 @@ function beginPlayerOrder(s: RpgState, order: RpgOrder, path: TilePosition[]) {
     const bank = nearest(s.player, (o) => o.kind === "bank");
     if (bank) s.player.action = { kind: "bank", targetId: bank.id, duration: 1, remaining: 1 };
   }
-  const questId = order.type === "quest" ? order.questId : order.type === "interact" && order.verb === "talk"
+  const questId = order.type === "quest" ? order.questId : order.type === "interact" && order.verb === "talk" && !order.once
     ? objectById(order.objectId)?.questId : undefined;
   if (questId && !s.quests[questId].complete) {
     const q = QUESTS[questId];
     s.control.goal = { id: `quest-${q.id}`, kind: "quest", questId: q.id, title: q.name };
     s.control.goalSource = "player";
+    // Choosing a quest authorizes that quest chain, without enabling unrelated adventures.
+    s.control.manualGoal = true;
     s.control.steps = goalSteps(s, s.control.goal); s.control.thought = null;
   }
 }
@@ -2607,6 +2627,37 @@ export function applyRpgCommand(
   const ok = (message: string) => { recordDecision(s, true); return { ok: true, message }; },
     fail = (message: string) => ({ ok: false, message });
   if (!object(command)) return fail("Invalid command.");
+  if (command.type === "cancel") {
+    finish(s, "Cancelled. Waiting for your next order.");
+    s.control.autoplay = false;
+    s.control.waiting = false;
+    delete s.control.manualGoal;
+    s.control.queue = [];
+    delete s.control.directOrderIndex;
+    s.control.thought = null;
+    s.player.movement = null;
+    s.player.previousPosition = { ...s.player.position };
+    s.player.activity = "Waiting for your next order";
+    return ok("Cancelled current and queued orders. Autoplay stays off.");
+  }
+  if (command.type === "autoplay") {
+    if (typeof command.enabled !== "boolean") return fail("Choose autoplay on or off.");
+    s.control.autoplay = command.enabled;
+    delete s.control.manualGoal;
+    if (command.enabled) {
+      s.control.waiting = false;
+      s.control.thinkingUntil = s.tick + 1;
+      return ok("Autoplay enabled. Alden will choose his next adventure.");
+    }
+    if (s.control.source === "autonomous") finish(s);
+    if (!s.control.active) {
+      s.player.movement = null;
+      s.player.previousPosition = { ...s.player.position };
+      s.player.activity = "Waiting for your next order";
+    }
+    s.control.reason = "Manual control is active. Autoplay stays off until you enable it.";
+    return ok("Autoplay off. Your orders still run; Alden will stay when they finish.");
+  }
   if (command.type === "planner-profile") {
     if (!validPlannerProfile(command.profile)) return fail("Each of the five traits must be a whole number from 0 to 100.");
     s.control.profile = structuredClone(command.profile);
@@ -2616,6 +2667,7 @@ export function applyRpgCommand(
     const next = auditGoalChoice(s);
     if (!next) return fail("Every available ambition is complete.");
     finish(s); s.control.goal = next; s.control.goalSource = "autonomous";
+    s.control.manualGoal = true;
     s.control.waiting = false; delete s.control.progress;
     s.control.steps = goalSteps(s, next); s.control.thought = null;
     s.control.reason = s.control.deliberation!.options[0].reasons.join(". ");
@@ -2648,6 +2700,7 @@ export function applyRpgCommand(
     return ok("Reordered queued intention.");
   }
   if (command.type === "wait") {
+    delete s.control.manualGoal;
     delete s.control.staminaResting;
     delete s.control.paceOverride;
     s.control.waiting = true;
@@ -2661,6 +2714,7 @@ export function applyRpgCommand(
     return ok("Alden will wait here; queued intentions are held.");
   }
   if (command.type === "resume") {
+    s.control.autoplay = true;
     s.control.waiting = false;
     s.control.thinkingUntil = s.tick + 1;
     return ok("Alden is considering his next intention.");
@@ -2693,6 +2747,7 @@ export function applyRpgCommand(
       return fail("That ambition is not available.");
     s.control.goal = structuredClone(command.goal);
     s.control.goalSource = "player";
+    s.control.manualGoal = true;
     delete s.control.progress;
     s.control.waiting = false;
     s.control.steps = goalSteps(s, command.goal);
@@ -2712,6 +2767,8 @@ export function applyRpgCommand(
   if (deferred) {
     if (command.type !== "enqueue" && !inventoryOrder(order) && s.control.directOrderIndex !== undefined) {
       s.control.queue[s.control.directOrderIndex] = structuredClone(order);
+      s.control.autoplay = false;
+      delete s.control.manualGoal;
       s.control.waiting = false;
       return ok("Replaced the pending direct intention; inventory actions remain in order.");
     }
@@ -2726,11 +2783,19 @@ export function applyRpgCommand(
       if (!inventoryOrder(order)) s.control.directOrderIndex = index;
     }
     if (command.type === "enqueue" && s.control.source === "autonomous") finish(s);
+    if (!inventoryOrder(order)) {
+      s.control.autoplay = false;
+      delete s.control.manualGoal;
+    }
     s.control.waiting = false;
     return ok("Added to the intention queue.");
   }
   const path = orderRoute(s, order);
   if (!path) return fail("That target is blocked or unreachable.");
+  if (!inventoryOrder(order)) {
+    s.control.autoplay = false;
+    delete s.control.manualGoal;
+  }
   if (!inventoryOrder(order) && s.control.directOrderIndex !== undefined) removeOrder(s, s.control.directOrderIndex);
   s.control.waiting = false;
   beginPlayerOrder(s, order, path);
@@ -3135,6 +3200,8 @@ export function validateRpgSave(v: unknown): RpgState | null {
     if (!integer(c.eatReadyAt)) return null;
     if (
       typeof c.waiting !== "boolean" ||
+      (c.autoplay !== undefined && typeof c.autoplay !== "boolean") ||
+      (c.manualGoal !== undefined && typeof c.manualGoal !== "boolean") ||
       (c.running !== undefined && typeof c.running !== "boolean") ||
       (c.staminaResting !== undefined && typeof c.staminaResting !== "boolean") ||
       (c.paceOverride !== undefined && typeof c.paceOverride !== "boolean") ||

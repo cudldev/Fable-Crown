@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { readFile } from "node:fs/promises";
 import { Group, InstancedMesh, Matrix4, OrthographicCamera, PerspectiveCamera, Scene, Vector3 } from "three";
 import { parseVox, surfaceLevel, voxelModel, type VoxelGrid } from "../src/render/three/voxel-data";
-import { cellPixels, chooseVoxelLod, fillVoxelInstances, standaloneVoxel, voxelBucketKey, VoxelBuckets } from "../src/render/three/voxel-buckets";
+import { cellPixels, chooseVoxelLod, fillVoxelInstances, standaloneVoxel, voxelBucketKey, VoxelBuckets, VOXEL_RESIDENT_CELL_BUDGET } from "../src/render/three/voxel-buckets";
 import { voxelAssetSpecs, voxelObject } from "../src/render/three/voxel-assets";
 
 const solid = (n = 4): VoxelGrid => ({ size: [n, n, n], cells: new Uint8Array(n ** 3).fill(1), palette: new Uint8Array([255, 0, 0, 255]) });
@@ -43,13 +43,81 @@ describe("native voxel rendering", () => {
   });
 
   test("selection uses screen size in both camera modes, with hysteresis", () => {
-    expect([4, .7, .2, .05].map(px => chooseVoxelLod(px))).toEqual([0, 2, 3, 4]);
+    expect([4, .7, .2, .05].map(px => chooseVoxelLod(px))).toEqual([0, 1, 2, 4]);
     expect(chooseVoxelLod(.05, -1, 2)).toBe(2);
-    expect(chooseVoxelLod(1.1, 0)).toBe(0); expect(chooseVoxelLod(.9, 0)).toBe(1);
+    expect(chooseVoxelLod(.7, 0)).toBe(0); expect(chooseVoxelLod(.65, 0)).toBe(1);
+    expect(chooseVoxelLod(.8, 1)).toBe(1); expect(chooseVoxelLod(.84, 1)).toBe(0);
+    for (const pixels of [.1, .2, .4, .7, 1.2]) expect(pixels * 2 ** chooseVoxelLod(pixels)).toBeLessThanOrEqual(1.5);
     const ortho = camera(); expect(cellPixels(ortho, 480, .1, new Vector3())).toBeCloseTo(2);
-    const perspective = new PerspectiveCamera(30, 1, .1, 1000); perspective.position.z = 10;
-    const near = cellPixels(perspective, 480, .1, new Vector3()); perspective.position.z = 20;
+    const perspective = new PerspectiveCamera(30, 1, .1, 1000); perspective.position.z = 10; perspective.updateMatrixWorld();
+    const near = cellPixels(perspective, 480, .1, new Vector3());
+    // Equal camera depth projects equally, including off-axis objects.
+    expect(cellPixels(perspective, 480, .1, new Vector3(8, 0, 0))).toBeCloseTo(near);
+    perspective.position.z = 20; perspective.updateMatrixWorld();
     expect(cellPixels(perspective, 480, .1, new Vector3())).toBeCloseTo(near / 2);
+  });
+
+  test("near and far objects in the same batch select detail independently", () => {
+    const scene = new Scene(), renderer = new VoxelBuckets(scene);
+    const c = new PerspectiveCamera(90, 1, .1, 100);
+    c.position.set(2, .5, 10); c.lookAt(2, .5, 0); c.updateMatrixWorld();
+    const model = voxelModel(solid(16), .0625, [8, 8, 0]);
+    const near = voxelObject({ model }), far = voxelObject({ model });
+    near.group.position.set(2, 0, 7); far.group.position.set(2, 0, 1); scene.add(near.group, far.group);
+    renderer.replace([{ art: near }, { art: far }]); renderer.update(c, 80);
+    expect(renderer.stats.visibleBuckets).toBe(1);
+    expect(renderer.stats.instances).toBe(model.levels[0].count + model.levels[2].count);
+    const mesh = scene.children.find(node => node instanceof InstancedMesh) as InstancedMesh;
+    const matrix = new Matrix4(); mesh.getMatrixAt(0, matrix);
+    expect(new Vector3().setFromMatrixScale(matrix).x).toBeCloseTo(.0625);
+    mesh.getMatrixAt(model.levels[0].count, matrix);
+    expect(new Vector3().setFromMatrixScale(matrix).x).toBeCloseTo(.25);
+    const uploads = renderer.stats.uploads;
+    renderer.update(c, 80); expect(renderer.stats.uploads).toBe(uploads);
+    renderer.dispose();
+  });
+
+  test("budget-forced detail recovers immediately when pressure clears", () => {
+    const scene = new Scene(), renderer = new VoxelBuckets(scene, 48, 50000, 400), c = camera();
+    const model = voxelModel(solid(16), .0625, [8, 8, 0]);
+    const a = voxelObject({ model }), b = voxelObject({ model }); b.group.position.x = 2; scene.add(a.group, b.group);
+    renderer.replace([{ art: a }, { art: b }]); renderer.update(c, 192);
+    expect(renderer.stats.instances).toBe(model.levels[2].count + model.levels[1].count);
+    const uploads = renderer.stats.uploads;
+    renderer.update(c, 192); expect(renderer.stats.uploads).toBe(uploads);
+    b.group.visible = false; renderer.update(c, 192);
+    expect(renderer.stats.instances).toBe(model.levels[1].count);
+    renderer.dispose();
+  });
+
+  test("off-screen objects in a visible child bucket cannot spend foreground detail", () => {
+    const model = voxelModel(solid(16), .0625, [8, 8, 0]);
+    const scene = new Scene(), renderer = new VoxelBuckets(scene, 48, 50000, model.levels[0].count);
+    const c = new OrthographicCamera(-1, 1, 1, -1, .1, 100);
+    c.position.set(2, 20, 2); c.up.set(0, 0, -1); c.lookAt(2, 0, 2); c.updateMatrixWorld();
+    const a = voxelObject({ model }), b = voxelObject({ model });
+    a.group.position.set(2, 0, 2); b.group.position.set(7, 0, 2); scene.add(a.group, b.group);
+    renderer.replace([{ art: a }, { art: b }]); renderer.update(c, 800);
+    expect(renderer.stats.visibleBuckets).toBe(1); expect(renderer.stats.visibleObjects).toBe(1);
+    expect(renderer.stats.instances).toBe(model.levels[0].count);
+    expect(renderer.stats.requestedCells).toBe(model.levels[0].count);
+    expect(renderer.stats.budgetCoarsenedObjects).toBe(0);
+    expect(renderer.stats.objectLods).toEqual([1, 0, 0, 0, 0]);
+    c.position.x = 7; c.lookAt(7, 0, 2); c.updateMatrixWorld(); renderer.update(c, 800);
+    expect(renderer.stats.visibleObjects).toBe(1); expect(renderer.stats.instances).toBe(model.levels[0].count);
+    const uploads = renderer.stats.uploads; renderer.update(c, 800); expect(renderer.stats.uploads).toBe(uploads);
+    renderer.dispose();
+  });
+
+  test("scaled objects use their transformed cell pitch within shared batches", () => {
+    const scene = new Scene(), renderer = new VoxelBuckets(scene), c = camera();
+    const model = voxelModel(solid(16), .0625, [8, 8, 0]);
+    const a = voxelObject({ model }), b = voxelObject({ model });
+    b.group.position.x = 2; b.group.scale.setScalar(2); scene.add(a.group, b.group);
+    renderer.replace([{ art: a }, { art: b }]); renderer.update(c, 192);
+    expect(renderer.stats.visibleBuckets).toBe(1);
+    expect(renderer.stats.instances).toBe(model.levels[1].count + model.levels[0].count);
+    renderer.dispose();
   });
 
   test("buckets handle negative coordinates and do not reupload unchanged instances", () => {
@@ -140,14 +208,14 @@ describe("native voxel rendering", () => {
     const scene = new Scene(), renderer = new VoxelBuckets(scene, 48), c = camera();
     c.left = c.bottom = -5; c.right = c.top = 5; c.updateProjectionMatrix();
     const model = voxelModel(solid(64), .0625, [32, 32, 0]);
-    const objects = Array.from({ length: 10 }, (_, i) => {
+    const objects = Array.from({ length: 20 }, (_, i) => {
       const art = voxelObject({ model }); art.group.position.x = i * 48; scene.add(art.group); return { art };
     });
     renderer.replace(objects);
     for (let i = 0; i < objects.length; i++) {
       c.position.set(i * 48, 10, 15); c.lookAt(i * 48, 0, 0); c.updateMatrixWorld(); renderer.update(c, 2000);
       expect(renderer.stats.visibleBuckets).toBe(1);
-      expect(renderer.stats.residentCells).toBeLessThanOrEqual(262144);
+      expect(renderer.stats.residentCells).toBeLessThanOrEqual(VOXEL_RESIDENT_CELL_BUDGET);
     }
     expect(renderer.stats.residentBuckets).toBeLessThan(objects.length);
     renderer.dispose();

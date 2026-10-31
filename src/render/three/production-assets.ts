@@ -5,7 +5,8 @@ import {
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { createArtLibrary } from "./art";
-import { loadVoxelAssets, voxelObject } from "./voxel-assets";
+import { loadVoxelAssets, voxelBindingId, voxelObject } from "./voxel-assets";
+import { composeVoxelModels } from "./voxel-data";
 import { loadTerrainTiles, type TerrainTiles } from "./terrain-tiles";
 import { standaloneVoxel } from "./voxel-buckets";
 import type { VoxelObject } from "./voxel-data";
@@ -207,7 +208,7 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
     const loader = new GLTFLoader();
     // Sequential bounded loads simplify abort/disposal and avoid a burst of decoded atlases.
     for (const spec of specs) {
-      if (spec.id === "alden" || spec.id === "tree" && voxelModels.has("tree")) continue;
+      if (spec.id === "alden" || ["tree", "anvil", "crate"].includes(spec.id) && voxelModels.has(spec.id)) continue;
       if (signal.aborted) throw new DOMException("Renderer startup cancelled", "AbortError");
       try {
         const url = productionAssetUrl(spec.url, directory);
@@ -252,12 +253,15 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
     const material = new MeshLambertMaterial({ color: terrainTiles.meanColors[kind] });
     material.name = `native-ground-mean-${kind}`; materials.add(material); terrain[kind] = material;
   }
+  const bindingModels = new Map(voxelModels), crate = voxelModels.get("crate"), barrel = voxelModels.get("barrel");
+  if (crate && barrel) bindingModels.set("supplies", { model: composeVoxelModels([{ model: crate.model, offset: [-.5, 0, -.125] }, { model: barrel.model, offset: [.5, 0, .125] }]) });
   const library: ArtLibrary = {
     terrain, terrainTiles,
     createObject(object: WorldObject, options): ObjectArt {
-      const voxels = object.kind === "tree" ? voxelModels.get("tree") : undefined;
+      const voxelId = voxelBindingId(object), voxels = voxelId ? bindingModels.get(voxelId) : undefined;
       if (voxels) {
         const art = voxelObject(voxels); art.group.name = `object:${object.id}`;
+        art.group.userData.voxelAsset = voxelId;
         if (options?.standaloneVoxels) {
           const available = standaloneVoxel(voxels.model.levels[0]); art.available.add(available); voxelPreviews.add(available);
           if (voxels.depleted) { const depleted = standaloneVoxel(voxels.depleted.levels[0]); art.depleted.add(depleted); voxelPreviews.add(depleted); }

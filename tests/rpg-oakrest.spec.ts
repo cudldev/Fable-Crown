@@ -109,7 +109,8 @@ test("Oakrest gate can be closed and reopened from its legal outside tile", asyn
   state.player.previousPosition = { ...approach };
   await importState(page, state);
 
-  await page.getByRole("button", { name: `Inspect ${gate!.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${gate!.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page
     .getByRole("region", { name: "Object actions" })
     .getByRole("button", { name: "Close gate" })
@@ -125,7 +126,8 @@ test("Oakrest gate can be closed and reopened from its legal outside tile", asyn
     .poll(async () => (await readSaved(page)).gates[gate!.id])
     .toBe(false);
 
-  await page.getByRole("button", { name: `Inspect ${gate!.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${gate!.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page
     .getByRole("region", { name: "Object actions" })
     .getByRole("button", { name: "Open gate" })
@@ -152,7 +154,8 @@ test("Oakrest sign text enters important history and the panel stays clear of th
   state.player.previousPosition = { ...approach };
   await importState(page, state);
 
-  await page.getByRole("button", { name: `Inspect ${sign!.name}` }).click();
+  await page.getByRole("button", { name: `Inspect ${sign!.name}` }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page
     .getByRole("region", { name: "Object actions" })
     .getByRole("button", { name: "Read sign" })

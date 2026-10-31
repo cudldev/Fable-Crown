@@ -146,7 +146,9 @@ test("full Three pixel cast draws, animates and responds to optional normals wit
   const working = fixture(), tree = objectById("oakrest-tree-0")!;
   working.player.position = { ...interactionTiles(tree)[0]! }; working.player.previousPosition = { ...working.player.position };
   await restore(page, working);
-  await world.locator(`[data-three-selection*="${tree.id}"]`).press("Enter");
+  await world.locator(`[data-three-selection*="${tree.id}"]`).press("Shift+F10");
+
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByText("Single action or queued order", { exact: true }).click();
   await page.getByRole("button", { name: "Do now", exact: true }).click();
   await closePanel(page); await expectAnimatedFrame(page, 5, 7);
@@ -232,7 +234,9 @@ test("unobstructed work contact keeps the pickaxe on Alden's shared cell grid", 
   await restore(page, state);
   await page.getByRole("button", { name: "Day lighting", exact: true }).click();
   for (let i = 0; i < 5; i++) await page.getByRole("button", { name: "Zoom in", exact: true }).click();
-  await world.locator(`[data-three-selection*="${ore.id}"]`).press("Enter");
+  await world.locator(`[data-three-selection*="${ore.id}"]`).press("Shift+F10");
+
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByText("Single action or queued order", { exact: true }).click();
   await page.getByRole("button", { name: "Do now", exact: true }).click();
   await closePanel(page);

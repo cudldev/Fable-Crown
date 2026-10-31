@@ -5,7 +5,7 @@ const voxels = JSON.parse(await readFile("dist/art3d/voxel/manifest.json", "utf8
 const terrain = JSON.parse(await readFile("dist/art3d/terrain/manifest.json", "utf8"));
 const coreArt = [
   "art3d/manifest.json", ...art3d.files,
-  "art3d/voxel/manifest.json", ...voxels.files,
+  "art3d/voxel/manifest.json?v=" + voxels.version, ...voxels.files.map(file => file + "?v=" + voxels.version),
   "art3d/terrain/manifest.json?v=" + terrain.version,
   ...terrain.files.map(file => file + "?v=" + terrain.version),
 ];

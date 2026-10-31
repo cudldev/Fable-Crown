@@ -1,5 +1,7 @@
 # Fable Crown — Voxel World and Pixel Cast (CURRENT)
 
+Ground foliage update (2026-10-30): user requested denser flat plant cards with big pixels, then a Minecraft Dungeons-inspired treatment. Original fuller tufts, fern fans and small flower clusters use0.0625m pixels on crossed cards, at roughly the earlier clump scale. Smooth clustered planting replaces square density patches. Grid roots, wind and character depth remain. Terrain, trees and structures retain their voxel direction. See [foliage rendering](FOLIAGE_RENDERING.md).
+
 > Current renderer update — 2026-10-30: The voxel world and approved pixel cast are now the sole gameplay renderer. Painterly/ink/fitted runtime styles are retired; original source art is retained. Environment migration remains incomplete.
 
 ## Authoritative decision — 2026-10-30

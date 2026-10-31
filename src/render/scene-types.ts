@@ -21,6 +21,8 @@ export interface TileSceneProps {
   onCamera: (c: TileCamera) => void;
   selection: TileSelection | null;
   onSelect: (s: TileSelection) => void;
+  onInteract?: (s: TileSelection) => void;
+  onContextMenu?: (s: TileSelection, point: { x: number; y: number }) => void;
   feedback?: FeedbackFloater[];
   previewRoute?: TilePosition[];
   presentationEpoch?: number;

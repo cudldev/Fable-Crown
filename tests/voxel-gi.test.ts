@@ -7,6 +7,26 @@ const source = (boxes: number[], depleted?: number[]): GIObjectSource => ({ id: 
 const world = (objects: GIObjectSource[]): GIWorldSource => ({ objects, ground: new Uint32Array(64).fill(packRGB(.2, .2, .2)), width: 8, height: 8 });
 
 describe("cached voxel diffuse GI and AO", () => {
+  test("successive diffuse passes reuse visibility, preserve darkness and add bounded reflected light", () => {
+    const c = config({ origin: [0, 0, 0], size: [8, 6, 8], stride: 2, rays: 32, sunPower: 2, skyPower: .5 });
+    const wall: number[] = [];
+    for (let y = 0; y < 6; y++) for (let z = 0; z < 8; z++) wall.push(2.25, y * .5 + .25, z * .5 + .25, .5, .7, .5, .3);
+    const geometry = world([source(wall)]); geometry.ground.fill(packRGB(.7, .5, .3));
+    const grid = rasterizeGI(geometry, c), resolution: [number, number, number] = [4, 3, 4];
+    const pass = (previous?: { probes: (Float32Array | null)[]; resolution: [number, number, number] }, dark = false) => {
+      const probes: (Float32Array | null)[] = [];
+      for (let z = 0; z < 4; z++) for (let y = 0; y < 3; y++) for (let x = 0; x < 4; x++)
+        probes.push(traceProbe(grid, [x + .25, y + .25, z + .25], dark ? { ...c, sunPower: 0, skyPower: 0 } : c, previous));
+      return { probes, resolution };
+    };
+    const first = pass(), second = pass(first), third = pass(second);
+    const energy = (field: typeof first) => field.probes.reduce((sum, p) => sum + (p?.[0] ?? 0), 0);
+    expect(energy(second)).toBeGreaterThan(energy(first)); expect(energy(third)).toBeGreaterThanOrEqual(energy(second));
+    expect(energy(third)).toBeLessThan(energy(first) * 3);
+    expect(pass(first)).toEqual(second);
+    const dark = pass(undefined, true); expect(energy(pass(dark, true))).toBe(0);
+    expect(first.probes.map(p => p?.[12])).toEqual(third.probes.map(p => p?.[12]));
+  });
   test("AO distance ignores distant blockers without shortening colored-light transport", () => {
     const boxes: number[] = [];
     for (let y = 0; y < 6; y++) for (let z = -3; z <= 3; z++) boxes.push(2.25, (y + .5) * .5, z * .5, .5, 1, .05, .05);

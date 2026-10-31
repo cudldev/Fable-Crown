@@ -65,7 +65,8 @@ test("clicked copper node offers and persists the matching training ambition", a
   await page
     .getByRole("button", { name: `Inspect ${node.name}` })
     .first()
-    .click();
+    .click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   const actions = page.getByRole("region", { name: "Object actions" });
   await actions.getByLabel("Quantity").selectOption("1");
   await expect(
@@ -96,7 +97,8 @@ test("mining shows progress then announces one copper and the level-up reward", 
   await page
     .getByRole("button", { name: `Inspect ${node.name}` })
     .first()
-    .click();
+    .click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   const actions = page.getByRole("region", { name: "Object actions" });
   await actions.getByLabel("Quantity").selectOption("1");
   // Observe real transient feedback before slow screenshots/save round trips can outlast it.

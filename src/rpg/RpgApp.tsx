@@ -1,6 +1,6 @@
 import { flushSync } from "react-dom";
 import PixelPortrait from "../render/PixelPortrait";
-import { clampGameplayZoom } from "../render/camera-limits";
+import { clampGameplayZoom, MAX_GAMEPLAY_ZOOM } from "../render/camera-limits";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   type TileCamera,
@@ -39,6 +39,9 @@ import { IntentionReadout } from "./IntentionReadout";
 import { PlannerPanel, LastDeliberation } from "./PlannerPanel";
 import { explainIntention } from "./intention-explanation";
 import { starterChoices } from "./starter";
+import { actionFeedback } from "./action-feedback";
+import { defaultInteraction } from "./default-interaction";
+import { WorldContextMenu, type WorldMenuItem } from "./WorldContextMenu";
 import type { TilePosition } from "./types";
 import type { SkillId, EquipmentSlot, CombatStyle } from "./types";
 import "./rpg.css";
@@ -64,7 +67,7 @@ export default function RpgApp() {
     [camera, setCamera] = useState<TileCamera>({
       x: 52,
       y: 95,
-      zoom: 0.85,
+      zoom: MAX_GAMEPLAY_ZOOM,
       follow: true,
       overview: false,
       grid: false,
@@ -79,6 +82,21 @@ export default function RpgApp() {
     [quantity, setQuantity] = useState(10),
     [bagItem, setBagItem] = useState<string | null>(null);
   const [feedbackEpoch, setFeedbackEpoch] = useState(0);
+  const [bagSearch, setBagSearch] = useState("");
+  const [bagFilter, setBagFilter] = useState("all");
+  const [bagGrouped, setBagGrouped] = useState(false);
+  const [bagSort, setBagSort] = useState("packed");
+  const [worldMenu, setWorldMenu] = useState<{ selection: TileSelection; x: number; y: number } | null>(null);
+  const [usingItem, setUsingItem] = useState<string | null>(null);
+  const lastManualKey = useRef(0);
+  const dock = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!dock.current) return;
+    const footer = dock.current, shell = footer.closest("main");
+    const observer = new ResizeObserver(() => shell?.style.setProperty("--dock-height", `${footer.offsetHeight}px`));
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, [!!state]);
   const message = notice.text;
   const setMessage = (text: string) => setNotice(current => ({ text, sequence: current.sequence + 1 }));
   const [messagesOpen, setMessagesOpen] = useState(false);
@@ -110,6 +128,7 @@ export default function RpgApp() {
       }
       setState(e.data.state);
       if (e.data.resetFeedback) {
+        setWorldMenu(null); setUsingItem(null);
         setFeedbackEpoch((value) => value + 1);
         setCommandNotice(null);
         setMessagesOpen(false);
@@ -148,10 +167,10 @@ export default function RpgApp() {
     };
   }, []);
   useEffect(() => {
-    if (!message) return;
+    if (!message || usingItem) return;
     const t = setTimeout(() => setMessage(""), 6000);
     return () => clearTimeout(t);
-  }, [message, notice.sequence]);
+  }, [message, notice.sequence, usingItem]);
   useEffect(() => {
     if (!commandNotice || commandNotice.pending) return;
     const timer = setTimeout(() => setCommandNotice(null), 4000);
@@ -165,9 +184,17 @@ export default function RpgApp() {
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.preventDefault();
+        setWorldMenu(null);
+        setUsingItem(null);
+        setMessage("");
+        setMapDestination(null);
+        setBagItem(null);
+        setExamining(false);
         setSelection(null);
         setPanel(null);
         setMessagesOpen(false);
+        command({ type: "cancel" });
       }
     };
     window.addEventListener("keydown", close);
@@ -200,22 +227,66 @@ export default function RpgApp() {
     command(next ? { type: "enqueue", order: o } : o);
     setSelection(null);
     setMapDestination(null);
+    setWorldMenu(null);
   };
+  useEffect(() => {
+    const move = (event: KeyboardEvent) => {
+      const direction = ({ w: [0, -1], a: [-1, 0], s: [0, 1], d: [1, 0] } as Record<string, number[]>)[event.key.toLowerCase()];
+      if (!direction || !state || panel || worldMenu || selection && selection.kind !== "tile" || event.ctrlKey || event.metaKey || event.altKey ||
+        (event.target as HTMLElement).closest("input, textarea, select, [contenteditable=true]")) return;
+      event.preventDefault();
+      if (event.repeat && performance.now() - lastManualKey.current < 180) return;
+      lastManualKey.current = performance.now();
+      const position = { ...state.player.position, x: state.player.position.x + direction[0], y: state.player.position.y + direction[1] };
+      if (findPath(state.player.position, position, worldForState(state))?.length !== 1) return;
+      command({ type: "move", position });
+      setCamera(current => ({ ...current, follow: true, overview: false }));
+    };
+    window.addEventListener("keydown", move);
+    return () => window.removeEventListener("keydown", move);
+  }, [state, panel, selection, worldMenu]);
   const open = (p: string) => {
+    setWorldMenu(null);
     setMessagesOpen(false);
     setPanel(panel === p ? null : p);
     setSelection(null);
   };
   const select = (s: TileSelection) => {
+    setWorldMenu(null);
     setMessagesOpen(false);
     setMapDestination(null);
     setExamining(false);
     setPanel(null);
-    if (s.kind === "tile") {
-      order({ type: "move", position: s.position });
-      setSelection(s);
-    } else setSelection(s);
+    setSelection(s);
   };
+  const interact = (selected: TileSelection) => {
+    if (!state) return;
+    setWorldMenu(null);
+    if (usingItem && selected.kind === "object") {
+      const target = objectById(selected.id), use = target && itemUses(state, usingItem, target)[0];
+      if (!use) { setMessage(`You cannot use ${itemName(usingItem)} there. Escape cancels item use.`); return; }
+      setUsingItem(null); setPanel(null); setSelection(null); setMessage("");
+      if (use.command.type === "goal") command({ type: "autoplay", enabled: false });
+      command(use.command); return;
+    }
+    setUsingItem(null);
+    const action = defaultInteraction(state, selected);
+    if (action.blocked) { setMessage(action.blocked); return; }
+    if (!action.order) { select(selected); return; }
+    setPanel(null); setMessagesOpen(false);
+    order(action.order);
+  };
+  const menuItems: WorldMenuItem[] = [];
+  if (state && worldMenu) {
+    const selected = worldMenu.selection, action = defaultInteraction(state, selected);
+    menuItems.push({ label: usingItem && selected.kind === "object" ? `Use ${itemName(usingItem)} → ${objectById(selected.id)?.name}` : action.label, run: () => interact(selected) });
+    if (action.order && !usingItem) menuItems.push({ label: "Add next", run: () => {
+      if (action.blocked) setMessage(action.blocked!);
+      else order(action.order!, true);
+    } });
+    if (selected.kind !== "tile") menuItems.push({ label: "More options", run: () => select(selected) });
+    menuItems.push({ label: "Examine", run: () => { select(selected); setExamining(true); } });
+  }
   const world = state ? worldForState(state) : WORLD;
   const selectedObject =
     selection?.kind === "object"
@@ -243,6 +314,9 @@ export default function RpgApp() {
       : undefined;
   const player = state?.player;
   const intention = state ? explainIntention(state) : null;
+  const work = state ? actionFeedback(state) : null;
+  const feedbackSkill = work?.skill ?? reward.skill;
+  const autoplay = state?.control.autoplay !== false && !state?.control.waiting;
   const hasBow = ITEMS[player?.equipment.weapon ?? ""]?.weaponType === "bow";
   const combatSkill: SkillId =
     state && ["attack", "strength", "defence"].includes(state.control.style)
@@ -293,14 +367,19 @@ export default function RpgApp() {
   const bagSlots = player
     ? player.inventory.flatMap((item) =>
         Array.from(
-          { length: ITEMS[item.itemId]?.stackable ? 1 : item.quantity },
+          { length: bagGrouped || ITEMS[item.itemId]?.stackable ? 1 : item.quantity },
           () => ({
             ...item,
-            quantity: ITEMS[item.itemId]?.stackable ? item.quantity : 1,
+            quantity: bagGrouped || ITEMS[item.itemId]?.stackable ? item.quantity : 1,
           }),
         ),
       )
     : [];
+  const visibleBag = bagSlots.filter(item => (bagFilter === "all" || ITEMS[item.itemId]?.kind === bagFilter) &&
+    itemName(item.itemId).toLowerCase().includes(bagSearch.trim().toLowerCase()));
+  if (bagSort !== "packed") visibleBag.sort((a, b) => bagSort === "value"
+    ? (ITEMS[b.itemId]?.value ?? 0) - (ITEMS[a.itemId]?.value ?? 0) || itemName(a.itemId).localeCompare(itemName(b.itemId))
+    : itemName(a.itemId).localeCompare(itemName(b.itemId)));
   function nextUnlock(skill: SkillId, level: number) {
     const options = [
       ...Object.values(RESOURCES)
@@ -413,12 +492,13 @@ export default function RpgApp() {
     >
       {state ? (
         <SceneHost
-          panelOpen={!!panel || (!!selection && selection.kind !== "tile")}
           state={state}
           camera={camera}
           onCamera={setCamera}
-          selection={selection}
+          selection={worldMenu?.selection ?? selection}
           onSelect={select}
+          onInteract={interact}
+          onContextMenu={(selected, point) => { setSelection(null); setPanel(null); setMessagesOpen(false); setMapDestination(null); setWorldMenu({ selection: selected, ...point }); }}
           feedback={reward.floaters}
           presentationEpoch={feedbackEpoch}
           onWorkContact={audio.workContact}
@@ -431,6 +511,7 @@ export default function RpgApp() {
           <p>Opening a new chapter…</p>
         </div>
       )}
+      {worldMenu && <WorldContextMenu x={worldMenu.x} y={worldMenu.y} items={menuItems} onClose={() => setWorldMenu(null)} />}
       {state && (
         <MessagePanel
           messages={state.messages}
@@ -595,6 +676,8 @@ export default function RpgApp() {
         <IntentionReadout
           view={intention}
           waiting={state.control.waiting}
+          autoplay={autoplay}
+          onAutoplay={() => command({ type: "autoplay", enabled: !autoplay })}
           onThoughts={() => open("thoughts")}
           onWait={() =>
             command({ type: state.control.waiting ? "resume" : "wait" })
@@ -612,7 +695,7 @@ export default function RpgApp() {
                 y: target.y,
                 follow: false,
                 overview: false,
-                zoom: Math.max(0.65, c.zoom),
+                zoom: clampGameplayZoom(c.zoom),
               }));
             }
           }}
@@ -968,7 +1051,7 @@ export default function RpgApp() {
       )}
       {panel && state && (
         <section
-          className={`parchment drawer ${panel === "thoughts" ? "thought-panel" : ""}`}
+          className={`parchment drawer ${panel === "thoughts" ? "thought-panel" : ""} ${panel === "bag" ? "wide-drawer inventory-drawer" : ""}`}
           aria-label={`${panel} panel`}
         >
           <button
@@ -1259,7 +1342,7 @@ export default function RpgApp() {
                   </div>
                 ))
               ) : (
-                <p>No queued orders. Alden continues his ambition.</p>
+                <p>{autoplay ? "No queued orders. Alden continues his ambition." : "No queued orders. Manual control holds until you choose an action or turn autoplay on."}</p>
               )}
               <div className="order-actions">
                 <button onClick={() => command({ type: "wait" })}>
@@ -1333,15 +1416,24 @@ export default function RpgApp() {
               <span className="eyebrow">ALDEN’S PACK</span>
               <h2>Inventory & equipment</h2>
               <p aria-label="Backpack capacity">
-                {inventorySlots(state.player.inventory)} / 28 slots · ores, logs
-                and food use one slot each. Coins, bait and feathers stack.
+                <strong>{inventorySlots(state.player.inventory)} / 28 slots</strong> · {28 - inventorySlots(state.player.inventory)} free · {itemCount(state.player.inventory, "coins").toLocaleString()} coins
               </p>
+              <progress className="bag-capacity" aria-label="Backpack space used" value={inventorySlots(state.player.inventory)} max={28} />
+              <div className="bag-tools">
+                <label>Find an item<input type="search" aria-label="Search inventory" placeholder="Name…" value={bagSearch} onChange={event => setBagSearch(event.target.value)} /></label>
+                <label>Show<select aria-label="Inventory category" value={bagFilter} onChange={event => setBagFilter(event.target.value)}>
+                  <option value="all">Everything</option><option value="food">Food</option><option value="gear">Gear</option><option value="tool">Tools</option><option value="resource">Materials</option><option value="supply">Supplies</option><option value="currency">Coins</option>
+                </select></label>
+                <label>Sort<select aria-label="Inventory sort" value={bagSort} onChange={event => setBagSort(event.target.value)}><option value="packed">Packed order</option><option value="name">Name</option><option value="value">Value</option></select></label>
+                <button aria-pressed={bagGrouped} onClick={() => setBagGrouped(value => !value)}>Group items {bagGrouped ? "on" : "off"}</button>
+              </div>
+              <small className="bag-help">Select an item to equip, eat or use it. Grouping changes the view; logs, ores and food still use one slot each.</small>
               <div className="rpg-backpack" aria-label="Backpack">
-                {Array.from({ length: 28 }, (_, i) => {
-                  const item = bagSlots[i];
+                {Array.from({ length: bagGrouped || bagSearch || bagFilter !== "all" ? visibleBag.length : 28 }, (_, i) => {
+                  const item = visibleBag[i];
                   return (
                     <button
-                      key={item ? `${item.itemId}:${bagSlots.slice(0, i).filter(slot => slot.itemId === item.itemId).length}` : `empty:${i}`}
+                      key={item ? `${item.itemId}:${visibleBag.slice(0, i).filter(slot => slot.itemId === item.itemId).length}` : `empty:${i}`}
                       disabled={!item}
                       title={item ? itemName(item.itemId) : "Empty slot"}
                       aria-label={
@@ -1358,16 +1450,12 @@ export default function RpgApp() {
                       {item && (
                         <>
                           <span>
-                            {itemName(item.itemId)
-                              .split(" ")
-                              .map((w) => w[0])
-                              .join("")
-                              .slice(0, 3)}
+                            {itemName(item.itemId)}
                           </span>
                           <small>
                             {item.quantity > 1
-                              ? item.quantity
-                              : itemName(item.itemId).split(" ").at(-1)}
+                              ? `×${item.quantity.toLocaleString()}`
+                              : ITEMS[item.itemId]?.kind}
                           </small>
                         </>
                       )}
@@ -1375,6 +1463,8 @@ export default function RpgApp() {
                   );
                 })}
               </div>
+              {!visibleBag.length && <p>No matching items.</p>}
+              <button className="full" onClick={() => { order({ type: "bank" }); setPanel(null); }}>Take backpack to bank</button>
               {bagItem && itemCount(state.player.inventory, bagItem) > 0 && (
                 <div className="rpg-item-inspect">
                   <h3>{itemName(bagItem)}</h3>
@@ -1400,9 +1490,15 @@ export default function RpgApp() {
                       : ""}
                     {ITEMS[bagItem]?.weight ?? 0} kg
                   </p>
+                  {ITEMS[bagItem]?.slot && <p className="item-comparison">
+                    <strong>{ITEMS[bagItem].slot} · {ITEMS[bagItem].twoHanded ? "two hands" : "one slot"}</strong><br />
+                    Attack {ITEMS[bagItem].attack ?? ITEMS[bagItem].rangedAttack ?? 0} · Strength {ITEMS[bagItem].strength ?? ITEMS[bagItem].rangedStrength ?? 0} · Defence {ITEMS[bagItem].defence ?? 0}<br />
+                    Currently equipped: {state.player.equipment[ITEMS[bagItem].slot!] ? itemName(state.player.equipment[ITEMS[bagItem].slot!]!) : "Empty"}
+                  </p>}
                   <button
                     onClick={() => {
                       setPanel(null);
+                      setUsingItem(bagItem);
                       setMessage(`Select a place to use ${itemName(bagItem)}.`);
                     }}
                   >
@@ -1726,9 +1822,11 @@ export default function RpgApp() {
               <span className="eyebrow">FABLE CROWN</span>
               <h2>A new RPG chapter</h2>
               <p>
-                Click a tile to travel. Inspect places to act. Drag, pinch or
-                use the wheel to explore. Alden follows his ambitions without
-                constant orders.
+                Left-click or tap to walk, gather or attack. Right-click or hold
+                a touch to choose other options. Escape cancels current and queued orders.
+                Drag, pinch or use the wheel to explore. WASD moves Alden one tile at a time.
+                Direct world orders switch to manual control. Turn Autoplay on
+                to let Alden choose adventures again.
               </p>
               <div className="menu-grid">
                 <button onClick={() => {
@@ -1962,7 +2060,7 @@ export default function RpgApp() {
         </section>
       )}
       {player && state && (
-        <footer className="intention-dock">
+        <footer ref={dock} className="intention-dock" data-working={!!work}>
           <button
             className="hero-status"
             aria-label="Inspect Alden"
@@ -1979,27 +2077,32 @@ export default function RpgApp() {
                   HP {player.health}/{levelForXp(player.skills.hitpoints)}
                 </em>
               </strong>
+              <progress className={`hero-health ${player.health <= levelForXp(player.skills.hitpoints) * .3 ? "low" : ""}`} aria-label="Alden health" value={player.health} max={levelForXp(player.skills.hitpoints)} />
               <span className="doing-now">
-                {intention?.title ?? player.activity}
+                {work ? `${work.label} · ${work.detail}` : intention?.title ?? player.activity}
               </span>
+              {work && <span className="hud-work" data-testid="hud-work-status">
+                <progress aria-label={`${work.label} cycle progress`} value={work.elapsed} max={work.duration} />
+                <small>{work.elapsed}/{work.duration} ticks · {Math.ceil((work.duration - work.elapsed) * .6)}s to attempt</small>
+              </span>}
               <span
                 className={`rpg-xp-inline ${reward.gain ? "gained" : ""}`}
                 aria-label="Recent skill experience"
               >
                 <span>
-                  {skillName(reward.skill)}{" "}
-                  {levelForXp(player.skills[reward.skill])}
-                  {reward.gain > 0 && <b> +{formatXp(reward.gain)} XP</b>}
+                  {skillName(feedbackSkill)}{" "}
+                  {levelForXp(player.skills[feedbackSkill])}
+                  {reward.gain > 0 && feedbackSkill === reward.skill && <b> +{formatXp(reward.gain)} XP</b>}
                 </span>
                 <progress
-                  aria-label={`${skillName(reward.skill)} experience progress`}
-                  value={xpProgress(player.skills[reward.skill]).current}
-                  max={xpProgress(player.skills[reward.skill]).span}
+                  aria-label={`${skillName(feedbackSkill)} experience progress`}
+                  value={xpProgress(player.skills[feedbackSkill]).current}
+                  max={xpProgress(player.skills[feedbackSkill]).span}
                 />
                 <small>
-                  {levelForXp(player.skills[reward.skill]) === 99
+                  {levelForXp(player.skills[feedbackSkill]) === 99
                     ? "Mastered"
-                    : `${formatXp(xpProgress(player.skills[reward.skill]).remaining)} XP to next level`}
+                    : `${formatXp(xpProgress(player.skills[feedbackSkill]).remaining)} XP to next level`}
                 </small>
               </span>
             </span>

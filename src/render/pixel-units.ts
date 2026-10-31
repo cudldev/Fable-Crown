@@ -1,3 +1,4 @@
+import { authorUnitNormals } from "./unit-normals";
 /** Authored, outline-free pixel units. Atlas pixels are source art, not a downsampled concept. */
 export const UNIT_FRAME_SIZE = 32;
 export const UNIT_FRAME_COUNT = 10;
@@ -22,7 +23,7 @@ export interface UnitSheet {
 }
 
 type Color = readonly [number, number, number];
-type Painter = (x: number, y: number, w: number, h: number, color: Color, curve?: number) => void;
+type Painter = (x: number, y: number, w: number, h: number, color: Color, _legacyCurve?: number) => void;
 export const UNIT_TOOLS = ["none", "sword", "axe", "pickaxe", "hammer", "rod", "bow"] as const;
 export type UnitTool = (typeof UNIT_TOOLS)[number];
 
@@ -67,16 +68,16 @@ export function unitKindForEnemy(definitionId: string): UnitKind {
   }
 }
 
-/** Flat pigment plus shallow authored form normals; these are not inferred physical normals. */
+/** Original flat pigment plus authored broad form normals; no inferred physical geometry. */
 export function createUnitSheet(kind: UnitKind, variant = 0): UnitSheet {
   validateKind(kind);
   const id = variantId(variant);
-  return makeSheet((p) => {
+  return authorUnitNormals(makeSheet((p) => {
     if (kind === "boar") boar(p, id);
     else if (kind === "rock-mite") rockMite(p, id);
     // The body, face and feet stay still: action animation belongs to the held layer.
     else person(p, kind, id);
-  });
+  }), kind);
 }
 
 /** Separate hand/equipment pixels on the SAME source grid and pivot as the body. */
@@ -85,7 +86,7 @@ export function createHeldUnitSheet(kind: UnitKind, variant: number, tool: UnitT
   if (!(UNIT_TOOLS as readonly string[]).includes(tool)) throw new Error(`Unknown unit tool: ${tool}`);
   const id = variantId(variant);
   const bodyHeight = createUnitSheet(kind, id).bodyHeight;
-  return makeSheet((p, frame) => {
+  return authorUnitNormals(makeSheet((p, frame) => {
     if (kind === "boar" || kind === "rock-mite") return;
     // One fine source pixel of hand movement; all other frames hold the rest pose.
     const dy = frame === 1 ? -1 : 0;
@@ -98,7 +99,7 @@ export function createHeldUnitSheet(kind: UnitKind, variant: number, tool: UnitT
     const skin = prince ? ALDEN_PIGMENTS.A! : SKINS[id % SKINS.length]!;
     paintHeldTool(shifted, tool, x, y, step, prince);
     shifted(x, y, step, step, skin, .12);
-  }, bodyHeight);
+  }, bodyHeight), kind, tool);
 }
 
 function validateKind(kind: UnitKind): void {
@@ -114,17 +115,13 @@ function makeSheet(drawFrame: (p: Painter, frame: number) => void, bodyHeight?: 
   const rgba = new Uint8Array(width * height * 4), normal = new Uint8Array(rgba.length);
   for (let i = 0; i < normal.length; i += 4) { normal[i] = 128; normal[i + 1] = 128; normal[i + 2] = 255; }
   for (let frame = 0; frame < UNIT_FRAME_COUNT; frame++) {
-    const draw: Painter = (x, y, w, h, color, curve = .12) => {
+    // Legacy pigment recipes retain their curve argument; broad form normals are authored afterward.
+    const draw: Painter = (x, y, w, h, color) => {
       for (let py = Math.max(0, y); py < Math.min(32, y + h); py++) {
         for (let px = Math.max(0, x); px < Math.min(32, x + w); px++) {
           const at = (py * width + frame * 32 + px) * 4;
           rgba[at] = color[0]; rgba[at + 1] = color[1]; rgba[at + 2] = color[2]; rgba[at + 3] = 255;
-          const nx = ((px + .5 - x) / Math.max(1, w) * 2 - 1) * curve;
-          const ny = (1 - (py + .5 - y) / Math.max(1, h) * 2) * curve;
-          const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
-          normal[at] = Math.round((nx * .5 + .5) * 255);
-          normal[at + 1] = Math.round((ny * .5 + .5) * 255);
-          normal[at + 2] = Math.round((nz * .5 + .5) * 255); normal[at + 3] = 255;
+
         }
       }
     };

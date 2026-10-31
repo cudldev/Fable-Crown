@@ -8,14 +8,19 @@ async function solve(config: GISolveConfig, version: number, epoch: number) {
   if (!world) return;
   const started = performance.now(), grid = rasterizeGI(world, config), voxelizeMs = performance.now() - started;
   const resolution = config.size.map(n => Math.floor((n - 1) / config.stride) + 1) as V3;
-  const probes: (Float32Array | null)[] = [], probeStart = performance.now();
-  for (let z = 0; z < resolution[2]; z++) {
-    for (let y = 0; y < resolution[1]; y++) for (let x = 0; x < resolution[0]; x++) {
-      const p = [x, y, z].map((n, axis) => config.origin[axis] + (n * config.stride + .5) * config.pitch) as V3;
-      probes.push(traceProbe(grid, p, config));
+  let probes: (Float32Array | null)[] = [];
+  const probeStart = performance.now(), bounces = Math.max(1, Math.min(3, Math.floor(config.bounces ?? 1)));
+  for (let bounce = 0; bounce < bounces; bounce++) {
+    const previous = bounce ? { probes, resolution } : undefined;
+    probes = [];
+    for (let z = 0; z < resolution[2]; z++) {
+      for (let y = 0; y < resolution[1]; y++) for (let x = 0; x < resolution[0]; x++) {
+        const p = [x, y, z].map((n, axis) => config.origin[axis] + (n * config.stride + .5) * config.pitch) as V3;
+        probes.push(traceProbe(grid, p, config, previous));
+      }
+      postMessage({ type: "progress", version, phase: "trace", done: bounce * resolution[2] + z + 1, total: bounces * resolution[2] });
+      await pause(); if (epoch !== generation) return;
     }
-    postMessage({ type: "progress", version, phase: "trace", done: z + 1, total: resolution[2] });
-    await pause(); if (epoch !== generation) return;
   }
   const probesMs = performance.now() - probeStart, interpolationStart = performance.now();
   // 2x2 sub-volumes with gutters fit WebGL2's minimum 256-texel 3D texture limit.
@@ -49,7 +54,7 @@ async function solve(config: GISolveConfig, version: number, epoch: number) {
   const half = new Uint16Array(atlas.length); for (let i = 0; i < atlas.length; i++) half[i] = DataUtils.toHalfFloat(atlas[i]);
   if (epoch !== generation) return;
   postMessage({ type: "ready", version, data: half, origin: config.origin, size: config.size, pitch: config.pitch,
-    stats: { voxelizeMs, probesMs, interpolateMs, packMs: performance.now() - packStart, totalMs: performance.now() - started, probes: probes.length,
+    stats: { bounces, voxelizeMs, probesMs, interpolateMs, packMs: performance.now() - packStart, totalMs: performance.now() - started, probes: probes.length,
       validProbes: probes.filter(Boolean).length, depletedCount: config.depleted.length, rays: grid.rays, occupied: grid.albedo.reduce((sum, value) => sum + Number(value !== 0), 0), textureBytes: half.byteLength } }, { transfer: [half.buffer] });
 }
 

@@ -40,7 +40,8 @@ try {
   await page.getByRole('button', { name: 'Visual settings', exact: true }).click();
   const foliage = page.getByRole('checkbox', { name: 'Enable ground foliage', exact: true });
   if (await foliage.count()) await foliage.uncheck();
-  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  // Measure rendering independently of overlapping settings/HUD hit targets.
+  await page.getByRole('button', { name: 'Done', exact: true }).dispatchEvent('click');
   const warm = () => page.evaluate(async () => { for (let i = 0; i < 120; i++) await new Promise(requestAnimationFrame); });
   const results = [];
   for (const view of ['close', 'matched-far', 'maximum', 'overview', 'phone']) {

@@ -21,8 +21,7 @@
     "voxel:build": "node scripts/voxel-recipes.mjs build",
     "voxel:test": "node scripts/voxel-recipes.mjs test",
     "voxel:preview": "node scripts/voxel-recipes.mjs preview",
-    "voxel:compare": "node scripts/voxel-recipes.mjs compare",
-    "test:browser:software": "playwright test --config=playwright.software.config.ts"
+    "voxel:compare": "node scripts/voxel-recipes.mjs compare"
   },
   "dependencies": {
     "react": "^19.0.0",

@@ -1,11 +1,31 @@
 import { expect, test, vi } from "vitest";
-import { BoxGeometry, DataTexture, Group, Matrix4, Mesh, OrthographicCamera, PerspectiveCamera, Scene, Vector2, Vector4, WebGLRenderTarget,
+import { BoxGeometry, BufferGeometry, Float32BufferAttribute, DataTexture, Group, Matrix4, Mesh, OrthographicCamera, PerspectiveCamera, Scene, Vector2, Vector4, WebGLRenderTarget,
   type WebGLProgramParametersWithUniforms, type WebGLRenderer } from "three";
-import { WATER_HEIGHT, WaterSystem, waterReflectionCamera, waterShoreDepth } from "../src/render/three/water";
+import { WATER_HEIGHT, WaterSystem, waterColumnDepth, waterReflectionCamera, waterShoreDepth } from "../src/render/three/water";
 import type { Terrain } from "../src/rpg/types";
 import { DEFAULT_VISUAL_SETTINGS } from "../src/render/three/visual-settings";
 
 const settings = { ...DEFAULT_VISUAL_SETTINGS, waterReflections: true, waterReflectionStrength: .65, waterRippleStrength: .35, waterReflectionResolution: 512 };
+
+test("submerged basin matches sampled shore depth, preserves surface geometry and shares chunk edges", () => {
+  const system = new WaterSystem();
+  system.setWorld({ width: 4, height: 2, terrain: ["sand", "water", "water", "water", "sand", "water", "water", "water"] });
+  const surface = new BufferGeometry().setAttribute("position", new Float32BufferAttribute([.5, WATER_HEIGHT, .5, 1.5, WATER_HEIGHT, .5, 2.5, WATER_HEIGHT, .5], 3));
+  const bed = system.createBed(surface), positions = bed.getAttribute("position");
+  for (let i = 0; i < 3; i++) {
+    expect(positions.getY(i)).toBeCloseTo(WATER_HEIGHT - waterColumnDepth((i + .5) / 3));
+    expect(surface.getAttribute("position").getY(i)).toBeCloseTo(WATER_HEIGHT);
+  }
+  expect(positions.getY(0)).toBeGreaterThan(positions.getY(1));
+  expect(positions.getY(1)).toBeGreaterThan(positions.getY(2));
+  // Convex island corner: three wet samples must not pull the bed away from the bank skirt.
+  system.setWorld({ width: 2, height: 2, terrain: ["sand", "water", "water", "water"] });
+  const islandBed = system.createBed(surface);
+  expect(islandBed.getAttribute("position").getY(0)).toBeCloseTo(WATER_HEIGHT - .1);
+  islandBed.dispose();
+  expect(system.material.transparent).toBe(true); expect(system.material.depthWrite).toBe(true);
+  bed.dispose(); surface.dispose(); system.dispose();
+});
 
 function fixture() {
   const system = new WaterSystem(), scene = new Scene(), camera = new PerspectiveCamera(50, 2, .1, 120);
@@ -71,6 +91,15 @@ test("realtime defaults recapture scene motion every frame even with an unchange
   f.system.dispose(); f.water.geometry.dispose(); f.initialTarget.dispose();
 });
 
+test("reduced motion freezes waves and shore lapping without freezing reflections", () => {
+  const f = fixture();
+  const shader = { uniforms: {}, vertexShader: "#include <project_vertex>", fragmentShader: "#include <color_fragment>" } as WebGLProgramParametersWithUniforms;
+  f.system.material.onBeforeCompile(shader, f.renderer as unknown as WebGLRenderer);
+  for (const time of [1000, 2000]) f.system.update(f.renderer as unknown as WebGLRenderer, f.scene, f.camera, [f.water], [], time, "day", settings, false, true);
+  expect(shader.uniforms.fableWaterTime.value).toBe(0); expect(f.system.stats.reflectionPasses).toBe(2);
+  f.system.dispose(); f.water.geometry.dispose(); f.initialTarget.dispose();
+});
+
 test("full reflection resolution follows the high-DPI render buffer and hardware limits preserve aspect", () => {
   const f = fixture(), visual = { ...settings, waterReflectionResolution: DEFAULT_VISUAL_SETTINGS.waterReflectionResolution };
   expect(visual.waterReflectionResolution).toBe(0);
@@ -122,6 +151,15 @@ test("sun direction and fog changes refresh an otherwise stationary capture imme
   expect(f.renderer.render).toHaveBeenCalledTimes(2);
   f.update(20, { ...settings, sunAzimuth: settings.sunAzimuth + 30, fogEnabled: !settings.fogEnabled });
   expect(f.renderer.render).toHaveBeenCalledTimes(3);
+  f.system.dispose(); f.water.geometry.dispose(); f.initialTarget.dispose();
+});
+
+test("continuous daylight respects the selected reflection capture rate", () => {
+  const f = fixture(), visual = { ...settings, dayNightCycle: true, cycleHour: 12, waterReflectionRate: 4 };
+  f.update(0, visual); f.update(10, { ...visual, cycleHour: 12.001 });
+  expect(f.renderer.render).toHaveBeenCalledTimes(1);
+  f.update(251, { ...visual, cycleHour: 12.002 }); expect(f.renderer.render).toHaveBeenCalledTimes(2);
+  f.update(260, { ...visual, dayTime: 18 }); expect(f.renderer.render).toHaveBeenCalledTimes(3);
   f.system.dispose(); f.water.geometry.dispose(); f.initialTarget.dispose();
 });
 

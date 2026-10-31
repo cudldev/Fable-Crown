@@ -163,7 +163,8 @@ test("equip a bow and ammunition, choose ranged styles, hit at seven tiles, and 
       Math.abs(prepared.player.position.y - enemy.position.y),
     ),
   ).toBe(7);
-  await page.getByRole("button", { name: /Inspect Moss boar/ }).click();
+  await page.getByRole("button", { name: /Inspect Moss boar/ }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page
     .getByRole("region", { name: "Enemy actions" })
     .getByRole("button", { name: "Attack now" })

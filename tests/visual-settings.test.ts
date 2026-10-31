@@ -4,7 +4,8 @@ import { LightingRig, LIGHTING_PRESETS, resolveLighting } from "../src/render/th
 import { DEFAULT_VISUAL_PRESET, DEFAULT_VISUAL_SETTINGS, normalizeVisualSettings, sunDirection, transportSettingsKey, visualPresetJSON } from "../src/render/three/visual-settings";
 
 test("defaults reproduce the accepted visual preset and unsafe values stay bounded", () => {
-  expect(DEFAULT_VISUAL_SETTINGS).toMatchObject({ sunAzimuth: 23.3, sunElevation: 62.3, shadowResolution: 2048, shadowSoftness: 3.5, shadowCoverage: 79, shadowBias: -.003, shadowNormalBias: .055, giStrength: 1.3, fogReach: 60, aoDistance: .125 });
+  expect(DEFAULT_VISUAL_SETTINGS.lightRays).toBe(.65);
+  expect(DEFAULT_VISUAL_SETTINGS).toMatchObject({ sunAzimuth: 23.3, sunElevation: 62.3, shadowResolution: 2048, shadowSoftness: 3.5, shadowCoverage: 79, shadowBias: -.003, shadowNormalBias: .055, giStrength: 1.3, fogReach: 60, aoStrength: .1, aoDistance: .125 });
   expect(Math.hypot(...sunDirection(DEFAULT_VISUAL_SETTINGS))).toBeCloseTo(1);
   expect(resolveLighting("day").sunPower).toBe(LIGHTING_PRESETS.day.sunPower);
   const bounded = normalizeVisualSettings({ sunStrength: -5, exposure: Infinity, shadowResolution: 8192, sunElevation: 100, sunTint: "unsafe" });

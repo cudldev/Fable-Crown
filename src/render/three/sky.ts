@@ -3,8 +3,9 @@ import {
   Matrix4, Mesh, RedFormat, RepeatWrapping, ShaderMaterial, UnsignedByteType, Vector3, Vector4,
   type Camera, type Scene,
 } from "three";
-import { resolveLighting, type LightingPreset } from "./lighting";
+import { blendLightColor, cyclePhase, resolveLighting, type LightingPreset } from "./lighting";
 import type { VisualSettings } from "./visual-settings";
+import { FOG_GRADIENT_GLSL } from "./fog-gradient";
 
 const mod = (n: number, period: number) => (n % period + period) % period;
 function lattice(x: number, y: number, period: number): number {
@@ -12,6 +13,11 @@ function lattice(x: number, y: number, period: number): number {
   n = Math.imul(n ^ n >>> 13, 1274126177); return ((n ^ n >>> 16) >>> 0) / 4294967295;
 }
 const smooth = (v: number) => v * v * (3 - 2 * v);
+export function moonAmount(preset: LightingPreset, visual: Readonly<VisualSettings>): number {
+  if (!visual.dayNightCycle || visual.cycleHour === undefined) return preset === "night" ? 1 : 0;
+  const hour = (visual.cycleHour % 24 + 24) % 24;
+  return 1 - smooth(Math.max(0, Math.min(1, (hour - 5) / 2))) * (1 - smooth(Math.max(0, Math.min(1, (hour - 17) / 2))));
+}
 /** Periodic deterministic cloud pigment; opposite texture boundaries share the same lattice. */
 export function cloudNoiseValue(x: number, y: number, size = 128): number {
   let result = 0;
@@ -47,8 +53,10 @@ uniform mat4 skyCameraWorld;
 uniform vec4 skyProjection;
 uniform float skyOrthographic;
 uniform vec3 skyZenith,skyHorizon,skyLower,cloudLit,cloudShade,sunDirection,sunColor;
-uniform float sunPower,cloudTime,cloudCoverage,cloudScale;
+uniform float sunPower,moonMix,cloudTime,cloudCoverage,cloudScale;
+uniform vec3 fogLow,fogHigh;uniform float fogGradient;
 varying vec2 vSkyNDC;
+${FOG_GRADIENT_GLSL}
 void main(){
  vec3 viewOrigin=vec3(0.0);
  vec3 viewDirection;
@@ -60,10 +68,18 @@ void main(){
  vec3 direction=normalize(mat3(skyCameraWorld)*viewDirection);
  float up=max(direction.y,0.0);
  vec3 color=mix(skyHorizon,skyZenith,pow(up,.58));
- color=mix(skyLower,color,smoothstep(-.12,.055,direction.y));
+ color=mix(fableGradient(skyLower,fogLow,fogHigh,direction.y,fogGradient),color,smoothstep(-.12,.055,direction.y));
  float sunDot=clamp(dot(direction,sunDirection),0.0,1.0);
- float sunDisc=smoothstep(cos(.011),cos(.007),sunDot);
- color+=sunColor*sunPower*(sunDisc*2.2+pow(sunDot,96.0)*.17+pow(sunDot,12.0)*.035);
+ float radius=mix(.028,.024,moonMix);
+ float sunDisc=smoothstep(cos(radius),cos(radius*.88),sunDot);
+ vec3 right=normalize(cross(abs(sunDirection.y)>.98?vec3(0.,0.,1.):vec3(0.,1.,0.),sunDirection));
+ vec3 top=cross(sunDirection,right);
+ vec2 face=vec2(dot(direction,right),dot(direction,top))/radius;
+ float craters=exp(-dot(face-vec2(-.3,.2),face-vec2(-.3,.2))*35.)
+              +.7*exp(-dot(face-vec2(.35,-.22),face-vec2(.35,-.22))*55.);
+ float moonFace=clamp(.84+.12*face.y-.25*craters,.45,1.);
+ color+=sunColor*sunPower*smoothstep(-.12,.015,direction.y)*(sunDisc*mix(2.8,moonFace*2.1,moonMix)
+       +pow(sunDot,96.0)*mix(.17,.055,moonMix)+pow(sunDot,12.0)*mix(.035,.008,moonMix));
  if(direction.y>.015 && cloudCoverage>0.0){
   vec2 point=origin.xz+direction.xz*(180.0-origin.y)/direction.y;
   vec2 uv=point/(256.0*cloudScale)+vec2(.007,.0025)*cloudTime;
@@ -90,6 +106,8 @@ void main(){
 export class SkySystem {
   readonly mesh: Mesh<BufferGeometry, ShaderMaterial>;
   readonly stats = { cloudTime: 0 };
+  readonly lightSource = { direction: new Vector3(), color: new Color(), power: 0 };
+  readonly fogPalette = { low: new Color(), high: new Color() };
   private previousTime?: number;
   private texture: DataTexture;
   private uniforms = {
@@ -98,6 +116,8 @@ export class SkySystem {
     skyZenith: { value: new Color() }, skyHorizon: { value: new Color() }, skyLower: { value: new Color() },
     cloudLit: { value: new Color() }, cloudShade: { value: new Color() },
     sunDirection: { value: new Vector3() }, sunColor: { value: new Color() }, sunPower: { value: 1 },
+    moonMix: { value: 0 },
+    fogLow: { value: this.fogPalette.low }, fogHigh: { value: this.fogPalette.high }, fogGradient: { value: .7 },
     cloudTime: { value: 0 }, cloudCoverage: { value: .55 }, cloudScale: { value: 1 },
   };
   constructor(private scene: Scene) {
@@ -129,7 +149,12 @@ export class SkySystem {
     this.previousTime = time;
     if (!reducedMotion) this.stats.cloudTime += delta * visual.cloudSpeed;
     this.mesh.visible = visual.skyEnabled;
-    const p = resolveLighting(preset, visual), palette = palettes[preset];
+    const p = resolveLighting(preset, visual);
+    let palette: { -readonly [K in keyof typeof palettes.day]: number } = palettes[preset];
+    if (visual.dayNightCycle && visual.cycleHour !== undefined) {
+      const [a, b, t] = cyclePhase(visual.cycleHour); palette = { ...palettes[a] };
+      for (const key of ["zenith", "horizon", "lit", "shade"] as const) palette[key] = blendLightColor(palettes[a][key], palettes[b][key], t);
+    }
     this.uniforms.cloudTime.value = this.stats.cloudTime;
     this.uniforms.cloudCoverage.value = visual.cloudCoverage; this.uniforms.cloudScale.value = visual.cloudScale;
     this.uniforms.skyLower.value.setHex(p.sky);
@@ -139,6 +164,12 @@ export class SkySystem {
     this.uniforms.cloudLit.value.setHex(palette.lit); this.uniforms.cloudShade.value.setHex(palette.shade);
     this.uniforms.sunColor.value.setHex(p.sun); this.uniforms.sunDirection.value.fromArray(p.direction);
     this.uniforms.sunPower.value = p.sunPower;
+    const moon = moonAmount(preset, visual); this.uniforms.moonMix.value = moon;
+    this.lightSource.direction.fromArray(p.direction); this.lightSource.color.setHex(p.sun);
+    this.lightSource.power = p.sunPower * (1 - moon * .8);
+    this.fogPalette.low.setHex(p.fog).lerp(this.lightSource.color, .1);
+    this.fogPalette.high.setHex(p.fog).lerp(new Color(visual.skyTint ? p.sky : palette.zenith), .16);
+    this.uniforms.fogGradient.value = visual.fogGradient;
   }
   dispose(): void {
     this.scene.remove(this.mesh); this.mesh.geometry.dispose(); this.mesh.material.dispose(); this.texture.dispose();

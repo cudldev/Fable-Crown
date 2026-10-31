@@ -121,7 +121,8 @@ test("using the bronze pickaxe on copper starts the matching gathering goal and 
   await page
     .getByRole("button", { name: `Inspect ${node.name}` })
     .first()
-    .click();
+    .click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   const actions = page.getByRole("region", { name: "Object actions" });
   await actions.getByRole("button", { name: "Examine" }).click();
   await expect(actions).toContainText("Ready to harvest");
@@ -147,7 +148,8 @@ test("using the bronze pickaxe on copper starts the matching gathering goal and 
   await page
     .getByRole("button", { name: `Inspect ${node.name}` })
     .first()
-    .click();
+    .click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByRole("button", { name: "Examine" }).click();
   await expect(
     page.getByRole("region", { name: "Object actions" }),

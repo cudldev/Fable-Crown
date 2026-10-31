@@ -41,7 +41,7 @@ const lighting = `
 #endif
 `;
 
-export interface GIStats { state: string; version: number; appliedVersion: number; appliedPreset?: string; totalMs: number; voxelizeMs?: number; probesMs?: number; interpolateMs?: number; packMs?: number; probes?: number; validProbes?: number; depletedCount?: number; rays?: number; occupied?: number; textureBytes?: number }
+export interface GIStats { state: string; version: number; appliedVersion: number; appliedPreset?: string; totalMs: number; voxelizeMs?: number; probesMs?: number; interpolateMs?: number; packMs?: number; probes?: number; validProbes?: number; depletedCount?: number; rays?: number; occupied?: number; textureBytes?: number; bounces?: number }
 
 function texture(data: Uint16Array, size: V3): Data3DTexture {
   const result = new Data3DTexture(data, 2 * (size[0] + 2), size[1], 2 * (size[2] + 2));
@@ -139,7 +139,7 @@ vFableGIPosition=(modelMatrix*fablePosition).xyz;`);
     const signature = `${critical}:${nearDepleted.join(",")}`;
     if (signature === this.signature) return; this.signature = signature;
     const p = resolveLighting(preset, visual), sun = new Color(p.sun), sky = new Color(p.fill);
-    const config: GISolveConfig = { origin: [x - 20, 0, z - 20], size: [80, 16, 80], pitch: .5, stride: 4, rays: 32,
+    const config: GISolveConfig = { origin: [x - 20, 0, z - 20], size: [80, 16, 80], pitch: .5, stride: 4, rays: 32, bounces: visual.giBounces,
       sunDirection: p.direction, sunColor: sun.toArray() as V3, skyColor: sky.toArray() as V3, sunPower: p.sunPower, skyPower: p.fillPower, aoDistance: visual.aoDistance,
       depleted: nearDepleted, lamps: lamps.filter(lamp => Math.hypot(lamp.position.x - x, lamp.position.z - z) < 34).map(lamp => ({ position: lamp.position.toArray(), color: new Color(lamp.color).toArray() as V3, intensity: lamp.intensity * p.lamps, distance: lamp.distance })) };
     if (this.busy && this.activeCritical === critical) this.pending = { config, critical };

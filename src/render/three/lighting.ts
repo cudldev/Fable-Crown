@@ -10,11 +10,30 @@ export const LIGHTING_PRESETS = {
   night: { sky: 0x303f52, fog: 0x303f52, sun: 0x9ebce2, sunPower: 0.5, fill: 0x8baccb, ground: 0x3b4243, fillPower: 0.72, lamps: 2.5 },
 } as const;
 
+export function cyclePhase(hour: number): [LightingPreset, LightingPreset, number] {
+  const keys: [number, LightingPreset][] = [[0, "night"], [5, "night"], [6, "dusk"], [8, "day"], [16, "day"], [18, "dusk"], [20, "night"], [24, "night"]];
+  const h = (hour % 24 + 24) % 24;
+  const i = keys.findIndex((key, index) => index > 0 && h < key[0]);
+  const a = keys[i - 1], b = keys[i], t = (h - a[0]) / (b[0] - a[0]);
+  return [a[1], b[1], t * t * (3 - 2 * t)];
+}
+export const blendLightColor = (a: number, b: number, t: number) => new Color(a).lerp(new Color(b), t).getHex();
+
 export function resolveLighting(preset: LightingPreset, settings: Readonly<VisualSettings> = DEFAULT_VISUAL_SETTINGS) {
-  const p = LIGHTING_PRESETS[preset], tint = (value: string | null, fallback: number) => value ? Number.parseInt(value.slice(1), 16) : fallback;
+  let p: { -readonly [K in keyof typeof LIGHTING_PRESETS.day]: number } = LIGHTING_PRESETS[preset];
+  let direction = sunDirection(settings);
+  if (settings.dayNightCycle && settings.cycleHour !== undefined) {
+    const [a, b, t] = cyclePhase(settings.cycleHour), low = LIGHTING_PRESETS[a], high = LIGHTING_PRESETS[b];
+    p = { ...low };
+    for (const key of ["sky", "fog", "sun", "fill", "ground"] as const) p[key] = blendLightColor(low[key], high[key], t);
+    for (const key of ["sunPower", "fillPower", "lamps"] as const) p[key] = low[key] + (high[key] - low[key]) * t;
+    direction = sunDirection({ ...settings, sunAzimuth: ((settings.cycleHour - 6) * 15 + settings.sunAzimuth + 360) % 360,
+      sunElevation: Math.max(5, settings.sunElevation * Math.abs(Math.sin((settings.cycleHour - 6) * Math.PI / 12))) });
+  }
+  const tint = (value: string | null, fallback: number) => value ? Number.parseInt(value.slice(1), 16) : fallback;
   return { ...p, sun: tint(settings.sunTint, p.sun), fill: tint(settings.ambientTint, p.fill), sky: tint(settings.skyTint, p.sky),
     fog: tint(settings.skyTint, p.fog), sunPower: p.sunPower * settings.sunStrength, fillPower: p.fillPower * settings.ambientStrength,
-    lamps: p.lamps * settings.lampStrength, direction: sunDirection(settings) };
+    lamps: p.lamps * settings.lampStrength, direction };
 }
 
 export interface SceneLamp extends LightAnchor { id: string }
@@ -95,13 +114,16 @@ export class LightingRig {
     this.scene.fog = overview || !this.visual.fogEnabled ? null : this.fog;
     this.fog.near = Math.max(1, cameraDistance - 8);
     this.fog.far = cameraDistance + this.visual.fogReach;
-    // Snap in light-camera space to whole shadow texels. World-axis snapping alone
-    // still slides rotated shadow samples when the camera follows a walking actor.
-    const texel = this.visual.shadowCoverage / this.sun.shadow.mapSize.x;
-    const u = target.dot(this.shadowRight), v = target.dot(this.shadowUp);
-    this.shadowTarget.copy(target)
-      .addScaledVector(this.shadowRight, Math.round(u / texel) * texel - u)
-      .addScaledVector(this.shadowUp, Math.round(v / texel) * texel - v);
+    this.shadowTarget.copy(target);
+    // A rotating light basis crosses texel boundaries even with a stationary
+    // target, making the entire shadow map jump. Follow continuously during the
+    // cycle; texel snapping still stabilizes camera movement under a fixed sun.
+    if (!this.visual.dayNightCycle || this.visual.cycleHour === undefined) {
+      const texel = this.visual.shadowCoverage / this.sun.shadow.mapSize.x;
+      const u = target.dot(this.shadowRight), v = target.dot(this.shadowUp);
+      this.shadowTarget.addScaledVector(this.shadowRight, Math.round(u / texel) * texel - u)
+        .addScaledVector(this.shadowUp, Math.round(v / texel) * texel - v);
+    }
     this.sun.position.copy(this.shadowTarget).add(this.sunOffset);
     this.sun.target.position.copy(this.shadowTarget);
     this.sun.target.updateMatrixWorld();

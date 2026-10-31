@@ -46,7 +46,7 @@ Observed on Windows HeadlessChrome156/ANGLE Direct3D11 with RTX5070Ti: the teste
 
 ## Limits and next work
 
-- First diffuse bounce and low-frequency L1 transport only; no glossy GI or full path tracing.
+- Low-frequency L1 diffuse transport, with 1 bounce by default and optional 2/3-pass propagation; no glossy GI or full path tracing.
 -0.5m conservative occupancy can close narrow windows and blur thin features. Normal bias and probe interpolation still need broader indoor/border testing; one sealed-room pass does not prove zero leaks everywhere.
 - Local lights in the main direct-light rig remain unshadowed and may spill through walls independently of GI.
 - Dynamic actors do not inject occlusion/emission. Animated light flicker is direct-only; baked source shading can still compound scene lighting.
@@ -54,3 +54,19 @@ Observed on Windows HeadlessChrome156/ANGLE Direct3D11 with RTX5070Ti: the teste
 - Most non-tree assets still await voxel migration. This renderer work does not generate their missing art or animation.
 
 Code: [transport](../src/render/three/voxel-gi-core.ts), [worker](../src/render/three/voxel-gi.worker.ts), [shader/cache integration](../src/render/three/voxel-gi.ts), [world capture](../src/render/three/voxel-gi-source.ts), [corner AO](../src/render/three/voxel-ao.ts), [FPS/GPU meters](../src/render/three/performance.ts).
+
+## Contact, atmosphere and daylight pass — 2026-10-31
+
+The default view now uses a cosmetic day–night cycle. One day takes30active game minutes; starting hour16. The clock derives from saved600ms ticks with bounded render interpolation, so saves retain the phase and simulation pauses stop its advance. It never changes the real-date calendar, decisions, deadlines or saves. Cycle controls persist locally, and Reset restores Cycle. Fixed Day/Dusk/Night buttons disable it for comparisons. Sun/moon direction, scene/fog colors, ambient fill, procedural sky/cloud palette and lamp gain blend through dawn/day/dusk/night; custom color tints still override the corresponding colors. Moonlight reuses the single shadow-casting directional light.
+
+Direct lighting follows the continuous phase. GI samples half-hour phases (37.5active seconds at default day length), preserving its background cache rather than launching solves per frame. Indirect lighting can therefore lag the direct phase by up to half a game hour plus worker latency. World movement, depletion and manual lighting changes retain their existing invalidation behavior.
+
+Diffuse bounces1/2/3 are selectable in Visual settings. Each additional pass gathers the previous pass's visibility-weighted SH irradiance at hit surfaces, evaluates it along the surface normal, then applies albedo/PI. Each pass rebuilds direct plus propagated light; it does not repeatedly add the old result. Unlit scenes remain unlit, and AO stays independent. The final atlas layout, texture size and four per-fragment samples are unchanged; worker tracing and temporary probe fields cost more. This remains a coarse diffuse approximation, not path tracing or shadow-map softening. One bounce remains default pending broader visual/device comparisons.
+
+Ground contact uses a cached8samples/m R8 field (3MiB for256×192tiles), local to fence posts, object roots and foundations. It darkens native ground only; cutout foliage/sprites do not receive screen-space halos. Strength defaults0.45. Character feet use a shared32×32radial alpha texture for softer contacts. No authored asset changed. Ambient gain defaults0.85; subtle warm highlights/cool shadows default0.35 in the existing composite pass.
+
+Height haze is an inexpensive surface shader approximation combined with logical horizontal distance fog. Relative ground density is `exp(-max(0, worldY)*0.8)` (45%at1m,20%at2m), multiplied by gentle static world-space patches and a distance ramp beginning4m from the camera target. Layered ground haze defaults0.65; near/middle air is clearer, while the existing distant fade still reaches full fog before geometry/picking cutoff. Fog color follows the cycle. It does not integrate density along camera rays, scatter local lights, cast fog shadows or produce volumetric shafts. Existing floating particles are separate.
+
+Evidence: [matched controls/bounce/cycle captures and host observations](art-audit/fidelity-cycle-v1/review.json), [noon](art-audit/fidelity-cycle-v1/cycle-12.png), [night](art-audit/fidelity-cycle-v1/cycle-0.png). These are actual browser renders with unchanged assets. Physical mobile performance remains unmeasured.
+
+Final desktop comparison observed1/2/3bounces at~0.704/1.214/1.313s worker rebuild,119.9FPS (refresh-rate capped),8.4–8.5ms RAF p95, with the same3442688byte final atlas. Short full-scene host samples do not establish isolated GPU overhead or mobile cost. The extra visual fill was subtle; default remains1. The cycle, haze and contact settings are independent of bounce count.

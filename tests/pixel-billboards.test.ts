@@ -18,6 +18,18 @@ describe("native pixel billboards", () => {
     for (const id of ["boar", "rock-mite", "bandit", "captain", "armoured-outlaw", "ranged-outlaw"]) expect(units.library.createEnemy(id).userData.pixelUnit).toBe(true);
     expect(UNIT_KINDS.length).toBe(14); units.dispose();
   });
+  it("has no self illumination in either body or held material", () => {
+    const units = new PixelBillboards(base()), actor = units.library.createActor(hero);
+    units.frame(actor.group, 6, 0, undefined, "sword");
+    for (const name of ["pixel-billboard", "pixel-held-tool"]) {
+      const material = (actor.group.getObjectByName(name) as Mesh).material as MeshStandardMaterial;
+      expect(material.emissive.getHex()).toBe(0);
+      expect(material.emissiveIntensity).toBe(0);
+      expect(material.emissiveMap).toBeNull();
+      expect(material.normalScale.toArray()).toEqual([.85, -.85]);
+    }
+    units.dispose();
+  });
   it("keeps full screen-facing proportions rather than foreshortening against camera elevation and changes only selected pose UVs", () => {
     const units = new PixelBillboards(base()), actor = units.library.createActor(hero);
     actor.group.rotation.y = -2;

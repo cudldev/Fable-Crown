@@ -15,6 +15,7 @@ test("visual controls update the renderer, copy a reusable preset, reset and fit
   await page.getByRole("button", { name: "Open game menu" }).click();
   await page.locator('input[type="file"]').setInputFiles({ name: "visual-fixture.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(fixture)) });
   await expect(page.getByRole("status")).toContainText("Chronicle restored"); await page.getByRole("button", { name: "Close panel" }).click();
+  await page.getByRole("button", { name: "Dusk lighting", exact: true }).click();
   await page.getByRole("button", { name: "Orthographic camera" }).click();
   await page.getByRole("button", { name: "Visual settings", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "Visual settings" }); await expect(panel).toBeVisible();

@@ -4,13 +4,9 @@ import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { build, type Plugin } from "esbuild";
 import { createRpg } from "../src/rpg/engine";
-import { tile } from "../src/rpg/world";
+import { interactionTiles, tile, WORLD } from "../src/rpg/world";
 
-const output = "docs/art-audit/foliage-v1";
-const nativeVoxelPlugin: Plugin = { name: "native-voxel-inline", setup(builder) {
-  builder.onResolve({ filter: /\.vox\?url&inline$/ }, args => ({ path: resolve(args.resolveDir, args.path.split("?")[0]), namespace: "native-vox" }));
-  builder.onLoad({ filter: /.*/, namespace: "native-vox" }, async args => ({ contents: `export default ${JSON.stringify("data:application/octet-stream;base64," + (await readFile(args.path)).toString("base64"))};`, loader: "js" }));
-} };
+const output = "docs/art-audit/foliage-tips-v6";
 async function frames(page: Page, count = 45) {
   await page.evaluate(async n => { for (let i = 0; i < n; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, renderFrameCount(count));
 }
@@ -41,6 +37,7 @@ test("tile foliage animates, controls persist, and the game keeps working offlin
   await expect(page.getByRole("status")).toContainText("Chronicle restored"); await page.getByRole("button", { name: "Close panel" }).click();
   await page.getByRole("button", { name: "Follow Alden", exact: true }).click();
   await expect.poll(async () => Number(await world.getAttribute("data-foliage-visible"))).toBeGreaterThan(100);
+  await expect.poll(async () => Number(await world.getAttribute("data-foliage-plants"))).toBeGreaterThan(4000);
   await frames(page, 100);
   const trials = [];
   for (const enabled of [false, true, false]) {
@@ -82,6 +79,15 @@ test("tile foliage animates, controls persist, and the game keeps working offlin
   await page.getByRole("button", { name: "Follow Alden", exact: true }).click();
   await page.getByRole("button", { name: "Zoom in", exact: true }).click(); await frames(page);
   await page.screenshot({ path: `${output}/ground-contact-world.png` });
+  const tree = WORLD.objects.filter(o => o.kind === "tree").sort((a, b) => Math.hypot(a.position.x - 45, a.position.y - 87) - Math.hypot(b.position.x - 45, b.position.y - 87))[0];
+  fixture.player.position = interactionTiles(tree, WORLD)[0]; fixture.player.previousPosition = { ...fixture.player.position };
+  await page.getByRole("button", { name: "Open game menu" }).click();
+  await page.locator('input[type="file"]').setInputFiles({ name: "foliage-forest-fixture.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(fixture)) });
+  await expect(page.getByRole("status")).toContainText("Chronicle restored"); await page.getByRole("button", { name: "Close panel" }).click();
+  await page.getByRole("button", { name: "Follow Alden", exact: true }).click(); await frames(page);
+  await page.screenshot({ path: `${output}/forest-layers.png` });
+  for (let i = 0; i < 3; i++) { await page.getByRole("button", { name: "Zoom in", exact: true }).click(); await frames(page); }
+  await page.screenshot({ path: `${output}/forest-close.png` });
   expect(errors).toEqual([]); expect(external).toEqual([]);
   await writeFile(`${output}/game-review.json`, JSON.stringify({ trials, errors, external, note: "Off/on/off host RAF observations with full scene and reflected foliage. Not isolated GPU cost or a physical-phone benchmark." }, null, 2) + "\n");
 });
@@ -97,6 +103,7 @@ test("GPU clump pixels move with wind and remain still with zero wind or reduced
     renderer.outputColorSpace=THREE.SRGBColorSpace; const scene=new THREE.Scene();scene.background=new THREE.Color(0xc9cbb2);scene.add(new THREE.HemisphereLight(0xffffff,0x667744,2));
     const system=new FoliageSystem(scene),target=new THREE.Vector3(),visual={...DEFAULT_VISUAL_SETTINGS,windStrength:2,foliageDensity:1};
     const mesh=system.meshes[0];mesh.count=1;mesh.setMatrixAt(0,new THREE.Matrix4());mesh.setColorAt(0,new THREE.Color(0xffffff));mesh.instanceMatrix.needsUpdate=true;mesh.instanceColor.needsUpdate=true;mesh.frustumCulled=false;
+    let normalControl;const compile=mesh.material.onBeforeCompile;mesh.material.onBeforeCompile=(shader,renderer)=>{compile.call(mesh.material,shader,renderer);normalControl=shader.uniforms.foliageNormalBlend;};
     const camera=new THREE.OrthographicCamera(-.45,.45,.55,-.125,.1,20);camera.position.set(0,0,4);camera.lookAt(0,0,0);camera.updateMatrixWorld();
     function draw(time,reduced=false){system.update(time,target,visual,false,reduced);renderer.render(scene,camera);}
     function read(){const gl=renderer.getContext(),p=new Uint8Array(640*480*4);gl.readPixels(0,0,640,480,gl.RGBA,gl.UNSIGNED_BYTE,p);return p;}
@@ -104,13 +111,17 @@ test("GPU clump pixels move with wind and remain still with zero wind or reduced
     draw(0);const first=read();for(let i=1;i<=80;i++)draw(i*100);const moved=read();
     visual.windStrength=0;draw(8100);const still=read();draw(8200);const still2=read();
     visual.windStrength=2;draw(8300,true);const reduced=read();draw(8400,true);const reduced2=read();
-    window.foliageLab={windDelta:difference(first,moved),stillDelta:difference(still,still2),reducedDelta:difference(reduced,reduced2),straightDelta:difference(still,reduced),glError:renderer.getContext().getError()};
+    normalControl.value=0;draw(8500,true);const faceLit=read();normalControl.value=1;draw(8600,true);const groundLit=read();
+    visual.windStrength=0;const variants=[];for(let i=0;i<4;i++){const x=i/16;mesh.setMatrixAt(0,new THREE.Matrix4().makeTranslation(x,0,0));mesh.instanceMatrix.needsUpdate=true;camera.position.set(x,0,4);camera.lookAt(x,0,0);camera.updateMatrixWorld();draw(8700,true);variants.push(read());}
+    window.foliageLab={windDelta:difference(first,moved),stillDelta:difference(still,still2),reducedDelta:difference(reduced,reduced2),straightDelta:difference(still,reduced),normalBlendDelta:difference(faceLit,groundLit),variantDeltas:variants.slice(1).map(p=>difference(variants[0],p)),glError:renderer.getContext().getError()};
     window.showClumps=(angle=0)=>{renderer.setSize(960,420);for(let i=0;i<4;i++){const m=system.meshes[i],d=(i-1.5)*.9;m.count=1;m.setMatrixAt(0,new THREE.Matrix4().makeTranslation(d*Math.cos(angle),0,-d*Math.sin(angle)));m.setColorAt(0,new THREE.Color(0xffffff));m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.frustumCulled=false;}camera.left=-2;camera.right=2;camera.top=.875;camera.bottom=-.875;camera.updateProjectionMatrix();camera.position.set(Math.sin(angle)*4,1.8,Math.cos(angle)*4);camera.lookAt(0,.35,0);camera.updateMatrixWorld();draw(8500);};
-  ` }, bundle: true, format: "iife", write: false, logLevel: "error", plugins: [nativeVoxelPlugin] });
+  ` }, bundle: true, format: "iife", write: false, logLevel: "error" });
   await page.setContent('<!doctype html><style>body{margin:0;background:#c9cbb2}canvas{display:block}</style><canvas></canvas>');
   await page.addScriptTag({ content: bundled.outputFiles[0].text });
-  const result = await page.evaluate(() => (window as unknown as { foliageLab: { windDelta: number; stillDelta: number; reducedDelta: number; straightDelta: number; glError: number } }).foliageLab);
+  const result = await page.evaluate(() => (window as unknown as { foliageLab: { windDelta: number; stillDelta: number; reducedDelta: number; straightDelta: number; normalBlendDelta: number; variantDeltas: number[]; glError: number } }).foliageLab);
   expect(result.glError).toBe(0); expect(result.windDelta).toBeGreaterThan(.05); expect(result.stillDelta).toBe(0); expect(result.reducedDelta).toBe(0); expect(result.straightDelta).toBe(0);
+  expect(result.normalBlendDelta).toBeGreaterThan(.1);
+  expect(result.variantDeltas.every(delta => delta > .05)).toBe(true);
   for (const [name, angle] of [["front", 0], ["side", Math.PI / 2], ["back", Math.PI], ["quarter", Math.PI / 4]] as const) {
     await page.evaluate(a => (window as unknown as { showClumps: (angle: number) => void }).showClumps(a), angle);
     await page.locator("canvas").screenshot({ path: `${output}/clump-${name}.png` });
@@ -144,7 +155,7 @@ test("foliage behind a character pivot cannot cut its body or held item in eithe
       results.push({camera:camera.type,bodyPixels,overlap,behindChanged,frontChanged});
     }
     window.pivotLab={results,glError:renderer.getContext().getError()};
-  ` }, bundle: true, format: "iife", write: false, logLevel: "error", plugins: [nativeVoxelPlugin] });
+  ` }, bundle: true, format: "iife", write: false, logLevel: "error" });
   await page.setContent('<!doctype html><style>body{margin:0}canvas{display:block}</style><canvas></canvas>'); await page.addScriptTag({ content: bundled.outputFiles[0].text });
   const result = await page.evaluate(() => (window as unknown as { pivotLab: { results: { camera: string; bodyPixels: number; overlap: number; behindChanged: number; frontChanged: number }[]; glError: number } }).pivotLab);
   for (const view of result.results) { expect(view.bodyPixels).toBeGreaterThan(100); expect(view.overlap).toBeGreaterThan(10); expect(view.behindChanged).toBe(0); expect(view.frontChanged).toBeGreaterThan(10); }
@@ -152,7 +163,7 @@ test("foliage behind a character pivot cannot cut its body or held item in eithe
   await writeFile(`${output}/pivot-depth.json`, JSON.stringify({ ...result, errors }, null, 2) + "\n");
 });
 
-test("opaque ground does not cut the bases of native foliage across camera angles and quarter turns", async ({ page }) => {
+test("opaque ground does not cut foliage cards across camera angles and quarter turns", async ({ page }) => {
   await mkdir(output, { recursive: true }); const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message)); page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
   const bundled = await build({ stdin: { resolveDir: process.cwd(), sourcefile: "foliage-ground-lab.ts", contents: `
@@ -166,7 +177,7 @@ test("opaque ground does not cut the bases of native foliage across camera angle
     const cameras=[new THREE.PerspectiveCamera(35,1,.1,650),new THREE.OrthographicCamera(-.65,.65,.65,-.65,.1,650)],results=[];
     function read(){const gl=renderer.getContext(),p=new Uint8Array(320*320*4);gl.readPixels(0,0,320,320,gl.RGBA,gl.UNSIGNED_BYTE,p);return p;}
     function draw(camera,mesh,floor){for(const m of foliage.meshes)m.visible=m===mesh;ground.visible=floor;renderer.render(scene,camera);return read();}
-    for(const camera of cameras)for(const distance of [1,16])for(const wind of [0,2])for(const yaw of [0,Math.PI/4])for(let k=0;k<4;k++)for(let turn=0;turn<4;turn++){
+    for(const camera of cameras)for(const distance of [1,16])for(const wind of [0,2])for(const yaw of [0,Math.PI/4])for(let k=0;k<FOLIAGE_KINDS.length;k++)for(let turn=0;turn<4;turn++){
       camera.position.set(Math.sin(yaw)*3*distance,2.55*distance+.25,Math.cos(yaw)*3*distance);camera.lookAt(0,.25,0);if(camera.isPerspectiveCamera)camera.zoom=2.1*distance;camera.updateProjectionMatrix();camera.updateMatrixWorld();
       foliage.update(5000,new THREE.Vector3(),{...DEFAULT_VISUAL_SETTINGS,windStrength:wind,foliageDensity:1},false);
       const mesh=foliage.meshes[k];mesh.count=1;mesh.setColorAt(0,new THREE.Color(0xffffff));mesh.instanceColor.needsUpdate=true;
@@ -176,7 +187,7 @@ test("opaque ground does not cut the bases of native foliage across camera angle
       results.push({camera:camera.type,distance,wind,yaw,kind:FOLIAGE_KINDS[k],turn,plantPixels,clippedPixels});
     }
     window.groundLab={results,glError:renderer.getContext().getError()};
-  ` }, bundle: true, format: "iife", write: false, logLevel: "error", plugins: [nativeVoxelPlugin] });
+  ` }, bundle: true, format: "iife", write: false, logLevel: "error" });
   await page.setContent('<!doctype html><style>body{margin:0}canvas{display:block}</style><canvas></canvas>'); await page.addScriptTag({ content: bundled.outputFiles[0].text });
   const result = await page.evaluate(() => (window as unknown as { groundLab: { results: { camera: string; kind: string; turn: number; plantPixels: number; clippedPixels: number }[]; glError: number } }).groundLab);
   await writeFile(`${output}/ground-contact.json`, JSON.stringify({ ...result, errors }, null, 2) + "\n");

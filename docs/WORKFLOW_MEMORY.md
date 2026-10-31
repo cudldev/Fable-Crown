@@ -1,12 +1,32 @@
 # Working notes
 
+- LOD: select per object inside shared batches, using camera depth/scaled pitch. Use floor for the 1.5 CSS-pixel target; keep desired hysteresis separate from forced budgets. Cull exact object bounds before spending detail; the old 100k view cap masked the threshold fix. Current caps: 250k visible/100k per batch/524288 resident. Regressions: voxel-rendering.test.ts + rpg-voxel-lod.spec.ts (native trees, zoom return/mobile/offline).
+
+- First prop batch: assets/explorations/voxel/prop-batch-v1. Image→TRELLIS→vox-01 raw; vox-02 explicit palette ramp pass fixes near-black faces without geometry changes. Shared16cells/m +4m oak comparisons. Ore inferred1.625×1.75×.75m,larger thanbrief; crate brace weak. Review beforebinding; ore states/material variants pending. run_prop_batch.py --resume preserves complete jobs; converter now takes --asset-id. Current drafts+scale ZIP inbatchfolder.
+
+- Daylight shadows: never texel-snap the target in a rotating light basis; it introduces stationary-camera jumps. Cycle follows continuously; fixed presets retain snapping. GPU comparison: rpg-daylight-shadows.spec.ts.
+
+- Lens distortion: Visual settings → Lens & world, default0.15×, 0=off; persists locally/copies/resets. Composite warp and CPU picking/label inverse share lens-distortion.ts; overview stays unwarped.
+
+- Starting camera follows Alden at MAX_GAMEPLAY_ZOOM (2×), the closest allowed view.
+
+- Lens defaults: world curvature2×, depth of field0.25× (2026-10-31); shared defaults also drive Reset.
+
+- Curved-view horizon: ViewDistance uses unbent world coordinates for fog, terrain/voxel culling and clicks. Fog fades before the cutoff (24m at closest zoom); nearly opaque targets cannot be selected. Keep drag anchors unrestricted and overview exempt. GPU fragment clipping also covers shared batches/reflections.
+
+- Menus/inspectors: keep the visible world drawing every foreground RAF. The old panel-open cap forced4FPS. Benchmark actual WebGL draws against RAF; use tests/rpg-panel-performance.spec.ts and docs/performance/menu-panels.
+
+- Lens: subtle bloom/edge chromatic aberration; stronger distant DoF uses a 32-sample circular HDR bokeh gather, broad sharp focus and gentle foreground blur. Visual settings → Lens & world. Close zoom lowers pitch 5° and adds cylindrical vertex curvature. Keep picking, pivot depth, culling and inverse-bent water UVs aligned. HDR + fused FXAA avoids multisampled HDR buffers; UI stays outside the pass.
+
 > Current renderer update — 2026-10-30: Rendering: voxel/pixel is the sole default at the plain URL; no renderer switch or character-study query paths. Release-art prunes retired runtime assets; world-assets.json drives current offline downloads. Keep original source studies.
 
-- Foliage: native-grid centres/90° turns. Body/tool use root depth; plants need per-column ground support depth +2-unit raster offset. Whole-clump root depth clips bases. Ground-contact GPU test includes opaque terrain, wind and far cameras. See FOLIAGE_RENDERING.md.
+- Foliage: layered mats→short fringe→grass→shrubs; separate flower patches. Sample native ground pigment per card; blend face/up normals. No dark root bars. Halo-filter coplanar overlaps; mats abut by tile. Keep pixel pitch, grid roots and support depth. See FOLIAGE_RENDERING.md.
+
+- Grass tips: restrained palette +85%card tint at tips. Four atlas blade patterns chosen by world cell; subtle color variance. Keep pattern stable across camera moves and avoid extra instance buffers.
 
 - Sky: procedural far-depth background + animated cloud layer captured bywater. Atmosphere controls enabled/coverage/speed/size; speed0/reducedmotion freezesphase. Camera ray math must ignore oblique clip's third row. Three noise taps/16KiB localtexture, no cubemaprebuild/network; no worldcloudshadows/GI update. See SKY_RENDERING.md.
 
-- Water: shared planar capture (full render resolution + every-frame default; optional256–4096caps/60/30/15/4Hz), world-space ripples/sun specular and cached shore color; Visual settings→Water controls/copies it. Old512cap looked soft; old4/15Hz auto policy lagged. Count reflection in frame GPU/draw totals; last-capture CPU is separate. SSR/refraction are not implemented. See WATER_RENDERING.md. Ground joins now3native cells/0.1875m, palette samples only.
+- Water: full-resolution/every-frame reflection; clear basin→opaque blue. User rejected contour rims AND smoky warped-noise foam. Use small stable flecks drifting downstream, with gradual lifetimes; distance only fades them at banks. Review animation, not just stills; GPU tracking must improve after correcting for current displacement. See rpg-water-depth.spec.ts/WATER_RENDERING.md; preserve surface depth and0.1m bank lip.
 
 - Ground nowlivefromnativeVOX v3; see TERRAIN_RENDERING.md. Compactnearest atlas5mips, cachedchunks/phasecells,quietpresentationaldirtcleanup,8pigmentcells/m in16nativegrid/48colors. Cache delivery MUSTversionbothmanifest+pack usinggeneratedterrain-version.ts; user'snewcodeoncegotoldPWAart. Perf: userlive112FPS/4KSmooth;118hostA/B,notproofinitial12cause. Copy performance includesCPU/GPU/cache/resolution; preservelogicalterrain/nav/saves.
 
@@ -26,7 +46,7 @@
 
 - Ground direction: nativeVOX authored tilemap, exact flat1m tops, proposed0.5m block terraces/vertical risers, separate4×0.125m stairs, level pads and shared prop/actor ground sample. No smooth noise/warped tile corners. See TERRAIN_ELEVATION_PLAN and VOXEL_ASSET_MIGRATION.10sourceprototype tiles in assets/source/voxel/terrain-kit-v1; check-kit.mjs --write imports edits without overwriting VOX. Not game-integrated/final art yet.
 
-- Visual defaults: user's dusk preset, sun23.3°/62.3°, shadows2048/softness3.5/coverage79, GI1.3; AO distance0.125m (slider steps0.125m). Settings panel copies JSON; transport/AO distance updates rebuild the worker cache asynchronously.
+- Visual defaults: user's dusk preset, sun23.3°/62.3°, shadows2048/softness3.5/coverage79, GI1.3; AO strength10%, distance0.125m (slider steps0.125m). Settings panel copies JSON; transport/AO distance updates rebuild the worker cache asynchronously.
 
 - Voxel: VOXEL_PIPELINE/RENDERING/LIGHTING.md.240trees use native VOX, instanced cubes,16tile buckets/3LODs. First-bounce worker GI + separate corner/world AO + live FPS now implemented; other art pending. Coalesce resource changes behind active solve to avoid starvation; capture gates after transforms. Keep diffuse RGB separate. RTX5070Ti results are not phone benchmarks; no deployment.
 
@@ -71,10 +91,36 @@
 - Autonomous pace lives in RPG travel, not rendering: reserve15%, restart40%, safe long-trip rest to60%; direct orders/manual pace override it. Cover save/offline replay and the real worker HUD.
 
 - Latest local playtest: use production preview with the build's matching base (currently npm run preview -- --base /Fable-Crown/ --port 4173), then /Fable-Crown/?renderer=3d. Verify the visible voxel world/pixel cast; public Pages may lag local work.
-- Voxel streaming: 16m parents contain 8m children; 5 LODs, 100k visible/262144 resident-cell targets. Use scripts/benchmark-voxel-lod.mjs; serialize builds/browser runs. GPU batches stream; shared VOX stays loaded. Gameplay caps at 64 vertical/96 horizontal tiles; strategic overview is separate.
+- Voxel streaming: 16m parents contain 8m children; 5 LODs, 250k visible/524288 resident-cell targets. Use scripts/benchmark-voxel-lod.mjs; serialize builds/browser runs. GPU batches stream; shared VOX stays loaded. Gameplay caps at 32 vertical/48 horizontal tiles (zoom0.75–2), halved per user request; strategic overview is separate.
 
-- Release gate unfinished31Oct: acfa1dd on main; managed voxel-default-release worktree owns latest fixes. CI41142685175 has a saved-state observation failure; do not call voxel live. Resume from PROGRESS release checkpoint, then verify fresh/offline and cached upgrade.
+- Memory: measure production Chrome OS private bytes against blank-browser baseline; report resident working set separately. JS heap excludes workers/native/GPU. See art-audit/memory-v1; tmp/memory-audit.mjs reproduces. Do not present partial GPU trace counters as total VRAM.
 
-- User authorized a temporary skip of only the healing/combat-style saved-row browser case31Oct; keep other gates and restore it after diagnosis.
+- Memory optimization backlog: tasks/MEMORY_OPTIMIZATION.md. Source tree models already share1.56MB; prioritize expanded render attributes, then worker source sharing and measured allocation churn. No optimization implemented yet.
 
-- CI persistence polls: keep the save menu open between reads. Closing it can submit a slow software GPU frame and exhaust the polling deadline before a later saved row is observed. Trace worker + saved-read timestamps before diagnosing data loss.
+- Memory user constraint: preserve runtime speed/responsiveness. Benchmark indirection,packing,shared GI transforms and half-float writes; compare frame tails/hitches and GI latency without memory tracing. Keep current path if parity is unproven; prefer duplicate removal and bounded reuse first.
+
+- Character lighting: no emission/self-lit color. Broad form normals in unit-normals.ts, scene sun/fill/lamps/GI only; Sprite depth0.85, zero=flat.
+
+- Daylight defaults to Cycle (30active minutes/day, saved tick phase); fixed presets pause it. GI phase quantizes to0.5h; optional1/2/3bounces keep one atlas. Compare with rpg-fidelity.spec.ts after builds/tests finish, without parallel CPU work.
+
+- Sky: shared fog gradient; discs may be offscreen. Rays now march low fog through the existing world shadow map, including rear-source/ortho views. Require fog+sun shadows; tests/rpg-fog-shafts.spec.ts covers GPU and actual forest views.
+- Rays default0.65. Fog-edge checks: rpg-fog-edge.spec.ts; sky and fully fogged geometry must share shaft endpoints/depth classification and grading.
+- Blue shore/fog outlines: reproduce river bridge via rpg-shore-outline.spec.ts. Shafts must defocus with scene color (rpg-fog-defocus.spec.ts); shoreline.ts closes the land0/water−0.055m gap. Keep0.65default.
+
+- Voxel-only release is not live yet. Latest branch codex/voxel-default-release, managed worktree C:/Users/antto/.codex/worktrees/voxel-default-release/Fable Crown. See its PROGRESS checkpoint; CI save observation remains unresolved.
+
+- UI concepts (2026-10-31): Field journal parchment / Crown blue navy; actual pixel portraits, compact Now/Why/Next and contextual thoughts. Conversation preview only; direction awaits user feedback.
+
+- UI preference: user requested a stronger medieval theme; explore heraldic shields, wood/iron frames and parchment scrolls. Oak & iron / Illuminated court are unapproved previews, not runtime changes.
+
+- UI correction: user dislikes gradients/cheap bevels. Keep medieval identity through flat parchment, woodcut lines, simple heraldry and matte colors; avoid simulated glossy materials. Current flat previews remain unapproved.
+
+- Native props: publish reviewed batch with tools/trellis-vox/publish_prop_batch.py; check-voxel-assets.mjs --write updates cache version. Bind kind/art/resourceId in voxel-assets.ts, explicit depleted VOX in manifest. Keep pitch/pivot; compose supplies once. Test real world + local GI depletion/respawn + stale-cache offline reload (rpg-voxel-props.spec.ts). GI depletion counter is local, not total-world count.
+
+- Gameplay feel: direct world orders persist manual mode (control.autoplay=false); inventory preserves it, explicit goals finish once. WASD/tile taps; explicit toggle resumes autonomy. Test rpg-gameplay-feel.spec.ts + rpg-manual-control.test.ts. World status labels avoid each other; combat numbers move freely below status/HUD; HUD ResizeObserver supplies --dock-height. Work labels reflect actual actions, not ambitions; never replay imported effects.
+
+- World inputs: primary click/tap uses default-interaction.ts; secondary click/500ms hold opens WorldContextMenu, More options retains detailed panels. Escape issues cancel (queue+targeting+movement, manual hold). Default NPC talk has once:true; no implicit quest pursuit. Damage floaters bind targetId to victim body; pop/rise/fade, reduced-motion fallback. Tests: rpg-inputs.spec.ts; sample short-lived damage atomically.
+
+- Click feedback: primary clicks/taps/keyboard show a brief screen-position X (enemy red, otherwise yellow); no drag/pinch/context marker. Effects layer is isolated below status/HUD, never catches input. Damage bypasses collision layout and drifts from victim; XP/items avoid status bars. Combat has no redundant overhead work card. Regression: rpg-click-feedback.spec.ts.
+
+- Combined release: tmp/release-publication on codex/live-update-20261031 integrates finished chats with prior release fixes. Live status follows the latest PROGRESS entry. Preserve authoring workspace; transient quest/arrival assertions observe worker snapshots, then separately verify persisted outcomes.

@@ -61,7 +61,7 @@ describe("authored pixel unit art", () => {
       }
       expect(nonOpaquePixels, kind + ' frame ' + frame + ' nonopaque occupied cells').toBe(0);
       expect(maxNormalError, kind + ' frame ' + frame + ' maximum normal-length error').toBeLessThan(.005);
-      expect(minNormalZ, kind + ' frame ' + frame + ' minimum outward normal').toBeGreaterThan(.9);
+      expect(minNormalZ, kind + ' frame ' + frame + ' minimum outward normal').toBeGreaterThan(.5);
     }
     let alphaMismatches = 0, fractionalAlphaPixels = 0;
     for (let index = 3; index < sheet.rgba.length; index += 4) {

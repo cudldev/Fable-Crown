@@ -133,7 +133,8 @@ test("skills, a real bronze recipe and the 28-slot bag work through the UI", asy
     { itemId: "tin-ore", quantity: 6 },
   );
   await restore(page, s);
-  await page.getByRole("button", { name: "Inspect Oakrest furnace" }).click();
+  await page.getByRole("button", { name: "Inspect Oakrest furnace" }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByRole("button", { name: "Craft here" }).click();
   await page.getByLabel("Craft quantity").selectOption("1");
   await page
@@ -181,7 +182,8 @@ test("a shop ambition buys the real usable steel tool rather than granting it", 
   s.player.position = { ...interactionTiles(objectById("oakrest-shop")!)[0]! };
   s.player.previousPosition = { ...s.player.position };
   await restore(page, s);
-  await page.getByRole("button", { name: "Inspect Oakrest supplies" }).click();
+  await page.getByRole("button", { name: "Inspect Oakrest supplies" }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "More options", exact: true }).click();
   await page.getByRole("button", { name: "Browse supplies" }).click();
   await page
     .locator(".rpg-shop-list article")

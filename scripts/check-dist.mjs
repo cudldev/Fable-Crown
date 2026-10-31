@@ -46,7 +46,7 @@ await checkTerrainAssets("dist/art3d/terrain");
 for (const path of ["art3d/voxel/manifest.json", ...voxels.files]) {
   if (!/^art3d\/voxel\/(manifest\.json|[a-z0-9-]+\.vox)$/.test(path)) throw Error("Voxel path escaped deployment base");
   await access("dist/" + path);
-  if (!sw.includes("./" + path)) throw Error("Voxel source missing from offline cache");
+  if (!sw.includes("./" + path + "?v=" + voxels.version)) throw Error("Versioned voxel source missing from offline cache");
 }
 console.log(
   `Verified ${paths.length} HTML asset URLs, ${art.files.length} artwork files, manifest and worker cache scope at ${base}`,

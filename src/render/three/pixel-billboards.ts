@@ -1,10 +1,12 @@
-import { CircleGeometry, DataTexture, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, NoColorSpace, PlaneGeometry, RGBAFormat, SRGBColorSpace, Vector2, Vector3, type Camera, type Intersection } from "three";
+import { CircleGeometry, DataTexture, DoubleSide, Group, LinearFilter, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, NoColorSpace, PlaneGeometry, RGBAFormat, SRGBColorSpace, Vector2, Vector3, type Camera, type Intersection } from "three";
 import { heldToolForActor, heldToolForEnemy } from "../unit-tools";
 import { unitWorldFrame } from "../unit-scale";
 import type { ActorState, WorldObject } from "../../rpg/types";
 import { createUnitSheet, createHeldUnitSheet, UNIT_FRAME_COUNT, unitKindForActor, unitKindForEnemy, type UnitKind, type UnitTool } from "../pixel-units";
 import type { ArtLibrary, ObjectArt, RigidActorArt } from "./contracts";
+import { DEFAULT_VISUAL_SETTINGS } from "./visual-settings";
 import { groundPivotDepthGLSL } from "./pivot-depth";
+import { footContactPixels } from "./contact-detail";
 
 interface UnitVisual { root: Group; body: Group; mesh: Mesh<PlaneGeometry, MeshStandardMaterial>; tool: Mesh<PlaneGeometry, MeshStandardMaterial>; height: number; frame: number; kind: UnitKind; variant: number; flipX: boolean }
 interface Pigment { map: DataTexture; normal: DataTexture; material: MeshStandardMaterial; bodyHeight: number; footX: number; footY: number; frameSize: number }
@@ -16,11 +18,14 @@ export class PixelBillboards {
   private visuals = new Map<Group, UnitVisual>();
   private frames: PlaneGeometry[] = [];
   private shadowGeometry = new CircleGeometry(.48, 16);
-  private shadowMaterial = new MeshBasicMaterial({ color: 0x34352a, opacity: .18, transparent: true, depthWrite: false });
+  private shadowTexture = new DataTexture(footContactPixels(), 32, 32, RGBAFormat);
+  private shadowMaterial = new MeshBasicMaterial({ color: 0x34352a, map: this.shadowTexture, opacity: .3, transparent: true, depthWrite: false });
   private normalStrength = -.1;
   readonly library: ArtLibrary;
 
   constructor(private base: ArtLibrary) {
+    this.shadowTexture.needsUpdate = true;
+    this.shadowTexture.minFilter = this.shadowTexture.magFilter = LinearFilter;
     for (let frame = 0; frame < UNIT_FRAME_COUNT; frame++) {
       const geometry = new PlaneGeometry(1, 1), uv = geometry.getAttribute("uv");
       for (let i = 0; i < uv.count; i++) {
@@ -48,8 +53,8 @@ export class PixelBillboards {
     if (!result) {
       const sheet = tool === undefined ? createUnitSheet(kind, variant % 8) : createHeldUnitSheet(kind, variant % 8, tool);
       const map = this.texture(sheet.rgba, sheet.width, sheet.height, true), normal = this.texture(sheet.normal, sheet.width, sheet.height);
-      const material = new MeshStandardMaterial({ map, normalMap: normal, normalScale: new Vector2(this.normalStrength >= 0 ? this.normalStrength : .35, -(this.normalStrength >= 0 ? this.normalStrength : .35)), roughness: 1, metalness: 0,
-        alphaTest: .5, transparent: false, side: DoubleSide, emissiveMap: map, emissive: 0xffffff, emissiveIntensity: .12 });
+      const material = new MeshStandardMaterial({ map, normalMap: normal, normalScale: new Vector2(this.normalStrength >= 0 ? this.normalStrength : DEFAULT_VISUAL_SETTINGS.spriteNormalStrength, -(this.normalStrength >= 0 ? this.normalStrength : DEFAULT_VISUAL_SETTINGS.spriteNormalStrength)), roughness: 1, metalness: 0,
+        alphaTest: .5, transparent: false, side: DoubleSide, emissive: 0x000000, emissiveIntensity: 0 });
       material.name = `pixel-unit-${key}`;
       const frame = unitWorldFrame(sheet);
       // Shared per pigment, expressed in the unscaled plane's coordinates. The
@@ -132,7 +137,7 @@ export class PixelBillboards {
   }
   dispose() {
     for (const pigment of this.pigments.values()) { pigment.map.dispose(); pigment.normal.dispose(); pigment.material.dispose(); }
-    this.frames.forEach(frame => frame.dispose()); this.shadowGeometry.dispose(); this.shadowMaterial.dispose();
+    this.frames.forEach(frame => frame.dispose()); this.shadowGeometry.dispose(); this.shadowMaterial.dispose(); this.shadowTexture.dispose();
     this.visuals.clear(); this.pigments.clear();
   }
 }

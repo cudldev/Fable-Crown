@@ -3,7 +3,11 @@
  */
 export function groundPivotDepthGLSL(worldPivot: string): string {
   return `
-    vec4 fableGroundClip=projectionMatrix*viewMatrix*vec4(${worldPivot},1.0);
+    vec3 fableDepthPivot=${worldPivot};
+    #ifdef FABLE_WORLD_CURVE
+      fableDepthPivot=fableCurvePoint(fableDepthPivot);
+    #endif
+    vec4 fableGroundClip=projectionMatrix*viewMatrix*vec4(fableDepthPivot,1.0);
     gl_Position.z=(fableGroundClip.z/fableGroundClip.w)*gl_Position.w;
   `;
 }

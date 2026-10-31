@@ -106,8 +106,8 @@ test("native VOX terrain paints the actual flat world crisply, reuses its bake a
   // Reproduce stale unversioned terrain entries without touching the real user's cache.
   // The versioned pack must still win on an offline reload of this isolated context.
   await page.evaluate(async version => {
-    const name = (await caches.keys()).find(key => key.startsWith("fable-art-"));
-    if (!name) throw Error("Missing active PWA artwork cache");
+    const name = (await caches.keys()).find(key => key.startsWith("fable-v3-"));
+    if (!name) throw Error("Missing active PWA shell cache");
     const cache = await caches.open(name), manifest = new URL("art3d/terrain/manifest.json", location.href), pack = new URL("art3d/terrain/tiles.bin", location.href);
     const versioned = new URL(manifest); versioned.searchParams.set("v", version);
     const response = await cache.match(versioned.href); if (!response) throw Error("Missing versioned terrain manifest");

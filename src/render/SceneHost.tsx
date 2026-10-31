@@ -22,7 +22,7 @@ class RendererBoundary extends Component<
 }
 
 /** Rendering consumes immutable snapshots independently of the simulation worker. */
-export function SceneHost(props: TileSceneProps & { panelOpen: boolean }) {
+export function SceneHost(props: TileSceneProps) {
   return (
     <RendererBoundary>
       <Suspense fallback={<div className="tile-world three-world" data-testid="rpg-world" data-renderer="3d" data-status="starting" aria-label="Voxel world loading"><div className="loading-screen">Opening the voxel village…</div></div>}>

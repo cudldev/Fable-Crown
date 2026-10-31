@@ -6,6 +6,10 @@ import { calendarDate, createRpg } from "../src/rpg/engine";
 import { ITEMS } from "../src/rpg/content";
 import { findPath } from "../src/rpg/world";
 import { PerspectiveCamera, Vector3 } from "three";
+import { gameplaySpan } from "../src/render/camera-limits";
+import { WorldCurve, cameraPitch } from "../src/render/three/world-curve";
+import { lensToScreen } from "../src/render/three/lens-distortion";
+import { DEFAULT_VISUAL_SETTINGS } from "../src/render/three/visual-settings";
 import type { RpgState } from "../src/rpg/types";
 
 const originalV4 = JSON.parse(
@@ -108,11 +112,17 @@ test("manual map movement is acknowledged and reaches its tile across mobile lay
   const bounds = await world.boundingBox();
   expect(bounds).not.toBeNull();
   const camera = new PerspectiveCamera(20, bounds!.width / bounds!.height, .1, 650);
-  const distance = (24 / .85) / (2 * Math.tan(Math.PI / 18));
-  camera.position.set(100, .4, 80).addScaledVector(new Vector3(32, 37, 45).normalize(), distance);
+  const zoom = Number(await world.getAttribute("data-camera-zoom"));
+  const aspect = bounds!.width / bounds!.height;
+  const distance = gameplaySpan(zoom, aspect) / (2 * Math.tan(Math.PI / 18));
+  const direction = new Vector3(32, Math.hypot(32, 45) * Math.tan(cameraPitch(zoom)), 45).normalize();
+  camera.position.set(100, .4, 80).addScaledVector(direction, distance);
   camera.lookAt(100, .4, 80);
   camera.updateMatrixWorld();
-  const destination = new Vector3(target!.x, 0, target!.y).project(camera);
+  const curve = new WorldCurve();
+  curve.update(new Vector3(100, 0, 80), zoom, DEFAULT_VISUAL_SETTINGS.worldCurvature, true);
+  const destination = lensToScreen(curve.bend(new Vector3(target!.x, 0, target!.y)).project(camera), DEFAULT_VISUAL_SETTINGS.lensDistortion, aspect);
+  curve.dispose();
   const point = {
     x: (destination.x + 1) * bounds!.width / 2,
     y: (1 - destination.y) * bounds!.height / 2,

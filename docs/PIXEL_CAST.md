@@ -11,3 +11,7 @@ Sprites copy the full camera quaternion, mirror the complete assembly horizontal
 Simulation, saves, equipment, selection IDs and 600ms ticks remain authoritative. No external runtime service or paid API was introduced. Current verification is recorded in [PROGRESS.md](PROGRESS.md); this change does not imply a deployment or a physical-phone performance benchmark.
 
 Ground foliage overlap uses explicit ground-pivot depth for body/held layer and per-column ground support depth for plants. This preserves the plant footprint and bases against opaque terrain; tall tips behind a unit cannot slice its body, while foreground plants still occlude it. Physical screen positions and lighting coordinates stay intact. Perspective/orthographic GPU evidence: [pivot-depth review](art-audit/foliage-v1/pivot-depth.json).
+
+## Scene lighting — 2026-10-31
+
+Body and held materials have zero emission and no emissive map. Sun, hemisphere fill, local lamps and enabled GI provide their light. Authored broad head/torso/arm/foot and creature forms replace the old tiny pigment-patch normals; tools have shared-grid bevels. The original albedo, silhouette, dimensions and animation are unchanged. Sprite depth defaults to0.85; zero restores flat surface normals while retaining scene lighting. Source: [unit-normals.ts](../src/render/unit-normals.ts).

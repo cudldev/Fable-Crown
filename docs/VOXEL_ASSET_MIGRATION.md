@@ -7,6 +7,8 @@ Requested2026-10-30: replace the current3D asset set in the accepted oak's voxel
 
 ## Current inventory
 
+**2026-10-31 prop integration:** 3 anvils, 7 crate/barrel supply pairs and all 30 ore outcrops now use the reviewed first-batch native VOX at 0.0625m pitch. Copper/tin/iron/coal share geometry with separate mineral palettes and an explicit neutral mined-rock state. Reviewed ore size is 1.625×1.75×0.75m: keep that visual overhang around the existing logical anchor; mine spacing accommodates it. Supply pairs span 1.875m without stretching. Building interiors still contain their earlier embedded props; ranges, fishing kits, crop beds and other families remain open. Runtime evidence: [voxel-props-runtime-v1](art-audit/voxel-props-runtime-v1/README.md).
+
 Counted from the actual `WORLD` export in `src/rpg/world.ts`:421 base objects, plus one restored bridge after the road quest. Repeated instances share templates;421 separate generations are unnecessary.
 
 | Family | Instances / distinct designs | Required voxel behavior |
@@ -15,7 +17,7 @@ Counted from the actual `WORLD` export in `src/rpg/world.ts`:421 base objects, p
 | Ore |30:12copper,6tin,6iron,6coal | One coherent outcrop family, four readable ore materials, depleted outcrop and respawn. A stump-like height crop alone loses ore-state intent. |
 | Work props |3anvils,3ranges | Anvil horn/waist/support at working height; range hearth/pot, heat/light socket and opaque opening. |
 | Fishing |9spots:3each shrimp/sardine/trout | Basket/resting rod shore kit with appropriate water/shore placement. Shared art is sufficient; resource identity stays in gameplay. |
-| Decoration |8crop beds,7supply groups | Grounded vegetable modules; independent crate/barrel/logs assembled into supply variants. Current production override replaces a whole `prop-supplies` group with one crate GLB. |
+| Decoration |8crop beds,7supply groups | Supply groups now compose native crate/barrel pairs. Vegetable modules, logs and varied supply arrangements remain. |
 | Clues and target |11clues,1archery target | Ledger/stand reusable baseline; later letter, tracks, banner and campfire identities for the actual clues. Target needs readable rings and support. |
 | Buildings |3banks,3furnaces,5shops,8other buildings | Banks4×3; furnaces2×2; shops4×3; cottages5×3; workshops4×3; manor6×5; ruined watch5×4. Separate roof/facade/interior, matching entrances and counters. |
 | Crossing and boundary |2bridges,54fences,3gates,2ferries | Bridges10×3 plus restored third bridge; repeatable span/end modules. Fence1m joins on both orientations; gate hinge and open/closed states. Boat/shore sockets for ferries. |

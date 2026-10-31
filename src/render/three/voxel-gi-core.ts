@@ -1,9 +1,10 @@
-/** Presentation-only, deterministic first-bounce diffuse transport on a coarse occupancy field. */
+/** Presentation-only deterministic diffuse transport on a coarse occupancy field. */
 export type V3 = [number, number, number];
 export interface GIObjectSource { id: string; triangles: Float32Array; availableTriangles: Float32Array; depletedTriangles: Float32Array; boxes?: { available: Float32Array; depleted?: Float32Array }; bounds: number[] }
 export interface GILamp { position: V3; color: V3; intensity: number; distance: number }
 export interface GIWorldSource { objects: GIObjectSource[]; ground: Uint32Array; width: number; height: number }
-export interface GISolveConfig { origin: V3; size: V3; pitch: number; stride: number; rays: number; sunDirection: V3; sunColor: V3; skyColor: V3; sunPower: number; skyPower: number; lamps: GILamp[]; depleted: string[]; aoDistance?: number }
+export interface GISolveConfig { origin: V3; size: V3; pitch: number; stride: number; rays: number; sunDirection: V3; sunColor: V3; skyColor: V3; sunPower: number; skyPower: number; lamps: GILamp[]; depleted: string[]; aoDistance?: number; bounces?: number }
+export interface GIProbeField { probes: (Float32Array | null)[]; resolution: V3 }
 export interface GIGrid { origin: V3; size: V3; pitch: number; albedo: Uint32Array; emission: Uint32Array; world: GIWorldSource; rays: number }
 export interface GIHit { position: V3; normal: V3; color: V3; emission: V3; distance: number }
 export const giIndex = (x: number, y: number, z: number, size: V3) => (z * size[1] + y) * size[0] + x;
@@ -130,9 +131,10 @@ function visibleSegment(grid: GIGrid, ax: number, ay: number, az: number, bx: nu
   return true;
 }
 
-export function traceProbe(grid: GIGrid, position: V3, config: GISolveConfig): Float32Array | null {
+export function traceProbe(grid: GIGrid, position: V3, config: GISolveConfig, previous?: GIProbeField): Float32Array | null {
   if (solidAt(grid, position)) return null;
   const coefficients = new Float32Array(13); let sky = 0, skyTotal = 0;
+  const reflected = previous ? new Float32Array(13) : undefined;
   const directions = Math.max(8, config.rays), angle = Math.PI * (3 - Math.sqrt(5));
   for (let i = 0; i < directions; i++) {
     const y = 1 - 2 * (i + .5) / directions, r = Math.sqrt(1 - y * y), phi = i * angle;
@@ -150,6 +152,11 @@ export function traceProbe(grid: GIGrid, position: V3, config: GISolveConfig): F
     const sun = ndotl && !traceGI(grid, origin, config.sunDirection) ? ndotl * config.sunPower : 0;
     const open = !traceGI(grid, origin, [0, 1, 0]) ? config.skyPower * (.5 + .5 * Math.max(0, hit.normal[1])) : 0;
     const incident = config.sunColor.map((v, axis) => v * sun + config.skyColor[axis] * open) as V3;
+    if (previous && reflected) {
+      interpolateGI(grid, origin, previous.probes, previous.resolution, config.stride, reflected);
+      for (let c = 0; c < 3; c++) incident[c] += Math.max(0, .282095 * reflected[c] + .488603 * (
+        hit.normal[0] * reflected[3 + c] + hit.normal[1] * reflected[6 + c] + hit.normal[2] * reflected[9 + c]));
+    }
     for (const lamp of config.lamps) {
       const delta = lamp.position.map((v, axis) => v - origin[axis]) as V3, distance = Math.hypot(...delta);
       if (distance < .05 || distance >= lamp.distance) continue;

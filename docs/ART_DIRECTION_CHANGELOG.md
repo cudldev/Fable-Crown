@@ -1,5 +1,9 @@
 # Design change record
 
+## Current — 2026-10-30: lush foliage cards
+
+User requested flat 2D plant cards to support denser vegetation. Original grass, fern, flower and reed cutouts use crossed upright cards, shared wind and native-grid placement. Earlier solid foliage VOX clumps are archived sources; other environment families retain their voxel direction.
+
 > Current renderer update — 2026-10-30: 2026-10-30: user requested voxel rendering as the live default and removal of other rendering styles. Runtime switching, painterly Canvas scenes and ink/fitted character routes are removed; release packaging excludes their assets. Source studies remain archived.
 
 ## Current — 2026-10-30: normal rendering only
@@ -27,3 +31,5 @@ Expanded-world implementation: original generated raster terrain and transparent
 Tile RPG iteration: logical square tiles projected isometrically; four quiet original material swatches plus separate painterly props/characters. Simplified approved Town Life proof remains authoritative. Added transparent fisher, boar, rock mite, outlaw, anvil and cooking range; exact prompts/PNGs in assets/generated/v3/. Removed unused region backdrops from runtime while preserving sources. No pixel art.
 
 - 2026-10-30: User approved measured Alden proportions for all units. Full cast now shares the scenery 0.0625m voxel pitch; separate hand/tool, still body, full billboards and horizontal mirror.
+
+-2026-10-31: Sprite bodies/hands/tools use environment lighting only, with zero emission and broader authored form normals; proportions and albedo retained.

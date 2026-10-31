@@ -96,7 +96,9 @@ export function voxelModel(grid: VoxelGrid, pitch: number, pivot: readonly numbe
     if ((z + .5 - pivot[2]) * pitch >= cutHeight) source.cells[index(x, y, z, grid.size)] = 0;
   }
   // Never inflate a tiny model or a harvested stump beyond its entire height.
-  const maxFactor = 2 ** Math.max(0, Math.floor(Math.log2(Math.min(Math.max(...grid.size), cutHeight === undefined ? Infinity : cutHeight / pitch))));
+  let occupiedHeight = 1;
+  for (let at = 0; at < source.cells.length; at++) if (source.cells[at]) occupiedHeight = Math.max(occupiedHeight, at % grid.size[2] + 1 - pivot[2]);
+  const maxFactor = 2 ** Math.max(0, Math.floor(Math.log2(Math.min(Math.max(...grid.size), occupiedHeight, cutHeight === undefined ? Infinity : cutHeight / pitch))));
   const levels = VOXEL_LOD_FACTORS.map(requested => {
     const factor = Math.min(requested, maxFactor);
     const coarse = factor === 1 ? { grid: source, pivot } : coarseGrid(source, pivot, factor);
@@ -104,4 +106,20 @@ export function voxelModel(grid: VoxelGrid, pitch: number, pivot: readonly numbe
   });
   const coarse = coarseGrid(source, pivot, 8);
   return { pitch, levels, lighting: surfaceLevel(coarse.grid, pitch * 8, coarse.pivot, true), radius: Math.hypot(...grid.size.map((n, axis) => Math.max(Math.abs(pivot[axis]), Math.abs(n - pivot[axis])) * pitch)) };
+}
+
+/** Assemble immutable native props once; no per-instance rescaling, draw calls or uploads. */
+export function composeVoxelModels(parts: readonly { model: VoxelModel; offset: readonly [number, number, number] }[]): VoxelModel {
+  if (!parts.length || parts.some(part => part.model.pitch !== parts[0].model.pitch)) throw Error("Voxel composition needs a shared cubic pitch.");
+  const merge = (levels: readonly VoxelLevel[]): VoxelLevel => {
+    if (levels.some(level => level.pitch !== levels[0].pitch)) throw Error("Voxel composition needs matching LOD pitches.");
+    const count = levels.reduce((sum, level) => sum + level.count, 0), centers = new Float32Array(count * 3), colors = new Float32Array(count * 3), ao = new Uint8Array(levels.reduce((sum, level) => sum + level.ao.length, 0));
+    let at = 0, aoAt = 0;
+    levels.forEach((level, index) => {
+      for (let i = 0; i < level.count; i++) for (let axis = 0; axis < 3; axis++) centers[(at + i) * 3 + axis] = level.centers[i * 3 + axis] + parts[index].offset[axis];
+      colors.set(level.colors, at * 3); ao.set(level.ao, aoAt); at += level.count; aoAt += level.ao.length;
+    });
+    return { pitch: levels[0].pitch, count, centers, colors, ao };
+  };
+  return { pitch: parts[0].model.pitch, levels: parts[0].model.levels.map((_, index) => merge(parts.map(part => part.model.levels[index]))), lighting: merge(parts.map(part => part.model.lighting)), radius: Math.max(...parts.map(part => part.model.radius + Math.hypot(...part.offset))) };
 }
