@@ -1,4 +1,5 @@
 import { uiTimeout } from "./ui-timeout";
+import { arrivalTick, trackPlayerPositions } from "./worker-positions";
 import { readFileSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import { calendarDate, createRpg } from "../src/rpg/engine";
@@ -79,6 +80,7 @@ test("manual map movement is acknowledged and reaches its tile across mobile lay
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  await trackPlayerPositions(page);
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("./?chapter=3");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
@@ -120,10 +122,12 @@ test("manual map movement is acknowledged and reaches its tile across mobile lay
     "Accepted",
   );
   await expect
-    .poll(async () => (await saveState(page, true)).player.position, {
+    .poll(() => arrivalTick(page, target!), {
       timeout: uiTimeout(10000),
     })
-    .toEqual(target);
+    .not.toBeNull();
+  const saved = await saveState(page, true);
+  expect(saved.tick).toBeGreaterThanOrEqual((await arrivalTick(page, target!))!);
   await page.getByRole("button", { name: "Close panel" }).click();
 
   await page.screenshot({ path: "docs/screenshots/feel-desktop.png" });

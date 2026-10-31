@@ -1,4 +1,5 @@
 import { uiTimeout } from "./ui-timeout";
+import { arrivalTick, trackPlayerPositions } from "./worker-positions";
 import { test, expect, type Page } from "@playwright/test";
 import { createRpg } from "../src/rpg/engine";
 import { interactionTiles, WORLD } from "../src/rpg/world";
@@ -52,6 +53,7 @@ function waitingFixture() {
 test("minimap shows frontier markers and previews travel until confirmed", async ({
   page,
 }) => {
+  await trackPlayerPositions(page);
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("./?chapter=3");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
@@ -74,6 +76,7 @@ test("minimap shows frontier markers and previews travel until confirmed", async
   const svgBox = await svg.boundingBox();
   expect(svgBox).not.toBeNull();
   const target = {
+    ...before.player.position,
     x: before.player.position.x + 3,
     y: before.player.position.y,
   };
@@ -92,10 +95,12 @@ test("minimap shows frontier markers and previews travel until confirmed", async
   await page.screenshot({ path: "docs/screenshots/journey-portrait.png" });
   await preview.getByRole("button", { name: "Travel here" }).click();
   await expect
-    .poll(async () => (await snapshot(page, true)).player.position.x, {
+    .poll(() => arrivalTick(page, target), {
       timeout: uiTimeout(12000),
     })
-    .toBe(target.x);
+    .not.toBeNull();
+  const saved = await snapshot(page, true);
+  expect(saved.tick).toBeGreaterThanOrEqual((await arrivalTick(page, target))!);
   await page.getByRole("button", { name: "Close panel" }).click();
   await map.getByRole("button", { name: "Shrink map" }).click();
 });
