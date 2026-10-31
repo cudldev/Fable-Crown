@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { renderFrameCount } from "./render-profile";
 import { mkdir, writeFile } from "node:fs/promises";
 import { build } from "esbuild";
 import { createRpg } from "../src/rpg/engine";
@@ -7,7 +8,7 @@ import { tile } from "../src/rpg/world";
 const output = "docs/art-audit/sky-v1";
 test.use({ serviceWorkers: "block", actionTimeout: 20000 });
 async function frames(page: Page, count = 90) {
-  await page.evaluate(async n => { for (let i = 0; i < n; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, count);
+  await page.evaluate(async n => { for (let i = 0; i < n; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, renderFrameCount(count));
 }
 async function measure(page: Page) {
   return page.evaluate(async () => {

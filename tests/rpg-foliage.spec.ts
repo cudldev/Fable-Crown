@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { renderFrameCount } from "./render-profile";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { build, type Plugin } from "esbuild";
@@ -11,7 +12,7 @@ const nativeVoxelPlugin: Plugin = { name: "native-voxel-inline", setup(builder) 
   builder.onLoad({ filter: /.*/, namespace: "native-vox" }, async args => ({ contents: `export default ${JSON.stringify("data:application/octet-stream;base64," + (await readFile(args.path)).toString("base64"))};`, loader: "js" }));
 } };
 async function frames(page: Page, count = 45) {
-  await page.evaluate(async n => { for (let i = 0; i < n; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, count);
+  await page.evaluate(async n => { for (let i = 0; i < n; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, renderFrameCount(count));
 }
 async function measure(page: Page) {
   return page.evaluate(async () => {

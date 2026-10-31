@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { renderFrameCount } from "./render-profile";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import { worldForState } from "../src/rpg/world";
@@ -24,15 +25,15 @@ test("native VOX trees use chunk instances/LOD in the real world and reload offl
   await page.getByRole("button", { name: "Sun shadows", exact: true }).click();
   await expect.poll(async () => Number(await world.getAttribute("data-voxel-instances"))).toBeGreaterThan(0);
   const output = "docs/art-audit/voxel-runtime-v2"; await mkdir(output, { recursive: true });
-  const measure = async () => page.evaluate(async () => {
+  const measure = async () => page.evaluate(async count => {
     const root = document.querySelector<HTMLElement>('[data-renderer="3d"]')!;
     const intervals: number[] = []; let last = performance.now();
-    for (let i = 0; i < 45; i++) { const now = await new Promise<number>(resolve => requestAnimationFrame(resolve)); intervals.push(now - last); last = now; }
+    for (let i = 0; i < count; i++) { const now = await new Promise<number>(resolve => requestAnimationFrame(resolve)); intervals.push(now - last); last = now; }
     intervals.sort((a, b) => a - b);
     const gl = document.querySelector<HTMLCanvasElement>('[data-testid="three-canvas"]')!.getContext("webgl2")!;
     const extension = gl.getExtension("WEBGL_debug_renderer_info");
-    return { counters: { ...root.dataset }, rafMedianMs: intervals[22], rafP95Ms: intervals[42], gpu: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : "unavailable", browser: navigator.userAgent, viewport: [innerWidth, innerHeight] };
-  });
+    return { counters: { ...root.dataset }, sampleFrames: count, rafMedianMs: intervals[Math.floor(count / 2)], rafP95Ms: intervals[Math.floor(count * .95)], gpu: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : "unavailable", browser: navigator.userAgent, viewport: [innerWidth, innerHeight] };
+  }, renderFrameCount(45));
   const close = await measure(); await page.screenshot({ path: output + "/world-close.png" });
   await page.getByRole("button", { name: "World overview" }).click();
   await expect.poll(async () => (await world.getAttribute("data-voxel-lods"))!.split(",").slice(2).reduce((sum, n) => sum + Number(n), 0)).toBeGreaterThan(0);

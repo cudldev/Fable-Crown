@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { renderFrameCount } from "./render-profile";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import type { RpgState } from "../src/rpg/types";
@@ -43,7 +44,7 @@ async function sample(page: Page, frames = 45) {
     const gl = document.querySelector<HTMLCanvasElement>('[data-testid="three-canvas"]')!.getContext("webgl2")!, extension = gl.getExtension("WEBGL_debug_renderer_info");
     return { counters: { ...root.dataset }, rafMedianMs: intervals[Math.floor(count / 2)], rafP95Ms: intervals[Math.floor(count * .95)], viewport: [innerWidth, innerHeight], browser: navigator.userAgent,
       gpu: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : "unavailable", contextLost: gl.isContextLost(), glError: gl.getError() };
-  }, frames);
+  }, renderFrameCount(frames));
 }
 
 test("native VOX terrain paints the actual flat world crisply, reuses its bake and reloads offline", async ({ page, context }) => {

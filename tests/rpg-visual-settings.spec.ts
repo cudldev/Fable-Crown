@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { renderFrameCount } from "./render-profile";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import { DEFAULT_VISUAL_SETTINGS } from "../src/render/three/visual-settings";
@@ -19,7 +20,7 @@ test("visual controls update the renderer, copy a reusable preset, reset and fit
   const panel = page.getByRole("dialog", { name: "Visual settings" }); await expect(panel).toBeVisible();
   await expect(panel.locator("[data-visual-performance]")).toContainText("FPS");
   const output = "docs/art-audit/visual-controls-v1"; await mkdir(output, { recursive: true });
-  await page.evaluate(async () => { for (let i = 0; i < 120; i++) await new Promise(resolve => requestAnimationFrame(resolve)); });
+  await page.evaluate(async count => { for (let i = 0; i < count; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, renderFrameCount(120));
   await page.screenshot({ path: output + "/desktop.png" });
   const position = [await world.getAttribute("data-camera-x"), await world.getAttribute("data-camera-y")];
   await panel.getByRole("slider", { name: "Exposure", exact: true }).press("End");

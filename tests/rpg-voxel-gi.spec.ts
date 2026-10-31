@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { renderFrameCount } from "./render-profile";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 
@@ -17,13 +18,13 @@ test("cached GI, AO and FPS work in the actual world with independent controls a
   await expect(page.getByTestId("fps-indicator")).toHaveText(/\d+ FPS · \d+\.\d ms/);
   const version = Number(await world.getAttribute("data-gi-applied")); expect(version).toBeGreaterThan(0);
   const output = "docs/art-audit/voxel-lighting-v1"; await mkdir(output, { recursive: true });
-  const sample = async () => page.evaluate(async () => {
+  const sample = async () => page.evaluate(async count => {
     const intervals: number[] = []; let previous = performance.now();
-    for (let i = 0; i < 90; i++) { const now = await new Promise<number>(resolve => requestAnimationFrame(resolve)); intervals.push(now - previous); previous = now; }
+    for (let i = 0; i < count; i++) { const now = await new Promise<number>(resolve => requestAnimationFrame(resolve)); intervals.push(now - previous); previous = now; }
     intervals.sort((a, b) => a - b);
     const gl = document.querySelector<HTMLCanvasElement>('[data-testid="three-canvas"]')!.getContext("webgl2")!, extension = gl.getExtension("WEBGL_debug_renderer_info");
-    return { counters: { ...document.querySelector<HTMLElement>('[data-renderer="3d"]')!.dataset }, rafMedianMs: intervals[45], rafP95Ms: intervals[85], viewport: [innerWidth, innerHeight], gpu: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : "unavailable", browser: navigator.userAgent };
-  });
+    return { counters: { ...document.querySelector<HTMLElement>('[data-renderer="3d"]')!.dataset }, sampleFrames: count, rafMedianMs: intervals[Math.floor(count / 2)], rafP95Ms: intervals[Math.floor(count * .95)], viewport: [innerWidth, innerHeight], gpu: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : "unavailable", browser: navigator.userAgent };
+  }, renderFrameCount(90));
   const both = await sample(); await page.screenshot({ path: output + "/world-gi-ao.png" });
   await page.getByRole("button", { name: "Global illumination", exact: true }).click();
   const ao = await sample(); await page.screenshot({ path: output + "/world-ao.png" });

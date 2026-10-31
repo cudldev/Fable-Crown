@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { renderFrameCount } from "./render-profile";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createRpg } from "../src/rpg/engine";
 import { tile, worldForState } from "../src/rpg/world";
@@ -7,7 +8,7 @@ import { build } from "esbuild";
 const output = "docs/art-audit/water-realtime-v1";
 test.use({ serviceWorkers: "block", actionTimeout: 20000 });
 async function warm(page: Page, count = 90) {
-  await page.evaluate(async frames => { for (let i = 0; i < frames; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, count);
+  await page.evaluate(async frames => { for (let i = 0; i < frames; i++) await new Promise(resolve => requestAnimationFrame(resolve)); }, renderFrameCount(count));
 }
 async function measure(page: Page) {
   return page.evaluate(async () => {
