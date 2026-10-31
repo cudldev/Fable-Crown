@@ -267,6 +267,11 @@ test("Alden explains a stamina break and resumes autonomous running offline", as
   });
   await page.goto("./?renderer=canvas");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
+  // Hold the real worker via its lifecycle pause while inspecting this short rest.
+  // Reload below starts it normally and verifies offline recovery and travel.
+  await page.getByRole("button", { name: "Open game menu" }).click();
+  await expect(page.getByRole("button", { name: "Save on device" })).toBeVisible();
+  await page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
   const state = waitingFixture();
   expect(applyRpgCommand(state, { type: "move", position: { ...state.player.position, x: 97, y: 105 } }).ok).toBe(true);
   state.control.source = "autonomous";
@@ -279,7 +284,7 @@ test("Alden explains a stamina break and resumes autonomous running offline", as
   const plan = page.getByRole("region", { name: "Alden's current plan" });
   await expect(plan).toContainText("Resting to recover run energy");
   await expect(plan.getByRole("progressbar", { name: "Run energy recovery" })).toBeVisible();
-  const resting = await savedState(page);
+  const resting = await savedState(page, true);
   expect(resting.control.staminaResting).toBe(true);
   expect(resting.player.position).toEqual(state.player.position);
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
