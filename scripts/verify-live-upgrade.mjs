@@ -28,7 +28,9 @@ try {
     await page.getByRole('button', { name: 'Save on device', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('Chronicle saved');
     const state = await readSave(page);
-    // Exclude absence time from the migration fixture; existing archives remain intact.
+    // Hold this isolated test profile so offline gameplay cannot spend its belongings.
+    Object.assign(state.control, { waiting: true, goal: null, active: null, queue: [], thought: null, thinkingUntil: 1e9 });
+    state.player.path = []; state.player.action = null; state.player.movement = null;
     state.savedAt = Date.now();
     await page.evaluate(state => new Promise((resolve, reject) => {
       const open = indexedDB.open('fable-crown', 1);

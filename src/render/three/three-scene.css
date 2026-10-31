@@ -1,4 +1,4 @@
-.three-world { background: #8f9aa4; touch-action: auto; isolation: isolate; }
+.three-world { background: #8f9aa4; touch-action: auto; }
 .three-hit-layer { z-index: 1; }
 .world-status-layer, .world-effects-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .world-status-layer { z-index: 3; }
