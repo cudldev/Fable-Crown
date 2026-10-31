@@ -63,11 +63,12 @@ test("combat text stays on a free effects layer when HUD panels cross its path",
     return { x: box.x, y: box.y };
   });
   await page.waitForTimeout(120);
-  const after = await damage.evaluate(element => { const box = element.getBoundingClientRect(); return { x: box.x, y: box.y, pointer: getComputedStyle(element.parentElement!).pointerEvents, isolation: getComputedStyle(document.querySelector(".three-world")!).isolation,
+  const after = await damage.evaluate(element => { const box = element.getBoundingClientRect(); return { x: box.x, y: box.y, pointer: getComputedStyle(element.parentElement!).pointerEvents, effectsPosition: getComputedStyle(element.parentElement!).position, effectsZIndex: Number(getComputedStyle(element.parentElement!).zIndex),
     statusAboveEffects: Number(getComputedStyle(document.querySelector(".world-status-layer")!).zIndex) > Number(getComputedStyle(element.parentElement!).zIndex) }; });
   expect(Math.abs(after.y - before.y)).toBeLessThan(35);
   expect(Math.abs(after.x - before.x)).toBeLessThan(20);
-  expect(after).toMatchObject({ pointer: "none", isolation: "isolate", statusAboveEffects: true });
+  expect(after).toMatchObject({ pointer: "none", effectsPosition: "absolute", statusAboveEffects: true });
+  expect(after.effectsZIndex).toBeLessThan(10);
   await page.locator("#feedback-hud-fixture").evaluate(element => element.remove());
   await page.screenshot({ path: "docs/screenshots/combat-free-layer.png" });
 });
