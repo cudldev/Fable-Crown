@@ -23,6 +23,15 @@ test.beforeEach(async ({ page }) => {
         this.addEventListener("message", event => {
           const data = event.data, state = data?.state as RpgState | undefined;
           if (!state?.player) return;
+          // Acceptance lasts only a few ticks before an already supplied delivery.
+          // Retain that actual worker state even if a software GPU blocks the driver.
+          if (sessionStorage.getItem("watch-forge-acceptance") === "true" &&
+              state.quests.forge?.accepted && !state.quests.forge.complete) {
+            sessionStorage.setItem("first-forge-acceptance", JSON.stringify({
+              tick: state.tick, inventory: state.player.inventory,
+            }));
+            sessionStorage.removeItem("watch-forge-acceptance");
+          }
           record({ event: "message", worker: this.traceId, message: data.message,
             tick: state.tick, savedAt: state.savedAt, storageOkay: data.storageOkay, hp: state.player.health,
             attack: state.player.skills.attack, position: state.player.position,
@@ -215,16 +224,24 @@ test("quest ambition persists and real carried supplies complete a delivery", as
   await importState(page, delivery);
   await expect(page.getByRole("status")).toContainText("Chronicle restored");
   await page.getByRole("button", { name: "Inspect Master smith Ren" }).click();
+  await page.evaluate(() => {
+    sessionStorage.removeItem("first-forge-acceptance");
+    sessionStorage.setItem("watch-forge-acceptance", "true");
+  });
   await page.getByRole("button", { name: "Do now" }).click();
   await expect
     .poll(async () => (await snapshot(page)).quests.forge?.accepted)
     .toBe(true);
-  const accepted = await snapshot(page);
+  await expect.poll(() => page.evaluate(() =>
+    sessionStorage.getItem("first-forge-acceptance"))).not.toBeNull();
+  const accepted = await page.evaluate(() => JSON.parse(
+    sessionStorage.getItem("first-forge-acceptance")!,
+  )) as { tick: number; inventory: RpgState["player"]["inventory"] };
   expect(
-    accepted.player.inventory.find((item) => item.itemId === "logs")?.quantity,
+    accepted.inventory.find((item) => item.itemId === "logs")?.quantity,
   ).toBe(6);
   expect(
-    accepted.player.inventory.find((item) => item.itemId === "bronze-bar")
+    accepted.inventory.find((item) => item.itemId === "bronze-bar")
       ?.quantity,
   ).toBe(6);
 
