@@ -2,6 +2,111 @@ import { expect, test } from "@playwright/test";
 import { build } from "esbuild";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
+test("native tree shadows persist through fine, LOD1 and distant LOD roundtrips with shadow-only proxies and visible-mesh fallback", async ({ page }) => {
+  const output = "docs/performance/voxel-lod-shadows"; await mkdir(output, { recursive: true });
+  const bytes = await readFile("public/art3d/voxel/tree.vox"), errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
+  const bundle = await build({ stdin: { resolveDir: process.cwd(), sourcefile: "voxel-lod-shadow-lab.ts", contents: `
+import * as THREE from 'three';
+import {VoxelMeshes} from './src/render/three/voxel-meshes';
+import {parseVox,voxelModel} from './src/render/three/voxel-data';
+import {bakeVoxelModelSurfaces} from './src/render/three/voxel-surface';
+import {voxelObject} from './src/render/three/voxel-assets';
+void(async()=>{
+const input=Uint8Array.from(atob(${JSON.stringify(bytes.toString("base64"))}),char=>char.charCodeAt(0)),grid=parseVox(input.buffer);
+const oak=voxelModel(grid,.0625,[34,35,0]);bakeVoxelModelSurfaces(grid,oak,.0625,[34,35,0]);
+const solid={size:[16,16,16],cells:new Uint8Array(4096).fill(1),palette:new Uint8Array([150,95,55,255])};
+const cube=voxelModel(solid,.0625,[8,8,0]);bakeVoxelModelSurfaces(solid,cube,.0625,[8,8,0]);
+const size=512,renderer=new THREE.WebGLRenderer({canvas:document.querySelector('canvas'),antialias:false,preserveDrawingBuffer:true});
+renderer.setSize(size,size);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xf5f2e9);
+const camera=new THREE.OrthographicCamera(-8,8,8,-8,.1,100);camera.position.set(0,30,0);camera.up.set(0,0,-1);camera.lookAt(0,0,0);camera.updateMatrixWorld();
+const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(-6,10,7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-.00005;sun.shadow.normalBias=0;sun.shadow.radius=1;
+Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12,near:.1,far:80});scene.add(sun,sun.target,new THREE.AmbientLight(0xffffff,.15));
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(22,22),new THREE.MeshLambertMaterial({color:0xffffff}));floor.rotation.x=-Math.PI/2;floor.position.y=-.02;floor.receiveShadow=true;scene.add(floor);
+const objects=[{model:oak,x:-3,id:'tree'},{model:cube,x:3,id:'fallback-cube'}].map(({model,x,id})=>{const art=voxelObject({model});art.group.position.x=x;art.group.userData.voxelAsset=id;scene.add(art.group);return {art};});
+const voxels=new VoxelMeshes(scene);voxels.replace(objects);const endWarmup=voxels.beginWarmup();await renderer.compileAsync(scene,camera);renderer.render(scene,camera);endWarmup();
+const gl=renderer.getContext(),calls=[];let proxy=false,pass='color';
+const renderDirect=renderer.renderBufferDirect.bind(renderer);renderer.renderBufferDirect=function(c,s,g,m,o,group){const oldProxy=proxy,oldPass=pass;proxy=o.userData.voxelStaticShadow===true;if(c===sun.shadow.camera)pass='shadow';try{return renderDirect(c,s,g,m,o,group);}finally{proxy=oldProxy;pass=oldPass;}};
+const instancedDraw=gl.drawElementsInstanced.bind(gl);gl.drawElementsInstanced=function(mode,count,type,offset,instances){if(proxy)calls.push({pass,count,instances});return instancedDraw(mode,count,type,offset,instances);};
+const depth=new THREE.MeshDepthMaterial();
+function draw(){renderer.render(scene,camera);const pixels=new Uint8Array(size*size*4);gl.readPixels(0,0,size,size,gl.RGBA,gl.UNSIGNED_BYTE,pixels);return pixels;}
+function mainNodes(){return scene.children.filter(n=>n.userData.voxelStatic&&n.visible&&n.count>0);}
+function appearance(node){const positions=node.geometry.getAttribute('position').array;for(const [family,model]of[['oak',oak],['cube',cube]]){const lod=model.surfaces.findIndex(surface=>surface.positions===positions);if(lod>=0)return {family,lod};}throw Error('Unknown visible static template');}
+function measure(name,save=false){
+ const mains=mainNodes(),families=new Map(mains.map(n=>[n.userData.voxelTemplate,appearance(n).family]));
+ const casters=scene.children.filter(n=>n.isMesh&&n.visible&&n.castShadow),allCalls=[];
+ calls.length=0;const shadowed=draw();allCalls.push(...calls);const shadowedPNG=save?renderer.domElement.toDataURL():undefined;
+ for(const node of casters)node.castShadow=false;
+ calls.length=0;const blank=draw();allCalls.push(...calls);const unshadowedPNG=save?renderer.domElement.toDataURL():undefined;
+ const countDark=pixels=>{let count=0;for(let i=0;i<pixels.length;i+=4){const white=Math.max(blank[i],blank[i+1],blank[i+2])-Math.min(blank[i],blank[i+1],blank[i+2])<3;if(white&&blank[i]-pixels[i]>12)count++;}return count;};
+ const dark={};
+ for(const family of ['oak','cube']){for(const node of casters)node.castShadow=families.get(node.userData.voxelTemplate)===family;calls.length=0;dark[family]=countDark(draw());allCalls.push(...calls);}
+ for(const node of casters)node.castShadow=true;
+ renderer.shadowMap.enabled=false;scene.overrideMaterial=depth;calls.length=0;pass='depth';draw();const depthCalls=calls.slice();scene.overrideMaterial=null;renderer.shadowMap.enabled=true;pass='color';
+ const proxies=scene.children.filter(n=>n.userData.voxelStaticShadow&&n.visible);
+ const result={name,appearances:mains.map(appearance),objectLods:[...voxels.stats.objectLods],transitions:voxels.stats.transitions,
+  treeLod:voxels.stats.closestTreeLod,treeDesiredLod:voxels.stats.closestTreeDesiredLod,shadowTriangles:voxels.stats.shadowTriangles,builds:voxels.stats.templateBuilds,
+  receiverDarkPixels:dark,combinedDarkPixels:countDark(shadowed),shadowCalls:allCalls.filter(call=>call.pass==='shadow'),primaryProxyCalls:allCalls.filter(call=>call.pass!=='shadow'),depthProxyCalls:depthCalls,
+  proxiesReset:proxies.every(node=>node.count===0&&node.geometry.drawRange.count===0),proxyCount:proxies.length,
+  fallbackCastCount:mains.filter(node=>appearance(node).family==='cube'&&node.castShadow).length,
+  glError:gl.getError(),shadowedPNG,unshadowedPNG};return result;
+}
+function update(height,time){voxels.update(camera,height,undefined,time);}
+// Selection uses actual VoxelMeshes projected-cell LOD inputs. Keep the GPU
+// readback viewport/camera fixed so distant receiver shadows stay measurable.
+update(512,0);update(512,200);const stages=[measure('fine0')],builds=voxels.stats.templateBuilds;
+let now=300;
+for(const [lod,height]of[[1,128],[3,32],[4,16],[0,512]]){
+ update(height,now);stages.push(measure('to-'+lod+'-start'));
+ update(height,now+70);stages.push(measure('to-'+lod+'-half'));
+ update(height,now+160);stages.push(measure('lod'+lod,true));now+=280;
+}
+const remainingBeforeDispose=mainNodes().length;voxels.dispose();const remainingAfterDispose=scene.children.filter(n=>n.userData.voxelStatic||n.userData.voxelStaticShadow).length;
+window.voxelLodShadowLab={stages,builds,remainingBeforeDispose,remainingAfterDispose,glError:gl.getError(),cubeFallback:cube.surfaces.every((surface,i)=>!cube.shadowSurfaces?.[i]&&!surface.shadow),
+ note:'Native oak and exact uniform cube; actual VoxelMeshes LOD selector at fixed512px readback, CSS projected-height inputs512/128/32/16. Oak uses baked proxies where cheaper; cube exercises same-visible-mesh shadow fallback. Each receiver mask isolates one asset casting, with both visible bodies retained.'};
+floor.geometry.dispose();floor.material.dispose();depth.dispose();sun.shadow.map?.dispose();sun.dispose();renderer.dispose();
+})().catch(error=>{window.voxelLodShadowLabError=String(error?.stack??error);});
+` }, bundle: true, format: "iife", write: false, logLevel: "error" });
+  await page.setContent('<!doctype html><style>body{margin:0}</style><canvas></canvas>');
+  await page.addScriptTag({ content: bundle.outputFiles[0].text });
+  await page.waitForFunction(() => (window as unknown as { voxelLodShadowLab?: unknown; voxelLodShadowLabError?: string }).voxelLodShadowLab || (window as unknown as { voxelLodShadowLabError?: string }).voxelLodShadowLabError);
+  const state = await page.evaluate(() => ({ result: (window as unknown as { voxelLodShadowLab?: {
+    stages: { name: string; appearances: { family: string; lod: number }[]; objectLods: number[]; transitions: number; treeLod: number; treeDesiredLod: number;
+      shadowTriangles: number; builds: number; receiverDarkPixels: { oak: number; cube: number }; combinedDarkPixels: number;
+      shadowCalls: { pass: string; count: number; instances: number }[]; primaryProxyCalls: unknown[]; depthProxyCalls: unknown[]; proxiesReset: boolean; proxyCount: number; fallbackCastCount: number; glError: number; shadowedPNG?: string; unshadowedPNG?: string }[];
+    builds: number; cubeFallback: boolean; remainingBeforeDispose: number; remainingAfterDispose: number; glError: number; note: string;
+  } }).voxelLodShadowLab, error: (window as unknown as { voxelLodShadowLabError?: string }).voxelLodShadowLabError }));
+  expect(state.error).toBeUndefined(); const result = state.result!;
+  const stages = [];
+  for (const stage of result.stages) {
+    const { shadowedPNG, unshadowedPNG, ...metrics } = stage; stages.push(metrics);
+    if (shadowedPNG && unshadowedPNG) for (const [label, data] of [["shadowed", shadowedPNG], ["unshadowed", unshadowedPNG]])
+      await writeFile(`${output}/${stage.name}-${label}.png`, Buffer.from(data.split(",")[1], "base64"));
+  }
+  await writeFile(`${output}/review.json`, JSON.stringify({ ...result, stages, errors }, null, 2) + "\n");
+  expect(result.cubeFallback).toBe(true); expect(result.remainingBeforeDispose).toBe(2); expect(result.remainingAfterDispose).toBe(0);
+  for (const stage of result.stages) {
+    expect(stage.receiverDarkPixels.oak, `${stage.name}: native oak must shade the floor`).toBeGreaterThan(100);
+    expect(stage.receiverDarkPixels.cube, `${stage.name}: visible-mesh fallback must shade the floor`).toBeGreaterThan(20);
+    expect(stage.shadowTriangles).toBeGreaterThan(0); expect(stage.builds).toBe(result.builds);
+    expect(stage.primaryProxyCalls).toEqual([]); expect(stage.depthProxyCalls).toEqual([]); expect(stage.proxiesReset).toBe(true);
+    expect(stage.fallbackCastCount).toBeGreaterThan(0); expect(stage.glError).toBe(0);
+  }
+  for (const [name, lod] of [["fine0", 0], ["lod1", 1], ["lod3", 3], ["lod4", 4], ["lod0", 0]] as const) {
+    const stage = result.stages.find(stage => stage.name === name)!;
+    expect(stage.appearances).toEqual(expect.arrayContaining([{ family: "oak", lod }, { family: "cube", lod }]));
+    expect(stage.appearances).toHaveLength(2); expect(stage.objectLods[lod]).toBe(2); expect(stage.transitions).toBe(0);
+    expect(stage.treeLod).toBe(lod); expect(stage.treeDesiredLod).toBe(lod);
+  }
+  for (const stage of result.stages.filter(stage => stage.name.endsWith("-half"))) {
+    expect(stage.transitions).toBe(2); expect(stage.appearances).toHaveLength(4);
+    expect(stage.appearances.filter(appearance => appearance.family === "oak").length).toBe(2);
+  }
+  expect(result.glError).toBe(0); expect(errors).toEqual([]);
+});
+
 test("shared greedy shadow meshes darken receivers while contributing zero primary color/depth draws", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));

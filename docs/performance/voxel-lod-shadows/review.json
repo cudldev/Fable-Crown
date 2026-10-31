@@ -1,0 +1,779 @@
+{
+  "stages": [
+    {
+      "name": "fine0",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 0
+        },
+        {
+          "family": "cube",
+          "lod": 0
+        }
+      ],
+      "objectLods": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "transitions": 0,
+      "treeLod": 0,
+      "treeDesiredLod": 0,
+      "shadowTriangles": 1984,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 9029,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 10447,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 1,
+      "fallbackCastCount": 1,
+      "glError": 0
+    },
+    {
+      "name": "to-1-start",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 0
+        },
+        {
+          "family": "cube",
+          "lod": 0
+        },
+        {
+          "family": "oak",
+          "lod": 1
+        },
+        {
+          "family": "cube",
+          "lod": 1
+        }
+      ],
+      "objectLods": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "transitions": 2,
+      "treeLod": 0,
+      "treeDesiredLod": 1,
+      "shadowTriangles": 3968,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 9029,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 10447,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "to-1-half",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 0
+        },
+        {
+          "family": "cube",
+          "lod": 0
+        },
+        {
+          "family": "oak",
+          "lod": 1
+        },
+        {
+          "family": "cube",
+          "lod": 1
+        }
+      ],
+      "objectLods": [
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "transitions": 2,
+      "treeLod": 1,
+      "treeDesiredLod": 1,
+      "shadowTriangles": 3968,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 8855,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 10273,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "lod1",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 1
+        },
+        {
+          "family": "cube",
+          "lod": 1
+        }
+      ],
+      "objectLods": [
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "transitions": 0,
+      "treeLod": 1,
+      "treeDesiredLod": 1,
+      "shadowTriangles": 1984,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 8681,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 10099,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 1,
+      "fallbackCastCount": 1,
+      "glError": 0
+    },
+    {
+      "name": "to-3-start",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 1
+        },
+        {
+          "family": "cube",
+          "lod": 1
+        },
+        {
+          "family": "oak",
+          "lod": 3
+        },
+        {
+          "family": "cube",
+          "lod": 3
+        }
+      ],
+      "objectLods": [
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "transitions": 2,
+      "treeLod": 1,
+      "treeDesiredLod": 3,
+      "shadowTriangles": 2304,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 8681,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 10099,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "to-3-half",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 1
+        },
+        {
+          "family": "cube",
+          "lod": 1
+        },
+        {
+          "family": "oak",
+          "lod": 3
+        },
+        {
+          "family": "cube",
+          "lod": 3
+        }
+      ],
+      "objectLods": [
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      "transitions": 2,
+      "treeLod": 3,
+      "treeDesiredLod": 3,
+      "shadowTriangles": 2304,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 12911,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 14329,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "lod3",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 3
+        },
+        {
+          "family": "cube",
+          "lod": 3
+        }
+      ],
+      "objectLods": [
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      "transitions": 0,
+      "treeLod": 3,
+      "treeDesiredLod": 3,
+      "shadowTriangles": 320,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 12013,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 13431,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 1,
+      "fallbackCastCount": 1,
+      "glError": 0
+    },
+    {
+      "name": "to-4-start",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 3
+        },
+        {
+          "family": "cube",
+          "lod": 3
+        },
+        {
+          "family": "oak",
+          "lod": 4
+        },
+        {
+          "family": "cube",
+          "lod": 4
+        }
+      ],
+      "objectLods": [
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      "transitions": 2,
+      "treeLod": 3,
+      "treeDesiredLod": 4,
+      "shadowTriangles": 430,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 12013,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 13431,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "to-4-half",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 3
+        },
+        {
+          "family": "cube",
+          "lod": 3
+        },
+        {
+          "family": "oak",
+          "lod": 4
+        },
+        {
+          "family": "cube",
+          "lod": 4
+        }
+      ],
+      "objectLods": [
+        0,
+        0,
+        0,
+        0,
+        2
+      ],
+      "transitions": 2,
+      "treeLod": 4,
+      "treeDesiredLod": 4,
+      "shadowTriangles": 430,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 18820,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 20238,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 924,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "lod4",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 4
+        },
+        {
+          "family": "cube",
+          "lod": 4
+        }
+      ],
+      "objectLods": [
+        0,
+        0,
+        0,
+        0,
+        2
+      ],
+      "transitions": 0,
+      "treeLod": 4,
+      "treeDesiredLod": 4,
+      "shadowTriangles": 110,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 17621,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 19039,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 1,
+      "fallbackCastCount": 1,
+      "glError": 0
+    },
+    {
+      "name": "to-0-start",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 0
+        },
+        {
+          "family": "cube",
+          "lod": 0
+        },
+        {
+          "family": "oak",
+          "lod": 4
+        },
+        {
+          "family": "cube",
+          "lod": 4
+        }
+      ],
+      "objectLods": [
+        0,
+        0,
+        0,
+        0,
+        2
+      ],
+      "transitions": 2,
+      "treeLod": 4,
+      "treeDesiredLod": 0,
+      "shadowTriangles": 2094,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 17621,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 19039,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "to-0-half",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 0
+        },
+        {
+          "family": "cube",
+          "lod": 0
+        },
+        {
+          "family": "oak",
+          "lod": 4
+        },
+        {
+          "family": "cube",
+          "lod": 4
+        }
+      ],
+      "objectLods": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "transitions": 2,
+      "treeLod": 0,
+      "treeDesiredLod": 0,
+      "shadowTriangles": 2094,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 20593,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 22011,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 294,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 2,
+      "fallbackCastCount": 2,
+      "glError": 0
+    },
+    {
+      "name": "lod0",
+      "appearances": [
+        {
+          "family": "oak",
+          "lod": 0
+        },
+        {
+          "family": "cube",
+          "lod": 0
+        }
+      ],
+      "objectLods": [
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "transitions": 0,
+      "treeLod": 0,
+      "treeDesiredLod": 0,
+      "shadowTriangles": 1984,
+      "builds": 10,
+      "receiverDarkPixels": {
+        "oak": 9029,
+        "cube": 1418
+      },
+      "combinedDarkPixels": 10447,
+      "shadowCalls": [
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        },
+        {
+          "pass": "shadow",
+          "count": 5916,
+          "instances": 1
+        }
+      ],
+      "primaryProxyCalls": [],
+      "depthProxyCalls": [],
+      "proxiesReset": true,
+      "proxyCount": 1,
+      "fallbackCastCount": 1,
+      "glError": 0
+    }
+  ],
+  "builds": 10,
+  "remainingBeforeDispose": 2,
+  "remainingAfterDispose": 0,
+  "glError": 0,
+  "cubeFallback": true,
+  "note": "Native oak and exact uniform cube; actual VoxelMeshes LOD selector at fixed512px readback, CSS projected-height inputs512/128/32/16. Oak uses baked proxies where cheaper; cube exercises same-visible-mesh shadow fallback. Each receiver mask isolates one asset casting, with both visible bodies retained.",
+  "errors": []
+}

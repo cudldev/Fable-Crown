@@ -133,6 +133,34 @@ test("an already minimal uniform surface reuses its own exact depth geometry",()
   finally {renderer.dispose();}
 });
 
+test("all visible LODs retain shared proxy or exact-geometry shadows through detail changes",()=>{
+  const scene=new Scene(),model=baked(),art=voxelObject({model}),c=camera(),clock=new Frames(),renderer=new VoxelMeshes(scene);
+  art.group.position.x=2;scene.add(art.group);
+  try {
+    renderer.replace([{art}]);const cleanup=renderer.beginWarmup();cleanup();
+    settle(renderer,c,clock);
+    const builds=renderer.stats.templateBuilds;
+    for(const lod of [0,1,2,3,4,0]) {
+      settle(renderer,c,clock,lod===0?2000:160/2**lod);
+      expect(renderer.stats.objectLods[lod]).toBe(1);
+      expect(renderer.stats.shadowTriangles).toBeGreaterThan(0);
+      expect(renderer.stats.shadowTriangles).toBeLessThanOrEqual(renderer.stats.visibleTriangles);
+      const main=color(scene)[0],proxy=shadow(scene)[0];
+      if(proxy) {
+        expect(main.castShadow).toBe(false);expect(proxy.castShadow).toBe(true);
+        expect(proxy.instanceMatrix).toBe(main.instanceMatrix);
+        expect(proxy.geometry.getAttribute("voxelTransition")).toBe(main.geometry.getAttribute("voxelTransition"));
+        expect(proxy.count).toBe(0);expect(proxy.geometry.drawRange.count).toBe(0);
+        proxy.onBeforeShadow(null as never,scene,c,c,proxy.geometry,proxy.customDepthMaterial!,null as never);
+        expect(proxy.count).toBe(1);expect(proxy.geometry.drawRange.count).toBeGreaterThan(0);
+        proxy.onAfterShadow(null as never,scene,c,c,proxy.geometry,proxy.customDepthMaterial!,null as never);
+        expect(proxy.count).toBe(0);expect(proxy.geometry.drawRange.count).toBe(0);
+      } else expect(main.castShadow).toBe(true);
+    }
+    expect(renderer.stats.templateBuilds).toBe(builds);
+  } finally {renderer.dispose();}
+});
+
 test("depletion, removal and restoration reuse baked geometry and preserve object state",()=>{
   const scene=new Scene(),model=baked(4),depleted=baked(4,true,.125),art=voxelObject({model,depleted}),c=camera(),clock=new Frames(),renderer=new VoxelMeshes(scene);art.group.position.x=2;scene.add(art.group);
   try {

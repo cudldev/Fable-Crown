@@ -205,12 +205,14 @@ export class VoxelMeshes {
       const size=curve?.view.enabled===false?32:16,point=entry.matrix.elements;
       const sector=`${size}:${Math.floor(point[12]/size)}:${Math.floor(point[14]/size)}`;
       const capacity=2**Math.ceil(Math.log2(Math.max(1,this.sectors.get(sector)??1)));
-      const casts=appearance.lod===0,key=`${appearance.template.id}:${sector}:${Number(casts)}`;
+      // Detail selection must not remove shadows. Each template already picks
+      // a cheaper baked caster, or reuses its own minimal surface for depth.
+      const key=`${appearance.template.id}:${sector}`;
       let batch=this.batches.get(key);
       if(batch&&batch.capacity<capacity) {
         this.scene.remove(batch.mesh);batch.mesh.dispose();if(batch.shadow){this.scene.remove(batch.shadow);batch.shadow.dispose();}batch=undefined;
       }
-      if(!batch){batch=this.batch(appearance.template,capacity,casts);this.batches.set(key,batch);}
+      if(!batch){batch=this.batch(appearance.template,capacity,true);this.batches.set(key,batch);}
       batch.records.push({entry,appearance,fade});
     };
     for(const plan of plans) {

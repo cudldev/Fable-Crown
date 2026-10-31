@@ -154,3 +154,5 @@
 - FPS stays visible throughout gameplay on desktop/mobile, above panels; mobile tools start below its reserved row. Keep meter hidden during asset preparation. Existing FPS/frame-ms sample window/500ms refresh unchanged; mobile HUD/startup browser checks cover this.
 
 - Camera stutter: HitDimensions caches intrinsic sizes viaResizeObserver; position hits with CSStranslate while preserving authored anchors. SceneRegistry tracks child events and polls cached material identities; never redefine Mesh.material (V8 dictionary mode slows matrices). Foliage caches8m source chunks/tint, slices~2ms softtarget andcommits1kind/frame; drainqueued understartup. Benchmarkforest+tree-freegrassland with frozenbefore/after/return controls; see performance/camera-stutter.
+
+- Voxel shadows: all visible LODs cast through their baked cheaper proxy or exact surface; never gate onLOD0. Keep shared fade attributes and zero proxy color/depth draws. Regression: rpg-voxel-shadow-mesh.spec.ts, nativeoak0→1→3→4→0 plus minimal-mesh fallback.
