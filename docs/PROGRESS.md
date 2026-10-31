@@ -599,3 +599,5 @@ Published full-bake2842eae plus cache-fix6bec969; Actions41234875066 passed524un
 
 ### Always-visible FPS — 2026-10-31
 Removed mobile meter hiding; fixed safe-area position above panels and reserved space above tools. Existing FPS/frame-ms sampling unchanged. Type/build/dist gates and3localbrowser checks pass (desktop,320/390portrait,667/844landscape, tools/settings/inventory and noHUD during preparation); HUDcoverage remains<25% with no overlap. Publication follows.
+
+Publishede8566e7 / Actions41236491974 passed all CI gates (524units +2release cases). Actualpublica8342481e32d confirms FPS/frame-ms visible on desktop/portrait/landscape/offline; zero page/console/GL/request/external errors. Existing source/asset/simulation contracts unchanged.

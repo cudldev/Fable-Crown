@@ -135,7 +135,7 @@
 
 - Final CI boundary: test:release has2non-GPU worker/save/offline/mobile smoke cases. GPU interactions and visual/performance suites are local; verify real public WebGL after publish.
 
-- Current live release6bec969 / Actions41234875066 verified2026-10-31;0590159679cf. Canonical integrated checkout tmp/release-publication. CI2non-GPU smoke cases; visual/GPU suites local. Wait for SW activation before upgrade reload; hold save fixtures via real Pause/Save.
+- Current live releasee8566e7 / Actions41236491974 verified2026-10-31;a8342481e32d. Canonical integrated checkout tmp/release-publication. CI2non-GPU smoke cases; visual/GPU suites local. Wait for SW activation before upgrade reload; hold save fixtures via real Pause/Save.
 
 - Async rendering: voxel assets decode in a worker; runtime LOD stages at2ms/32768cells and commits≤1replacement/frame; started visible jobs finish first, with stable4m batches,6m prefetch and140ms opaque dither swaps. GI slices at~4ms; final GPU uploads remain synchronous. Keep identical capped levels shared.
 - Streaming benchmark: scripts/benchmark-streaming.mjs LABEL; BENCH_DIST selects an isolated original. Run original→changed→original serially; see performance/async-streaming. Pass is integrated and published from tmp/release-publication. New local GPU regression: rpg-voxel-streaming.spec.ts; mobile controls use Tools.
