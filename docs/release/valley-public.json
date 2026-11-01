@@ -1,19 +1,22 @@
 {
   "url": "https://cudldev.github.io/Fable-Crown/",
-  "date": "2026-11-01T01:05:00.041Z",
-  "version": "8daf56535279",
+  "date": "2026-11-01T02:28:47.709Z",
+  "version": "e6498778b998",
   "scope": "https://cudldev.github.io/Fable-Crown/",
   "previousCaches": [
-    "fable-v3-141aac213cf0",
-    "fable-art-141aac213cf0"
+    "fable-v3-8daf56535279",
+    "fable-art-8daf56535279"
   ],
   "caches": [
-    "fable-art-8daf56535279",
-    "fable-v3-8daf56535279"
+    "fable-art-e6498778b998",
+    "fable-v3-e6498778b998"
   ],
   "freshFormat": 7,
   "oldArchivesUntouched": true,
+  "valleyProgressPreserved": true,
   "noMigration": true,
+  "consoleMenu": true,
+  "personalBackpackOnly": true,
   "continuousMovement": true,
   "nativeTentPlaced": true,
   "webglOffline": true,

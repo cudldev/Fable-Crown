@@ -4,7 +4,9 @@
 
 Replaced global action tabs with a console Menu/Back hierarchy and nearby-object services. Crafting/trade show one selected recipe/good; global backpack excludes storage; home/account, dialogue and projects follow context. Smaller HUD, mirrored/raised thumb docks, contextual labels, recovery ring, exact item/XP/coin results, recent activity and resumable placement drafts. Menus pause actors while ordinary background work continues. Format7/balance/assets unchanged.
 
-739units/84files, strict type/build/native/baked/dist pass. Full17 local GPU cases passed, then7 density/controller cases and3 final touch/controller cases passed after targeted fixes; final2 non-GPU release cases pass. Reviewed10 mobile captures; no-scroll landscape actions, pad quantity steppers and actual secondary-touch mode/interact verified. Saves stay format7. Publication/public upgrade verification follows; no performance claim or paid calls/reset/credits.
+739units/84files, strict type/build/native/baked/dist pass. Full17 local GPU cases passed, then7 density/controller cases and3 final touch/controller cases passed after targeted fixes; final2 non-GPU release cases pass. Reviewed10 mobile captures; no-scroll landscape actions, pad quantity steppers and actual secondary-touch mode/interact verified. Saves stay format7; no performance claim.
+
+Published2cfc688 / Actions41265086021 passed. Publice6498778b998 verifies actual8daf→e649 cache upgrade, console Menu/Back, personal-only backpack, preserved valley inventory/skills/gear/storage/quests/home/terrain and untouched V3–V6 keys, both orientations, continuous movement and offline WebGL/all11 asset entries; zero page errors/external requests. Public runtime entry matches local candidate. Evidence: release/valley-public.json. Actual weekly35%used/~65%remaining; no reset/credits/paid calls. Stop for device playtesting.
 
 ## Hands-on valley onboarding — 2026-11-01
 

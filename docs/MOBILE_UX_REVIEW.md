@@ -1,5 +1,7 @@
 # Mobile UX pass
 
+Published2cfc688 / Actions41265086021 succeeded. Actual publice6498778b998: console Menu/Back, personal-only backpack,8daf→e649 cache upgrade, current valley progress and old keys preserved, both orientations and offline WebGL/all11 assets, zero page errors/external requests. Public runtime entry matches local candidate; see release/valley-public.json and the public mobile/menu captures. Physical-device playtesting remains.
+
 Initial evidence: code at isolated `5e2ea12` and existing public390×844/844×390 captures. No new GPU or physical-device review yet. Later console-menu steering supersedes the old nine-tab navigation.
 
 | Finding | Bounded fix / acceptance |

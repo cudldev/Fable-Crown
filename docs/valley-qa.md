@@ -1,5 +1,7 @@
 # Valley QA
 
+Published contextual UX2cfc688 / Actions41265086021 passed. Publice6498778b998 verifies console Menu/Back, personal-only backpack, actual cached upgrade, current valley progress/old-key preservation, both orientations and offline WebGL/all11 assets; zero page errors/external requests. See release/valley-public.json. Full739 units pass; staged local browser evidence below remains distinct from the public smoke test.
+
 Current format **7** uses `valley-v1` / `valley-v1-backup`: fresh25 coins, no V3–V6 migration/import, old keys untouched.
 
 Current local production **5b79dde599fd**, `http://127.0.0.1:5398/Fable-Crown/`:

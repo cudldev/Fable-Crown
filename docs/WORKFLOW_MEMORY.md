@@ -1,5 +1,7 @@
 # Working notes
 
+- Multitouch regression: reuse the real two-touch helper in rpg-valley-mobile-ux.spec.ts and verify native pointerup, not synthetic clicks. Mode/Interact explicitly handle touch releases and deduplicate click; mode changes must preserve held movement.
+
 - UI: keep action menus contextual to world objects (services.ts), console Menu/Back hierarchy, one selected recipe/good. Personal backpack stays global; storage/account/workshop actions need their matching interaction. Feedback/service context and touch preferences never enter format7. Validate coarse-pointer portrait+landscape, mirrored reach, menu action-pause/background work, repeated feedback and recovery; keep GPU local.
 
 - Valley release: use isolated tmp/valley-onboarding. Build with VITE_BASE_PATH=/Fable-Crown/; production preview5398; serialize local GPU checks. Audit against APPROVED_ONBOARDING_PLAN.md, then verify the actual public PWA/WebGL with scripts/verify-valley-public.mjs (host Node uses --use-system-ca). Keep CI at two non-GPU cases.
