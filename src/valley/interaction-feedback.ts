@@ -32,6 +32,7 @@ const objectAnchor=(save:ValleySave,object:WorldObject)=>{
 };
 /** Deliberate mouse activation may turn toward a nearby target, but never extends its reach. */
 export function selectionInRange(save:ValleySave,action:ActionState,world:WorldDefinition,selection:TileSelection):boolean {
+  if(selection.kind==="actor"){const npc=save.chapter.npcs.find(npc=>npc.id===selection.id&&npc.health>0);return !!npc&&distance(action,npc.position.x,npc.position.y)<=3;}
   if(selection.kind==="object"){
     const object=world.objects.find(value=>value.id===selection.id);if(!object)return false;
     if(object.resourceId)return distance(action,object.position.x,object.position.y)<=1.65;
@@ -56,9 +57,10 @@ const forwardAlignment=(action:ActionState,x:number,z:number):number=>{
 export function nearbyValleyInteraction(save:ValleySave,action:ActionState,world:WorldDefinition):NearbyInteraction|null {
   const candidates:NearbyInteraction[]=world.objects.filter(object=>!object.resourceId&&(["quest","shop","building","furnace","range","anvil","sign"].includes(object.kind)||!!object.serviceId))
     .flatMap(object=>{const anchor=objectAnchor(save,object);return distance(action,anchor.x,anchor.z)<=anchor.limit?[{selection:{kind:"object"as const,id:object.id},label:object.id.startsWith("valley-visitor-")?"Talk":object.kind==="sign"?"Read":"Open",detail:object.name,x:anchor.x,z:anchor.z}]:[];});
+  for(const npc of save.chapter.npcs)if(npc.health>0&&distance(action,npc.position.x,npc.position.y)<=3)candidates.push({selection:{kind:"actor",id:npc.id},label:"Talk",detail:npc.name,x:npc.position.x,z:npc.position.y});
   if(save.chapter.grave&&distance(action,save.chapter.grave.position.x,save.chapter.grave.position.y)<2)candidates.push({selection:{kind:"grave"},label:"Recover",detail:"Your backpack",x:save.chapter.grave.position.x,z:save.chapter.grave.position.y});
   for(const drop of save.chapter.drops)if(distance(action,drop.position.x,drop.position.y)<2)candidates.push({selection:{kind:"drop",id:drop.id},label:"Collect",detail:"Dropped supplies",x:drop.position.x,z:drop.position.y});
-  const key=(target:NearbyInteraction)=>target.selection.kind==="grave"?"0-grave":target.selection.kind==="drop"?`1-${target.selection.id}`:target.selection.kind==="object"?`2-${target.selection.id}`:"";
+  const key=(target:NearbyInteraction)=>target.selection.kind==="grave"?"0-grave":target.selection.kind==="drop"?`1-${target.selection.id}`:target.selection.kind==="object"?`2-${target.selection.id}`:target.selection.kind==="actor"?`3-${target.selection.id}`:"";
   return candidates.map(target=>({target,alignment:forwardAlignment(action,target.x,target.z),range:distance(action,target.x,target.z)}))
     .filter(value=>value.alignment>=.5)
     .sort((a,b)=>b.alignment-a.alignment||a.range-b.range||(key(a.target)<key(b.target)?-1:key(a.target)>key(b.target)?1:0))[0]?.target??null;

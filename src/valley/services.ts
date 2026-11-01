@@ -30,8 +30,8 @@ export function serviceSections(service:ValleyService|null):{panel:ValleyService
     case "home":return [{panel:"home",label:"Arrange my home"},{panel:"inventory",label:"Open storage"}];
     case "planning":return [{panel:"projects",label:"Planning & orders"}];
     case "forge":return [{panel:"projects",label:"Forge project"}];
-    case "visitor":return service.visitorId==="builder"?[{panel:"visitor",label:"Rowan"},{panel:"projects",label:"Orders"},{panel:"home",label:"Royal account"}]:service.visitorId==="merchant"?[{panel:"visitor",label:"Conversation"},{panel:"trade",label:"Trade"},{panel:"projects",label:"Orders"}]:[{panel:"visitor",label:"Conversation"},{panel:"projects",label:"Orders"}];
+    case "visitor":return service.visitorId==="builder"?[{panel:"visitor",label:"Rowan"},{panel:"projects",label:"Orders"},{panel:"home",label:"Royal account"}]:service.visitorId==="merchant"?[{panel:"visitor",label:"Conversation"},{panel:"trade",label:"Trade"},{panel:"projects",label:"Orders"}]:service.visitorId==="smith"?[{panel:"visitor",label:"Conversation"},{panel:"projects",label:"Orders"}]:[];
   }
 }
-export function servicePanel(service:ValleyService):ValleyServicePanel {return serviceSections(service)[0].panel;}
+export function servicePanel(service:ValleyService):ValleyServicePanel {return serviceSections(service)[0]?.panel??"visitor";}
 export function hasPlanningTable(save:ValleySave):boolean{return !!save.valley.home&&save.valley.cottageTicks>=COTTAGE_TICKS;}

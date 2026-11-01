@@ -5,6 +5,7 @@ export interface PlacedFurniture { id:string; itemId:FurnitureId; x:number; z:nu
 export interface GroundEdit { level:-1|0|1; path:boolean; stairs?:0|1|2|3 }
 export interface GroundUndo { key:string; before:GroundEdit|null; after:GroundEdit|null }
 export interface ValleyData {
+  visitorPositions?:Partial<Record<"builder"|"merchant"|"smith",{x:number;z:number}>>;
   home:null|{x:number;z:number;rotation:0|1|2|3;tentPacked:boolean};
   paid:number; cottageTicks:number;
   forge:{logs:number;bars:number;ticks:number};
@@ -45,16 +46,22 @@ export interface ValleyService {objectId:string;name:string;kind:"workbench"|"fu
 export const COTTAGE_TICKS=9000;
 export const FORGE_TICKS=1800;
 export const FIRST_BILL=100;
+/** Explicit point-and-click task. Transient: never saved or advanced offline. */
+export interface PointerActivity {kind:"walk"|"interact"|"gather"|"attack";label:string;phase:"walking"|"acting";selection:import("../render/scene-types").TileSelection;path:{x:number;z:number}[]}
+export interface AmbientNpcPose {id:string;x:number;z:number;fromX:number;fromZ:number;activity:string;working:boolean;moving:boolean}
 export type ValleyWorkerRequest =
-  | {type:"interface";open:boolean}
+  | {type:"interface";open:boolean;npcId?:string}
   | {type:"input";input:import("../action/contracts").ActionInput}
   | {type:"command";command:ValleyCommand;requestId?:number}
   | {type:"focus";selection:import("../render/scene-types").TileSelection}
+  | {type:"point";selection:import("../render/scene-types").TileSelection;intent?:"walk"|"examine"}
   | {type:"import";value:unknown}
-  | {type:"pause"|"resume"|"save"|"interact"|"export"|"reset"};
+  | {type:"pause"|"resume"|"save"|"interact"|"export"|"reset"|"cancel"};
 export interface ValleyWorkerMessage {
   save?:ValleySave; action?:ActionState; message?:string; storageOkay?:boolean;
   feedback?:ValleyFeedback;
+  pointer?:PointerActivity|null;
+  ambient?:AmbientNpcPose[];
   receipt?:{requestId?:number;ok:boolean}; export?:ValleySave;
   open?:ValleyServicePanel;
   service?:ValleyService;

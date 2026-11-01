@@ -1,5 +1,13 @@
 # Progress — 2026-10-29
 
+## Point controls, living NPCs and road-aware routes — 2026-11-01
+
+Kept the valley, art, contextual conversations/crafting, construction balance and current saves. Mouse/tap selects ground or approaches a target; right-click/hold offers options. Explicit gathering/combat repeats only for the selected target and cancels safely without skipping swing recovery. No virtual dock; keyboard/controller and contextual wilderness guard remain. NPCs work, wander and rest by role; a conversation holds only its target through child menus. Ambient work grants no player resources/XP. Visitor positions persist; offline reconciliation clears transient NPC traces. Occupied pads/ground and the future forge stay protected.
+
+Shared weighted navigation prefers dirt roads/player paths0.6 over ordinary ground1 and sand1.15, while allowing useful shortcuts. Collision, corners, stairs, blocked-route stopping and moving-target replanning remain authoritative. Roads never change walking speed. Lead integrated worker/save/UI; specialists supplied pointer/visitor rendering, deterministic routes/NPC routines and browser-test migration. Independent review found and closed recovery, offline-trace, stuck-route and occupied-pad edge cases.
+
+Strict types/build/native/baked/dist and2release cases pass.32distinct local WebGL scenarios verified across broad runs and focused reruns; final442bd3740632 passes8affected cases. Final878units/93files pass, including road preference, actual player paths, NPC holds, occupancy protection, cancellation recovery and offline traces. Actual captures: screenshots/valley-point; rules/review: UX_LAYOUT_RULES.md and CONTROLS_REVIEW.md. No new art or physical-device/performance claim. Actual weekly50%used/~50%remaining; no reset/credits/paid calls. Publication verification pending.
+
 ## Following and facing controls — 2026-11-01
 
 Always-follow valley camera, eased movement lead (cap1.1m), idle settling and reduced-motion handling; no parked pan/right-stick camera. Find pins destinations. Forward-facing nearby actions share the target marker; small depth-tested 3D ground ring/arrow shows facing and conforms to terrain at fixed world scale. Touch world activation disabled outside placement; mouse requires real range and consumes its click. Service props have hit areas, RMB guard works over world objects, selected recovery bags stay distinct. Current saves/legacy camera/balance retained. Rules and actual captures: CONTROLS_REVIEW.md.

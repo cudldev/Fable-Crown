@@ -4,6 +4,9 @@ import {tile} from "../src/rpg/world";
 import {COTTAGE_TICKS,FORGE_TICKS} from "../src/valley/contracts";
 import {homeFootprints} from "../src/valley/world";
 
+async function qaPad(page:Page){await page.addInitScript(()=>{const pad={buttons:Array.from({length:17},()=>({pressed:false,touched:false,value:0})),axes:[0,0,0,0]};Object.assign(window,{valleyActionQaPad:pad});Object.defineProperty(navigator,"getGamepads",{value:()=>[{...pad,connected:true,index:0,id:"QA action pad",mapping:"standard",timestamp:performance.now()}]});});}
+async function qaButton(page:Page,index:number,held:boolean){await page.evaluate(({index,held})=>{const p=(window as unknown as {valleyActionQaPad:{buttons:{pressed:boolean;touched:boolean;value:number}[]}}).valleyActionQaPad;Object.assign(p.buttons[index],{pressed:held,touched:held,value:Number(held)});},{index,held});await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));}
+test.beforeEach(async({page})=>qaPad(page));
 async function settings(page:Page){
   await page.getByRole("button",{name:"Menu",exact:true}).click();
   await page.getByRole("dialog").getByRole("button",{name:"Settings",exact:true}).click();
@@ -74,11 +77,11 @@ test("authored shield and tool contact remain readable on clear ground",async({p
   await page.getByRole("dialog").getByRole("button",{name:"Close",exact:true}).click();
   for(const direction of ["left","right"]){
     if(direction==="right"){await page.keyboard.down("d");await page.waitForTimeout(120);await page.keyboard.up("d");}
-    await page.mouse.move(1150,400);await page.mouse.down({button:"right"});await page.waitForTimeout(250);
+    await page.mouse.move(1150,400);await qaButton(page,6,true);await page.waitForTimeout(250);
     await expect(page.locator("[data-character-clip]")).toHaveAttribute("data-character-clip","block");
-    await page.screenshot({path:`docs/screenshots/valley-clear-block-${direction}.png`});await page.mouse.up({button:"right"});
+    await page.screenshot({path:`docs/screenshots/valley-clear-block-${direction}.png`});await qaButton(page,6,false);
   }
-  await page.mouse.move(1150,400);await page.mouse.down();
+  await page.mouse.move(1150,400);await qaButton(page,7,true);
   await expect(page.locator("[data-character-clip]")).toHaveAttribute("data-character-clip","strike");await page.waitForTimeout(205);
-  await page.screenshot({path:"docs/screenshots/valley-clear-strike.png"});await page.mouse.up();
+  await page.screenshot({path:"docs/screenshots/valley-clear-strike.png"});await qaButton(page,7,false);
 });

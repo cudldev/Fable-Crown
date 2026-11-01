@@ -1,5 +1,7 @@
 # Codex instructions
 
+LATEST CONTROLS/LIFE OVERRIDE (2026-11-01): Keep the current valley game and contextual menus; exploration uses mouse/tap destination walking and approach-to-interact. Right-click/long press offers target options. Selected gathering/combat is a bounded cancellable task, with no offline continuation. Remove the virtual joystick/action dock; keyboard/controller remain alternatives. Preserve always-follow camera and the world-space facing mark. NPCs follow local role work/wander/rest routines; hold the conversation target in place through its child menus, let others continue, then resume. Ambient jobs grant no player resources or XP. See docs/UX_LAYOUT_RULES.md; these controls supersede prior joystick/per-press mouse requirements.
+
 LATEST UX OVERRIDE (2026-11-01): Follow docs/UX_LAYOUT_RULES.md for all layouts. One active presentation, contextual object/NPC actions, hidden exploration HUD during interactions, camera encounter framing, organic conversation endings, and combined full-screen crafting with roughly one-third information area. Preserve current format7 saves and simulation balance.
 
 LATEST SAVE OVERRIDE (2026-11-01): The user explicitly chose fresh saves for this major redesign. The valley starts from a separate valley-v1 key/format7, with 25 starting coins. Do not read, convert or import older V3–V6 game saves into the valley. Leave old keys untouched. This supersedes earlier migration/continuity requirements; current valley saves still support backup, import/export and offline progress.

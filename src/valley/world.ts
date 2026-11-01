@@ -155,7 +155,7 @@ function building(world: WorldDefinition, data: ValleyData, id: string, name: st
 }
 export function createValleyWorld(data: ValleyData,chapter?:RpgState): WorldDefinition {
   const base=chapter?worldForState(chapter):WORLD;
-  const key = geometryKey(data)+(chapter?worldVariantKey(chapter):"base"), cached = worlds.get(key);
+  const key = geometryKey(data)+(chapter?worldVariantKey(chapter):"base")+JSON.stringify(data.visitorPositions??{}), cached = worlds.get(key);
   if (cached) { worlds.delete(key); worlds.set(key, cached); return cached; }
   const pathKey=Object.keys(data.ground).filter(key=>data.ground[key].path).sort().join(";");
   let cache=materials.get(base);if(!cache){cache=new Map();materials.set(base,cache);}
@@ -175,9 +175,9 @@ export function createValleyWorld(data: ValleyData,chapter?:RpgState): WorldDefi
     ...(data.introduced.includes("merchant") ? [{ id: "merchant", name: "Pella the merchant", x: 75, z: 142 }] : []),
     ...(data.introduced.includes("smith") ? [{ id: "smith", name: "Garrick the smith", x: 76, z: 178 }] : []),
   ];
-  for (const visitor of visitors) addObject(world, { id: `valley-visitor-${visitor.id}`, name: visitor.name, kind: "quest",
-    serviceId: `valley-visitor-${visitor.id}`, art: `valley-visitor-${visitor.id}`, position: tile(visitor.x, visitor.z),
-    width: 1, height: 1, blocks: false, description: "Visitor appearance draft: existing pixel NPC placeholder." });
+  for (const visitor of visitors) {const p=data.visitorPositions?.[visitor.id as "builder"|"merchant"|"smith"]??visitor;addObject(world, { id: `valley-visitor-${visitor.id}`, name: visitor.name, kind: "quest",
+    serviceId: `valley-visitor-${visitor.id}`, art: `valley-visitor-${visitor.id}`, position: tile(p.x, p.z),
+    width: 1, height: 1, blocks: false, description: "A visiting neighbour working around the valley. Existing pixel appearance draft." });}
   const home = data.home, footprint = homeFootprints(data);
   if (home && footprint) {
     if (!home.tentPacked) building(world, data, "valley-home-tent", "Your tent", footprint.tent, "valley-tent", footprint.tentDoor, home.rotation);
@@ -246,10 +246,12 @@ function flat(data: ValleyData, ps: ValleyPoint[]): boolean {
 }
 function originalOccupied(p: ValleyPoint): boolean { return WORLD.objects.some(o => inRect(p, objectRect(o))); }
 function staticOccupied(p: ValleyPoint): boolean { return STATIC_OBJECTS.some(o => inRect(p, objectRect(o))); }
+export function visitorOccupies(data:ValleyData,rect:ValleyRect):boolean{return Object.values(data.visitorPositions??{}).some(p=>p&&p.x+.2>rect.x-.5&&p.x-.2<rect.x+rect.width-.5&&p.z+.2>rect.z-.5&&p.z-.2<rect.z+rect.height-.5);}
 export function validateHomePlacement(data: ValleyData, x: number, z: number, rotation: number): string | null {
   if (!integerPoint(x, z) || !quarterTurn(rotation)) return "Choose a whole tile and a quarter-turn rotation.";
   const home: Home = { x, z, rotation, tentPacked: false }, footprint = homeFootprints(home)!, ps = cells(footprint.pad);
   if (!ps.every(p => isOwned(p.x, p.z))) return "The complete home pad must fit inside your land.";
+  if(visitorOccupies(data,footprint.pad))return "Choose a home pad clear of visiting neighbours.";
   if (ps.some(p => shore(p.x, p.z))) return "Leave the pond and its one-tile shore clear.";
   if (ps.some(p => entranceCorridor(p.x, p.z))) return "Keep the valley entrance path clear.";
   if (ps.some(p => originalOccupied(p) || staticOccupied(p) || data.plants.some(v => v.x === p.x && v.z === p.z) ||
@@ -262,6 +264,7 @@ export function validateHomePlacement(data: ValleyData, x: number, z: number, ro
 export function validateFurniturePlacement(data: ValleyData, itemId: FurnitureId, x: number, z: number, rotation: number, ignoreId?: string, player?:ValleyPoint): string | null {
   if (!Object.hasOwn(FURNITURE_FOOTPRINTS, itemId) || !integerPoint(x, z) || !quarterTurn(rotation)) return "Choose a furnishing, whole tile and quarter-turn rotation.";
   const furnishing=furnitureFootprint(itemId,x,z,rotation);
+  if(visitorOccupies(data,furnishing))return "Wait for your neighbour to step clear of this spot.";
   if(player&&player.x+.2>furnishing.x-.5&&player.x-.2<furnishing.x+furnishing.width-.5&&player.z+.2>furnishing.z-.5&&player.z-.2<furnishing.z+furnishing.height-.5)
     return "Step clear of the furnishing's footprint before placing it.";
   const ps = cells(furnitureFootprint(itemId, x, z, rotation)), footprint = homeFootprints(data);
@@ -292,6 +295,7 @@ function groundProtection(data: ValleyData, x: number, z: number): string | null
   if (shore(x, z)) return "The pond and its shore cannot be edited.";
   if (entranceCorridor(x, z)) return "Keep the valley entrance path clear.";
   const p = { x, z }, footprint = homeFootprints(data);
+  if(visitorOccupies(data,{x,z,width:1,height:1}))return "Wait for your neighbour to step clear before editing the ground.";
   if (footprint && inRect(p, footprint.pad)) return "The reserved home pad and apron must stay level.";
   if (originalOccupied(p) || staticOccupied(p) || data.furniture.some(f => inRect(p, furnitureFootprint(f.itemId, f.x, f.z, f.rotation))) ||
     data.plants.some(v => v.x === x && v.z === z)) return "Move belongings and plants before editing this tile.";

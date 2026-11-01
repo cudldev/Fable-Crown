@@ -40,34 +40,31 @@ test("camera follows with movement lead, settles, and cannot be parked by draggi
   expect(after[2]).toBeCloseTo(Number(await app(page).getAttribute("data-player-z")),1);
   await page.screenshot({path:"docs/screenshots/valley-controls/desktop-follow.png"});
 });
-test("mouse activates only in-range targets, with no extra swing",async({page})=>{
+test("mouse approaches a remote station and opens its focused action without an extra swing",async({page})=>{
   await page.setViewportSize({width:1280,height:720});await ready(page);await restore(page,69,143);
-  const bench=page.getByRole("button",{name:"Inspect Communal carpentry workbench",exact:true});
-  await expect(bench).toBeVisible();await bench.click();await expect(dialog(page)).toHaveCount(0);
-  await expect(app(page)).toHaveAttribute("data-player-x","69.000");
-  await restore(page,69,140);
-  await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label",/workbench/i);
-  await bench.click();await expect(dialog(page)).toHaveAccessibleName(/workbench/i);
+  const bench=page.getByRole("button",{name:"Use Communal carpentry workbench",exact:true});
+  await expect(bench).toBeVisible();await bench.click();await expect(dialog(page)).toHaveAccessibleName(/workbench/i,{timeout:15000});
+  expect(Number(await app(page).getAttribute("data-player-z"))).toBeLessThan(143);
   await expect(world(page)).toHaveAttribute("data-facing-indicator","hidden");
   await page.keyboard.press("Escape");await expect(dialog(page)).toHaveCount(0);
   await expect(app(page)).toHaveAttribute("data-swing","0.000");
 });
-test.describe("touch uses joystick and nearby action",()=>{
+test.describe("touch approaches targets while preserving dynamic follow",()=>{
   test.use({hasTouch:true,isMobile:true,viewport:{width:390,height:844},deviceScaleFactor:1});
-  test("world taps and drags never open a remote action or park the camera",async({page})=>{
+  test("target taps open conversations; drags never walk or park the camera",async({page})=>{
     await ready(page);
-    const npc=page.getByRole("button",{name:"Inspect Rowan the builder",exact:true});
-    await npc.tap();await expect(dialog(page)).toHaveCount(0);
-    await expect(page.getByTestId("interaction-indicator")).toBeVisible();
+    const npc=page.getByRole("button",{name:"Talk to Rowan the builder",exact:true});
+    await npc.tap();await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan",{timeout:15000});
     await page.screenshot({path:"docs/screenshots/valley-controls/mobile-aim.png"});
-    await page.locator(".action-interact").tap();await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan");
     await expect(page.getByTestId("interaction-indicator")).toBeHidden();await page.keyboard.press("Escape");
-    await page.touchscreen.tap(20,300);
+    const beforeDrag=await app(page).getAttribute("data-player-x");
     const cdp=await page.context().newCDPSession(page);
     await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:1,x:200,y:350}]});
     await cdp.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{id:1,x:290,y:430}]});
     await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
     await expect(app(page)).toHaveAttribute("data-camera-follow","true");await expect(dialog(page)).toHaveCount(0);
+    await page.waitForTimeout(250);await expect(app(page)).toHaveAttribute("data-player-x",beforeDrag!);
+    await expect(page.locator("[data-action-controls]")).toHaveCount(0);
     await page.setViewportSize({width:844,height:390});await expect(world(page)).toHaveAttribute("data-facing-indicator","world");
     await page.screenshot({path:"docs/screenshots/valley-controls/landscape-aim.png"});
   });

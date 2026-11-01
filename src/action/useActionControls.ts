@@ -9,6 +9,7 @@ import type {ActionInputMode} from "./input-mode";
 export interface UseActionControlsOptions {
   enabled?: boolean;
   cameraAxes?: CameraAxes;
+  mouseActions?: boolean;
   onInteract(): void;
   onInventory?(): void;
   onMenu?(): void;
@@ -100,13 +101,14 @@ export function useActionControls(options: UseActionControlsOptions) {
         event.preventDefault(); inputBuffer.setKey(event.code, true);
       }
       if (event.repeat) return;
+      if(event.code==="Space"&&enabled&&latest.current.mouseActions===false&&(!isInterfaceTarget(event.target)||event.target instanceof Element&&!!event.target.closest("[data-three-selection]"))){event.preventDefault();inputBuffer.setBlock("keyboard",true);}
       if (event.code === "KeyE" && enabled) { event.preventDefault(); latest.current.onInteract(); }
       if (event.code === "KeyQ" && enabled) { event.preventDefault(); latest.current.onToggleTool?.(); }
       if (event.code === "KeyI") { event.preventDefault(); latest.current.onInventory?.(); }
       if (event.code === "KeyB") { event.preventDefault(); latest.current.onBuild?.(); }
       if (event.code === "Escape") latest.current.onBack?.();
     }
-    function onKeyUp(event: KeyboardEvent) { heldKeys.delete(event.code);releasedBeforeAction.delete(event.code);inputBuffer.setKey(event.code, false); }
+    function onKeyUp(event: KeyboardEvent) { heldKeys.delete(event.code);releasedBeforeAction.delete(event.code);inputBuffer.setKey(event.code, false);if(event.code==="Space")inputBuffer.setBlock("keyboard",false); }
     function releaseMouse() {
       inputBuffer.setStrike("mouse", false); inputBuffer.setBlock("mouse", false);
     }
@@ -177,7 +179,7 @@ export function useActionControls(options: UseActionControlsOptions) {
   const worldBindings: HTMLAttributes<HTMLElement> = {
     onPointerDown(event) {
       const worldTarget=event.target instanceof Element&&!!event.target.closest("[data-three-selection]");
-      if (event.defaultPrevented || latest.current.enabled === false || event.pointerType === "touch" || isInterfaceTarget(event.target)&&!(worldTarget&&event.button===2)) return;
+      if (latest.current.mouseActions===false || event.defaultPrevented || latest.current.enabled === false || event.pointerType === "touch" || isInterfaceTarget(event.target)&&!(worldTarget&&event.button===2)) return;
       if (event.button === 0) inputBuffer.setStrike("mouse", true);
       if (event.button === 2) inputBuffer.setBlock("mouse", true);
     },

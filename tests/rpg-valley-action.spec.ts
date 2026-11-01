@@ -9,6 +9,9 @@ import { createValleySave, validateValleySave } from "../src/valley/save";
 import { applyValleyCommand } from "../src/valley/settlement";
 import { createValleyWorld, homeFootprints } from "../src/valley/world";
 
+async function qaPad(page:Page){await page.addInitScript(()=>{const pad={buttons:Array.from({length:17},()=>({pressed:false,touched:false,value:0})),axes:[0,0,0,0]};Object.assign(window,{valleyActionQaPad:pad});Object.defineProperty(navigator,"getGamepads",{value:()=>[{...pad,connected:true,index:0,id:"QA action pad",mapping:"standard",timestamp:performance.now()}]});});}
+async function qaButton(page:Page,index:number,held:boolean){await page.evaluate(({index,held})=>{const p=(window as unknown as {valleyActionQaPad:{buttons:{pressed:boolean;touched:boolean;value:number}[]}}).valleyActionQaPad;Object.assign(p.buttons[index],{pressed:held,touched:held,value:Number(held)});},{index,held});await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));}
+
 const root = (page: Page) => page.getByTestId("valley-app");
 const panel = (page: Page) => page.getByRole("dialog");
 const status = (page: Page) => page.locator(".valley-message");
@@ -16,6 +19,7 @@ const errors = new WeakMap<Page, string[]>();
 test.beforeEach(async ({ page }) => {
   const messages: string[] = []; errors.set(page, messages);
   page.on("pageerror", error => messages.push(error.message));
+  await qaPad(page);
 });
 test.afterEach(async ({ page }) => { expect(errors.get(page)).toEqual([]); });
 async function ready(page: Page) {
@@ -151,19 +155,19 @@ test("real tree gathering consumes one tool swing per press rather than repeatin
   const xp = fixture.chapter.player.skills.woodcutting;
   await restore(page, fixture);
   await page.mouse.move(700, 300);
-  await page.mouse.down({ button: "right" }); await page.waitForTimeout(200);
+  await qaButton(page,6,true); await page.waitForTimeout(200);
   await page.screenshot({ path: "docs/screenshots/valley-block.png" });
-  await page.mouse.up({ button: "right" });
+  await qaButton(page,6,false);
   await page.mouse.move(700, 300);
-  await page.mouse.down(); await page.waitForTimeout(250);
+  await qaButton(page,7,true); await page.waitForTimeout(250);
   await page.screenshot({ path: "docs/screenshots/valley-strike.png" });
-  await page.waitForTimeout(1050); await page.mouse.up();
+  await page.waitForTimeout(1050); await qaButton(page,7,false);
   const first = await snapshot(page);
   expect(itemCount(first.chapter.player.inventory, "logs")).toBe(1);
   expect(first.chapter.player.skills.woodcutting).toBe(xp + 250);
   await panel(page).getByRole("button", { name: "Close", exact: true }).click();
   await page.mouse.move(700, 300);
-  await page.mouse.down(); await page.waitForTimeout(900); await page.mouse.up();
+  await qaButton(page,7,true); await page.waitForTimeout(900); await qaButton(page,7,false);
   const second = await snapshot(page);
   expect(itemCount(second.chapter.player.inventory, "logs")).toBe(2);
   expect(second.chapter.player.skills.woodcutting).toBe(xp + 500);

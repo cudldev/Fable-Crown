@@ -17,6 +17,10 @@ export interface ActionState { frame: number; player: ActionPlayer; enemies: Act
 export interface ActionInput { moveX: number; moveZ: number; strike: boolean; block: boolean; tool: boolean }
 export interface ActionTarget { id: string; x: number; z: number; kind: "resource" | "enemy" }
 export interface ActionWorld {
+  /** Relative route cost; roads are preferred without changing movement speed. */
+  travelCost?(x:number,z:number):number;
+  /** An explicitly selected pointer activity only contacts its selected target. */
+  targetId?:string;
   canOccupy(x: number, z: number, fromX: number, fromZ: number): boolean;
   groundHeight(x: number, z: number): number;
   isSafe(x: number, z: number): boolean;

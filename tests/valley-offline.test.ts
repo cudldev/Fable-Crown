@@ -7,6 +7,8 @@ import { reconcileValley } from "../src/valley/offline";
 import { createValleySave, validateValleySave } from "../src/valley/save";
 import { applyValleyCommand, ensureValleyResources } from "../src/valley/settlement";
 import { createValleyWorld } from "../src/valley/world";
+import {ValleyNpcRoutines} from "../src/valley/npc-routines";
+import {rpgActionWorld} from "../src/action/rpg-adapter";
 
 const NOW = Date.UTC(2026, 10, 1, 12);
 const HOUR = 3_600_000;
@@ -19,6 +21,14 @@ function commissioned() {
 }
 
 describe("quarter-speed offline valley construction", () => {
+  it("clears live NPC traces across offline ticks while preserving their locations and inventories",()=>{
+    const save=createValleySave(NOW),routines=new ValleyNpcRoutines();
+    for(let i=0;i<25;i++){save.chapter.tick++;const world=createValleyWorld(save.valley,save.chapter);routines.step(save,world,rpgActionWorld(save.chapter,world));if(save.chapter.npcs.some(npc=>npc.movement))break;}
+    expect(save.chapter.npcs.some(npc=>npc.movement)).toBe(true);expect(validateValleySave(save)).not.toBeNull();
+    const positions=save.chapter.npcs.map(npc=>npc.position),bags=save.chapter.npcs.map(npc=>npc.inventory);
+    reconcileValley(save,NOW+12000);expect(validateValleySave(save)).not.toBeNull();
+    expect(save.chapter.npcs.map(npc=>npc.position)).toEqual(positions);expect(save.chapter.npcs.map(npc=>npc.inventory)).toEqual(bags);expect(save.chapter.npcs.every(npc=>npc.movement===null&&npc.path.length===0)).toBe(true);
+  });
   it("summarises actual partial construction and currently available visitors",()=>{
     const s=commissioned();let summary=reconcileValley(s,NOW+HOUR);
     expect(summary.message).toContain("75 active minutes remaining");expect(summary.message).toContain("Visiting today: Rowan");expect(summary.message).not.toContain("Pella");

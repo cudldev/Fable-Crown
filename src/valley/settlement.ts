@@ -7,12 +7,13 @@ import { COTTAGE_TICKS, FIRST_BILL, FORGE_TICKS } from "./contracts";
 import type { ValleyCommand, ValleyResult, ValleySave } from "./contracts";
 import { VALLEY_COMMISSIONS, VALLEY_RECIPES, VALLEY_STOCK, visitorStock } from "./content";
 import { getVisitors } from "./onboarding";
-import { createValleyWorld, editValleyGround, homeFootprints, undoValleyGround, validateFurniturePlacement, validateHomePlacement } from "./world";
+import { createValleyWorld, editValleyGround, homeFootprints, undoValleyGround, validateFurniturePlacement, validateHomePlacement,visitorOccupies } from "./world";
 
 const result=(ok:boolean,message:string):ValleyResult=>({ok,message});
 const quantity=(n:number)=>Number.isSafeInteger(n)&&n>0&&n<=100;
 const complete=(save:ValleySave)=>save.valley.cottageTicks>=COTTAGE_TICKS;
 const near=(save:ValleySave,x:number,z:number,r=3)=>Math.hypot(save.action.player.x-x,save.action.player.z-z)<=r;
+const nearVisitor=(save:ValleySave,id:"builder"|"merchant"|"smith",x:number,z:number)=>{const p=save.valley.visitorPositions?.[id];return near(save,p?.x??x,p?.z??z);};
 const overlapsPlayer=(save:ValleySave,x:number,z:number,width:number,height:number)=>{
   const p=save.action.player;
   return p.x+.2>x-.5&&p.x-.2<x+width-.5&&p.z+.2>z-.5&&p.z-.2<z+height-.5;
@@ -27,7 +28,7 @@ function bankNearby(save:ValleySave):boolean {
   const fp=homeFootprints(save.valley);
   return !!fp&&((!save.valley.home?.tentPacked&&near(save,fp.tentDoor.x,fp.tentDoor.z))||(complete(save)&&near(save,fp.door.x,fp.door.z)));
 }
-function orderNearby(save:ValleySave):boolean {const fp=complete(save)?homeFootprints(save.valley):null;return near(save,51,141)||near(save,74,140)||bankNearby(save)||complete(save)&&(near(save,75,142)||near(save,76,178))||!!fp&&near(save,fp.planningTable.x,fp.planningTable.z);}
+function orderNearby(save:ValleySave):boolean {const fp=complete(save)?homeFootprints(save.valley):null;return nearVisitor(save,"builder",51,141)||near(save,74,140)||bankNearby(save)||complete(save)&&(nearVisitor(save,"merchant",75,142)||nearVisitor(save,"smith",76,178))||!!fp&&near(save,fp.planningTable.x,fp.planningTable.z);}
 function gift(save:ValleySave,itemId:string,n:number):boolean {
   if(!addItems(carried(save),itemId,n)) {
     // Connected storage has no slot limit, but the shared inventory integer ceiling still applies.
@@ -114,7 +115,7 @@ function execute(save:ValleySave,command:ValleyCommand,now:number):ValleyResult 
       return result(true,`${order.name} delivered. Earned ${order.coins} coins.`);
     }
     case "buy": case "sell": {
-      if(!near(save,74,140)&&!(complete(save)&&near(save,75,142)))return result(false,"Stand near the supply caravan or Pella to trade.");
+      if(!near(save,74,140)&&!(complete(save)&&nearVisitor(save,"merchant",75,142)))return result(false,"Stand near the supply caravan or Pella to trade.");
       if(!quantity(command.quantity))return result(false,"Choose a quantity from 1 to 100.");
       const stock=VALLEY_STOCK.find(s=>s.itemId===command.itemId);
       if(!stock||(stock.requiresCottage&&!complete(save)))return result(false,"That item is unavailable at the caravan.");
@@ -156,7 +157,7 @@ function execute(save:ValleySave,command:ValleyCommand,now:number):ValleyResult 
       v.plants.push({id:`p-${v.layoutRevision}-${save.chapter.tick}`,x:command.x,z:command.z,kind:command.kind});v.layoutRevision++;return result(true,"Planted. Ground work awards no experience.");
     }
     case "daily-help": {
-      if(!near(save,51,141))return result(false,"Speak to Rowan for a small daily timber parcel.");
+      if(!nearVisitor(save,"builder",51,141))return result(false,"Speak to Rowan for a small daily timber parcel.");
       if(v.dailyHelp.includes(date)||v.dailyHelp.some(day=>day>date))return result(false,"Rowan has already given you today's timber parcel.");
       if(!gift(save,"logs",4))return result(false,"Make room for the timber parcel in connected storage.");v.dailyHelp.push(date);v.dailyHelp=v.dailyHelp.slice(-90);return result(true,"Rowan gave you four logs. One parcel is available per local date.");
     }
@@ -171,6 +172,7 @@ function execute(save:ValleySave,command:ValleyCommand,now:number):ValleyResult 
       if(!complete(save))return result(false,"The public forge is optional after your cottage is complete.");
       if(!near(save,70,178,5))return result(false,"Carry materials to the public forge site.");
       if(overlapsPlayer(save,70,178,4,3))return result(false,"Step clear of the forge's building pad before delivering materials.");
+      if(visitorOccupies(v,{x:70,z:178,width:4,height:3}))return result(false,"Wait for your neighbour to step clear of the forge pad.");
       if(!quantity(command.quantity)||!["logs","bronze-bar"].includes(command.itemId))return result(false,"Choose an exact material quantity.");
       const key=command.itemId==="logs"?"logs":"bars",limit=key==="logs"?12:2;
       if(command.quantity>limit-v.forge[key]||!removeItems(bag,command.itemId,command.quantity))return result(false,"Bring carried materials within the remaining project requirement.");

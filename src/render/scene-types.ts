@@ -31,6 +31,9 @@ export interface TileSceneProps {
   /** Height edits change this key; pigment texture reuse follows terrain-array identity. */
   groundRevision?: string | number;
   directInput?: boolean;
+  /** Point-and-click exploration; selection approaches targets through the worker. */
+  pointControls?: boolean;
+  ambientNpcs?:readonly import("../valley/contracts").AmbientNpcPose[];
   readInteractionCue?: () => {player:{x:number;z:number;facingX:number;facingZ:number};target?:{x:number;z:number;label:string}} | undefined;
   canInteractSelection?: (selection:TileSelection) => boolean;
   placementPreview?: readonly {x:number;z:number;width:number;height:number;color?:number}[];

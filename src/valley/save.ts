@@ -63,6 +63,7 @@ export function validateValleySave(value:unknown):ValleySave|null {
     if(!record(value)||value.version!==7||!record(value.chapter)||!record(value.valley)||!integer(value.savedAt,8.64e15)||!finite(value.offlineRemainder,0,599.999999))return null;
     const input=structuredClone(value),v=input.valley as unknown as ValleyData;
     v.workQueue??=[];
+    if(v.visitorPositions!==undefined&&(!record(v.visitorPositions)||Object.entries(v.visitorPositions).some(([id,p])=>!["builder","merchant","smith"].includes(id)||!record(p)||!finite(p.x,8,87)||!finite(p.z,136,183))))return null;
     if(!Array.isArray(v.workQueue)||v.workQueue.length>1||v.workQueue.some(job=>!record(job)||typeof job.recipeId!=="string"||!VALLEY_RECIPES[job.recipeId]||!integer(job.quantity,100)||job.quantity<1||!integer(job.remainingTicks,360000)))return null;
     if(!integer(v.paid,100)||!integer(v.cottageTicks,9000)||(v.cottageTicks>0&&v.paid!==100)||!record(v.forge)||
       !integer(v.forge.logs,12)||!integer(v.forge.bars,2)||!integer(v.forge.ticks,1800)||(v.forge.ticks>0&&(v.forge.logs!==12||v.forge.bars!==2||v.cottageTicks!==9000))||

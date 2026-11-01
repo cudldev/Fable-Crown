@@ -12,11 +12,11 @@ test.use({ hasTouch: true, isMobile: true, deviceScaleFactor: 1 });
 const app = (page: Page) => page.getByTestId("valley-app");
 const dialog = (page: Page) => page.getByRole("dialog");
 const feedback = (page: Page) => page.getByTestId("valley-feedback");
-const strike = (page: Page) => page.locator("[data-action-strike]");
 const errors = new WeakMap<Page, string[]>();
 test.beforeEach(async ({ page }) => {
   const captured: string[] = []; errors.set(page, captured);
   page.on("pageerror", error => captured.push(error.message));
+  await page.addInitScript(()=>{const pad={buttons:Array.from({length:17},()=>({pressed:false,touched:false,value:0})),axes:[0,0,0,0]};Object.assign(window,{mobileQaPad:pad});Object.defineProperty(navigator,"getGamepads",{value:()=>[{...pad,connected:true,index:0,id:"Mobile QA controller",mapping:"standard",timestamp:performance.now()}]});});
 });
 test.afterEach(async ({ page }) => { expect(errors.get(page)).toEqual([]); });
 async function ready(page: Page) {
@@ -89,97 +89,33 @@ async function capture(page: Page, name: string) {
   await page.screenshot({ path: `docs/screenshots/valley-mobile/${size.width > size.height ? "landscape" : "portrait"}-${name}.png` });
 }
 
-test("coarse touch reports real repeated gathering, recovery and empty attempts without extra rewards", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("./?chapter=valley"); await ready(page);
-  const fixture = createValleySave(Date.now()); at(fixture, 25, 140);
-  fixture.chapter.player.inventory = [{ itemId: "bronze-axe", quantity: 1 }]; fixture.chapter.seed = 2;
-  const xp = fixture.chapter.player.skills.woodcutting;
-  await restore(page, fixture);
-  await expect(strike(page)).toHaveAccessibleName("Chop");
-  await expect(page.getByTestId("valley-context")).toHaveAttribute("data-target-ready", "true");
-  await strike(page).tap();
-  await expect(feedback(page)).toContainText(/\+1 Logs/);
-  await expect(feedback(page)).toContainText("+25 woodcutting XP");
-  await expect(feedback(page)).toBeVisible();
-  await capture(page, "gather-feedback");
-  const first = await feedback(page).getAttribute("data-feedback-id");
-  await expect(strike(page)).toHaveAttribute("data-swinging", "false");
-  await strike(page).tap();
-  await expect.poll(() => feedback(page).getAttribute("data-feedback-id")).not.toBe(first);
-  await expect(feedback(page)).toContainText(/\+1 Logs/);
-  await expect(feedback(page)).toHaveAttribute("data-visible", "true");
-  await expect(strike(page)).toHaveAttribute("data-swinging", "false");
-  // Separate recovery feedback from the two rewards: a newer failed tap can legitimately
-  // replace the previous reward toast. The seeded third attempt gives no material.
-  await strike(page).tap(); await expect(strike(page)).toHaveAttribute("data-swinging", "true");
-  await strike(page).tap(); await expect(feedback(page)).toContainText("Finishing this swing");
-  await expect(strike(page)).toHaveAttribute("data-swinging", "false");
-  const gathered = await snapshot(page);
-  expect(itemCount(gathered.chapter.player.inventory, "logs")).toBe(2);
-  expect(gathered.chapter.player.skills.woodcutting).toBe(xp + 500);
-  await menu(page, "Journal");
-  const history = dialog(page).getByRole("region", { name: "Recent activity" });
-  await expect(history).toContainText("Finishing this swing");
-  expect(await history.getByText("+1 Logs · +25 woodcutting XP", { exact: true }).count()).toBe(2);
-  await dialog(page).getByRole("button", { name: "Back", exact: true }).tap(); await capture(page, "game-menu");
-  const empty = createValleySave(Date.now()); at(empty, 52, 150);
-  await restore(page, empty); await strike(page).tap();
-  await expect(feedback(page)).toContainText("Nothing gathered this swing");
-  await expect(feedback(page)).toContainText("Face a tree, rock or pond");
-  await expect(strike(page)).toHaveAttribute("data-swinging", "false");
-  const unchanged = await snapshot(page);
-  expect(unchanged.chapter.player.inventory).toEqual(empty.chapter.player.inventory);
-  expect(unchanged.chapter.player.skills).toEqual(empty.chapter.player.skills);
+async function controllerButton(page:Page,index:number,held:boolean){await page.evaluate(({index,held})=>{const p=(window as unknown as {mobileQaPad:{buttons:{pressed:boolean;touched:boolean;value:number}[]}}).mobileQaPad;Object.assign(p.buttons[index],{pressed:held,touched:held,value:Number(held)});},{index,held});await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));}
+test("mobile controller gathering preserves exact rewards and reports empty attempts",async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto("./?chapter=valley");await ready(page);const fixture=createValleySave(Date.now());at(fixture,25,140);fixture.chapter.seed=2;fixture.chapter.player.inventory=[{itemId:"bronze-axe",quantity:1}];const xp=fixture.chapter.player.skills.woodcutting;await restore(page,fixture);
+ for(let i=0;i<2;i++){const prior=await feedback(page).getAttribute("data-feedback-id");await controllerButton(page,7,true);await expect.poll(()=>feedback(page).getAttribute("data-feedback-id")).not.toBe(prior);await expect(feedback(page)).toContainText("+1 Logs");await expect(feedback(page)).toContainText("+25 woodcutting XP");await expect(app(page)).toHaveAttribute("data-swing","0.000");await controllerButton(page,7,false);await page.waitForTimeout(60);}
+ const gathered=await snapshot(page);expect(itemCount(gathered.chapter.player.inventory,"logs")).toBe(2);expect(gathered.chapter.player.skills.woodcutting).toBe(xp+500);
+ const empty=createValleySave(Date.now());at(empty,52,150);await restore(page,empty);await controllerButton(page,7,true);await controllerButton(page,7,false);await expect(feedback(page)).toContainText("Nothing gathered this swing");const unchanged=await snapshot(page);expect(unchanged.chapter.player.inventory).toEqual(empty.chapter.player.inventory);expect(unchanged.chapter.player.skills).toEqual(empty.chapter.player.skills);
 });
 
-test("coarse portrait and landscape keep both handed layouts reachable and clear of other controls", async ({ page }) => {
-  await page.goto("./?chapter=valley"); await ready(page);
-  const fixture = createValleySave(Date.now()); at(fixture, 52, 150); await restore(page, fixture);
-  for (const size of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 667, height: 375 }, { width: 844, height: 390 }]) {
-    await page.setViewportSize(size);
-    for (const hand of ["right", "left"] as const) {
-      await menu(page, "Settings");
-      await dialog(page).getByRole("button", { name: hand === "right" ? "Right-handed" : "Left-handed", exact: true }).tap();
-      await dialog(page).getByRole("button", { name: "Lower controls", exact: true }).tap();
-      await dialog(page).getByRole("button", { name: "Close", exact: true }).tap();
-      await expect(page.locator("[data-action-controls]")).toHaveAttribute("data-hand", hand);
-      await strike(page).tap();
-      await expect(feedback(page)).toHaveAttribute("data-visible", "true");
-      const controls = await page.locator(".action-stick, [data-action-controls] button, .valley-camera button").all();
-      const rectangles = [];
-      for (const control of controls) {
-        const box = await bounds(control); rectangles.push(box);
-        expect(box.width).toBeGreaterThanOrEqual(44); expect(box.height).toBeGreaterThanOrEqual(44);
-        expect(box.x).toBeGreaterThanOrEqual(0); expect(box.y).toBeGreaterThanOrEqual(0);
-        expect(box.x + box.width).toBeLessThanOrEqual(size.width + .5);
-        expect(box.y + box.height).toBeLessThanOrEqual(size.height + .5);
-      }
-      for (let a = 0; a < rectangles.length; a++) for (let b = a + 1; b < rectangles.length; b++) {
-        const one = rectangles[a], two = rectangles[b];
-        const overlap = Math.min(one.x + one.width, two.x + two.width) - Math.max(one.x, two.x) > .5 && Math.min(one.y + one.height, two.y + two.height) - Math.max(one.y, two.y) > .5;
-        expect(overlap, `${size.width}×${size.height} ${hand}: touch controls ${a}/${b} overlap`).toBe(false);
-      }
-      for (const text of [page.getByTestId("valley-context"), feedback(page)]) {
-        const box = await bounds(text);
-        expect(box.x).toBeGreaterThanOrEqual(0); expect(box.y).toBeGreaterThanOrEqual(0);
-        expect(box.x + box.width).toBeLessThanOrEqual(size.width + .5); expect(box.y + box.height).toBeLessThanOrEqual(size.height + .5);
-        for (const control of rectangles) {
-          expect(Math.min(box.x + box.width, control.x + control.width) - Math.max(box.x, control.x) > .5 && Math.min(box.y + box.height, control.y + control.height) - Math.max(box.y, control.y) > .5,
-            `${size.width}×${size.height} ${hand}: action feedback covers a control`).toBe(false);
-        }
-      }
-      if (hand === "right" && (size.width === 390 || size.width === 844)) await capture(page, "hud-feedback");
-      const primary = await bounds(strike(page)), block = await bounds(page.locator(".action-block"));
-      expect(hand === "right" ? primary.x > block.x : primary.x < block.x).toBe(true);
-      const lower = primary.y;
-      await menu(page, "Settings"); await dialog(page).getByRole("button", { name: "Raise controls", exact: true }).tap();
-      await dialog(page).getByRole("button", { name: "Close", exact: true }).tap();
-      await expect(page.locator("[data-action-controls]")).toHaveAttribute("data-raised", "true");
-      expect((await bounds(strike(page))).y).toBeLessThan(lower - 10);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    }
-  }
+test("coarse portrait and landscape keep point menus reachable without a virtual dock",async({page})=>{
+ await page.goto("./?chapter=valley");await ready(page);const fixture=createValleySave(Date.now());at(fixture,52,150);await restore(page,fixture);
+ for(const size of [{width:320,height:568},{width:390,height:844},{width:667,height:375},{width:844,height:390}]){
+  await page.setViewportSize(size);await expect(page.locator("[data-action-controls]")).toHaveCount(0);await expect(page.getByRole("group",{name:"Movement joystick"})).toHaveCount(0);
+  for(const control of await page.locator(".valley-hud-actions button,.valley-camera button").all()){const box=await bounds(control);expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);expect(box.x).toBeGreaterThanOrEqual(0);expect(box.y).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(size.width+.5);expect(box.y+box.height).toBeLessThanOrEqual(size.height+.5);}
+  await menu(page,"Settings");await expect(dialog(page)).toContainText("Click or tap ground");await dialog(page).getByRole("button",{name:"Close",exact:true}).tap();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+});
+
+test("touch drag, pinch and long-press do not dispatch an accidental walk",async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto("./?chapter=valley");await ready(page);const fixture=createValleySave(Date.now());at(fixture,52,150);await restore(page,fixture);
+ const cdp=await page.context().newCDPSession(page),before=await app(page).getAttribute("data-player-x");
+ await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:1,x:195,y:350}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{id:1,x:280,y:430}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+ await page.waitForTimeout(200);await expect(app(page)).toHaveAttribute("data-player-x",before!);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");
+ const zoom=Number(await app(page).getAttribute("data-camera-zoom"));
+ await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:1,x:140,y:350},{id:2,x:250,y:350}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{id:1,x:105,y:350},{id:2,x:285,y:350}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+ await expect.poll(async()=>Number(await app(page).getAttribute("data-camera-zoom"))).toBeGreaterThan(zoom);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");await expect(app(page)).toHaveAttribute("data-camera-follow","true");
+ await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:3,x:195,y:370}]});await expect(page.getByRole("menu",{name:"World actions"})).toBeVisible({timeout:3000});await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+ await expect(page.getByRole("menuitem",{name:"Walk here",exact:true})).toBeVisible();await page.keyboard.press("Escape");await expect(page.locator(".valley-world-menu")).toHaveCount(0);await page.waitForTimeout(200);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");await expect(app(page)).toHaveAttribute("data-player-x",before!);
 });
 
 test("world stations filter services, finish real work while actors pause, and keep a suspended placement draft", async ({ page }) => {
@@ -193,7 +129,7 @@ test("world stations filter services, finish real work while actors pause, and k
   await expect(dialog(page).getByRole("heading", { name: "Connected storage", exact: true })).toHaveCount(0);
   await expect(dialog(page).getByRole("button", { name: /^Store / })).toHaveCount(0);
   await dialog(page).getByRole("button", { name: "Close", exact: true }).tap();
-  await page.locator(".action-interact").tap();
+  await page.keyboard.press("e");
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
   await dialog(page).getByRole("button", { name: "Craft something", exact: true }).tap();
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "craft");
@@ -229,15 +165,7 @@ test("world stations filter services, finish real work while actors pause, and k
   await page.keyboard.down("d");
   try { await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(73.5); }
   finally { await page.keyboard.up("d"); }
-  // Approach from the west and face the caravan rather than its separate chest.
-  await page.keyboard.down("a");
-  try { await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeLessThan(74.4); }
-  finally { await page.keyboard.up("a"); }
-  await page.keyboard.down("w");
-  try { await expect(page.getByTestId("interaction-indicator")).toBeVisible(); await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label", /Open · Travelling supply caravan/); }
-  finally { await page.keyboard.up("w"); }
-  await page.touchscreen.tap(20, 20); // Actual touch resumes the mobile dock after keyboard walking.
-  await page.locator(".action-interact").tap();
+  await page.getByRole("button",{name:"Trade at Travelling supply caravan",exact:true}).tap();
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
   await dialog(page).getByRole("button", { name: "Browse supplies", exact: true }).tap();
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "trade");
@@ -253,7 +181,7 @@ test("world stations filter services, finish real work while actors pause, and k
   expect(crafted.valley.carpentryXp).toBe(100);
   for (const station of [{ x: 78, z: 140, kind: "furnace" }, { x: 81, z: 140, kind: "range" }] as const) {
     const other = createValleySave(Date.now()); at(other, station.x, station.z, { x: station.x, z: 139 }); await restore(page, other);
-    await page.locator(".action-interact").tap();
+    await page.keyboard.press("e");
     await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
     await dialog(page).getByRole("button", { name: station.kind === "furnace" ? "Smelt something" : "Cook something", exact: true }).tap();
     await expect(dialog(page)).toHaveAttribute("data-menu-panel", "craft");
@@ -278,107 +206,11 @@ test("world stations filter services, finish real work while actors pause, and k
   await page.setViewportSize({ width: 844, height: 390 }); await capture(page, "placement");
   await page.setViewportSize({ width: 390, height: 844 });
   await dialog(page).getByRole("button", { name: "Walk closer", exact: true }).tap();
-  await expect(dialog(page)).toHaveCount(0); await expect(strike(page)).toBeVisible();
+  await expect(dialog(page)).toHaveCount(0); await expect(page.locator("[data-action-controls]")).toHaveCount(0);
   await page.getByRole("button", { name: "Resume placement", exact: true }).tap();
   await expect(page.getByLabel("Placement X")).toHaveValue("58"); await expect(page.getByLabel("Placement Z")).toHaveValue("168");
   await expect(dialog(page).getByRole("button", { name: "Rotate 90°", exact: true })).toBeVisible();
   await dialog(page).getByRole("button", { name: "Cancel", exact: true }).tap();
   const kept = await snapshot(page);
   expect(itemCount(kept.chapter.player.inventory, "valley-stool")).toBe(1); expect(kept.valley.furniture).toEqual([]);
-});
-
-test("independent move and strike touches release on cancellation, orientation and menu entry", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("./?chapter=valley"); await ready(page);
-  const fixture = createValleySave(Date.now()); at(fixture, 52, 150); await restore(page, fixture);
-  const cdp = await page.context().newCDPSession(page);
-  const stick = page.getByRole("group", { name: "Movement joystick" });
-  const start = async () => {
-    const move = await bounds(stick), action = await bounds(strike(page));
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ id: 1, x: move.x + move.width / 2 + 35, y: move.y + move.height / 2 }, { id: 2, x: action.x + action.width / 2, y: action.y + action.height / 2 }] });
-  };
-  const before = Number(await app(page).getAttribute("data-player-x"));
-  await start(); await expect(strike(page)).toHaveAttribute("data-held", "true");
-  await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(before + .1);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-  await expect(strike(page)).toHaveAttribute("data-held", "false");
-  await page.waitForTimeout(200);
-  const stopped = Number(await app(page).getAttribute("data-player-x"));
-  await page.waitForTimeout(250);
-  expect(Number(await app(page).getAttribute("data-player-x"))).toBeCloseTo(stopped, 2);
-  const move = await bounds(stick), mode = page.locator("[data-action-mode]"), modeBox = await bounds(mode);
-  const movePoint = { id: 1, x: move.x + move.width / 2 + 35, y: move.y + move.height / 2 };
-  const modePoint = { id: 2, x: modeBox.x + modeBox.width / 2, y: modeBox.y + modeBox.height / 2 };
-  const previousMode = await mode.getAttribute("data-mode");
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [movePoint] });
-  await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(stopped + .1);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [movePoint, modePoint] });
-  // This Chrome contact stream ends the supplied contact; joystick id1 remains held.
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [modePoint] });
-  await expect(mode).toHaveAttribute("data-mode", previousMode === "tool" ? "weapon" : "tool");
-  await page.waitForTimeout(200); // Exclude an old 100ms HUD snapshot when measuring continued motion.
-  const afterMode = Number(await app(page).getAttribute("data-player-x"));
-  await expect.poll(async () => Number(await app(page).getAttribute("data-player-x")), { message: "The held joystick must keep moving after the other thumb switches mode" }).toBeGreaterThan(afterMode + .1);
-  await expect(stick.locator(".action-stick-thumb")).not.toHaveAttribute("style", /translate\(0px, 0px\)/);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-  await mode.tap(); // A primary touch also toggles once, without a synthesized-click bounce.
-  await expect(mode).toHaveAttribute("data-mode", previousMode!); await page.waitForTimeout(200);
-  await expect(mode).toHaveAttribute("data-mode", previousMode!);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [modePoint] });
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-  await expect(mode).toHaveAttribute("data-mode", previousMode!);
-  const outside = { ...modePoint, x: modeBox.x - 15 };
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [modePoint] });
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [outside] });
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [outside] });
-  await page.waitForTimeout(200);
-  await expect(mode).toHaveAttribute("data-mode", previousMode!);
-  await start(); await expect(strike(page)).toHaveAttribute("data-held", "true");
-  await page.setViewportSize({ width: 844, height: 390 });
-  await expect(strike(page)).toHaveAttribute("data-held", "false");
-  await expect(stick.locator(".action-stick-thumb")).toHaveAttribute("style", /translate\(0px, 0px\)/);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-  await page.getByRole("button", { name: "Menu", exact: true }).tap();
-  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "menu");
-  await capture(page, "game-menu");
-  await page.setViewportSize({ width: 667, height: 375 });
-  await fullyInsideMenu(page, dialog(page).getByRole("button", { name: "Resume", exact: true }));
-  await fullyInsideMenu(page, dialog(page).getByRole("button", { name: "Settings", exact: true }));
-  await capture(page, "small-game-menu");
-  for (const worldOnly of ["Crafting", "Trade", "Visitors", "Orders", "Public projects"]) {
-    await expect(dialog(page).getByRole("button", { name: worldOnly, exact: true })).toHaveCount(0);
-  }
-  await dialog(page).getByRole("button", { name: "Settings", exact: true }).tap();
-  await dialog(page).getByRole("button", { name: "Back", exact: true }).tap();
-  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "menu");
-  await dialog(page).getByRole("button", { name: "Resume", exact: true }).tap();
-  await expect(strike(page)).toHaveAttribute("data-held", "false");
-  const resumed = Number(await app(page).getAttribute("data-player-x"));
-  await page.waitForTimeout(250);
-  expect(Number(await app(page).getAttribute("data-player-x"))).toBeCloseTo(resumed, 2);
-  const workbench = createValleySave(Date.now()); at(workbench, 69, 140, { x: 69, z: 139 }); await restore(page, workbench);
-  const walking = await bounds(stick), interact = await bounds(page.locator(".action-interact"));
-  // Screen up-right maps to world north in the fixed isometric camera basis.
-  const walkingPoint = { id: 1, x: walking.x + walking.width / 2 + 20, y: walking.y + walking.height / 2 - 28 };
-  const interactPoint = { id: 2, x: interact.x + interact.width / 2, y: interact.y + interact.height / 2 };
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [walkingPoint] });
-  await expect.poll(async () => Number(await app(page).getAttribute("data-player-z"))).toBeLessThan(139.9);
-  await expect(page.getByTestId("interaction-indicator")).toBeVisible();
-  await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label", /Open · Communal carpentry workbench/);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [walkingPoint, interactPoint] });
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [interactPoint] });
-  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
-  await expect(dialog(page)).toContainText("Communal carpentry workbench");
-  await expect(dialog(page).getByRole("button", { name: "Craft something", exact: true })).toBeVisible();
-  await page.waitForTimeout(200);
-  const inMenu = Number(await app(page).getAttribute("data-player-x"));
-  const inMenuZ = Number(await app(page).getAttribute("data-player-z"));
-  await page.waitForTimeout(250);
-  expect(Number(await app(page).getAttribute("data-player-x"))).toBeCloseTo(inMenu, 2);
-  expect(Number(await app(page).getAttribute("data-player-z"))).toBeCloseTo(inMenuZ, 2);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-  await dialog(page).getByRole("button", { name: "Step away", exact: true }).tap();
-  await page.waitForTimeout(250);
-  expect(Number(await app(page).getAttribute("data-player-x"))).toBeCloseTo(inMenu, 2);
-  expect(Number(await app(page).getAttribute("data-player-z"))).toBeCloseTo(inMenuZ, 2);
 });

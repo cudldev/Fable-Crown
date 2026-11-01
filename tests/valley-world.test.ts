@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { canStep, COLLISION, isWalkable, tile, WORLD } from "../src/rpg/world";
 import { findPath } from "../src/rpg/pathfinding";
+import {rpgActionWorld} from "../src/action/rpg-adapter";
+import {createValleySave} from "../src/valley/save";
+import {planPointerRoute} from "../src/valley/pointer-navigation";
 import type { ValleyData } from "../src/valley/contracts";
 import { COTTAGE_TICKS, FORGE_TICKS } from "../src/valley/contracts";
 import { canTraverseValley, createValleyWorld, editValleyGround, furnitureFootprint, homeFootprints, inValley,
@@ -15,6 +18,22 @@ function data(overrides: Partial<ValleyData> = {}): ValleyData {
 const complete = (overrides: Partial<ValleyData> = {}) => data({ cottageTicks: COTTAGE_TICKS, ...overrides });
 
 describe("valley ownership and immutable world compilation", () => {
+  it("routes through a modest detour on actual player-laid paths",()=>{
+    const save=createValleySave(Date.now());for(let x=48;x<=52;x++)save.valley.ground[`${x},151`]={level:0,path:true};
+    const world=createValleyWorld(save.valley,save.chapter),env=rpgActionWorld(save.chapter,world),route=planPointerRoute({x:48,z:150},{x:52,z:150,range:0},env,world);
+    expect(env.travelCost?.(50,151)).toBe(.6);expect(env.travelCost?.(50,150)).toBe(1);expect(route?.some(p=>p.z===151)).toBe(true);
+  });
+  it("keeps moving visitors out of new home, furnishing and ground edits",()=>{
+    const d=data({visitorPositions:{builder:{x:55,z:156}}});
+    expect(validateHomePlacement(d,54,155,0)).toMatch(/neighbours/);
+    expect(validateFurniturePlacement(d,"stool",55,156,0)).toMatch(/neighbour/);
+    const before=structuredClone(d);expect(editValleyGround(d,55,156,"raise").ok).toBe(false);expect(d).toEqual(before);
+  });
+  it("updates visitor anchors when their saved positions change without changing building layout",()=>{
+    const d=data({visitorPositions:{builder:{x:52,z:143}}}),before=createValleyWorld(d);
+    d.visitorPositions!.builder={x:53,z:143};const after=createValleyWorld(d);
+    expect(after).not.toBe(before);expect(after.objects.find(o=>o.id==="valley-visitor-builder")?.position).toEqual(tile(53,143));
+  });
   it("uses the exact safe and owned inclusive bounds without accepting NaN", () => {
     expect(VALLEY_BOUNDS).toEqual({ minX: 8, maxX: 87, minZ: 136, maxZ: 183 });
     expect(OWNED_BOUNDS).toEqual({ minX: 16, maxX: 79, minZ: 144, maxZ: 175 });

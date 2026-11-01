@@ -10,6 +10,8 @@ export function reconcileValley(save:ValleySave,now:number):{ticks:number;messag
   const ticks=Math.floor(effective/600),home=save.valley.cottageTicks,forge=save.valley.forge.ticks,queue=save.valley.workQueue.length;
   save.offlineRemainder=effective%600;
   advanceSettlement(save,ticks,Math.max(now,save.savedAt));
+  // Live NPC traces belong to one settlement tick and must never replay after time away.
+  for(const npc of save.chapter.npcs){npc.previousPosition={...npc.position};npc.movement=null;npc.path=[];npc.action=null;}
   save.savedAt=Math.max(now,save.savedAt);save.chapter.savedAt=save.savedAt;save.chapter.calendar=calendarDate(save.savedAt);
   const finished=[];
   if(home<COTTAGE_TICKS&&save.valley.cottageTicks>=COTTAGE_TICKS)finished.push("Your cottage is ready");

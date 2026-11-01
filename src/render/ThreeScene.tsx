@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ActionCycle } from "./ActionCycle";
 import { HealthVial } from "./HealthVial";
 import type { TileSceneProps, TileSelection } from "./scene-types";
+import type { WorldObject } from "../rpg/types";
 import { worldForState } from "../rpg/world";
 import { ENEMIES } from "../rpg/content";
 import { levelForXp } from "../rpg/skills";
@@ -21,6 +22,7 @@ const DAYLIGHT_SETTINGS_KEY = "fable-crown.daylight-settings";
 const LENS_SETTINGS_KEY = "fable-crown.lens-distortion";
 
 export type ThreeSceneProps = TileSceneProps;
+const pointObjectAction=(object:WorldObject)=>`${object.resourceId?object.kind==="tree"?"Chop":object.kind==="rock"?"Mine":object.kind==="fish"?"Fish":"Gather":object.id.startsWith("valley-visitor-")||object.kind==="quest"?"Talk to":object.kind==="shop"?"Trade at":object.kind==="sign"?"Read":object.kind==="bank"?"Store at":object.kind==="building"?"Open":(["anvil","furnace","range"].includes(object.kind)||!!object.serviceId)?"Use":"Inspect"} ${object.name}`;
 
 /** The voxel world consumes immutable simulation snapshots. */
 export default function ThreeScene(props: ThreeSceneProps) {
@@ -115,7 +117,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
     // Pointer selection is handled by the drag-aware runtime, keyboard activation by React.
     if (event.detail === 0) {
       event.stopPropagation();
-      if(props.camera.dynamicFollow&&!props.canInteractSelection?.(selection))return;
+      if(props.camera.dynamicFollow&&!(props.pointControls&&!props.directInput)&&!props.canInteractSelection?.(selection))return;
       const bounds = event.currentTarget.getBoundingClientRect();
       runtime.current?.showClickIndicator(selection, bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
       (props.onInteract ?? props.onSelect)(selection);
@@ -132,7 +134,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
       const bounds = button.getBoundingClientRect();
       props.onContextMenu?.(JSON.parse(button.dataset.threeSelection!), { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 });
     }}>
-      <canvas ref={canvas} data-testid="three-canvas" aria-label={props.camera.dynamicFollow?"The Fable Crown valley. Move with WASD, a controller or joystick. The camera follows you; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
+      <canvas ref={canvas} data-testid="three-canvas" aria-label={props.pointControls?"The Fable Crown valley. Click or tap to walk, or choose a target to approach and interact. Right click or touch and hold for options. The camera follows you; wheel or pinch zooms.":props.camera.dynamicFollow?"The Fable Crown valley. Move with WASD, a controller or joystick. The camera follows you; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
       {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the voxel village…</div>}
       {status === "ready" && <>
         <span className="three-performance" data-testid="fps-indicator" aria-label="Rendering performance" aria-live="off">FPS —</span>
@@ -154,23 +156,24 @@ export default function ThreeScene(props: ThreeSceneProps) {
           {objectButtons.map(object => {
             const selection: TileSelection = { kind: "object", id: object.id };
             const selected = props.selection?.kind === "object" && props.selection.id === object.id;
-            return <button key={object.id} ref={bind(`object-${object.id}`)} className={`tile-object ${["tree", "rock"].includes(object.kind) ? "resource" : ""}`} aria-label={`Inspect ${object.name}`} aria-description={props.camera.dynamicFollow?"Mouse interaction requires nearby range. Face the target to use Interact.":`Left click: ${defaultInteraction(props.state, selection).label}. Right click for options.`} aria-pressed={selected} title={props.camera.dynamicFollow?`Interact with ${object.name} when nearby`:defaultInteraction(props.state, selection).label} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)}>
+            const action=props.pointControls?pointObjectAction(object):defaultInteraction(props.state,selection).label;
+            return <button key={object.id} ref={bind(`object-${object.id}`)} className={`tile-object ${["tree", "rock"].includes(object.kind) ? "resource" : ""}`} aria-label={props.pointControls?action:`Inspect ${object.name}`} aria-description={props.pointControls?`Click or tap: approach and ${action.toLowerCase()}. Right click or touch and hold for options.`:props.camera.dynamicFollow?"Mouse interaction requires nearby range. Face the target to use Interact.":`Left click: ${action}. Right click for options.`} aria-pressed={selected} title={props.pointControls?action:props.camera.dynamicFollow?`Interact with ${object.name} when nearby`:action} style={props.pointControls?{cursor:"pointer"}:undefined} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)}>
               <span>{!props.camera.dynamicFollow&&(["bank", "quest"].includes(object.kind) || selected || props.camera.overview && object.kind === "landmark") ? object.name : ""}</span>
             </button>;
           })}
-          {!props.camera.overview && [props.state.player, ...props.state.npcs].filter(actor=>!props.directInput||actor.id!==props.state.player.id).map(actor => {
+          {!props.camera.overview && [props.state.player, ...props.state.npcs].filter(actor=>!(props.directInput||props.pointControls)||actor.id!==props.state.player.id).map(actor => {
             const selection: TileSelection = { kind: "actor", id: actor.id };
-            return <button key={`actor-${actor.id}`} ref={bind(`actor-${actor.id}`)} className="tile-actor" aria-label={`Inspect ${actor.name}`} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)} />;
+            return <button key={`actor-${actor.id}`} ref={bind(`actor-${actor.id}`)} className="tile-actor" aria-label={`${props.pointControls?"Talk to":"Inspect"} ${actor.name}`} title={props.pointControls?`Talk to ${actor.name}`:undefined} style={props.pointControls?{cursor:"pointer"}:undefined} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)} />;
           })}
           {!props.camera.overview && props.state.enemies.filter(enemy => enemy.health > 0).map(enemy => {
             const selection: TileSelection = { kind: "enemy", id: enemy.id };
-            return <button key={`enemy-${enemy.id}`} ref={bind(`enemy-${enemy.id}`)} className="tile-enemy" aria-label={`Inspect ${ENEMIES[enemy.definitionId]?.name ?? enemy.definitionId}, ${enemy.health} health`} aria-pressed={props.selection?.kind === "enemy" && props.selection.id === enemy.id} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)} />;
+            return <button key={`enemy-${enemy.id}`} ref={bind(`enemy-${enemy.id}`)} className="tile-enemy" aria-label={`${props.pointControls?"Attack":"Inspect"} ${ENEMIES[enemy.definitionId]?.name ?? enemy.definitionId}, ${enemy.health} health`} title={props.pointControls?`Attack ${ENEMIES[enemy.definitionId]?.name??enemy.definitionId}`:undefined} style={props.pointControls?{cursor:"crosshair"}:undefined} aria-pressed={props.selection?.kind === "enemy" && props.selection.id === enemy.id} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)} />;
           })}
           {!props.camera.overview && props.state.drops.map(drop => {
             const selection: TileSelection = { kind: "drop", id: drop.id };
-            return <button key={`drop-${drop.id}`} ref={bind(`drop-${drop.id}`)} className="tile-drop" aria-label={`Inspect loot bag, ${drop.items.length} item types`} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)}><span>Loot</span></button>;
+            return <button key={`drop-${drop.id}`} ref={bind(`drop-${drop.id}`)} className="tile-drop" aria-label={`${props.pointControls?"Collect":"Inspect"} loot bag, ${drop.items.length} item types`} title={props.pointControls?"Collect supplies":undefined} style={props.pointControls?{cursor:"pointer"}:undefined} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)}><span>Loot</span></button>;
           })}
-          {!props.camera.overview && props.state.grave && <button ref={bind("grave")} className="tile-grave" aria-label="Inspect your backpack grave" data-three-selection={JSON.stringify({ kind: "grave" })} onClick={event => keyboardSelect(event, { kind: "grave" })}><span>Backpack grave</span></button>}
+          {!props.camera.overview && props.state.grave && <button ref={bind("grave")} className="tile-grave" aria-label={props.pointControls?"Recover your backpack":"Inspect your backpack grave"} title={props.pointControls?"Recover backpack":undefined} style={props.pointControls?{cursor:"pointer"}:undefined} data-three-selection={JSON.stringify({ kind: "grave" })} onClick={event => keyboardSelect(event, { kind: "grave" })}><span>Backpack grave</span></button>}
         </div>
         <div className="world-status-layer" data-testid="world-status-layer">
           {!props.camera.overview && <span ref={bind("health-player")} className="world-health world-health-player" aria-label={`Alden health ${props.state.player.health} of ${maxHealth}`}>

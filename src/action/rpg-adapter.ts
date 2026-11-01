@@ -14,6 +14,7 @@ export function rpgActionWorld(state: RpgState, world: WorldDefinition = worldFo
   safe = actionSafe, height = (_x:number,_z:number) => 0): ActionWorld {
   return {
     isSafe: safe, groundHeight: height,
+    travelCost(x,z){const terrain=world.terrain[Math.round(z)*world.width+Math.round(x)];return terrain==="dirt"?.6:terrain==="sand"?1.15:1;},
     canOccupy(x,z,fromX,fromZ) {
       if (![x,z,fromX,fromZ].every(Number.isFinite)) return false;
       const next = tile(Math.round(x),Math.round(z)), previous = tile(Math.round(fromX),Math.round(fromZ));

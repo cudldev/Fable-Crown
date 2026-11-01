@@ -37,97 +37,33 @@ async function ready(page: Page) {
   await expect(app(page)).toHaveAttribute("data-mode", "world");
 }
 
-test("fine-pointer desktop has no touch dock and supports real keyboard and world mouse actions", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 720 }); await ready(page);
-  expect(await page.evaluate(() => matchMedia("(pointer: fine)").matches)).toBe(true);
-  await expect(app(page)).toHaveAttribute("data-input-mode", "keyboard");
-  await expect(dock(page)).toHaveCount(0);
-  await expect(page.getByRole("group", { name: "Movement joystick" })).toHaveCount(0);
-  await page.mouse.click(1100, 450);
-  await expect(page.locator("[data-character-clip]")).toHaveAttribute("data-character-clip", "strike");
-  await expect(page.getByTestId("valley-feedback")).toContainText("Nothing gathered this swing");
-  const before = Number(await app(page).getAttribute("data-player-x"));
-  await page.keyboard.down("d");
-  try { await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(before + .1); }
-  finally { await page.keyboard.up("d"); }
-  await page.keyboard.down("a");
-  try { await expect(page.getByTestId("interaction-indicator")).toBeVisible(); await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label", /Talk · Rowan/); }
-  finally { await page.keyboard.up("a"); }
-  await page.keyboard.press("e");
-  await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan");
-  await page.keyboard.press("Escape"); await expect(dialog(page)).toHaveCount(0);
-  await expect(dock(page)).toHaveCount(0);
-  await press(page, 9); await expect(dialog(page)).toHaveAttribute("data-menu-panel", "menu");
-  await expect(app(page)).toHaveAttribute("data-input-mode", "controller");
-  await press(page, 1); await expect(dialog(page)).toHaveCount(0);
-  await expect(dock(page)).toHaveCount(0);
-  await page.keyboard.press("w"); await expect(app(page)).toHaveAttribute("data-input-mode", "keyboard");
-  await expect(dock(page)).toHaveCount(0);
-  await page.screenshot({ path: test.info().outputPath("desktop-keyboard-no-touch-dock.png") });
+test("desktop uses point navigation without a dock and retains keyboard/controller menus",async({page})=>{
+ await page.setViewportSize({width:1280,height:720});await ready(page);
+ await expect(dock(page)).toHaveCount(0);await expect(app(page)).toHaveAttribute("data-controls","point");
+ const before=Number(await app(page).getAttribute("data-player-x"));
+ await page.keyboard.down("d");try{await expect.poll(async()=>Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(before+.1);}finally{await page.keyboard.up("d");}
+ await page.getByRole("button",{name:"Talk to Rowan the builder",exact:true}).click();
+ await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan",{timeout:15000});
+ await page.keyboard.press("Escape");await expect(dialog(page)).toHaveCount(0);
+ await press(page,9);await expect(dialog(page)).toHaveAttribute("data-menu-panel","menu");
+ await expect(app(page)).toHaveAttribute("data-input-mode","controller");await press(page,1);await expect(dialog(page)).toHaveCount(0);
+ await page.keyboard.press("w");await expect(app(page)).toHaveAttribute("data-input-mode","keyboard");await expect(dock(page)).toHaveCount(0);
 });
-
-test.describe("mobile touch and controller handover", () => {
-  test.use({ hasTouch: true, isMobile: true, deviceScaleFactor: 1, viewport: { width: 390, height: 844 } });
-  test("actual controller use hides the dock, releases virtual movement and restores touch only on touch or disconnect", async ({ page }) => {
-    await ready(page);
-    expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
-    await expect(app(page)).toHaveAttribute("data-input-mode", "touch");
-    await expect(dock(page)).toBeVisible();
-    await page.waitForTimeout(250); // An idle connected controller must not change the mode.
-    await expect(app(page)).toHaveAttribute("data-input-mode", "touch");
-    for (const drift of [.02, -.08, .05]) {
-      await axis(page, 0, drift); await axis(page, 2, -drift);
-      await page.waitForTimeout(80);
-      await expect(app(page)).toHaveAttribute("data-input-mode", "touch");
-      await expect(dock(page)).toBeVisible();
-    }
-    await axis(page, 0, 0); await axis(page, 2, 0);
-    const cdp = await page.context().newCDPSession(page);
-    const stick = await page.getByRole("group", { name: "Movement joystick" }).boundingBox(); expect(stick).not.toBeNull();
-    const before = Number(await app(page).getAttribute("data-player-x"));
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ id: 1, x: stick!.x + stick!.width / 2 + 35, y: stick!.y + stick!.height / 2 }] });
-    await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(before + .1);
-    await button(page, 13, true);
-    await expect(app(page)).toHaveAttribute("data-input-mode", "controller");
-    await expect(dock(page)).toHaveCount(0);
-    await button(page, 13, false);
-    await page.waitForTimeout(200);
-    const stopped = await app(page).getAttribute("data-player-x");
-    await page.waitForTimeout(250);
-    await expect(app(page)).toHaveAttribute("data-player-x", stopped!);
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-    await page.setViewportSize({ width: 844, height: 390 });
-    await expect(app(page)).toHaveAttribute("data-input-mode", "controller"); await expect(dock(page)).toHaveCount(0);
-    await axis(page, 0, -1);
-    try { await expect(page.getByTestId("interaction-indicator")).toBeVisible(); await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label", /Talk · Rowan/); }
-    finally { await axis(page, 0, 0); }
-    await press(page, 0); await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan");
-    await press(page, 0); await expect(dialog(page).getByRole("button", { name: "About my home…", exact: true })).toBeFocused();
-    await press(page, 13); await expect(dialog(page).getByRole("button", { name: "Need a hand with anything?", exact: true })).toBeFocused();
-    await press(page, 1); await expect(dialog(page)).toHaveCount(0);
-    await expect(dock(page)).toHaveCount(0);
-    await page.screenshot({ path: test.info().outputPath("mobile-controller-no-touch-dock-844x390.png") });
-    await page.touchscreen.tap(20, 20);
-    await expect(app(page)).toHaveAttribute("data-input-mode", "touch"); await expect(dock(page)).toBeVisible();
-    await axis(page, 0, 1);
-    await expect(app(page)).toHaveAttribute("data-input-mode", "controller"); await expect(dock(page)).toHaveCount(0);
-    await page.touchscreen.tap(20, 20);
-    await expect(app(page)).toHaveAttribute("data-input-mode", "touch"); await expect(dock(page)).toBeVisible();
-    await page.waitForTimeout(120); // An unchanged held axis must not steal back the mode.
-    await expect(app(page)).toHaveAttribute("data-input-mode", "touch"); await expect(dock(page)).toBeVisible();
-    await axis(page, 0, 0);
-    await press(page, 3);
-    await expect(app(page)).toHaveAttribute("data-input-mode", "controller"); await expect(dock(page)).toHaveCount(0);
-    await axis(page, 0, .04); await page.waitForTimeout(120);
-    await expect(app(page)).toHaveAttribute("data-input-mode", "controller");
-    await page.setViewportSize({ width: 390, height: 844 });
-    await expect(app(page)).toHaveAttribute("data-input-mode", "controller");
-    await page.evaluate(() => {
-      (window as unknown as { valleyInputModePad: TestPad }).valleyInputModePad.connected = false;
-      window.dispatchEvent(new Event("gamepaddisconnected"));
-    });
-    await expect(app(page)).toHaveAttribute("data-input-mode", "touch"); await expect(dock(page)).toBeVisible();
-    await expect(page.locator(".action-stick-thumb")).toHaveAttribute("style", /translate\(0px, 0px\)/);
-    await page.screenshot({ path: test.info().outputPath("mobile-touch-restored-after-controller.png") });
-  });
+test.describe("mobile point input and controller handover",()=>{
+ test.use({hasTouch:true,isMobile:true,deviceScaleFactor:1,viewport:{width:390,height:844}});
+ test("tap and controller modes remain dock-free across drift, rotation and disconnect",async({page})=>{
+  await ready(page);await expect(app(page)).toHaveAttribute("data-input-mode","touch");await expect(dock(page)).toHaveCount(0);
+  for(const drift of [.02,-.08,.05]){await axis(page,0,drift);await page.waitForTimeout(80);await expect(app(page)).toHaveAttribute("data-input-mode","touch");}
+  await axis(page,0,0);await page.getByRole("button",{name:"Talk to Rowan the builder",exact:true}).tap();
+  await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan",{timeout:15000});
+  await press(page,0);await expect(dialog(page).getByRole("button",{name:"About my home…",exact:true})).toBeFocused();
+  await press(page,13);await expect(dialog(page).getByRole("button",{name:"Need a hand with anything?",exact:true})).toBeFocused();
+  await expect(app(page)).toHaveAttribute("data-input-mode","controller");await press(page,1);await expect(dialog(page)).toHaveCount(0);
+  for(const size of [{width:844,height:390},{width:390,height:844}]){await page.setViewportSize(size);await expect(dock(page)).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
+  await page.getByRole("button",{name:"Menu",exact:true}).tap();await expect(app(page)).toHaveAttribute("data-input-mode","touch");await expect(dock(page)).toHaveCount(0);
+  await dialog(page).getByRole("button",{name:"Resume",exact:true}).tap();
+  await press(page,9);await expect(app(page)).toHaveAttribute("data-input-mode","controller");await press(page,1);
+  await page.evaluate(()=>{(window as unknown as {valleyInputModePad:TestPad}).valleyInputModePad.connected=false;window.dispatchEvent(new Event("gamepaddisconnected"));});
+  await expect(app(page)).toHaveAttribute("data-input-mode","touch");await expect(dock(page)).toHaveCount(0);
+ });
 });

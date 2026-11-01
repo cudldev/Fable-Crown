@@ -1,9 +1,9 @@
 # Working notes
 
 - Layouts: follow UX_LAYOUT_RULES.md. NPC dialogue ends through turns; object prompt opens one action. Craft list/details stay together; info including action is roughly one-third. Hide HUD/FPS while panels own focus, restore camera on exit. Thumbnail previews borrow loaded baked geometry; release strips raw VOX.
-- Input: desktop has no touch dock; last intentional touch/controller/keyboard use owns controls. Idle pads/drift do not switch. Clear held input on handoff; never save device mode. Q switches mode. Valley camera always follows, with movement lead; face targets for Interact, mouse needs range, world touch selects only placement.
+- Input: valley uses click/tap walking and approach-to-interact; right-click/hold options. No virtual dock. Keyboard/controller remain alternatives; clear held inputs on handoff. Explicit selected work stops on new destination/Stop/menu/visibility; never save or advance it offline. Camera follows; direction geometry stays in world.
 
-- Multitouch regression: reuse the real two-touch helper in rpg-valley-mobile-ux.spec.ts and verify native pointerup, not synthetic clicks. Mode/Interact explicitly handle touch releases and deduplicate click; mode changes must preserve held movement.
+- Pointer QA: use actual mouse/CDP touch releases; test drag, pinch, long-press release suppression and approach range. NPC holds use service.objectId, span child menus, and release on exit. Clear NPC movement traces during offline reconciliation; preserve swing recovery when cancelling work.
 
 - UI: keep action menus contextual to world objects (services.ts), console Menu/Back hierarchy, one selected recipe/good. Personal backpack stays global; storage/account/workshop actions need their matching interaction. Feedback/service context and touch preferences never enter format7. Validate coarse-pointer portrait+landscape, mirrored reach, menu action-pause/background work, repeated feedback and recovery; keep GPU local.
 

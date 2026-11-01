@@ -65,6 +65,7 @@ export class ThreeRuntime {
   private pixelReactions = new Map<THREE.Group, { frame: number; until: number }>();
   private pixelStrikes = new Map<THREE.Group, number>();
   private enemyMotion = new Map<string, { x: number; z: number; fromX: number; fromZ: number; at: number; moving: boolean; health: number; hitUntil: number; deathUntil: number }>();
+  private ambientMotion = new Map<string,{key:string;at:number;flipX:boolean}>();
   private rig = new LightingRig(this.scene);
   private vials?: FloatingVials;
   private hitDimensions = new HitDimensions();
@@ -115,6 +116,7 @@ export class ThreeRuntime {
   private ring: THREE.Mesh;
   private playerRing: THREE.Mesh;
   private route: THREE.Line;
+  private routeKey="";
   private grid: THREE.LineSegments;
   private ownGeometries: THREE.BufferGeometry[] = [];
   private ownMaterials: THREE.Material[] = [];
@@ -432,6 +434,14 @@ export class ThreeRuntime {
     const rotation=(object as WorldObject & {rotation?:number}).rotation??0;
     return this.art.createObject(rotation%2?{...object,width:object.height,height:object.width}:object);
   }
+  private updateRoute() {
+    const route=this.props.previewRoute??[];
+    const key=JSON.stringify([this.world.id,this.props.groundRevision,route]);
+    if(key===this.routeKey)return;this.routeKey=key;
+    const points=route.map(p=>new THREE.Vector3(p.x,this.heightAt(p.x,p.y)+.05,p.y));
+    this.route.geometry.dispose();this.route.geometry=new THREE.BufferGeometry().setFromPoints(points);
+    this.root.dataset.previewRoutePoints=String(points.length);
+  }
   private updatePreview() {
     const key=JSON.stringify([this.props.placementPreview,this.props.groundRevision]);
     if(key===this.previewKey)return;this.previewKey=key;
@@ -527,7 +537,7 @@ export class ThreeRuntime {
     const { state, presentationEpoch = 0 } = this.props;
     if (this.observedState === state && this.observedEpoch === presentationEpoch) return;
     const resetPresentation = this.observedEpoch !== presentationEpoch;
-    if(resetPresentation){this.fastPlayer=undefined;this.followCamera.reset();}
+    if(resetPresentation){this.fastPlayer=undefined;this.followCamera.reset();this.ambientMotion.clear();}
     const tickChanged = this.observedState?.tick !== state.tick || resetPresentation;
     this.observedState = state; this.observedEpoch = presentationEpoch;
     if (tickChanged) this.observedAt = time;
@@ -598,8 +608,6 @@ export class ThreeRuntime {
       this.giWorldDirty = false;
     }
     this.updateStaticBatches();
-    const points = (this.props.previewRoute ?? []).map(p => new THREE.Vector3(p.x, this.heightAt(p.x,p.y)+.05, p.y));
-    this.route.geometry.dispose(); this.route.geometry = new THREE.BufferGeometry().setFromPoints(points);
     const observed = consumeEffects(state, presentationEpoch, this.effectCursor); this.effectCursor = observed.cursor;
     if (observed.reset) { this.clearEffects(); this.pixelReactions.clear(); this.pixelStrikes.clear(); }
     for (const effect of observed.effects) {
@@ -662,7 +670,8 @@ export class ThreeRuntime {
     if (this.pixelUnits.has(art.group)) {
       const reaction = this.pixelReactions.get(art.group);
       const activeReaction = reaction && time < reaction.until ? reaction.frame : 0;
-      const native = samplePixelUnitPose({ moving: motion.moving, gaitDistance: motion.gaitDistance, workPhase: stroke?.phase, reducedMotion: this.reducedMotion, hit: activeReaction === 8, defeated: activeReaction === 9 });
+      const ambientWorking=this.props.pointControls&&!motion.moving&&actor.activity.startsWith("Working:");
+      const native = samplePixelUnitPose({ moving: motion.moving, gaitDistance: motion.gaitDistance, workPhase: stroke?.phase??(ambientWorking?(time%1800<600?"prepare":time%1800<1000?"contact":"recover"):undefined), reducedMotion: this.reducedMotion, hit: activeReaction === 8, defeated: activeReaction === 9 });
       const strikeAge = time - (this.pixelStrikes.get(art.group) ?? -Infinity);
       const frame = !activeReaction && !this.reducedMotion && strikeAge >= 0 && strikeAge < 280 ? strikeAge < 140 ? 6 : 7 : native.frame;
       const combatTarget = actor.id === 0 && actor.action?.kind === "fight" ? this.props.state.enemies.find(enemy => enemy.id === actor.action?.targetId)?.position : undefined;
@@ -688,10 +697,34 @@ export class ThreeRuntime {
       }
     }
   }
+  private poseAmbientNpcs(time:number) {
+    const poses=this.props.ambientNpcs??[],active=new Set<string>();
+    const rendered:{id:string;x:number;z:number;activity:string;moving:boolean;working:boolean;frame:number}[]=[];
+    for(const pose of poses){
+      const entry=this.objects.get(pose.id);if(!entry)continue;active.add(pose.id);
+      const key=JSON.stringify([pose.x,pose.z,pose.fromX,pose.fromZ,pose.activity,pose.moving,pose.working]);
+      let motion=this.ambientMotion.get(pose.id);
+      if(!motion||motion.key!==key){motion={key,at:time,flipX:motion?.flipX??false};this.ambientMotion.set(pose.id,motion);}
+      const distance=Math.hypot(pose.x-pose.fromX,pose.z-pose.fromZ);
+      const fraction=!pose.moving||this.reducedMotion||distance>4?1:clamp((time-motion.at)/600,0,1);
+      const x=pose.fromX+(pose.x-pose.fromX)*fraction,z=pose.fromZ+(pose.z-pose.fromZ)*fraction;
+      entry.art.group.position.set(x,this.heightAt(x,z),z);
+      const moving=pose.moving&&distance>.0001&&fraction<1,working=pose.working&&!pose.moving;
+      const toward=(pose.x-pose.fromX)*this.camera.matrixWorld.elements[0]+(pose.z-pose.fromZ)*this.camera.matrixWorld.elements[2];
+      if(Math.abs(toward)>.001)motion.flipX=toward<0;
+      const frame=this.reducedMotion?0:moving?1+Math.floor(time/140)%4:working?5+Math.floor(time/180)%3:0;
+      const role=pose.id.endsWith("builder")?"builder":pose.id.endsWith("smith")?"smith":"merchant";
+      this.pixelUnits.frame(entry.art.group,frame,0,undefined,heldToolForActor({id:1000,role}),motion.flipX);
+      rendered.push({id:pose.id,x:+x.toFixed(4),z:+z.toFixed(4),activity:pose.activity,moving,working,frame});
+    }
+    for(const id of this.ambientMotion.keys())if(!active.has(id))this.ambientMotion.delete(id);
+    this.root.dataset.ambientNpcs=JSON.stringify(rendered);
+  }
   private frame(time: number, draw = true) {
     const cpuStart = performance.now();
     this.frameMeter.sample(time);
     this.sync(time);
+    this.updateRoute();
     const { state, camera: view, selection, lighting, shadows, cameraMode } = this.props;
     const elapsed = this.previousTime ? time - this.previousTime : 16.7;
     this.previousTime = time;
@@ -736,6 +769,7 @@ export class ThreeRuntime {
       this.root.dataset.interactionTarget=anchor(view.interaction.target);
       this.root.dataset.interactionSafeArea=JSON.stringify(view.interaction.safeArea);
     }else{delete this.root.dataset.interactionPlayer;delete this.root.dataset.interactionTarget;delete this.root.dataset.interactionSafeArea;}
+    this.poseAmbientNpcs(time);
     this.root.dataset.billboardYaw = this.pixelUnits.faceCamera(this.camera, this.props.visual?.spriteNormalStrength ?? .35).toFixed(4);
     this.root.dataset.billboardCount = String(this.pixelUnits.count);
     this.root.dataset.spriteNormalStrength = String(this.props.visual?.spriteNormalStrength ?? .35);
@@ -1076,7 +1110,13 @@ export class ThreeRuntime {
     let downSelection: TileSelection | null = null;
     let hold: ReturnType<typeof setTimeout> | undefined;
     let contextAt = -Infinity;
+    const pointMode=()=>this.props.pointControls===true&&this.props.directInput===true;
     const clearHold = () => { if (hold) clearTimeout(hold); hold = undefined; };
+    const cancelPointers=()=>{
+      clearHold();dragged=true;pinched=true;
+      for(const id of pointers.keys())if(this.root.hasPointerCapture(id))this.root.releasePointerCapture(id);
+      pointers.clear();downSelection=null;
+    };
     const selectionAt = (event: MouseEvent): TileSelection | null => {
       const hit = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-three-selection]");
       if (hit) {
@@ -1090,19 +1130,19 @@ export class ThreeRuntime {
     const context = (event: MouseEvent) => {
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       event.preventDefault(); clearHold(); this.clearClickIndicator();
-      if(this.props.camera.dynamicFollow)return;
+      if(this.props.camera.dynamicFollow&&!pointMode())return;
       if (performance.now() - contextAt < 500) return;
       const selected = selectionAt(event);
-      if (selected) { contextAt = performance.now(); this.props.onContextMenu?.(selected, { x: event.clientX, y: event.clientY }); }
+      if (selected) { contextAt = performance.now();cancelPointers();this.props.onContextMenu?.(selected, { x: event.clientX, y: event.clientY }); }
     };
     const down = (event: PointerEvent) => {
       // A new secondary click is a fresh request, even just after a prior menu.
       // Keep the touch-hold guard for its synthesized contextmenu event only.
-      if (event.button === 2) { contextAt = -Infinity; return; }
+      if (event.button === 2) { contextAt = -Infinity;clearHold();dragged=true;return; }
       if (event.button !== 0 && !(this.props.directInput && event.button===1)) return;
       if(event.button===1)event.preventDefault();
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
-      if(this.props.directInput && event.pointerType!=="touch" && event.button===0) {
+      if(this.props.directInput&&!pointMode() && event.pointerType!=="touch" && event.button===0) {
         this.clearClickIndicator();const selected=selectionAt(event);
         if(this.props.camera.dynamicFollow){
           if(selected&&selected.kind!=="tile"&&this.props.canInteractSelection?.(selected)){
@@ -1118,10 +1158,10 @@ export class ThreeRuntime {
         dragAnchor = this.groundAt(startX, startY);
         const hit = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-three-selection]");
         downSelection = hit ? JSON.parse(hit.dataset.threeSelection!) as TileSelection : null;
-        if (event.pointerType === "touch"&&!this.props.camera.dynamicFollow) hold = setTimeout(() => {
+        if (event.pointerType === "touch"&&(!this.props.camera.dynamicFollow||pointMode())) hold = setTimeout(() => {
           const selected = downSelection ?? selectionAt(event);
           if (selected && !dragged && pointers.size === 1) {
-            pinched = true; contextAt = performance.now();
+            contextAt = performance.now();cancelPointers();
             this.props.onContextMenu?.(selected, { x: startX, y: startY });
           }
         }, 500);
@@ -1140,7 +1180,7 @@ export class ThreeRuntime {
       }
       if (pinched) return;
       if (Math.hypot(event.clientX - startX, event.clientY - startY) > 6) { dragged = true; clearHold(); }
-      if (dragged&&!this.props.camera.dynamicFollow) {
+      if (dragged&&!this.props.camera.dynamicFollow&&!pointMode()) {
         const point = this.groundAt(event.clientX, event.clientY);
         // Keep the grabbed world point under the pointer. Incremental pointer
         // deltas lose movement when several events share the last rendered target.
@@ -1158,7 +1198,7 @@ export class ThreeRuntime {
       if (!pointers.has(event.pointerId)) return;
       pointers.delete(event.pointerId);
       if (this.root.hasPointerCapture(event.pointerId)) this.root.releasePointerCapture(event.pointerId);
-      if(this.props.camera.dynamicFollow&&this.props.directInput&&event.pointerType==="touch")return;
+      if(this.props.camera.dynamicFollow&&!pointMode()&&this.props.directInput&&event.pointerType==="touch")return;
       if (!dragged && !pinched && event.type !== "pointercancel" && event.button!==1) {
         if (downSelection) {
           const position = this.selectionPosition(downSelection);
@@ -1180,9 +1220,7 @@ export class ThreeRuntime {
     const cancelInput = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       this.clearClickIndicator();
-      clearHold(); dragged = true;
-      for (const id of pointers.keys()) if (this.root.hasPointerCapture(id)) this.root.releasePointerCapture(id);
-      pointers.clear(); downSelection = null;
+      cancelPointers();
     };
     const wheel = (event: WheelEvent) => {
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings")) return;

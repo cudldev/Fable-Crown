@@ -25,9 +25,7 @@ async function closePanels(page: Page) {
   await expect(panel(page)).toHaveCount(0);
 }
 async function rowanAccount(page: Page, payment = true) {
-  await expect(page.getByTestId("interaction-indicator")).toBeVisible();
-  await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label",/Talk · Rowan/);
-  await page.keyboard.press("e");
+  await page.getByRole("button",{name:"Talk to Rowan the builder",exact:true}).click();
   await expect(panel(page)).toHaveAttribute("data-menu-panel", "interaction");
   await panel(page).getByRole("button", { name: "Continue conversation", exact: true }).click();
   await panel(page).getByRole("button", { name: "About my home…", exact: true }).click();
@@ -135,7 +133,7 @@ test("valley UI reserves a real craft batch and sells the finished planks at the
   try { await expect.poll(async () => Number(await root(page).getAttribute("data-player-x"))).toBeGreaterThan(73.5); }
   finally { await page.keyboard.up("d"); }
   // Deliberate mouse activation turns to the caravan after walking into its range.
-  await page.getByRole("button",{name:"Inspect Travelling supply caravan",exact:true}).click();
+  await page.getByRole("button",{name:"Trade at Travelling supply caravan",exact:true}).click();
   await expect(panel(page)).toHaveAttribute("data-menu-panel","interaction");
   await panel(page).getByRole("button",{name:"Browse supplies",exact:true}).click();
   await panel(page).getByRole("group", { name: "Goods", exact: true }).getByRole("button", { name: "Sawn plank", exact: true }).click();
@@ -258,18 +256,7 @@ test("production valley keyboard, emulated controller and touch cancellation wor
     const pad = (window as unknown as { valleyTestPad: { buttons: { pressed: boolean; value: number }[] } }).valleyTestPad;
     pad.buttons[1].pressed = false; pad.buttons[1].value = 0;
   });
-  await page.touchscreen.tap(20, 20); // Resume touch after actual controller use.
-  const stick = page.getByRole("group", { name: "Movement joystick" }), box = await stick.boundingBox(); expect(box).not.toBeNull();
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box!.x + box!.width / 2 + 35, y: box!.y + box!.height / 2 }] });
-  const touchBefore = Number(await root(page).getAttribute("data-player-x"));
-  await expect.poll(async () => Number(await root(page).getAttribute("data-player-x"))).toBeGreaterThan(touchBefore + .1);
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-  await page.waitForTimeout(250);
-  const stopped = Number(await root(page).getAttribute("data-player-x"));
-  await page.waitForTimeout(300);
-  expect(Number(await root(page).getAttribute("data-player-x"))).toBeCloseTo(stopped, 2);
+  await expect(page.locator("[data-action-controls]")).toHaveCount(0);
   for (const size of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(size);
     await expect(page.getByRole("button", { name: "Camera", exact: true })).toBeVisible();

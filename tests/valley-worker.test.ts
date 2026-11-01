@@ -44,6 +44,57 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("actual valley worker lifecycle", () => {
+  it("preserves a queued controller strike across movement packets before the next step",async()=>{
+    await boot();await send({type:"resume"});await send({type:"input",input:{...idleActionInput(),moveX:1,strike:true}});
+    await send({type:"input",input:{...idleActionInput(),moveX:1,strike:false}});vi.advanceTimersByTime(24);
+    expect(actor().player.swing).toBeGreaterThan(0);
+  });
+  it("keeps the swing recovery when a pointer activity is cancelled and selected again",async()=>{
+    const fixture=createValleySave(Date.now(),2);Object.assign(fixture.action.player,{x:25,z:140});
+    await boot(fixture);await send({type:"resume"});await send({type:"point",selection:{kind:"object",id:"valley-tree-1"}});vi.advanceTimersByTime(250);
+    const hit=await exported();expect(hit.action.player.swing).toBeGreaterThan(0);expect(hit.chapter.player.skills.woodcutting).toBeGreaterThan(0);
+    await send({type:"cancel"});await send({type:"point",selection:{kind:"object",id:"valley-tree-1"}});vi.advanceTimersByTime(250);
+    const recovery=await exported();expect(recovery.chapter.player.skills.woodcutting).toBe(hit.chapter.player.skills.woodcutting);expect(recovery.action.player.swing).toBeGreaterThan(0);
+    vi.advanceTimersByTime(400);expect((await exported()).chapter.player.skills.woodcutting).toBeGreaterThan(hit.chapter.player.skills.woodcutting);
+  });
+  it("repeats only the selected resource and stops cleanly on cancellation",async()=>{
+    const fixture=createValleySave(Date.now(),2);Object.assign(fixture.action.player,{x:25,z:140});
+    await boot(fixture);await send({type:"resume"});await send({type:"point",selection:{kind:"object",id:"valley-tree-1"}});
+    vi.advanceTimersByTime(1600);const gathered=await exported();
+    expect(gathered.chapter.player.skills.woodcutting).toBeGreaterThan(fixture.chapter.player.skills.woodcutting);
+    expect(messages.filter(message=>message.feedback?.title?.startsWith("Collected")).length).toBeGreaterThan(0);
+    await send({type:"cancel"});const stopped=await exported();vi.advanceTimersByTime(1000);const after=await exported();
+    expect(after.chapter.player.inventory).toEqual(stopped.chapter.player.inventory);expect(after.chapter.player.skills).toEqual(stopped.chapter.player.skills);
+  });
+  it("walks continuously to a selected ground point and cancels on new direct movement",async()=>{
+    await boot();await send({type:"resume"});await send({type:"point",selection:{kind:"tile",position:tile(55,146)}});
+    vi.advanceTimersByTime(2400);const walked=await exported();
+    expect(walked.action.player.x).toBeCloseTo(55,1);expect(walked.action.player.z).toBeCloseTo(146,1);
+    expect(messages.some(message=>message.pointer?.kind==="walk")).toBe(true);expect(messages.at(-1)?.pointer).toBeNull();
+    await send({type:"point",selection:{kind:"tile",position:tile(62,150)}});vi.advanceTimersByTime(160);
+    await send({type:"input",input:{...idleActionInput(),moveX:-1}});vi.advanceTimersByTime(160);expect(messages.at(-1)?.pointer).toBeNull();
+  });
+  it("approaches a far station and opens only once it is nearby",async()=>{
+    await boot();await send({type:"resume"});await send({type:"point",selection:{kind:"object",id:"valley-workbench"}});
+    expect(messages.some(message=>message.open)).toBe(false);vi.advanceTimersByTime(6500);
+    expect(messages.filter(message=>message.open)).toHaveLength(1);expect(messages.find(message=>message.open)?.service?.objectId).toBe("valley-workbench");
+    const value=await exported();expect(Math.hypot(value.action.player.x-69,value.action.player.z-139)).toBeLessThanOrEqual(3);
+  });
+  it("cancels pointer work on menus, pause and reload rather than resuming it offline",async()=>{
+    await boot();await send({type:"resume"});await send({type:"point",selection:{kind:"tile",position:tile(62,150)}});vi.advanceTimersByTime(100);
+    await send({type:"interface",open:true});const stopped=actor();vi.advanceTimersByTime(1200);expect(actor().player).toEqual(stopped.player);
+    await send({type:"interface",open:false});vi.advanceTimersByTime(160);expect(actor().player.x).toBe(stopped.player.x);
+    await send({type:"point",selection:{kind:"tile",position:tile(62,150)}});await send({type:"pause"});const snapshot=await exported();
+    expect(snapshot).not.toHaveProperty("pointer");await send({type:"import",value:snapshot});expect(messages.at(-1)?.pointer).toBeNull();
+  });
+  it("holds a visitor through a conversation while the other NPC routines continue",async()=>{
+    await boot();await send({type:"resume"});await send({type:"point",selection:{kind:"object",id:"valley-visitor-builder"}});vi.advanceTimersByTime(32);
+    await send({type:"interface",open:true,npcId:"valley-visitor-builder"});const initial=(await exported()).valley.visitorPositions?.builder;
+    vi.advanceTimersByTime(15000);const during=await exported();expect(during.valley.visitorPositions?.builder).toEqual(initial);
+    expect(during.chapter.npcs.some(npc=>npc.activity!=="Considering the road ahead")).toBe(true);
+    await send({type:"interface",open:false});vi.advanceTimersByTime(12000);
+    expect(messages.filter(message=>message.ambient?.some(npc=>npc.id==="valley-visitor-builder"&&npc.moving)).length).toBeGreaterThan(0);
+  });
   it("collects the faced bag and preserves nearby recovery markers",async()=>{
     const fixture=createValleySave(Date.now());
     fixture.chapter.grave={position:tile(51,141),items:[{itemId:"logs",quantity:2}],attempts:0,retryAt:0};

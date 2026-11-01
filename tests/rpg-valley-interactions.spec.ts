@@ -67,7 +67,7 @@ async function snapshot(page: Page): Promise<ValleySave> {
   }));
 }
 async function interact(page: Page) {
-  await page.locator(".action-interact").tap();
+  await page.keyboard.press("e");
   await expect(panel(page)).toHaveAttribute("data-menu-panel", "interaction");
   await expect(root(page)).toHaveAttribute("data-ui-state", "interaction");
   await expect(page.locator(".valley-play-ui")).toBeHidden();
@@ -237,7 +237,7 @@ test("combined crafting keeps real images, proportions and reachable actions acr
 test("peaceful gathering enters a real craft, pauses actors and requires release of held movement after menus", async ({ page }) => {
   await ready(page);
   const save = fixtureAt(25, 140); save.chapter.seed = 2; save.chapter.player.inventory = [{ itemId: "bronze-axe", quantity: 1 }];
-  await restore(page, save); await page.locator("[data-action-strike]").tap();
+  await restore(page, save); await press(page, 7);
   await expect(page.getByTestId("valley-feedback")).toContainText("+1 Logs");
   const gathered = await snapshot(page); expect(itemCount(gathered.chapter.player.inventory, "logs")).toBe(1);
   Object.assign(gathered.action.player, { x: 69, z: 140 });

@@ -10,8 +10,8 @@ try{
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{const target=new URL(r.url());if(target.protocol.startsWith('http')&&target.origin!==new URL(url).origin)external.push(target.href);});
   const app=page.getByTestId('valley-app'),dialog=page.getByRole('dialog'),world=page.getByTestId('rpg-world');
   await page.goto(url);await expect(app).toHaveAttribute('data-ready','true',{timeout:90000});
-  await expect(app).toHaveAttribute('data-input-mode','touch');await expect(page.locator('[data-action-controls]')).toBeVisible();
-  await page.locator('.action-interact').tap();await expect(dialog).toHaveAttribute('data-menu-panel','interaction');
+  await expect(app).toHaveAttribute('data-input-mode','touch');await expect(page.locator('[data-action-controls]')).toHaveCount(0);
+  await page.getByRole('button',{name:'Talk to Rowan the builder',exact:true}).tap();await expect(dialog).toHaveAttribute('data-menu-panel','interaction');
   await expect(page.locator('.valley-hud')).toBeHidden();await expect(page.getByTestId('fps-indicator')).toBeHidden();
   await expect(dialog.getByRole('button',{name:'Leave',exact:true})).toHaveCount(0);
   await expect(world).toHaveAttribute('data-interaction-camera','active',{timeout:10000});
@@ -25,7 +25,7 @@ try{
   for(const key of ['position','previousPosition'])fixture.chapter.player[key]={...fixture.chapter.player[key],x:69,y:140};fixture.chapter.player.path=[];fixture.chapter.player.movement=null;fixture.chapter.player.action=null;
   fixture.chapter.player.inventory.push({itemId:'valley-plank',quantity:2});fixture.savedAt=Date.now();fixture.chapter.savedAt=fixture.savedAt;
   await page.getByLabel('Import valley archive').setInputFiles({name:'public-interaction-fixture.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fixture))});await expect(dialog).toContainText('Chapter restored');await dialog.getByRole('button',{name:'Close',exact:true}).tap();
-  await page.locator('.action-interact').tap();await dialog.getByRole('button',{name:'Craft something',exact:true}).tap();
+  await page.getByRole('button',{name:'Use Communal carpentry workbench',exact:true}).tap();await dialog.getByRole('button',{name:'Craft something',exact:true}).tap();
   await dialog.getByTestId('recipe-grid').locator('[data-recipe-id="valley-stool"]').tap();
   await expect(dialog.getByTestId('recipe-grid')).toBeVisible();await expect(dialog.getByTestId('recipe-detail')).toContainText('Handmade stool');
   await expect(dialog.getByTestId('recipe-grid').locator('[data-recipe-id="valley-stool"] img')).toBeVisible();
@@ -41,7 +41,7 @@ try{
   await page.evaluate(()=>{window.publicTestPad.buttons[13]={pressed:true,touched:true,value:1};});
   await expect(app).toHaveAttribute('data-input-mode','controller');await expect(page.locator('[data-action-controls]')).toHaveCount(0);
   await page.evaluate(()=>{window.publicTestPad.buttons[13]={pressed:false,touched:false,value:0};});await page.touchscreen.tap(20,20);
-  await expect(app).toHaveAttribute('data-input-mode','touch');await expect(page.locator('[data-action-controls]')).toBeVisible();
+  await expect(app).toHaveAttribute('data-input-mode','touch');await expect(page.locator('[data-action-controls]')).toHaveCount(0);
   const version=(await(await context.request.get(url+'world-assets.json?verify='+Date.now())).json()).version;
   expect(errors).toEqual([]);expect(external).toEqual([]);
   await mkdir('docs/release',{recursive:true});const report={url,date:new Date().toISOString(),version,conversation:true,terminalEnding:true,exclusiveHud:true,encounterCamera:true,fullScreenCombinedCrafting:true,nativePreview:true,realCraftCompletion:true,touchControllerHandover:true,viewports:sizes,errors,external};

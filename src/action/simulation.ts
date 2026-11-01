@@ -126,6 +126,7 @@ export function findActionTarget(state: ActionState, world: ActionWorld, tool: b
     : state.enemies.filter((enemy) => !enemy.defeated && enemy.health > 0 && !world.isSafe(p.x, p.z) && !world.isSafe(enemy.x, enemy.z))
       .map((enemy) => ({ id: enemy.id, x: enemy.x, z: enemy.z, kind: "enemy" as const }));
   return candidates.filter((target) => {
+    if(world.targetId&&target.id!==world.targetId)return false;
     const dx = target.x - p.x, dz = target.z - p.z, range = Math.hypot(dx, dz);
     return range <= REACH && (range === 0 || (dx * p.facingX + dz * p.facingZ) / range >= 0.5)
       && (tool || outsideSafeSegment(p.x, p.z, target.x, target.z, world));

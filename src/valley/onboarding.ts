@@ -27,7 +27,7 @@ export function getVisitors(save:ValleySave,now:number):ValleyVisitor[] {
       dialogue:!v.home?"The king grants you this safe valley. Choose a clear place for your free tent; we reserve room for your cottage beside it. Pay the 100-coin royal account at your own pace. The marked trails beyond the valley lead to optional wilderness.":v.paid<FIRST_BILL?`Your cottage account is ${v.paid}/100 coins. Small payments are welcome; work starts at 100.`:!complete?"The cottage is under construction. Chores cannot hurry the build; explore or make yourself at home.":"Your cottage is ready. You can furnish it, shape terraces, or choose an optional public forge.",stock:[],offers},
     ...(complete?[{id:"merchant",name:"Pella",role:"Merchant",x:75,z:142,dialogue:"A finished home brings a regular visitor. The caravan still buys useful supplies; my two decoration slots rotate each local day, and today's small orders are available.",stock:visitorStock(now).filter(s=>!s.requiresCottage||complete).map(s=>({...s})),offers},
       {id:"smith",name:"Garrick",role:"Smith",x:76,z:178,dialogue:v.forge.ticks>=FORGE_TICKS?"The public forge is ready. Bronze smelting now takes four settlement ticks instead of five. I also pay for fresh bronze supplies each day.":"The public forge is optional. Bring twelve logs and two bronze bars to its site; the communal brazier can already smelt those bars. I also pay for fresh bronze supplies each day.",stock:[],offers:offers.filter(o=>o.id==="daily-smith")}]:[]),
-  ];
+  ].map(visitor=>({...visitor,...v.visitorPositions?.[visitor.id as "builder"|"merchant"|"smith"]}));
 }
 export interface Onboarding {day:1|2|3;title:string;body:string;help?:string;steps:{id:string;label:string;complete:boolean}[];nextGoal:string}
 export function getOnboarding(save:ValleySave,_now:number):Onboarding {
@@ -49,7 +49,7 @@ export function getOnboarding(save:ValleySave,_now:number):Onboarding {
     steps:[{id:"bill",label:"Pay the 100-coin account",complete:true},{id:"stool",label:"Make your first stool",complete:v.flags.includes("crafted-stool")||itemCount(save.chapter.player.inventory,"valley-stool")>0},
       {id:"cottage",label:"Let Rowan complete the cottage",complete:false}],nextGoal:v.flags.includes("crafted-stool")?"Explore, gather, or wait for your cottage":"Saw planks and make a stool at the communal workbench"};
   const steps=[{id:"tent",label:"Choose a clear place for your free tent",complete:!!v.home},
-    {id:"timber",label:"Face a valley tree and press Tool once for each swing",complete:v.flags.includes("first-strike")||v.commissions.length>0},
+    {id:"timber",label:"Select a valley tree to walk over and gather timber",complete:v.flags.includes("first-strike")||v.commissions.length>0},
     {id:"stool",label:"Saw planks, craft a stool at the workbench (69, 139)",complete:v.flags.includes("crafted-stool")||v.furniture.length>0||v.commissions.includes("furniture")},
     {id:"place",label:"Place your stool near camp using Home",complete:v.furniture.length>0},
     {id:"order",label:"Complete a timber, stool, or fishing commission",complete:v.commissions.length>0},
