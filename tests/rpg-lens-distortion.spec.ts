@@ -12,7 +12,7 @@ test("lens distortion control previews, copies, resets and persists offline on p
   page.on("pageerror", e => errors.push(e.message));
   page.on("console", e => { if (e.type() === "error") errors.push(e.text()); });
   page.on("request", r => { const url = new URL(r.url()); if (url.protocol.startsWith("http") && url.hostname !== "127.0.0.1") external.push(url.href); });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy");
   const world = page.getByTestId("rpg-world"), panel = page.getByRole("dialog", { name: "Visual settings" });
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await page.getByRole("button", { name: "Visual settings", exact: true }).click();

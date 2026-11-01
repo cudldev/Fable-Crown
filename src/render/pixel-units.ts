@@ -1,4 +1,5 @@
 import { authorUnitNormals } from "./unit-normals";
+import { HELD_ACTIONS } from "./held-action-data";
 /** Authored, outline-free pixel units. Atlas pixels are source art, not a downsampled concept. */
 export const UNIT_FRAME_SIZE = 32;
 export const UNIT_FRAME_COUNT = 10;
@@ -24,7 +25,7 @@ export interface UnitSheet {
 
 type Color = readonly [number, number, number];
 type Painter = (x: number, y: number, w: number, h: number, color: Color, _legacyCurve?: number) => void;
-export const UNIT_TOOLS = ["none", "sword", "axe", "pickaxe", "hammer", "rod", "bow"] as const;
+export const UNIT_TOOLS = ["none", "sword", "axe", "pickaxe", "hammer", "rod", "bow", "shield"] as const;
 export type UnitTool = (typeof UNIT_TOOLS)[number];
 
 const C = {
@@ -88,6 +89,15 @@ export function createHeldUnitSheet(kind: UnitKind, variant: number, tool: UnitT
   const bodyHeight = createUnitSheet(kind, id).bodyHeight;
   return authorUnitNormals(makeSheet((p, frame) => {
     if (kind === "boar" || kind === "rock-mite") return;
+    const pose=HELD_ACTIONS[tool]?.[frame]??(tool==="shield"?HELD_ACTIONS.shield[5]:undefined),poseDy=tool==="shield"&&frame===1?-1:0;
+    if(pose&&(frame>=5&&frame<=7||tool==="shield")) {
+      const skin=kind==="prince"?ALDEN_PIGMENTS.A!:SKINS[id%SKINS.length]!;
+      const hand=()=>p(pose.grip[0],pose.grip[1]+poseDy,2,2,skin);
+      if(tool==="shield")hand();
+      for(const [x,y,r,g,b] of pose.cells)p(x,y+poseDy,1,1,[r,g,b]);
+      if(tool!=="shield")hand();
+      return;
+    }
     // One fine source pixel of hand movement; all other frames hold the rest pose.
     const dy = frame === 1 ? -1 : 0;
     const shifted: Painter = (x, y, w, h, color, curve) => p(x, y + dy, w, h, color, curve);

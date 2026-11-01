@@ -1,0 +1,49 @@
+{
+  "cellSize": 512,
+  "baseline": 440,
+  "views": {
+    "front": {
+      "file": "front.png",
+      "origin": [
+        256.0,
+        440
+      ]
+    },
+    "back": {
+      "file": "back.png",
+      "origin": [
+        256.0,
+        440
+      ]
+    },
+    "left": {
+      "file": "left.png",
+      "origin": [
+        256.0,
+        440
+      ]
+    },
+    "right": {
+      "file": "right.png",
+      "origin": [
+        256.0,
+        440
+      ]
+    },
+    "top": {
+      "file": "top.png",
+      "origin": [
+        256.0,
+        256.0
+      ]
+    },
+    "bottom": {
+      "file": "bottom.png",
+      "origin": [
+        256.0,
+        256.0
+      ]
+    }
+  },
+  "geometrySource": "All six images are first-hit projections of volume.npz; outputs, not independent reconstruction inputs"
+}

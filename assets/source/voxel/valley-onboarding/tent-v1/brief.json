@@ -1,0 +1,18 @@
+{
+  "id": "valley-tent-v1",
+  "status": "source artwork pending local reconstruction and visual review",
+  "physicalTargetXYZ": [3, 3, 2],
+  "physicalHeightMetres": 2,
+  "logicalFootprintTiles": [3, 3],
+  "pitchMetres": 0.0625,
+  "targetGridXYZ": [48, 48, 32],
+  "groundPivot": "center XY, minimum Z",
+  "front": "-Y source / south runtime",
+  "requiredNegativeSpace": "open front doorway at least 1.5m high; real walk-in cavity under canvas",
+  "materials": ["warm cream canvas", "muted blue repair patches", "warm timber poles", "ochre rope", "wood stakes"],
+  "reference": "assets/explorations/voxel/trellis-oak-softlight-v1/vox-01/comparison.png (material grouping and stepped volume only)",
+  "homePadLocalXY": [0, 2],
+  "rotationQuarterTurns": 0,
+  "requestedScope": "one original colored three-quarter image -> pinned local TRELLIS -> native VOX; no production bake or runtime binding",
+  "validation": "Uniform height scale preserves inferred aspect; measure width/depth, enclosed-only fill, doorway/ground/components/native palette/readback and actual rendered review. Generated reference is not completed geometry."
+}

@@ -102,7 +102,7 @@ export class PixelBillboards {
     return { kind: "rigid", group: visual.root, body: visual.body, leftArm: limb("leftArm"), rightArm: limb("rightArm"), leftLeg: limb("leftLeg"), rightLeg: limb("rightLeg"), tool: limb("tool") };
   }
   private createQuest(object: WorldObject): ObjectArt {
-    const role = object.questId === "forge" ? "smith" : object.questId === "supper" ? "cook" : "merchant";
+    const role = object.questId === "forge" || object.serviceId === "valley-visitor-smith" ? "smith" : object.serviceId === "valley-visitor-builder" ? "builder" : object.questId === "supper" ? "cook" : "merchant";
     const variant = [...object.name].reduce((n, c) => n + c.charCodeAt(0), 0) % 12;
     const visual = this.create(unitKindForActor({ id: 1000 + variant, name: object.name, role }), variant, `quest:${object.name}`);
     this.frame(visual.root, 0, 0, undefined, heldToolForActor({ id: 1000, role }));
@@ -119,7 +119,7 @@ export class PixelBillboards {
     visual.body.scale.set(visual.flipX ? -1 : 1, 1, 1);
     const layer = this.pigment(visual.kind, visual.variant, heldTool);
     visual.tool.material = layer.material;
-    visual.tool.geometry = this.frames[stateFrame === 1 || stateFrame === 6 ? 1 : 0];
+    visual.tool.geometry = this.frames[stateFrame>=5&&stateFrame<=7?stateFrame:stateFrame===1?1:0];
     visual.tool.position.copy(visual.mesh.position); visual.tool.position.z += .002;
     visual.tool.scale.copy(visual.mesh.scale); // Identical native pitch, canvas and foot/hand anchor.
     visual.tool.visible = visual.kind !== "boar" && visual.kind !== "rock-mite" && bodyFrame < 8;

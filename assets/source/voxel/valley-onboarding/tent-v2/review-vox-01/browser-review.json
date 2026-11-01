@@ -1,0 +1,21 @@
+{
+  "verification": {
+    "nativeLoader": true,
+    "glbLoader": true,
+    "dimensionsWHD": [
+      3.25,
+      2,
+      3.125
+    ],
+    "groundY": 0,
+    "pitch": 0.0625,
+    "cells": 13709,
+    "externalRuntime": false
+  },
+  "errors": [],
+  "external": [],
+  "glError": 0,
+  "artApproved": false,
+  "gameIntegrated": false,
+  "magicaVoxelOpened": false
+}

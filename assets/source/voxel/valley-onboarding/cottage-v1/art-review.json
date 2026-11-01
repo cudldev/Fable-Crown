@@ -1,0 +1,11 @@
+{
+  "selectedJob":"vox-02",
+  "actualPreview":"cutaway-v2/software-iso.png",
+  "reviewedGeometry":"Exact native cell faces with unchanged1.125m actor at common scale; prior full/cutaway/state browser review retained in review-vox-01",
+  "silhouette":{"status":"usable draft","reason":"Broad gable, timber frame and stone/plaster wall hierarchy read clearly"},
+  "construction":{"status":"usable draft","reason":"Real open1.5m doorway/central room; both0.75m wall worktops visible in cutaway"},
+  "material":{"status":"usable draft","reason":"Quiet cream/wood/slate groups; stepped roof values remain simple"},
+  "cohesion":{"status":"usable draft","reason":"Warm palette matches tent and authored timber furnishings"},
+  "integration":{"status":"placeholder","reason":"Floor/socket/native metadata checked; lead owns updated in-game worktop check"},
+  "artApproved":false
+}

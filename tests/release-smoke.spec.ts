@@ -1,6 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createRpg } from "../src/rpg/engine";
-import type { RpgState } from "../src/rpg/types";
+import { addItems } from "../src/rpg/inventory";
+import type { ValleySave } from "../src/valley/contracts";
+import { createValleySave } from "../src/valley/save";
 
 // Graphics are covered on the local GPU and against the actual public URL.
 // These cases exercise the real worker, React controls, IndexedDB and PWA.
@@ -16,22 +18,31 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function menu(page: Page) {
-  if (!(await page.getByRole("button", { name: "Save on device", exact: true }).isVisible()))
-    await page.getByRole("button", { name: "Open game menu", exact: true }).click();
+  if (await page.getByRole("button", { name: "Save on this device", exact: true }).isVisible()) return;
+  const dialog = page.getByRole("dialog");
+  if (await dialog.isVisible()) await dialog.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "More", exact: true }).click();
 }
-async function snapshot(page: Page): Promise<RpgState> {
-  await menu(page);
-  await page.getByRole("button", { name: "Save on device", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Chronicle saved");
-  return page.evaluate(() => new Promise<RpgState>((resolve, reject) => {
+async function ready(page: Page) {
+  await expect(page.getByTestId("valley-app")).toHaveAttribute("data-ready", "true");
+  await expect(page.getByTestId("valley-app")).toHaveAttribute("data-mode", "dashboard");
+}
+async function read(page: Page, key = "v6") {
+  return page.evaluate(key => new Promise<ValleySave>((resolve, reject) => {
     const open = indexedDB.open("fable-crown", 1);
     open.onerror = () => reject(open.error);
     open.onsuccess = () => {
-      const db = open.result, get = db.transaction("saves").objectStore("saves").get("v5");
+      const db = open.result, get = db.transaction("saves").objectStore("saves").get(key);
       get.onsuccess = () => { resolve(get.result); db.close(); };
       get.onerror = () => { reject(get.error); db.close(); };
     };
-  }));
+  }), key);
+}
+async function snapshot(page: Page): Promise<ValleySave> {
+  await menu(page);
+  await page.getByRole("button", { name: "Save on this device", exact: true }).click();
+  await expect(page.locator(".valley-message")).toContainText("Chapter saved on this device");
+  return read(page);
 }
 async function restore(page: Page, state: unknown) {
   await menu(page);
@@ -40,29 +51,44 @@ async function restore(page: Page, state: unknown) {
   });
 }
 
-test("real worker, local thoughts and durable saves work without graphics or WebGPU", async ({ page }) => {
+test("real valley worker, local guidance and durable saves work without graphics or WebGPU", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("./");
-  await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "unavailable");
+  await ready(page);
+  const legacy = createRpg(Date.now(), 8128);
+  addItems(legacy.bank, "logs", 12, Infinity);
+  Object.assign(legacy.quests.forge, { accepted: true, complete: true, stageId: "complete" });
+  await page.evaluate(value => new Promise<void>((resolve, reject) => {
+    const open = indexedDB.open("fable-crown", 1);
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result, tx = db.transaction("saves", "readwrite"), store = tx.objectStore("saves");
+      store.put(value, "v5"); store.delete("v6"); store.delete("v6-backup");
+      tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => reject(tx.error);
+    };
+  }), legacy);
+  await page.reload(); await ready(page);
   const first = await snapshot(page);
-  await expect.poll(async () => (await snapshot(page)).tick).toBeGreaterThan(first.tick);
-  await page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
-  await page.getByRole("button", { name: "Open thoughts", exact: true }).click();
-  await expect(page.locator(".plan-choice")).toHaveCount(3);
-  await page.locator(".plan-choice").filter({ hasText: "Prepare for a woodland hunt" }).click();
+  expect(first.chapter.bank).toEqual(legacy.bank);
+  expect(first.chapter.quests).toEqual(legacy.quests);
+  expect(await read(page, "v5")).toEqual(legacy);
+  await expect.poll(async () => (await snapshot(page)).chapter.tick).toBeGreaterThan(first.chapter.tick);
+  await page.getByRole("dialog").getByRole("button", { name: "Journal", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Your own quiet valley");
+  await page.getByRole("button", { name: "Pin next suggested goal", exact: true }).click();
   const chosen = await snapshot(page);
-  expect(chosen.control.goal).toMatchObject({ kind: "skill", skill: "attack", level: 5 });
-  await restore(page, { version: 3, player: { health: -999 } });
-  await expect(page.getByRole("status")).toContainText("invalid");
+  expect(chosen.valley.goal).toBe("Choose a clear place for your free tent");
+  await restore(page, { version: 6, chapter: { player: { health: -999 } } });
+  await expect(page.locator(".valley-message")).toContainText("invalid");
   const preserved = await snapshot(page);
-  expect(preserved.player).toEqual(chosen.player);
-  expect(preserved.control.goal).toEqual(chosen.control.goal);
-  await page.getByRole("button", { name: "Close panel", exact: true }).click();
+  expect(preserved.chapter.player).toEqual(chosen.chapter.player);
+  expect(preserved.valley.goal).toEqual(chosen.valley.goal);
+  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    const control = await page.getByRole("button", { name: "Open game menu", exact: true }).boundingBox();
+    const control = await page.getByRole("button", { name: "More", exact: true }).boundingBox();
     expect(control!.width).toBeGreaterThanOrEqual(44);
     expect(control!.height).toBeGreaterThanOrEqual(44);
   }
@@ -78,13 +104,12 @@ test("the installed PWA preserves the chapter and all required assets offline wi
     if (url.protocol.startsWith("http") && url.origin !== origin) external.push(url.href);
   });
   await page.goto("./");
-  await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "unavailable");
-  const fixture = createRpg(Date.now(), 8128);
-  Object.assign(fixture.control, { autoplay: false, waiting: true, goal: null, active: null,
-    source: null, queue: [], thought: null, thinkingUntil: 1e9 });
-  fixture.player.path = []; fixture.player.action = null; fixture.player.movement = null;
+  await ready(page);
+  const fixture = createValleySave(Date.now(), 8128);
+  fixture.valley.goal = "Keep this offline valley";
+  addItems(fixture.chapter.bank, "logs", 12, Infinity);
   await restore(page, fixture);
-  await expect(page.getByRole("status")).toContainText("Chronicle restored");
+  await expect(page.locator(".valley-message")).toContainText("Chapter restored");
   const before = await snapshot(page);
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
   expect(await page.evaluate(async () => (await navigator.serviceWorker.ready).scope))
@@ -92,13 +117,14 @@ test("the installed PWA preserves the chapter and all required assets offline wi
   await context.setOffline(true);
   try {
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "unavailable");
+    await ready(page);
     const after = await snapshot(page);
     for (const field of ["position", "skills", "inventory", "equipment", "ammo", "health"] as const)
-      expect(after.player[field], field).toEqual(before.player[field]);
-    expect(after.bank).toEqual(before.bank);
-    expect(after.quests).toEqual(before.quests);
-    expect(after.control.autoplay).toBe(false);
+      expect(after.chapter.player[field], field).toEqual(before.chapter.player[field]);
+    expect(after.chapter.bank).toEqual(before.chapter.bank);
+    expect(after.chapter.quests).toEqual(before.chapter.quests);
+    expect(after.chapter.control.autoplay).toBe(false);
+    expect(after.valley.goal).toBe("Keep this offline valley");
     const assets = await page.evaluate(async () => {
       const manifest = await (await fetch(new URL("world-assets.json", location.href))).json();
       return Promise.all(manifest.files.map(async (file: string) => {

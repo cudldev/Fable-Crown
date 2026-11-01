@@ -13,7 +13,7 @@ test("native VOX trees use chunk instances/LOD in the real world and reload offl
     if (url.protocol.startsWith("http") && page.url().startsWith("http") && url.origin !== new URL(page.url()).origin) external.push(url.href);
   });
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   await expect(world).toHaveAttribute("data-voxel-assets", /\btree\b/);

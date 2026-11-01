@@ -1,5 +1,5 @@
 {
-  "version": "1c5e92e6f77bda4d",
+  "version": "2b5f1005f32b0be2",
   "files": [
     "art3d/voxel/tree.vox",
     "art3d/voxel/anvil.vox",
@@ -9,7 +9,25 @@
     "art3d/voxel/ore-tin.vox",
     "art3d/voxel/ore-iron.vox",
     "art3d/voxel/ore-coal.vox",
-    "art3d/voxel/ore-depleted.vox"
+    "art3d/voxel/ore-depleted.vox",
+    "art3d/voxel/valley-tent.vox",
+    "art3d/voxel/valley-tent-cutaway.vox",
+    "art3d/voxel/valley-cottage.vox",
+    "art3d/voxel/valley-cottage-cutaway.vox",
+    "art3d/voxel/valley-cottage-build.vox",
+    "art3d/voxel/valley-cottage-foundation.vox",
+    "art3d/voxel/valley-forge.vox",
+    "art3d/voxel/valley-forge-cutaway.vox",
+    "art3d/voxel/valley-forge-build.vox",
+    "art3d/voxel/valley-forge-foundation.vox",
+    "art3d/voxel/valley-stool.vox",
+    "art3d/voxel/valley-table.vox",
+    "art3d/voxel/valley-bed.vox",
+    "art3d/voxel/valley-shelf.vox",
+    "art3d/voxel/valley-chest.vox",
+    "art3d/voxel/valley-planter.vox",
+    "art3d/voxel/valley-flowers.vox",
+    "art3d/voxel/valley-sapling.vox"
   ],
   "assets": [
     {
@@ -106,6 +124,189 @@
         14,
         0
       ]
+    },
+    {
+      "id": "valley-tent",
+      "file": "valley-tent.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        24,
+        24,
+        2
+      ],
+      "depletedAsset": "valley-tent-cutaway"
+    },
+    {
+      "id": "valley-tent-cutaway",
+      "file": "valley-tent-cutaway.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        24,
+        24,
+        2
+      ]
+    },
+    {
+      "id": "valley-cottage",
+      "file": "valley-cottage.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        48,
+        40,
+        2
+      ],
+      "depletedAsset": "valley-cottage-cutaway"
+    },
+    {
+      "id": "valley-cottage-cutaway",
+      "file": "valley-cottage-cutaway.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        48,
+        40,
+        2
+      ]
+    },
+    {
+      "id": "valley-cottage-build",
+      "file": "valley-cottage-build.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        48,
+        40,
+        2
+      ]
+    },
+    {
+      "id": "valley-cottage-foundation",
+      "file": "valley-cottage-foundation.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        48,
+        40,
+        2
+      ]
+    },
+    {
+      "id": "valley-forge",
+      "file": "valley-forge.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        32,
+        24,
+        2
+      ],
+      "depletedAsset": "valley-forge-cutaway"
+    },
+    {
+      "id": "valley-forge-cutaway",
+      "file": "valley-forge-cutaway.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        32,
+        24,
+        2
+      ]
+    },
+    {
+      "id": "valley-forge-build",
+      "file": "valley-forge-build.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        32,
+        24,
+        2
+      ]
+    },
+    {
+      "id": "valley-forge-foundation",
+      "file": "valley-forge-foundation.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        32,
+        24,
+        2
+      ]
+    },
+    {
+      "id": "valley-stool",
+      "file": "valley-stool.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        5,
+        5,
+        0
+      ]
+    },
+    {
+      "id": "valley-table",
+      "file": "valley-table.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        9,
+        16,
+        0
+      ]
+    },
+    {
+      "id": "valley-bed",
+      "file": "valley-bed.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        10,
+        15,
+        0
+      ]
+    },
+    {
+      "id": "valley-shelf",
+      "file": "valley-shelf.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        12,
+        3,
+        0
+      ]
+    },
+    {
+      "id": "valley-chest",
+      "file": "valley-chest.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        6,
+        8,
+        0
+      ]
+    },
+    {
+      "id": "valley-planter",
+      "file": "valley-planter.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        4,
+        4,
+        0
+      ]
+    },
+    {
+      "id": "valley-flowers",
+      "file": "valley-flowers.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        6,
+        6,
+        0
+      ]
+    },
+    {
+      "id": "valley-sapling",
+      "file": "valley-sapling.vox",
+      "pitch": 0.0625,
+      "pivot": [
+        8,
+        8,
+        0
+      ]
     }
   ],
   "source": "assets/explorations/voxel/trellis-oak-softlight-v1/vox-01/asset.vox",
@@ -189,6 +390,114 @@
       "occupiedCells": 2545,
       "components": 1,
       "groundCells": 550
+    },
+    "valley-tent": {
+      "source": "assets/source/voxel/valley-onboarding/tent-v2/vox-04/asset.vox",
+      "sha256": "7e923202c60e45ea865ee4b72e886eea15de6500284a22dc5f05df58ee1e3df5",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/tent-v2/review-vox-04/browser-review.json"
+    },
+    "valley-tent-cutaway": {
+      "source": "assets/source/voxel/valley-onboarding/tent-v2/cutaway/asset.vox",
+      "sha256": "268a7db125d664f0ac815bfc512725b9ab189ef170101d78f0e9256fdf8655da",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/tent-v2/review-vox-04/browser-review.json"
+    },
+    "valley-cottage": {
+      "source": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/asset.vox",
+      "sha256": "6be6a908baf14eddd9ad4422f676f69d7d265227663bc461c6420c123eb28c3f",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/cottage-v1/art-review.json"
+    },
+    "valley-cottage-cutaway": {
+      "source": "assets/source/voxel/valley-onboarding/cottage-v1/cutaway-v2/asset.vox",
+      "sha256": "2ab0af73440390d53cac524aa5bd12e9e5c76ad9fa86896be5158dc0b4c4ebc2",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/cottage-v1/art-review.json"
+    },
+    "valley-cottage-build": {
+      "source": "assets/source/voxel/valley-onboarding/cottage-v1/states/scaffold/asset.vox",
+      "sha256": "42de547c4e3bf2b82b5b9dc01a4aeaf0511611280c0f1b2a5cd5438d84372474",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/cottage-v1/art-review.json"
+    },
+    "valley-cottage-foundation": {
+      "source": "assets/source/voxel/valley-onboarding/cottage-v1/states/foundation/asset.vox",
+      "sha256": "6e2011c02bbc2c01661ad911d2e21516cfe3f51847796a33b9e2848add409702",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/cottage-v1/art-review.json"
+    },
+    "valley-forge": {
+      "source": "assets/source/voxel/valley-onboarding/forge-v1/vox-01/asset.vox",
+      "sha256": "54100b5340026b2e614775798a9cb23b04f6a165afe0265c57ae1f3cd94e2787",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/forge-v1/review-vox-01/browser-review.json"
+    },
+    "valley-forge-cutaway": {
+      "source": "assets/source/voxel/valley-onboarding/forge-v1/cutaway/asset.vox",
+      "sha256": "ce2866a216f63abb234d416f4d35ddd59cf00e37a3b900faf0d184e0e8dcc620",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/forge-v1/review-vox-01/browser-review.json"
+    },
+    "valley-forge-build": {
+      "source": "assets/source/voxel/valley-onboarding/forge-v1/states/scaffold/asset.vox",
+      "sha256": "dcb8195b133f8512f07d6e838e84b28601d0d88483b46b592f63cb2b891d7a4f",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/forge-v1/review-vox-01/browser-review.json"
+    },
+    "valley-forge-foundation": {
+      "source": "assets/source/voxel/valley-onboarding/forge-v1/states/foundation/asset.vox",
+      "sha256": "c5f7cffbfe7ce3ae9b22b87a621c83f8a8684080bdb734b5b7c986ed7ffb7fe8",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/forge-v1/review-vox-01/browser-review.json"
+    },
+    "valley-stool": {
+      "source": "assets/source/voxel/valley-onboarding/stool-v1/vox-02/asset.vox",
+      "sha256": "29e08ed433c459acf670da2d4a1e36bf74a8e47b59a2c359d6e9e0f7af5b67c3",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/stool-v1/review-vox-02/browser-review.json"
+    },
+    "valley-table": {
+      "source": "assets/source/voxel/valley-onboarding/table-v1/vox-02/asset.vox",
+      "sha256": "5ebff11fdc7af21cdb08affc26f2b63afedaf4d306e5ea4441012129b40ab203",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/table-v1/review-vox-02/browser-review.json"
+    },
+    "valley-bed": {
+      "source": "assets/source/voxel/valley-onboarding/bed-v1/vox-02/asset.vox",
+      "sha256": "d5eeecc4820b37cf49cdcd75c447cdfa923a1c26ed51d6beb20aaebd4d4e556c",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/bed-v1/review-vox-02/browser-review.json"
+    },
+    "valley-shelf": {
+      "source": "assets/source/voxel/valley-onboarding/shelf-v1/vox-02/asset.vox",
+      "sha256": "49be064c96836e866a4ba5d93b14c9dec6a896d6f8206594b8505724ef5691b6",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/shelf-v1/review-vox-02/browser-review.json"
+    },
+    "valley-chest": {
+      "source": "assets/source/voxel/valley-onboarding/chest-v1/vox-02/asset.vox",
+      "sha256": "6c2162a7eae5a5dae65c64b6e6fa1dcef046346db18211084041a0c0eb386313",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/chest-v1/review-vox-02/browser-review.json"
+    },
+    "valley-planter": {
+      "source": "assets/source/voxel/valley-onboarding/planter-v1/vox-02/asset.vox",
+      "sha256": "a0b83c13f8123439963ffd9bdcaba72cead93610bf4dfbb228f3818e84e30e74",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/planter-v1/review-vox-02/browser-review.json"
+    },
+    "valley-flowers": {
+      "source": "assets/source/voxel/valley-onboarding/flowers-v1/vox-01/asset.vox",
+      "sha256": "6a7281aab462b659e50200bee4247ba2936a4cccfed2e056416b0d5d13467644",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/flowers-v1/art-review.json"
+    },
+    "valley-sapling": {
+      "source": "assets/source/voxel/valley-onboarding/sapling-v1/vox-01/asset.vox",
+      "sha256": "bad4fc1c086ade45782129297f2d9a5d9ea14b25f542ce3ee96818b9100baab5",
+      "operation": "Exact native source copy; source scale and pivot preserved",
+      "review": "assets/source/voxel/valley-onboarding/sapling-v1/art-review.json"
     }
   },
   "publication": "Reviewed first prop batch at shared0.0625m pitch; ore variants/depleted state are explicit native derivatives"

@@ -16,7 +16,7 @@ test("normal rendering follows display density and ignores legacy pixelation thr
   });
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.addInitScript(() => localStorage.setItem("fable-crown.render-style", "pixelated"));
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"), canvas = page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   await expect(world).toHaveAttribute("data-voxel-assets", /\btree\b/);

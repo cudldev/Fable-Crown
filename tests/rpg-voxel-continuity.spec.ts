@@ -9,7 +9,7 @@ test("forest detail progresses during continuous camera movement and settles wit
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
   const cdp = await context.newCDPSession(page); await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d", { waitUntil: "domcontentloaded" });
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy&renderer=3d", { waitUntil: "domcontentloaded" });
   const world = page.getByTestId("rpg-world"), canvas = page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 120000 });
   const state = createRpg(Date.now(), 8128), tree = WORLD.objects.filter(o => o.kind === "tree").sort((a,b) => Math.hypot(a.position.x-45,a.position.y-87)-Math.hypot(b.position.x-45,b.position.y-87))[0];

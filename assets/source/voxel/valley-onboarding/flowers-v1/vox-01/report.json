@@ -1,0 +1,94 @@
+{
+  "asset_id": "flowers-v1",
+  "method": "Original native authored vegetation; not image-reconstructed or reference-image-complete claim",
+  "dimensions": [
+    12,
+    12,
+    8
+  ],
+  "grid_min": [
+    -6,
+    -6,
+    0
+  ],
+  "grid_max": [
+    6,
+    6,
+    8
+  ],
+  "pivot_voxels": [
+    6,
+    6,
+    0
+  ],
+  "physical_scale": {
+    "height_units": 0.5,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      6,
+      6,
+      0
+    ],
+    "units_per_tile": 1
+  },
+  "occupied_voxels": 181,
+  "palette": [
+    [
+      137,
+      100,
+      57
+    ],
+    [
+      153,
+      117,
+      67
+    ],
+    [
+      102,
+      130,
+      61
+    ],
+    [
+      117,
+      143,
+      72
+    ],
+    [
+      91,
+      119,
+      55
+    ],
+    [
+      235,
+      222,
+      181
+    ],
+    [
+      218,
+      175,
+      77
+    ],
+    [
+      190,
+      127,
+      126
+    ],
+    [
+      85,
+      112,
+      56
+    ]
+  ],
+  "connected_components": 1,
+  "ground_cells": 35,
+  "mesh": {
+    "triangles": 266,
+    "vertices": 532,
+    "quads": 133,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "sourceRecipe": "../recipe.json",
+  "art_approved": false,
+  "game_integrated": false
+}

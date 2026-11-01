@@ -1,5 +1,7 @@
 # Codex Milestones and Acceptance Criteria
 
+2026-11-01 override: execute the approved valley vertical slice in [VALLEY_IMPLEMENTATION.md](../docs/VALLEY_IMPLEMENTATION.md); original M0–M8 below are historical scope. Stop after the slice release for playtesting.
+
 M0 — Vite/React/TypeScript strict setup; Three.js, Vitest, Playwright, PWA, mobile portrait/landscape shell, IndexedDB and worker stubs. Include GitHub Pages deployment via GitHub Actions, configurable Vite base path, valid PWA manifest/service-worker scope, and setup instructions. Build/test/typecheck pass; deployment workflow and built asset paths validated (live deployment requires repository configuration).
 
 M1 — Seeded RNG, stable event queue, authoritative 600ms tick, action scheduler, versioned save/load. Replay deterministic after save/reload, test simultaneous events.

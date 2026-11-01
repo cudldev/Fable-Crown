@@ -1,0 +1,208 @@
+{
+  "dimensions": [
+    8,
+    8,
+    8
+  ],
+  "grid_min": [
+    -4,
+    -4,
+    0
+  ],
+  "grid_max": [
+    4,
+    4,
+    8
+  ],
+  "pivot_voxels": [
+    4,
+    4,
+    0
+  ],
+  "uniform_source_scale": 0.4996234036944437,
+  "source_translation_before_scale": [
+    1.1861324310302734e-05,
+    -8.986890316009521e-05,
+    0.5004105567932129
+  ],
+  "source_bounds_metres": {
+    "min": [
+      -0.19635614038995675,
+      -0.1962696224066642,
+      0.0
+    ],
+    "max": [
+      0.19635614038995675,
+      0.1962696224066642,
+      0.5
+    ]
+  },
+  "shell_cells": 253,
+  "filled_cells": 32,
+  "boundary_touch_cells_clamped": 1,
+  "connected_components": 1,
+  "ground_cells": 36,
+  "nearest_source_vertex_distance_metres": {
+    "median": 0.021309015606138668,
+    "maximum": 0.10004044552294714
+  },
+  "color_method": "Nearest original dense TRELLIS vertex RGB; warm-hue/rest median-cut palette from surface cells; no relighting/repainting",
+  "fill_method": "Only fully enclosed cavities, scipy.ndimage.binary_fill_holes; open gaps/through-holes retained",
+  "method": "Trimesh 4.10.1 mesh.voxelized(subdivide); original TRELLIS mesh and generated vertex RGB",
+  "asset_id": "planter-v1",
+  "occupied_voxels": 285,
+  "palette": [
+    [
+      144,
+      91,
+      38
+    ],
+    [
+      116,
+      66,
+      27
+    ],
+    [
+      102,
+      55,
+      23
+    ],
+    [
+      88,
+      48,
+      20
+    ],
+    [
+      83,
+      43,
+      18
+    ],
+    [
+      76,
+      39,
+      17
+    ],
+    [
+      67,
+      35,
+      16
+    ],
+    [
+      47,
+      27,
+      17
+    ],
+    [
+      121,
+      141,
+      69
+    ],
+    [
+      112,
+      131,
+      63
+    ],
+    [
+      106,
+      124,
+      57
+    ],
+    [
+      104,
+      116,
+      53
+    ],
+    [
+      86,
+      104,
+      47
+    ],
+    [
+      82,
+      100,
+      47
+    ],
+    [
+      77,
+      95,
+      44
+    ],
+    [
+      71,
+      89,
+      41
+    ],
+    [
+      69,
+      83,
+      36
+    ],
+    [
+      63,
+      78,
+      36
+    ],
+    [
+      62,
+      74,
+      35
+    ],
+    [
+      60,
+      75,
+      34
+    ],
+    [
+      56,
+      75,
+      32
+    ],
+    [
+      58,
+      71,
+      32
+    ],
+    [
+      54,
+      65,
+      30
+    ],
+    [
+      37,
+      38,
+      20
+    ]
+  ],
+  "mesh": {
+    "triangles": 494,
+    "vertices": 988,
+    "quads": 247,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "physical_scale": {
+    "height_units": 0.5,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      4,
+      4,
+      0
+    ],
+    "units_per_tile": 1
+  },
+  "elapsed_seconds": 1.5177933509999093,
+  "source": {
+    "path": "/mnt/c/Users/antto/Documents/ChatGPT/Fable Crown/tmp/valley-onboarding/assets/source/voxel/valley-onboarding/planter-v1/trellis-01/raw-mesh.npz",
+    "sha256": "056c4ef394003634dea6d77a92616306481ce7958abd2301b2eb83e4480a03fe"
+  },
+  "settings": {
+    "height_metres": 0.5,
+    "pitch_metres": 0.0625,
+    "colors": 24,
+    "fill_enclosed": true
+  },
+  "views_used": [],
+  "views_are": "Rendered projections of final volume, not reconstruction inputs",
+  "art_approved": false,
+  "game_integrated": false
+}

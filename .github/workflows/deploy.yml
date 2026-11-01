@@ -37,7 +37,7 @@ jobs:
           if [ "${REPO,,}" = "${OWNER,,}.github.io" ]; then BASE="/"; else BASE="/$REPO/"; fi
           echo "Building with Vite base $BASE"
           echo "demo_url=http://127.0.0.1:4174$BASE" >> "$GITHUB_OUTPUT"
-          npm run build -- --base="$BASE"
+          VITE_BASE_PATH="$BASE" npm run build
       - name: Validate built asset paths and PWA scope
         run: npm run check:dist
       - name: Share validated site

@@ -43,7 +43,7 @@ test("tree inspectors and menus keep drawing on foreground animation frames", as
     if (url.protocol.startsWith("http") && url.origin !== new URL(testInfo.project.use.baseURL!).origin) external.push(url.href);
   });
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   const fixture = createRpg(Date.now(), 8128), tree = objectById("oakrest-tree-0")!;

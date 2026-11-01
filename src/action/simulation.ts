@@ -44,8 +44,8 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
   if (p.guardBroken > 0) p.guardBroken -= 1;
   p.blocking = input.block && p.guardBroken === 0 && p.guard > 0 && p.swing === 0;
   // Holding guard continually resets the rest period, even without a hit.
-  if (p.blocking) p.guardDelay = 45;
-  if (p.guardDelay === 0 && p.guardBroken === 0 && !p.blocking) {
+  if (input.block) p.guardDelay = 45;
+  if (p.guardDelay === 0 && p.guardBroken === 0 && !input.block) {
     p.guard = Math.min(100, p.guard + 20 * ACTION_DT);
   }
 
@@ -97,8 +97,9 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
         const enemy = state.enemies.find((candidate) => candidate.id === target.id);
         if (enemy && !enemy.defeated && enemy.health > 0) {
           enemy.aggressive = true;
-          enemy.health = Math.max(0, enemy.health - 3);
-          events.push({ kind: "enemy-hit", targetId: enemy.id, damage: 3 });
+          const damage=Math.min(3,enemy.health);
+          enemy.health = Math.max(0, enemy.health - damage);
+          events.push({ kind: "enemy-hit", targetId: enemy.id, damage });
           if (enemy.health === 0) {
             enemy.defeated = true; enemy.windup = 0;
             events.push({ kind: "enemy-defeat", targetId: enemy.id });

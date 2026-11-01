@@ -7,7 +7,7 @@ import { tile, WORLD } from "../src/rpg/world";
 test("shore and bridge lens outline isolation", async ({ page }) => {
   const output = "docs/art-audit/shore-outline-v1"; await mkdir(output, { recursive: true }); const errors: string[] = [];
   page.on("pageerror", e => errors.push(e.message)); page.on("console", e => { if (e.type() === "error") errors.push(e.text()); });
-  await page.emulateMedia({ reducedMotion: "reduce" }); await page.setViewportSize({ width: 1920, height: 1080 }); await page.goto("./?renderer=3d");
+  await page.emulateMedia({ reducedMotion: "reduce" }); await page.setViewportSize({ width: 1920, height: 1080 }); await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"), panel = page.getByRole("dialog", { name: "Visual settings" });
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const fixture = createRpg(Date.now(), 8128), y = 62, bank = WORLD.terrain.slice(y * WORLD.width, (y + 1) * WORLD.width).indexOf("water") - 1;

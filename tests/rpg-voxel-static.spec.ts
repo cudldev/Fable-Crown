@@ -28,7 +28,7 @@ test("the real game reuses baked meshes through camera changes, harvest, phone l
   page.on("pageerror",error=>errors.push(error.message));page.on("console",message=>{if(message.type()==="error")errors.push(message.text());});
   page.on("worker",worker=>workers.push(worker.url()));
   page.on("request",request=>{const url=new URL(request.url());if(/\.vox$|\/tiles\.bin$/.test(url.pathname))nativeRequests.push(url.href);if(url.protocol.startsWith("http")&&page.url().startsWith("http")&&url.origin!==new URL(page.url()).origin)external.push(url.href);});
-  await page.setViewportSize({width:1280,height:800});await page.goto("./?renderer=3d");
+  await page.setViewportSize({width:1280,height:800});await page.goto("./?chapter=legacy&renderer=3d");
   const world=page.getByTestId("rpg-world"),canvas=page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status","ready",{timeout:120000});
   await expect(world).toHaveAttribute("data-voxel-renderer","shared-static-meshes");
@@ -105,7 +105,7 @@ test("the real game reuses baked meshes through camera changes, harvest, phone l
 test("held camera drags preserve wheel zoom and rapid wheel events accumulate",async({page,context})=>{
   test.setTimeout(120000);await mkdir(output,{recursive:true});
   const cdp=await context.newCDPSession(page);await cdp.send("Emulation.setCPUThrottlingRate",{rate:4});
-  await page.setViewportSize({width:1280,height:800});await page.goto("./?renderer=3d");
+  await page.setViewportSize({width:1280,height:800});await page.goto("./?chapter=legacy&renderer=3d");
   const world=page.getByTestId("rpg-world"),canvas=page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status","ready",{timeout:90000});
   await expect(world).toHaveAttribute("data-camera-zoom","2.0000");

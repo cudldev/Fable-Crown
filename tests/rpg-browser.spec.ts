@@ -40,7 +40,7 @@ test("tile chapter preserves the earlier archive and renders a selectable isomet
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   await page.evaluate(
     (value) =>
@@ -119,7 +119,7 @@ test("tile chapter preserves the earlier archive and renders a selectable isomet
 test("skills, a real bronze recipe and the 28-slot bag work through the UI", async ({
   page,
 }) => {
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const s = createRpg(Date.now());
   s.control.waiting = true;
@@ -172,7 +172,7 @@ test("skills, a real bronze recipe and the 28-slot bag work through the UI", asy
 test("a shop ambition buys the real usable steel tool rather than granting it", async ({
   page,
 }) => {
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const s = createRpg(Date.now());
   s.control.waiting = true;

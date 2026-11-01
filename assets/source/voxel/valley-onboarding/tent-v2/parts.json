@@ -1,0 +1,60 @@
+{
+  "id": "valley-tent-v2",
+  "nativeJob": "vox-04",
+  "unitsPerTile": 1,
+  "pitch": 0.0625,
+  "sourceAxes": "Z up, front-Y; runtimeY up,front+Z",
+  "logicalFootprint": [
+    3,
+    3
+  ],
+  "visualExtentXYZ": [
+    3,
+    3,
+    2
+  ],
+  "groundPivotVoxels": [
+    24,
+    24,
+    2
+  ],
+  "interiorFloorMetres": 0,
+  "buriedBaseMetres": 0.125,
+  "entrance": {
+    "side": "south",
+    "width": 1.5,
+    "height": 1.5,
+    "centerSourceXYZ": [
+      0,
+      -1.5,
+      0
+    ]
+  },
+  "clearInteriorPrism": {
+    "min": [
+      -0.75,
+      -1.5,
+      0
+    ],
+    "max": [
+      0.75,
+      0.875,
+      1.5
+    ]
+  },
+  "parts": [
+    {
+      "id": "shelter",
+      "file": "vox-04/asset.vox",
+      "visible": "always"
+    }
+  ],
+  "construction": null,
+  "provenance": "Original built-in imagegen source -> pinned local TRELLIS -> native VOX -> explicit bounded native doorway/stake/canopy correction. No paid endpoint or runtime dependency.",
+  "status": "usable draft pending lead Blender and actual game review",
+  "models": {
+    "full": "vox-04/asset.vox",
+    "cutaway": "cutaway/asset.vox"
+  },
+  "physicalRoofSource": "vox-04/asset.vox; derived camera cutaway does not alter physical roof occupancy"
+}

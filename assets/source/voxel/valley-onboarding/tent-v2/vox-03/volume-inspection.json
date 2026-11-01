@@ -1,0 +1,169 @@
+{
+  "dimensionsXYZMetres": [
+    3.0,
+    3.0,
+    2.0
+  ],
+  "occupiedCells": 11046,
+  "nativePaletteEntries": 24,
+  "components": [
+    11046
+  ],
+  "groundCells": 136,
+  "centerThroughCorridorWidthByHeight": [
+    {
+      "heightBottom": 0.0,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.0625,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.125,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.1875,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.25,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.3125,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.375,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.4375,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.5,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.5625,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.625,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.6875,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.75,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.8125,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.875,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 0.9375,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 1.0,
+      "clearWidth": 1.5
+    },
+    {
+      "heightBottom": 1.0625,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.125,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.1875,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.25,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.3125,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.375,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.4375,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.5,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.5625,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.625,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.6875,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.75,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.8125,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.875,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 1.9375,
+      "clearWidth": 0.0
+    }
+  ],
+  "corridorInterpretation": "Conservative XZ projection across all source-Y depth; positive width proves complete through-space at that height. Not a collision/body acceptance test.",
+  "artApproved": false,
+  "centralRoomClearanceCandidates": [
+    {
+      "widthMetres": 1.0625,
+      "heightMetres": 1.125,
+      "bestEmptyCentralBox": {
+        "floorHeight": 0.0,
+        "sourceYStart": -1.5,
+        "sourceYEnd": 1.125,
+        "emptyDepth": 2.625,
+        "frontEdgeReached": true
+      }
+    },
+    {
+      "widthMetres": 1.5,
+      "heightMetres": 1.5,
+      "bestEmptyCentralBox": {
+        "floorHeight": 0.0,
+        "sourceYStart": -1.5,
+        "sourceYEnd": 0.875,
+        "emptyDepth": 2.375,
+        "frontEdgeReached": true
+      }
+    }
+  ]
+}

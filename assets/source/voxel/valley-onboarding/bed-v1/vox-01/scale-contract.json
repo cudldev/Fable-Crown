@@ -1,0 +1,116 @@
+{
+  "assetId": "bed-v1",
+  "mode": "asset-reference",
+  "sizeStatus": "declared 1.0m height; uniform scaling preserves inferred aspect ratio",
+  "style": {
+    "status": "candidate",
+    "profile": "TRELLIS-generated RGB;24-color voxel reduction"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    1,
+    1
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -0.875,
+      -1.25,
+      0.0
+    ],
+    "max": [
+      0.875,
+      1.25,
+      1.0
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -0.875,
+      -1.25,
+      0.0
+    ],
+    "max": [
+      0.875,
+      1.25,
+      1.0
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    28,
+    40,
+    16
+  ],
+  "assetPivotGrid": [
+    14,
+    20,
+    0
+  ],
+  "actualExtentUnits": [
+    1.75,
+    2.5,
+    1.0
+  ],
+  "viewFrameGrid": [
+    56,
+    56
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -1.75,
+      -1.75,
+      -0.5
+    ],
+    "max": [
+      1.75,
+      1.75,
+      3.0
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 504,
+  "pixelsPerVoxel": 9,
+  "outerMarginPixels": 4,
+  "pixelsPerWorldUnit": 144.0,
+  "pixelsPerTile": 144.0,
+  "baseline": 436,
+  "origins": {
+    "front": [
+      256.0,
+      436
+    ],
+    "back": [
+      256.0,
+      436
+    ],
+    "left": [
+      256.0,
+      436
+    ],
+    "right": [
+      256.0,
+      436
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

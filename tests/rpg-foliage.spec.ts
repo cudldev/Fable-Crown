@@ -27,7 +27,7 @@ test("tile foliage animates, controls persist, and the game keeps working offlin
   await mkdir(output, { recursive: true }); const errors: string[] = [], external: string[] = [];
   page.on("pageerror", error => errors.push(error.message)); page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
   page.on("request", request => { const url = new URL(request.url()); if (url.protocol.startsWith("http") && url.hostname !== "127.0.0.1") external.push(url.href); });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"), panel = page.getByRole("dialog", { name: "Visual settings" });
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const fixture = createRpg(Date.now(), 8128);

@@ -1,0 +1,18 @@
+diff --git a/trellis/pipelines/__init__.py b/trellis/pipelines/__init__.py
+index 0e33c6e..16ca05c 100644
+--- a/trellis/pipelines/__init__.py
++++ b/trellis/pipelines/__init__.py
+@@ -1,6 +1,6 @@
+ from . import samplers
+ from .trellis_image_to_3d import TrellisImageTo3DPipeline
+-from .trellis_text_to_3d import TrellisTextTo3DPipeline
++# Image-only experiment: avoid eager text-only Open3D dependency.
+ 
+ 
+ def from_pretrained(path: str):
+diff --git a/trellis/representations/mesh/flexicubes b/trellis/representations/mesh/flexicubes
+--- a/trellis/representations/mesh/flexicubes
++++ b/trellis/representations/mesh/flexicubes
+@@ -1 +1 @@
+-Subproject commit 815e075a2a400d06c48d94c347674344ed6ae5c5
++Subproject commit 815e075a2a400d06c48d94c347674344ed6ae5c5-dirty

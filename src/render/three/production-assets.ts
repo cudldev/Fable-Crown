@@ -256,10 +256,12 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
   const library: ArtLibrary = {
     terrain, terrainTiles,
     createObject(object: WorldObject, options): ObjectArt {
+      if (object.art === "valley-built-in") return { group: new Group(), lights: [] };
       const voxelId = voxelBindingId(object), voxels = voxelId ? bindingModels.get(voxelId) : undefined;
       if (voxels) {
         const art = voxelObject(voxels); art.group.name = `object:${object.id}`;
         art.group.userData.voxelAsset = voxelId;
+        if (["valley-tent", "valley-cottage", "valley-forge"].includes(voxelId!)) art.group.userData.cameraCutaway = true;
         if (options?.standaloneVoxels) {
           const available = standaloneVoxel(voxels.model.levels[0]); art.available.add(available); voxelPreviews.add(available);
           if (voxels.depleted) { const depleted = standaloneVoxel(voxels.depleted.levels[0]); art.depleted.add(depleted); voxelPreviews.add(depleted); }

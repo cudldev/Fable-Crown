@@ -1,0 +1,141 @@
+{
+  "dimensions": [
+    18,
+    32,
+    12
+  ],
+  "grid_min": [
+    -9,
+    -16,
+    0
+  ],
+  "grid_max": [
+    9,
+    16,
+    12
+  ],
+  "pivot_voxels": [
+    9,
+    16,
+    0
+  ],
+  "uniform_source_scale": 1.8776493882693246,
+  "source_translation_before_scale": [
+    0.00013245642185211182,
+    2.1636486053466797e-05,
+    0.20229554176330566
+  ],
+  "source_bounds_metres": {
+    "min": [
+      -0.557583649563083,
+      -0.941196990830559,
+      0.0
+    ],
+    "max": [
+      0.557583649563083,
+      0.941196990830559,
+      0.75
+    ]
+  },
+  "shell_cells": 1813,
+  "filled_cells": 16,
+  "boundary_touch_cells_clamped": 1,
+  "connected_components": 1,
+  "ground_cells": 48,
+  "nearest_source_vertex_distance_metres": {
+    "median": 0.006837235904974209,
+    "maximum": 0.03370651413912604
+  },
+  "color_method": "Explicit authored material-ramp palette correction; no albedo recovery claim",
+  "fill_method": "Only fully enclosed cavities, scipy.ndimage.binary_fill_holes; open gaps/through-holes retained",
+  "method": "Trimesh 4.10.1 mesh.voxelized(subdivide); original TRELLIS mesh and generated vertex RGB",
+  "asset_id": "table-v1",
+  "occupied_voxels": 1829,
+  "palette": [
+    [
+      130,
+      94,
+      55
+    ],
+    [
+      148,
+      109,
+      64
+    ],
+    [
+      166,
+      125,
+      74
+    ],
+    [
+      184,
+      141,
+      86
+    ]
+  ],
+  "mesh": {
+    "triangles": 720,
+    "vertices": 1440,
+    "quads": 360,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "physical_scale": {
+    "height_units": 0.75,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      9,
+      16,
+      0
+    ],
+    "units_per_tile": 1
+  },
+  "elapsed_seconds": 0.9089819069999976,
+  "source": {
+    "path": "/mnt/c/Users/antto/Documents/ChatGPT/Fable Crown/tmp/valley-onboarding/assets/source/voxel/valley-onboarding/table-v1/trellis-01/raw-mesh.npz",
+    "sha256": "27f7a208f15de89f2d63814abdcb32e4abc748cc01cb5f2ae781b64769a84381"
+  },
+  "settings": {
+    "height_metres": 0.75,
+    "pitch_metres": 0.0625,
+    "colors": 24,
+    "fill_enclosed": true
+  },
+  "views_used": [],
+  "views_are": "Rendered projections of final volume, not reconstruction inputs",
+  "art_approved": false,
+  "game_integrated": false,
+  "palette_correction": {
+    "raw": "../vox-01",
+    "geometryUnchanged": true,
+    "materials": [
+      "wood"
+    ],
+    "ramps": {
+      "wood": [
+        [
+          130,
+          94,
+          55
+        ],
+        [
+          148,
+          109,
+          64
+        ],
+        [
+          166,
+          125,
+          74
+        ],
+        [
+          184,
+          141,
+          86
+        ]
+      ]
+    },
+    "assignment": "Manual broad hue/relative-color rules; planter soil uses explicit upper-center region. These are art choices, not inferred physical materials.",
+    "notPhysicalAlbedoRecovery": true
+  }
+}

@@ -14,7 +14,7 @@ test("startup warms the shader variants used by the first world overview", async
     WebGL2RenderingContext.prototype.linkProgram = function (program: WebGLProgram) { state.links++; return original.call(this, program); };
   });
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   const world = await ready(page);
   expect(Number(await world.getAttribute("data-startup-programs"))).toBeGreaterThan(0);
   const before = await page.evaluate(() => (window as Window & { shaderWarmup?: { links: number } }).shaderWarmup!.links);
@@ -92,7 +92,7 @@ test.describe("protected game preparation", () => {
     const gate = new Promise<void>(resolve => { release = resolve; });
     await page.route(/\/assets\/index-[^/]+\.js$/, async route => { await gate; await route.continue(); });
     try {
-      await page.goto("./", { waitUntil: "commit" });
+      await page.goto("./?chapter=legacy", { waitUntil: "commit" });
       await expect(page.getByRole("heading", { name: "Preparing your game", exact: true })).toBeVisible();
       await expect(page.getByRole("button", { name: "Open game menu", exact: true })).toBeHidden();
     } finally { release(); }
@@ -107,7 +107,7 @@ test.describe("protected game preparation", () => {
     const gate = new Promise<void>(resolve => { release = resolve; });
     await page.route(/\/art3d\/voxel\/meshes\.bin(?:\?|$)/, async route => { held = true; await gate; await route.continue(); });
     try {
-      await page.goto("./", { waitUntil: "domcontentloaded" });
+      await page.goto("./?chapter=legacy", { waitUntil: "domcontentloaded" });
       const screen = page.getByTestId("startup-screen");
       await expect(screen).toBeVisible();
       await expect(screen).toContainText("Preparing your game");
@@ -152,7 +152,7 @@ test.describe("protected game preparation", () => {
         return getContext.apply(this, args);
       } as typeof getContext;
     });
-    await page.goto("./", { waitUntil: "domcontentloaded" });
+    await page.goto("./?chapter=legacy", { waitUntil: "domcontentloaded" });
     await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "unavailable", { timeout: readyTimeout });
     await expect(page.getByTestId("startup-screen")).toBeHidden();
     await expect(page.getByRole("button", { name: "Retry voxel renderer", exact: true })).toBeVisible();
@@ -174,7 +174,7 @@ test.describe("protected game preparation", () => {
         }
       };
     });
-    await page.goto("./", { waitUntil: "domcontentloaded" });
+    await page.goto("./?chapter=legacy", { waitUntil: "domcontentloaded" });
     const error = page.getByTestId("startup-screen");
     await expect(error).toHaveAttribute("role", "alert");
     await expect(error).toContainText("Your chapter could not open");
@@ -193,7 +193,7 @@ test.describe("protected game preparation", () => {
         return result;
       };
     });
-    await page.goto("./");
+    await page.goto("./?chapter=legacy");
     const world = page.getByTestId("rpg-world");
     await expect(world).toHaveAttribute("data-status", "unavailable", { timeout: readyTimeout });
     await expect(page.getByTestId("startup-screen")).toBeHidden();
@@ -212,7 +212,7 @@ test("cached offline startup prepares the real WebGL world before showing the HU
     if (url.protocol.startsWith("http") && page.url().startsWith("http") && url.origin !== new URL(page.url()).origin) external.push(url.href);
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("./", { waitUntil: "domcontentloaded" });
+  await page.goto("./?chapter=legacy", { waitUntil: "domcontentloaded" });
   await ready(page);
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 30_000 }).toBe(true);
   await context.setOffline(true);

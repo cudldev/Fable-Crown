@@ -72,7 +72,7 @@ test.describe("delayed renderer loading", () => {
     const gate = new Promise<void>(resolve => { release = resolve; });
     await page.route(/\/assets\/ThreeScene-[^/]+\.js$/, async route => { await gate; await route.continue(); });
     try {
-      await page.goto("./", { waitUntil: "domcontentloaded" });
+      await page.goto("./?chapter=legacy", { waitUntil: "domcontentloaded" });
       const world = page.getByTestId("rpg-world");
       await expect(page.getByTestId("startup-screen")).toBeVisible();
       await expect(world).toBeHidden();
@@ -91,7 +91,7 @@ test("voxel is the default, draws with WebGL and preserves the chapter with lega
   const errors: string[] = [], obsoleteAssets: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("request", request => { if (/\/(ink|fitted)\/|alden(?:-ink|-fitted)?\.glb/.test(request.url())) obsoleteAssets.push(request.url()); });
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await ready(page);
   const fixture = waitingFixture();
   await restore(page, fixture);
@@ -123,12 +123,12 @@ test("voxel is the default, draws with WebGL and preserves the chapter with lega
   await page.getByTestId("rpg-world").getByRole("button", { name: "Inspect Alden", exact: true }).click();
   await expect(page.getByRole("region", { name: "Character details" })).toBeVisible();
   const before = await saved(page);
-  await page.goto("./?renderer=painterly&character=fitted&terrain=legacy");
+  await page.goto("./?chapter=legacy&renderer=painterly&character=fitted&terrain=legacy");
   await ready(page);
   await expect(world).toHaveAttribute("data-character-style", "pixel");
   await expect(world).toHaveAttribute("data-character-rig", "billboard");
   await expect(world).toHaveAttribute("data-terrain-source", "vox");
-  await page.goto("./?renderer=3d&character=ink");
+  await page.goto("./?chapter=legacy&renderer=3d&character=ink");
   await ready(page);
   await expect(world).toHaveAttribute("data-character-style", "pixel");
   const after = await saved(page);
@@ -152,7 +152,7 @@ test("voxel is the default, draws with WebGL and preserves the chapter with lega
 });
 
 test("real smelting works in 3D and lighting controls do not grant items or XP", async ({ page }) => {
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = await ready(page);
   const state = waitingFixture();
   state.player.position = { ...interactionTiles(objectById("oakrest-furnace")!)[0]! };
@@ -206,7 +206,7 @@ test("3D camera and touch controls fit portrait and landscape without external r
       external.push(url);
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   await ready(page);
   await restore(page, waitingFixture());
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
@@ -246,7 +246,7 @@ test("3D camera and touch controls fit portrait and landscape without external r
 
 for (const mode of ["perspective", "orthographic"] as const) {
   test(`${mode} camera drag stays anchored when multiple pointer events arrive between frames`, async ({ page }) => {
-    await page.goto("./");
+    await page.goto("./?chapter=legacy");
     await ready(page);
     await restore(page, waitingFixture());
     await page.getByRole("button", { name: `${mode === "perspective" ? "Perspective" : "Orthographic"} camera`, exact: true }).click();
@@ -315,7 +315,7 @@ for (const mode of ["perspective", "orthographic"] as const) {
 }
 
 test("default voxel world reloads offline with the same saved chapter", async ({ page, context }) => {
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await ready(page);
   await restore(page, waitingFixture());
   const before = await saved(page);
@@ -346,7 +346,7 @@ test("unavailable WebGL keeps menus usable and retries the voxel world", async (
       return getContext.apply(this, args);
     } as typeof getContext;
   });
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "unavailable");
   await expect(page.getByRole("button", { name: "Retry voxel renderer", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /painterly/i })).toHaveCount(0);
@@ -361,7 +361,7 @@ test("unavailable WebGL keeps menus usable and retries the voxel world", async (
 test("all current environment assets load and switching camera projection preserves the saved character", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = await ready(page);
   await expect(world).toHaveAttribute("data-assets", "blender");
   const ids = (await world.getAttribute("data-production-assets"))!.split(",").sort();
@@ -388,7 +388,7 @@ test("all current environment assets load and switching camera projection preser
 test("art workbench is isolated from gameplay and cached models reload offline", async ({ page, context }) => {
   const errors: string[] = [], workers: string[] = [], external: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   await restore(page, waitingFixture());
   await saved(page);

@@ -1,0 +1,166 @@
+{
+  "id": "cottage-v1",
+  "pitch": 0.0625,
+  "unitsPerTile": 1,
+  "nativeJob": "vox-02",
+  "sourceRoute": "native-modular",
+  "gridXYZ": [
+    96,
+    80,
+    58
+  ],
+  "pivotVoxels": [
+    48,
+    40,
+    2
+  ],
+  "logicalFootprint": [
+    6.0,
+    5.0
+  ],
+  "boundsXYZMetres": {
+    "min": [
+      -3.0,
+      -2.5,
+      -0.125
+    ],
+    "max": [
+      3.0,
+      2.5,
+      3.5
+    ]
+  },
+  "walkingFloor": {
+    "height": 0,
+    "baseBuriedMetres": 0.125
+  },
+  "entrance": {
+    "side": "south",
+    "clearWidth": 1.5,
+    "clearHeight": 1.75,
+    "clearDepth": 4.5625
+  },
+  "models": {
+    "full": "vox-02/asset.vox",
+    "cutaway": "cutaway-v2/asset.vox",
+    "foundation": "states/foundation/asset.vox",
+    "scaffold": "states/scaffold/asset.vox",
+    "complete": "vox-02/asset.vox"
+  },
+  "parts": [
+    {
+      "id": "foundation",
+      "file": "parts/foundation/asset.vox",
+      "glb": "parts/foundation/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 15360
+    },
+    {
+      "id": "interior",
+      "file": "parts/interior/asset.vox",
+      "glb": "parts/interior/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 19838
+    },
+    {
+      "id": "facade",
+      "file": "parts/facade/asset.vox",
+      "glb": "parts/facade/asset.glb",
+      "hiddenInCutaway": true,
+      "cells": 15950
+    },
+    {
+      "id": "roof",
+      "file": "parts/roof/asset.vox",
+      "glb": "parts/roof/asset.glb",
+      "hiddenInCutaway": true,
+      "cells": 15360
+    },
+    {
+      "id": "workbench",
+      "file": "parts/workbench/asset.vox",
+      "glb": "parts/workbench/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 360
+    },
+    {
+      "id": "planning-table",
+      "file": "parts/planning-table/asset.vox",
+      "glb": "parts/planning-table/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 360
+    }
+  ],
+  "physicalRoofSource": "vox-02/asset.vox; cutaway remains a visibility variant only",
+  "provenance": "Original generated cottage image is a style source only. Exact authored96x80x58 cubic-grid modules, real hollow interior,1.5m door, independent roof/facade/cutaway/foundation/scaffold. No monolithic inferred solid or external asset library.",
+  "status": "native usable-draft candidate; actual visual and lead game review pending",
+  "homePadLocalXY": [
+    4,
+    1
+  ],
+  "workstations": [
+    {
+      "id": "personal-workbench",
+      "homePadTileCenter": [
+        4,
+        2
+      ],
+      "sourceCenterVoxel": [
+        10,
+        24,
+        2
+      ],
+      "surfaceHeightMetres": 0.75,
+      "counterSizeSourceXYZMetres": [
+        0.5,
+        0.75,
+        0.75
+      ],
+      "sourceBoundsMetres": {
+        "min": [
+          -2.625,
+          -1.375,
+          0
+        ],
+        "max": [
+          -2.125,
+          -0.625,
+          0.75
+        ]
+      },
+      "accessFrom": "east/room centre"
+    },
+    {
+      "id": "planning-table",
+      "homePadTileCenter": [
+        9,
+        2
+      ],
+      "sourceCenterVoxel": [
+        86,
+        24,
+        2
+      ],
+      "surfaceHeightMetres": 0.75,
+      "counterSizeSourceXYZMetres": [
+        0.5,
+        0.75,
+        0.75
+      ],
+      "sourceBoundsMetres": {
+        "min": [
+          2.125,
+          -1.375,
+          0
+        ],
+        "max": [
+          2.625,
+          -0.625,
+          0.75
+        ]
+      },
+      "accessFrom": "west/room centre"
+    }
+  ],
+  "revisionNote": "vox-01/cutaway and parts-v1.json preserved. vox-02/cutaway-v2 add only wall-socket worktops; central south entrance/passage remains empty."
+}

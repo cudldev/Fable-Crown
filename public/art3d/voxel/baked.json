@@ -1,12 +1,12 @@
 {
   "format": 1,
-  "version": "211a169cfa8230cd",
-  "sourceVersion": "1c5e92e6f77bda4d",
+  "version": "e3312457bd762b7c",
+  "sourceVersion": "2b5f1005f32b0be2",
   "pack": "meshes.bin",
   "encoding": "gzip",
-  "bytes": 1682622,
-  "decodedBytes": 10591132,
-  "packSha256": "97352a60580d52e2d1726db51b10f929c79754f3bbc361aa3e59e7b92e3523d4",
+  "bytes": 4409864,
+  "decodedBytes": 35052992,
+  "packSha256": "62d3bac9a51ffc962ae2104c0d3da9aefcc964fbaeb4f9f897fa2261ab3fc9f3",
   "assets": [
     {
       "id": "tree",
@@ -78,6 +78,150 @@
         26,
         28,
         12
+      ]
+    },
+    {
+      "id": "valley-tent",
+      "size": [
+        48,
+        48,
+        32
+      ]
+    },
+    {
+      "id": "valley-tent-cutaway",
+      "size": [
+        48,
+        48,
+        32
+      ]
+    },
+    {
+      "id": "valley-cottage",
+      "size": [
+        96,
+        80,
+        58
+      ]
+    },
+    {
+      "id": "valley-cottage-cutaway",
+      "size": [
+        96,
+        80,
+        58
+      ]
+    },
+    {
+      "id": "valley-cottage-build",
+      "size": [
+        96,
+        80,
+        58
+      ]
+    },
+    {
+      "id": "valley-cottage-foundation",
+      "size": [
+        96,
+        80,
+        58
+      ]
+    },
+    {
+      "id": "valley-forge",
+      "size": [
+        64,
+        48,
+        50
+      ]
+    },
+    {
+      "id": "valley-forge-cutaway",
+      "size": [
+        64,
+        48,
+        50
+      ]
+    },
+    {
+      "id": "valley-forge-build",
+      "size": [
+        64,
+        48,
+        50
+      ]
+    },
+    {
+      "id": "valley-forge-foundation",
+      "size": [
+        64,
+        48,
+        50
+      ]
+    },
+    {
+      "id": "valley-stool",
+      "size": [
+        10,
+        10,
+        8
+      ]
+    },
+    {
+      "id": "valley-table",
+      "size": [
+        18,
+        32,
+        12
+      ]
+    },
+    {
+      "id": "valley-bed",
+      "size": [
+        20,
+        30,
+        12
+      ]
+    },
+    {
+      "id": "valley-shelf",
+      "size": [
+        24,
+        6,
+        20
+      ]
+    },
+    {
+      "id": "valley-chest",
+      "size": [
+        12,
+        16,
+        8
+      ]
+    },
+    {
+      "id": "valley-planter",
+      "size": [
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "valley-flowers",
+      "size": [
+        12,
+        12,
+        8
+      ]
+    },
+    {
+      "id": "valley-sapling",
+      "size": [
+        16,
+        16,
+        22
       ]
     },
     {

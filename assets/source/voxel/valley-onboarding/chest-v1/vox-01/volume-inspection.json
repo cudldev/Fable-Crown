@@ -1,0 +1,61 @@
+{
+  "dimensionsXYZMetres": [
+    0.75,
+    1.0,
+    0.5
+  ],
+  "occupiedCells": 1420,
+  "nativePaletteEntries": 24,
+  "components": [
+    1420
+  ],
+  "groundCells": 176,
+  "centerThroughCorridorWidthByHeight": [
+    {
+      "heightBottom": 0.0,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.0625,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.125,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.1875,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.25,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.3125,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.375,
+      "clearWidth": 0.0
+    },
+    {
+      "heightBottom": 0.4375,
+      "clearWidth": 0.0
+    }
+  ],
+  "corridorInterpretation": "Conservative XZ projection across all source-Y depth; positive width proves complete through-space at that height. Not a collision/body acceptance test.",
+  "artApproved": false,
+  "centralRoomClearanceCandidates": [
+    {
+      "widthMetres": 1.0625,
+      "heightMetres": 1.125,
+      "bestEmptyCentralBox": null
+    },
+    {
+      "widthMetres": 1.5,
+      "heightMetres": 1.5,
+      "bestEmptyCentralBox": null
+    }
+  ]
+}

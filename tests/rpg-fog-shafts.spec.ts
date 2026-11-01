@@ -43,7 +43,7 @@ window.shaftDispose=()=>{post.dispose();scene.traverse(o=>{o.geometry?.dispose()
 test("forest shafts are visible from the normal gameplay camera with an offscreen light", async ({ page }) => {
   const output = "docs/art-audit/world-fog-shafts-v1"; await mkdir(output, { recursive: true }); const errors: string[] = [];
   page.on("pageerror", e => errors.push(e.message)); page.on("console", e => { if (e.type() === "error") errors.push(e.text()); });
-  await page.emulateMedia({ reducedMotion: "reduce" }); await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d");
+  await page.emulateMedia({ reducedMotion: "reduce" }); await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"); await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const fixture = createRpg(Date.now(), 8128), tree = WORLD.objects.filter(o => o.kind === "tree").sort((a, b) => Math.hypot(a.position.x - 45, a.position.y - 87) - Math.hypot(b.position.x - 45, b.position.y - 87))[0];
   Object.assign(fixture.control, { waiting: true, goal: null, active: null, source: null, queue: [], thought: null, thinkingUntil: 1e9 });

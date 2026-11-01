@@ -64,6 +64,7 @@ export async function loadVoxelAssets(base: URL, signal: AbortSignal): Promise<M
 
 /** Native prop bindings precede legacy templates; resource identity stays authoritative. */
 export function voxelBindingId(object: Pick<WorldObject, "kind" | "art" | "resourceId">): string | undefined {
+  if (object.art?.startsWith("valley-") && !["valley-built-in", "valley-visitor-builder", "valley-visitor-merchant", "valley-visitor-smith"].includes(object.art)) return object.art;
   if (object.kind === "tree") return "tree";
   if (object.kind === "anvil") return "anvil";
   if (object.kind === "rock" && object.resourceId && ["copper", "tin", "iron", "coal"].includes(object.resourceId)) return "ore-" + object.resourceId;

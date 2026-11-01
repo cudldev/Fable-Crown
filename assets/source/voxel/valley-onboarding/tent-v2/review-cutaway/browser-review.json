@@ -1,0 +1,23 @@
+{
+  "verification": {
+    "nativeLoader": true,
+    "glbLoader": true,
+    "dimensionsWHD": [
+      3,
+      1.375,
+      3
+    ],
+    "groundY": -0.125,
+    "pitch": 0.0625,
+    "cells": 6160,
+    "externalRuntime": false,
+    "sourceRoute": "TRELLIS",
+    "modelChecks": []
+  },
+  "errors": [],
+  "external": [],
+  "glError": 0,
+  "artApproved": false,
+  "gameIntegrated": false,
+  "magicaVoxelOpened": false
+}

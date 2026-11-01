@@ -1,0 +1,237 @@
+{
+  "dimensions": [
+    48,
+    48,
+    32
+  ],
+  "grid_min": [
+    -24,
+    -24,
+    -2
+  ],
+  "grid_max": [
+    24,
+    24,
+    30
+  ],
+  "pivot_voxels": [
+    24,
+    24,
+    2
+  ],
+  "uniform_source_scale": 3.237565074422803,
+  "source_translation_before_scale": [
+    0.0006971955299377441,
+    -0.007022112607955933,
+    0.3115535080432892
+  ],
+  "source_bounds_metres": {
+    "min": [
+      -1.6165019714697715,
+      -1.558447602033752,
+      0.0
+    ],
+    "max": [
+      1.6165019714697715,
+      1.558447602033752,
+      2.0
+    ]
+  },
+  "shell_cells": 13035,
+  "filled_cells": 674,
+  "boundary_touch_cells_clamped": 1,
+  "connected_components": 1,
+  "ground_cells": 136,
+  "nearest_source_vertex_distance_metres": {
+    "median": 0.016923514033853008,
+    "maximum": 0.08822331849047217
+  },
+  "color_method": "Nearest original dense TRELLIS vertex RGB; warm-hue/rest median-cut palette from surface cells; no relighting/repainting",
+  "fill_method": "Only fully enclosed cavities, scipy.ndimage.binary_fill_holes; open gaps/through-holes retained",
+  "method": "Trimesh 4.10.1 mesh.voxelized(subdivide); original TRELLIS mesh and generated vertex RGB",
+  "asset_id": "valley-tent-v2-corrected",
+  "occupied_voxels": 11046,
+  "palette": [
+    [
+      223,
+      217,
+      173
+    ],
+    [
+      212,
+      205,
+      155
+    ],
+    [
+      205,
+      197,
+      148
+    ],
+    [
+      203,
+      195,
+      135
+    ],
+    [
+      195,
+      186,
+      129
+    ],
+    [
+      185,
+      176,
+      122
+    ],
+    [
+      169,
+      154,
+      99
+    ],
+    [
+      123,
+      84,
+      35
+    ],
+    [
+      244,
+      242,
+      213
+    ],
+    [
+      244,
+      242,
+      210
+    ],
+    [
+      243,
+      241,
+      211
+    ],
+    [
+      243,
+      241,
+      208
+    ],
+    [
+      242,
+      240,
+      211
+    ],
+    [
+      242,
+      240,
+      209
+    ],
+    [
+      242,
+      239,
+      206
+    ],
+    [
+      241,
+      238,
+      207
+    ],
+    [
+      239,
+      236,
+      207
+    ],
+    [
+      238,
+      235,
+      201
+    ],
+    [
+      229,
+      225,
+      186
+    ],
+    [
+      225,
+      222,
+      179
+    ],
+    [
+      222,
+      219,
+      177
+    ],
+    [
+      211,
+      208,
+      172
+    ],
+    [
+      123,
+      150,
+      158
+    ],
+    [
+      72,
+      96,
+      120
+    ]
+  ],
+  "mesh": {
+    "triangles": 8766,
+    "vertices": 17532,
+    "quads": 4383,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "physical_scale": {
+    "height_units": 2,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      24,
+      24,
+      2
+    ],
+    "units_per_tile": 1
+  },
+  "elapsed_seconds": 16.263431377000018,
+  "source": {
+    "path": "/mnt/c/Users/antto/Documents/ChatGPT/Fable Crown/tmp/valley-onboarding/assets/source/voxel/valley-onboarding/tent-v2/trellis-01/raw-mesh.npz",
+    "sha256": "fcfc97b4afae708faab34ec854f883222716ebe08884c8a87e80348e4d9d707c"
+  },
+  "settings": {
+    "height_metres": 2.0,
+    "pitch_metres": 0.0625,
+    "colors": 24,
+    "fill_enclosed": true
+  },
+  "views_used": [],
+  "views_are": "Rendered projections of final volume, not reconstruction inputs",
+  "art_approved": false,
+  "game_integrated": false,
+  "walking_floor": {
+    "runtimeHeightMetres": 0,
+    "sourceVolumeTopCell": 2,
+    "pivotZCells": 2,
+    "buriedBaseMetres": 0.125,
+    "supportCellsBelowFloor": 1697
+  },
+  "native_correction": {
+    "source": "../vox-01/volume.npz",
+    "sourceSha256": "51e3652eef43cf7bd613339c84b3e7fb0d1361dd8ff0e821c70e9c6cd65466e7",
+    "originalGeometryPreserved": true,
+    "operation": "crop outer2X/1Y cells of learned stake tips; carve source-requested central doorway/room prism only; set pivot at actual interior floor top",
+    "trimmedStakeCells": 235,
+    "removedDoorwayCells": 2428,
+    "clearancePrismSourceXYZMetres": {
+      "min": [
+        -0.75,
+        -1.5,
+        0
+      ],
+      "max": [
+        0.75,
+        0.875,
+        1.5
+      ]
+    },
+    "noAxisStretch": true,
+    "noColorEdits": true
+  }
+}

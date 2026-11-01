@@ -12,7 +12,7 @@ test("clear shoreline remains drawable in game, camera modes, phone views and of
   const errors: string[] = [], external: string[] = [];
   page.on("pageerror", e => errors.push(e.message)); page.on("console", e => { if (e.type() === "error") errors.push(e.text()); });
   page.on("request", request => { const url = new URL(request.url()); if (url.protocol.startsWith("http") && url.hostname !== "127.0.0.1") external.push(url.href); });
-  await page.emulateMedia({ reducedMotion: "no-preference" }); await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./");
+  await page.emulateMedia({ reducedMotion: "no-preference" }); await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy");
   const world = page.getByTestId("rpg-world"); await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const state = createRpg(Date.now(), 8128), y = 62, bank = WORLD.terrain.slice(y * WORLD.width, (y + 1) * WORLD.width).indexOf("water") - 1;
   Object.assign(state.control, { autoplay: false, waiting: true, goal: null, active: null, source: null, queue: [], thought: null, thinkingUntil: 1e9 });

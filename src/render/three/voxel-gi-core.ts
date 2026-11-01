@@ -2,7 +2,8 @@
 export type V3 = [number, number, number];
 export interface GIObjectSource { id: string; triangles: Float32Array; availableTriangles: Float32Array; depletedTriangles: Float32Array; boxes?: { available: Float32Array; depleted?: Float32Array }; bounds: number[] }
 export interface GILamp { position: V3; color: V3; intensity: number; distance: number }
-export interface GIWorldSource { objects: GIObjectSource[]; ground: Uint32Array; width: number; height: number }
+import { groundHeightAt,traceGroundHeight,type GroundHeightField } from "./ground-height";
+export interface GIWorldSource { objects: GIObjectSource[]; ground: Uint32Array; width: number; height: number; heightField?:GroundHeightField }
 export interface GISolveConfig { origin: V3; size: V3; pitch: number; stride: number; rays: number; sunDirection: V3; sunColor: V3; skyColor: V3; sunPower: number; skyPower: number; lamps: GILamp[]; depleted: string[]; aoDistance?: number; bounces?: number }
 export interface GIProbeField { probes: (Float32Array | null)[]; resolution: V3 }
 export interface GIGrid { origin: V3; size: V3; pitch: number; albedo: Uint32Array; emission: Uint32Array; world: GIWorldSource; rays: number }
@@ -79,7 +80,8 @@ export function solidAt(grid: GIGrid, point: V3): boolean {
 /** Exact grid DDA, including blockers between sample endpoints and an implicit ground plane. */
 export function traceGI(grid: GIGrid, start: V3, direction: V3, maxDistance = 24): GIHit | null {
   grid.rays++;
-  const groundDistance = direction[1] < -1e-9 && start[1] >= 0 ? -start[1] / direction[1] : Infinity;
+  const groundHit=grid.world.heightField?traceGroundHeight(grid.world.heightField,start,direction,maxDistance):undefined;
+  const groundDistance = grid.world.heightField?(groundHit?.distance??Infinity):direction[1] < -1e-9 && start[1] >= 0 ? -start[1] / direction[1] : Infinity;
   let enter = 0, exit = Math.min(maxDistance, groundDistance);
   for (let axis = 0; axis < 3; axis++) {
     if (Math.abs(direction[axis]) < 1e-10) { if (start[axis] < grid.origin[axis] || start[axis] >= grid.origin[axis] + grid.size[axis] * grid.pitch) { enter = Infinity; break; } continue; }
@@ -108,10 +110,10 @@ export function traceGI(grid: GIGrid, start: V3, direction: V3, maxDistance = 24
     }
   }
   if (groundDistance >= 0 && groundDistance < maxDistance) {
-    const position = start.map((v, axis) => v + direction[axis] * groundDistance) as V3;
+    const position = groundHit?.position ?? start.map((v, axis) => v + direction[axis] * groundDistance) as V3;
     const x = Math.round(position[0]), z = Math.round(position[2]);
     const packed = x >= 0 && z >= 0 && x < grid.world.width && z < grid.world.height ? grid.world.ground[z * grid.world.width + x] : packRGB(.15, .18, .09);
-    return { distance: groundDistance, position, normal: [0, 1, 0], color: unpack(packed), emission: [0, 0, 0] };
+    return { distance: groundDistance, position, normal: groundHit?.normal??[0, 1, 0], color: unpack(packed), emission: [0, 0, 0] };
   }
   return null;
 }
@@ -125,7 +127,9 @@ function visibleSegment(grid: GIGrid, ax: number, ay: number, az: number, bx: nu
   grid.rays++;
   const dx = bx - ax, dy = by - ay, dz = bz - az, distance = Math.hypot(dx, dy, dz);
   if (distance < 1e-5) return true;
-  if (ay < 0 || by < 0) return false;
+  if(grid.world.heightField){
+    if(traceGroundHeight(grid.world.heightField,[ax,ay,az],[dx/distance,dy/distance,dz/distance],distance-.01))return false;
+  }else if (ay < 0 || by < 0) return false;
   const p = grid.pitch, ox = grid.origin[0], oy = grid.origin[1], oz = grid.origin[2], nx = grid.size[0], ny = grid.size[1], nz = grid.size[2];
   let x = Math.floor((ax - ox) / p), y = Math.floor((ay - oy) / p), z = Math.floor((az - oz) / p);
   if (x < 0 || y < 0 || z < 0 || x >= nx || y >= ny || z >= nz) return !traceGI(grid, [ax, ay, az], [dx / distance, dy / distance, dz / distance], distance - .01);
@@ -145,6 +149,7 @@ function visibleSegment(grid: GIGrid, ax: number, ay: number, az: number, bx: nu
 }
 
 export function traceProbe(grid: GIGrid, position: V3, config: GISolveConfig, previous?: GIProbeField): Float32Array | null {
+  if(grid.world.heightField&&position[1]<groundHeightAt(grid.world.heightField,position[0],position[2]))return null;
   if (solidAt(grid, position)) return null;
   const coefficients = new Float32Array(13); let sky = 0, skyTotal = 0;
   const reflected = previous ? new Float32Array(13) : undefined;

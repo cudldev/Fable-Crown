@@ -1,0 +1,29 @@
+{
+  "date":"2026-11-01",
+  "status":"usable vertical-slice world and held-pose appearance draft",
+  "assets":["tent","cottage","forge","stool","table","bed","shelf","chest","planter","flowers","sapling"],
+  "actualCaptures":["docs/screenshots/valley-home-interior.png","docs/screenshots/valley-home-exterior.png","docs/screenshots/valley-home-portrait.png","docs/screenshots/valley-home-landscape.png","docs/screenshots/valley-forge-interior.png"],
+  "silhouette":{"status":"usable draft","reason":"Cottage/tent/forge and all six furnishings plus two planting models are distinct beside the unchanged prince"},
+  "construction":{"status":"usable draft","reason":"Visible native floor, clear central room path, both side-wall worktops, actual hearth aperture and anvil workspace; cutaway exposes actor"},
+  "material":{"status":"usable draft","reason":"Quiet cream/timber/slate world palette, readable cream-blue bed and metal chest bands; no fallback crates in selected new furniture"},
+  "cohesion":{"status":"usable draft","reason":"Shared6.25cm source density and physical sizes are coherent with1.125m pixel actor and warm terrain"},
+  "integration":{"status":"usable draft","reason":"Actual desktop/portrait/landscape captures show grounded full/cutaway geometry and visible native floors after lead terrain-face masking"},
+  "pixelRuntimeAppearance":{
+    "status":"usable draft",
+    "actualCaptures":["docs/screenshots/valley-clear-block-left.png","docs/screenshots/valley-clear-block-right.png","docs/screenshots/valley-clear-strike.png"],
+    "shield":"Distinct warm wood face and restrained gold material rim in both screen facings. Shield stays at the holding side with a consistent grip; no extra sword, body proportion drift or visible foot displacement.",
+    "contact":"Visible angled held-tool silhouette is connected to the hand and separated from the face. This single pose image does not establish every tool identity or full animation playback.",
+    "previousCaptureIssue":"Earlier valley-block/valley-strike images were occluded by a tree and were not accepted as pose evidence. The clear-grass captures resolve that evidence limitation.",
+    "scope":"Actual production pose appearance snapshots only; source cell/alpha/grip bounds were audited separately. No gameplay timing, damage, resource, performance or full playback claim."
+  },
+  "rotatedCottageReview":{
+    "actualCaptures":["docs/screenshots/valley-rotated-home-0.png","docs/screenshots/valley-rotated-home-1.png","docs/screenshots/valley-rotated-home-2.png","docs/screenshots/valley-rotated-home-3.png"],
+    "geometry":"All four orientations retain grounded native floor, coherent walls and both worktop sockets; no new geometry or scale defect visible.",
+    "visibility":"Orientations0/3 clearly expose the actor. Orientations1/2 leave a retained tall wall between the fixed camera and actor, causing partial occlusion; this remains a camera-dependent cutaway draft limit."
+  },
+  "remainingVisibleLimits":["Simple repeated roof face values remain visibly corrugated","Small planter/flower details are intentionally coarse at overview","Tent inferred low rear opening remains documented","Rotated cottage orientations1/2 partly occlude the actor behind retained walls"],
+  "scope":"Native source and actual production world/held-pose appearance snapshots only. Construction state sources were reviewed separately; these captures do not prove timed construction transitions, full animation playback, saves, gameplay authority or performance. On-screen FPS counters are not benchmark evidence. No user final art approval or public deployment claim.",
+  "nativeMagicaVoxelApplicationOpened":false,
+  "publicDeploymentVerified":false,
+  "userFinalArtApproval":false
+}

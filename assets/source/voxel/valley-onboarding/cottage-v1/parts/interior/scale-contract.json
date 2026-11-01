@@ -1,0 +1,116 @@
+{
+  "assetId": "cottage-v1-parts-interior",
+  "mode": "asset-reference",
+  "sizeStatus": "Exact native modules with shared origin and walking-floor pivot",
+  "style": {
+    "status": "candidate",
+    "profile": "Original warm cream-stone timber and quiet slate roof"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    6,
+    5
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -3.0,
+      -2.5,
+      -0.125
+    ],
+    "max": [
+      3.0,
+      2.5,
+      3.5
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -3.0,
+      -2.5,
+      -0.125
+    ],
+    "max": [
+      3.0,
+      2.5,
+      3.5
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    96,
+    80,
+    58
+  ],
+  "assetPivotGrid": [
+    48,
+    40,
+    2
+  ],
+  "actualExtentUnits": [
+    6.0,
+    5.0,
+    3.625
+  ],
+  "viewFrameGrid": [
+    112,
+    112
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -3.5,
+      -3.5,
+      -0.625
+    ],
+    "max": [
+      3.5,
+      3.5,
+      6.375
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 448,
+  "pixelsPerVoxel": 4,
+  "outerMarginPixels": 32,
+  "pixelsPerWorldUnit": 64.0,
+  "pixelsPerTile": 64.0,
+  "baseline": 440,
+  "origins": {
+    "front": [
+      256.0,
+      440
+    ],
+    "back": [
+      256.0,
+      440
+    ],
+    "left": [
+      256.0,
+      440
+    ],
+    "right": [
+      256.0,
+      440
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

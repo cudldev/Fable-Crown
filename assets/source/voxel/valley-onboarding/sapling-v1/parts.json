@@ -1,0 +1,33 @@
+{
+  "id": "sapling-v1",
+  "pitch": 0.0625,
+  "unitsPerTile": 1,
+  "nativeJob": "vox-01",
+  "sourceRoute": "native-authored-vegetation",
+  "gridXYZ": [
+    16,
+    16,
+    22
+  ],
+  "pivotVoxels": [
+    8,
+    8,
+    0
+  ],
+  "logicalFootprint": [
+    1,
+    1
+  ],
+  "models": {
+    "full": "vox-01/asset.vox"
+  },
+  "parts": [
+    {
+      "id": "whole",
+      "file": "vox-01/asset.vox"
+    }
+  ],
+  "sourceRecipe": "recipe.json",
+  "provenance": "Original small asymmetric forked sapling: rooted trunk, two stout branch directions, dominant stepped crown and supporting left/rear lobes. Native extent1x1x1.375m; logical1x1m, shared pitch. Quiet broad olive pigment groups; no reused proprietary tree.",
+  "status": "native usable draft candidate; lead game integration pending"
+}

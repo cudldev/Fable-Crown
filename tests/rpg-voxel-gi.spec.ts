@@ -6,7 +6,7 @@ import { createRpg } from "../src/rpg/engine";
 test("cached GI, AO and FPS work in the actual world with independent controls and invalidation", async ({ page, context }) => {
   const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
   page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"); await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   const fixture = createRpg(Date.now(), 8128);
   Object.assign(fixture.control, { waiting: true, goal: null, active: null, source: null, queue: [], thought: null, thinkingUntil: 1_000_000_000 }); fixture.player.path = [];

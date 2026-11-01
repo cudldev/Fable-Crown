@@ -227,7 +227,7 @@ test("feedback and contextual goal controls fit portrait and landscape mobile vi
 test("Walk recovers energy and Run consumes it while the movement choice persists", async ({
   page,
 }) => {
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const s = waitingFixture();
   s.player.runEnergy = 5000;
@@ -267,7 +267,7 @@ test("Alden explains a stamina break and resumes autonomous running offline", as
     const url = new URL(request.url());
     if (url.protocol.startsWith("http") && page.url().startsWith("http") && url.origin !== new URL(page.url()).origin) external.push(url.href);
   });
-  await page.goto("./?renderer=canvas");
+  await page.goto("./?chapter=legacy&renderer=canvas");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   // Hold the real worker via its lifecycle pause while inspecting this short rest.
   // Reload below starts it normally and verifies offline recovery and travel.

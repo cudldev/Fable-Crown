@@ -11,6 +11,9 @@ export interface UseActionControlsOptions {
   onInventory?(): void;
   onBuild?(): void;
   onBack?(): void;
+  /** Called once per animation frame while the right stick is displaced. */
+  onCameraPan?(x:number,y:number,deltaSeconds:number):void;
+  onFollow?():void;
 }
 
 const MOVEMENT_KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"]);
@@ -57,8 +60,9 @@ export function useActionControls(options: UseActionControlsOptions) {
     const edges = new ButtonEdgeTracker();
     let padIndex: number | null = null;
     let animationFrame = 0;
+    let lastPadTime = 0;
     function clear() {
-      inputBuffer.clear(); edges.clear(); setResetKey(value => value + 1);
+      inputBuffer.clear(); setResetKey(value => value + 1);
     }
     clearRef.current = clear;
     function onKeyDown(event: KeyboardEvent) {
@@ -80,21 +84,27 @@ export function useActionControls(options: UseActionControlsOptions) {
     }
     function visibilityChanged() { if (document.hidden) clear(); }
     function focused(event: FocusEvent) { if (isTextTarget(event.target)) clear(); }
-    function disconnected() { padIndex = null; clear(); }
-    function pollGamepad() {
+    function disconnected() { padIndex = null; edges.clear(); clear(); }
+    function pollGamepad(time:number) {
+      const deltaSeconds=Math.min(.05,lastPadTime?(time-lastPadTime)/1000:1/60);lastPadTime=time;
       if (!document.hidden && document.hasFocus()) {
         const pads = typeof navigator.getGamepads === "function" ? navigator.getGamepads() : [];
         const pad = (padIndex === null ? undefined : pads[padIndex]) ?? [...pads].find(candidate => candidate?.connected);
         if (!pad && padIndex !== null) { padIndex = null; clear(); }
         if (pad) {
-          if (pad.index !== padIndex) { clear(); padIndex = pad.index; }
+          if (pad.index !== padIndex) { clear(); edges.clear(); padIndex = pad.index; }
           const pressed = (index: number) => Boolean(pad.buttons[index]?.pressed || (pad.buttons[index]?.value ?? 0) > 0.5);
           const buttons = menuButtons();
           const canAct = latest.current.enabled !== false && !buttons && !isTextTarget(document.activeElement);
           const stick = applyStickDeadzone(pad.axes[0] ?? 0, pad.axes[1] ?? 0);
           inputBuffer.setMovement("gamepad", canAct ? stick.x : 0, canAct ? stick.y : 0);
-          inputBuffer.setStrike("gamepad", canAct && pressed(7));
+          const strikeEdge=edges.update("strike",pressed(7));
+          inputBuffer.setStrike("gamepad",false);
+          if(canAct&&strikeEdge)inputBuffer.setStrike("gamepad",true);
           inputBuffer.setBlock("gamepad", canAct && pressed(6));
+          const cameraStick=applyStickDeadzone(pad.axes[2]??0,pad.axes[3]??0);
+          if(canAct&&(cameraStick.x||cameraStick.y))latest.current.onCameraPan?.(cameraStick.x,cameraStick.y,deltaSeconds);
+          if(edges.update("follow",pressed(11)))latest.current.onFollow?.();
           const confirm = edges.update("confirm", pressed(0));
           if (confirm) {
             if (buttons) {

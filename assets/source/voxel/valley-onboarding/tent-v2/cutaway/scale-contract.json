@@ -1,0 +1,116 @@
+{
+  "assetId": "valley-tent-v2-corrected",
+  "mode": "asset-reference",
+  "sizeStatus": "Exact3x3m native extent;2m total height; pivot at actual interior floor top. Stake/base0.125m is buried. Original learned raw and uncropped volume preserved.",
+  "style": {
+    "status": "candidate",
+    "profile": "TRELLIS cream-blue wall tent with explicit source-matching native doorway correction"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    3,
+    3
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -1.5,
+      -1.5,
+      -0.125
+    ],
+    "max": [
+      1.5,
+      1.5,
+      1.875
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -1.5,
+      -1.5,
+      -0.125
+    ],
+    "max": [
+      1.5,
+      1.5,
+      1.875
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    48,
+    48,
+    32
+  ],
+  "assetPivotGrid": [
+    24,
+    24,
+    2
+  ],
+  "actualExtentUnits": [
+    3.0,
+    3.0,
+    2.0
+  ],
+  "viewFrameGrid": [
+    64,
+    64
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -2.0,
+      -2.0,
+      -0.625
+    ],
+    "max": [
+      2.0,
+      2.0,
+      3.375
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 512,
+  "pixelsPerVoxel": 8,
+  "outerMarginPixels": 0,
+  "pixelsPerWorldUnit": 128.0,
+  "pixelsPerTile": 128.0,
+  "baseline": 432,
+  "origins": {
+    "front": [
+      256.0,
+      432
+    ],
+    "back": [
+      256.0,
+      432
+    ],
+    "left": [
+      256.0,
+      432
+    ],
+    "right": [
+      256.0,
+      432
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

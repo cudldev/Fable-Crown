@@ -7,7 +7,7 @@ test("game daylight still advances, fixed presets work and cycling reloads offli
   const errors: string[] = [], external: string[] = [];
   page.on("pageerror", e => errors.push(e.message)); page.on("console", e => { if (e.type() === "error") errors.push(e.text()); });
   page.on("request", r => { const u = new URL(r.url()); if (u.protocol.startsWith("http") && u.hostname !== "127.0.0.1") external.push(u.href); });
-  await page.goto("./"); const world = page.getByTestId("rpg-world");
+  await page.goto("./?chapter=legacy"); const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await expect(world).toHaveAttribute("data-day-night-cycle", "true");
   const hour = Number(await world.getAttribute("data-day-hour"));

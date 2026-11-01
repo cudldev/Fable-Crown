@@ -1,0 +1,25 @@
+{
+  "id": "stool-v1",
+  "targetXYZ": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "logicalFootprint": [
+    1,
+    1
+  ],
+  "materials": "warm honey timber",
+  "notes": "Broad simple seat, visibly separated stout legs, grounded supports.",
+  "physicalTargetXYZ": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "physicalHeightMetres": 0.5,
+  "pitchMetres": 0.0625,
+  "groundPivot": "center XY, minimum Z",
+  "front": "-Y",
+  "status": "source/reconstruction pending visual review",
+  "requestedScope": "original colored image -> local TRELLIS -> native VOX; no production bake or runtime binding"
+}

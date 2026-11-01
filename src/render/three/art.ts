@@ -299,7 +299,7 @@ export function createArtLibrary(): RigidArtLibrary {
       for (const x of [-.4, .4]) block(group, m.darkWood, x, .3, 0, .08, .3, .68);
       block(group, m.paleWood, 0, .26, 0, .8, .1, .16, "ferry-seat");
     } else if (object.kind === "quest") {
-      const actor = createActor({ id: 1000 + object.position.x, name: object.name, role: object.questId === "forge" ? "smith" : object.questId === "supper" ? "cook" : "merchant" });
+      const actor = createActor({ id: 1000 + object.position.x, name: object.name, role: object.questId === "forge" || object.serviceId === "valley-visitor-smith" ? "smith" : object.serviceId === "valley-visitor-builder" ? "builder" : object.questId === "supper" ? "cook" : "merchant" });
       actor.group.name = "quest-giver"; group.add(actor.group);
     } else if (object.kind === "clue") {
       block(group, m.wood, 0, .32, 0, .6, .64, .42, "clue-stand");

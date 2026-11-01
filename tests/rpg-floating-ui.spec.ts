@@ -30,7 +30,7 @@ async function unboxed(page: Page, selector: string) {
 test("floating vials follow scene light with transparent labels and readable glass on phones", async ({ page }) => {
   await mkdir(output, { recursive: true });
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const injured = fixture(); injured.player.health = 6;
   await restore(page, injured);
   const health = page.locator(".world-health-player");
@@ -67,7 +67,7 @@ test("floating vials follow scene light with transparent labels and readable gla
 
 test("real work, XP, level-up and victim damage float without plates", async ({ page }) => {
   await mkdir(output, { recursive: true });
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const state = fixture(), ore = WORLD.objects.find(object => object.resourceId === "copper")!;
   state.player.position = { ...interactionTiles(ore)[0] }; state.player.previousPosition = { ...state.player.position };
   state.player.skills.mining = XP_THRESHOLDS[1] - 100;
@@ -94,7 +94,7 @@ test("real work, XP, level-up and victim damage float without plates", async ({ 
 test("skilling ring follows the actual attempt and resets without growing the mobile dock", async ({ page }) => {
   await mkdir(output, { recursive: true });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const state = fixture(), ore = WORLD.objects.find(object => object.resourceId === "copper")!;
   state.player.position = { ...interactionTiles(ore)[0] }; state.player.previousPosition = { ...state.player.position };
   expect(applyRpgCommand(state, { type: "gather", objectId: ore.id, quantity: 28 }).ok).toBe(true);

@@ -1,0 +1,116 @@
+{
+  "assetId": "valley-bed",
+  "mode": "asset-reference",
+  "sizeStatus": "declared 0.75m height; uniform scaling preserves inferred aspect ratio",
+  "style": {
+    "status": "candidate",
+    "profile": "TRELLIS-generated RGB;24-color voxel reduction"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    1,
+    1
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -0.625,
+      -0.9375,
+      0.0
+    ],
+    "max": [
+      0.625,
+      0.9375,
+      0.75
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -0.625,
+      -0.9375,
+      0.0
+    ],
+    "max": [
+      0.625,
+      0.9375,
+      0.75
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    20,
+    30,
+    12
+  ],
+  "assetPivotGrid": [
+    10,
+    15,
+    0
+  ],
+  "actualExtentUnits": [
+    1.25,
+    1.875,
+    0.75
+  ],
+  "viewFrameGrid": [
+    46,
+    46
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -1.4375,
+      -1.4375,
+      -0.5
+    ],
+    "max": [
+      1.4375,
+      1.4375,
+      2.375
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 506,
+  "pixelsPerVoxel": 11,
+  "outerMarginPixels": 3,
+  "pixelsPerWorldUnit": 176.0,
+  "pixelsPerTile": 176.0,
+  "baseline": 421,
+  "origins": {
+    "front": [
+      256.0,
+      421
+    ],
+    "back": [
+      256.0,
+      421
+    ],
+    "left": [
+      256.0,
+      421
+    ],
+    "right": [
+      256.0,
+      421
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

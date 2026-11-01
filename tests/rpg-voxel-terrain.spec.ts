@@ -59,7 +59,7 @@ test("native VOX terrain paints the actual flat world crisply, reuses its bake a
   });
   await mkdir(output, { recursive: true });
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await expect(world).toHaveAttribute("data-terrain-source", "vox");
@@ -135,7 +135,7 @@ test.describe("native terrain fallback", () => {
     await mkdir(output, { recursive: true });
     const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
     await page.route("**/art3d/terrain/surface.bin*", route => route.abort());
-    await page.goto("./?renderer=3d");
+    await page.goto("./?chapter=legacy&renderer=3d");
     const world = page.getByTestId("rpg-world");
     await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
     await expect(world).toHaveAttribute("data-terrain-source", "fallback");

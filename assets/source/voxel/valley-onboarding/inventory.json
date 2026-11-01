@@ -1,0 +1,678 @@
+{
+  "schemaVersion": 1,
+  "sourceRoot": "assets/source/voxel/valley-onboarding",
+  "pitchMetres": 0.0625,
+  "unitsPerTile": 1,
+  "sourceAxes": "X width,Y depth,Z up; front-Y",
+  "runtimeAxes": "X width,Y up,Z=-sourceY; front+Z",
+  "actorBodyMetres": {
+    "width": 1.0625,
+    "height": 1.125
+  },
+  "integrationOwnership": "Lead only: runtime/public manifest/renderers/bakes untouched by art specialist",
+  "pixelActionRecipe": "assets/source/voxel/valley-onboarding/pixel-actions-v1/recipe.json",
+  "pixelActionPreview": "assets/source/voxel/valley-onboarding/pixel-actions-v1/pose-review.png",
+  "assets": [
+    {
+      "kind": "tent",
+      "id": "tent-v2",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/tent-v2",
+      "sourceImage": "assets/source/voxel/valley-onboarding/tent-v2/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/tent-v2/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/tent-v2/brief.json",
+      "sourceRoute": "single colored image -> pinned local TRELLIS -> native VOX",
+      "selectedJob": "vox-04",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/tent-v2/vox-04/asset.vox",
+      "nativeSha256": "7e923202c60e45ea865ee4b72e886eea15de6500284a22dc5f05df58ee1e3df5",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/tent-v2/vox-04/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/tent-v2/vox-04/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/tent-v2/vox-04/scale-contract.json",
+      "gridXYZ": [
+        48,
+        48,
+        32
+      ],
+      "pivotVoxels": [
+        24,
+        24,
+        2
+      ],
+      "extentXYZMetres": [
+        3.0,
+        3.0,
+        2.0
+      ],
+      "heightAbovePivotMetres": 1.875,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 11508,
+      "paletteEntries": 24,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/tent-v2/vox-04/asset.vox",
+        "cutaway": "assets/source/voxel/valley-onboarding/tent-v2/cutaway/asset.vox"
+      },
+      "partsMetadata": "assets/source/voxel/valley-onboarding/tent-v2/parts.json",
+      "partGroups": [
+        {
+          "id": "shelter",
+          "file": "vox-04/asset.vox",
+          "visible": "always"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/tent-v2/review-vox-04/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/tent-v2/review-vox-04/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "rawLearnedMesh": "assets/source/voxel/valley-onboarding/tent-v2/trellis-01/raw-mesh.npz",
+      "generationMetadata": "assets/source/voxel/valley-onboarding/tent-v2/trellis-01/generation.json",
+      "buriedBaseMetres": 0.125,
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "cottage",
+      "id": "cottage-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/cottage-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/cottage-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/cottage-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/cottage-v1/brief.json",
+      "sourceRoute": "native-modular",
+      "selectedJob": "vox-02",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/asset.vox",
+      "nativeSha256": "6be6a908baf14eddd9ad4422f676f69d7d265227663bc461c6420c123eb28c3f",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/scale-contract.json",
+      "gridXYZ": [
+        96,
+        80,
+        58
+      ],
+      "pivotVoxels": [
+        48,
+        40,
+        2
+      ],
+      "extentXYZMetres": [
+        6.0,
+        5.0,
+        3.625
+      ],
+      "heightAbovePivotMetres": 3.5,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 67228,
+      "paletteEntries": 20,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/asset.vox",
+        "cutaway": "assets/source/voxel/valley-onboarding/cottage-v1/cutaway-v2/asset.vox",
+        "foundation": "assets/source/voxel/valley-onboarding/cottage-v1/states/foundation/asset.vox",
+        "scaffold": "assets/source/voxel/valley-onboarding/cottage-v1/states/scaffold/asset.vox",
+        "complete": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/asset.vox"
+      },
+      "partsMetadata": "assets/source/voxel/valley-onboarding/cottage-v1/parts.json",
+      "partGroups": [
+        {
+          "id": "foundation",
+          "file": "parts/foundation/asset.vox",
+          "glb": "parts/foundation/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 15360
+        },
+        {
+          "id": "interior",
+          "file": "parts/interior/asset.vox",
+          "glb": "parts/interior/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 19838
+        },
+        {
+          "id": "facade",
+          "file": "parts/facade/asset.vox",
+          "glb": "parts/facade/asset.glb",
+          "hiddenInCutaway": true,
+          "cells": 15950
+        },
+        {
+          "id": "roof",
+          "file": "parts/roof/asset.vox",
+          "glb": "parts/roof/asset.glb",
+          "hiddenInCutaway": true,
+          "cells": 15360
+        },
+        {
+          "id": "workbench",
+          "file": "parts/workbench/asset.vox",
+          "glb": "parts/workbench/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 360
+        },
+        {
+          "id": "planning-table",
+          "file": "parts/planning-table/asset.vox",
+          "glb": "parts/planning-table/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 360
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/cottage-v1/art-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/cottage-v1/vox-02/software-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "buriedBaseMetres": 0.125,
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "forge",
+      "id": "forge-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/forge-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/forge-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/forge-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/forge-v1/brief.json",
+      "sourceRoute": "native-modular",
+      "selectedJob": "vox-01",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/forge-v1/vox-01/asset.vox",
+      "nativeSha256": "54100b5340026b2e614775798a9cb23b04f6a165afe0265c57ae1f3cd94e2787",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/forge-v1/vox-01/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/forge-v1/vox-01/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/forge-v1/vox-01/scale-contract.json",
+      "gridXYZ": [
+        64,
+        48,
+        50
+      ],
+      "pivotVoxels": [
+        32,
+        24,
+        2
+      ],
+      "extentXYZMetres": [
+        4.0,
+        3.0,
+        3.125
+      ],
+      "heightAbovePivotMetres": 3.0,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 32240,
+      "paletteEntries": 39,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/forge-v1/vox-01/asset.vox",
+        "cutaway": "assets/source/voxel/valley-onboarding/forge-v1/cutaway/asset.vox",
+        "foundation": "assets/source/voxel/valley-onboarding/forge-v1/states/foundation/asset.vox",
+        "scaffold": "assets/source/voxel/valley-onboarding/forge-v1/states/scaffold/asset.vox",
+        "complete": "assets/source/voxel/valley-onboarding/forge-v1/vox-01/asset.vox"
+      },
+      "partsMetadata": "assets/source/voxel/valley-onboarding/forge-v1/parts.json",
+      "partGroups": [
+        {
+          "id": "foundation",
+          "file": "parts/foundation/asset.vox",
+          "glb": "parts/foundation/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 6144
+        },
+        {
+          "id": "interior",
+          "file": "parts/interior/asset.vox",
+          "glb": "parts/interior/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 8388
+        },
+        {
+          "id": "facade",
+          "file": "parts/facade/asset.vox",
+          "glb": "parts/facade/asset.glb",
+          "hiddenInCutaway": true,
+          "cells": 3444
+        },
+        {
+          "id": "roof",
+          "file": "parts/roof/asset.vox",
+          "glb": "parts/roof/asset.glb",
+          "hiddenInCutaway": true,
+          "cells": 5928
+        },
+        {
+          "id": "hearth",
+          "file": "parts/hearth/asset.vox",
+          "glb": "parts/hearth/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 7076
+        },
+        {
+          "id": "anvil",
+          "file": "parts/anvil/asset.vox",
+          "glb": "parts/anvil/asset.glb",
+          "hiddenInCutaway": false,
+          "cells": 1260
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/forge-v1/review-vox-01/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/forge-v1/review-vox-01/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "buriedBaseMetres": 0.125,
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "stool",
+      "id": "stool-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/stool-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/stool-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/stool-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/stool-v1/brief.json",
+      "sourceRoute": "single colored image -> pinned local TRELLIS -> native VOX",
+      "selectedJob": "vox-02",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/stool-v1/vox-02/asset.vox",
+      "nativeSha256": "29e08ed433c459acf670da2d4a1e36bf74a8e47b59a2c359d6e9e0f7af5b67c3",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/stool-v1/vox-02/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/stool-v1/vox-02/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/stool-v1/vox-02/scale-contract.json",
+      "gridXYZ": [
+        10,
+        10,
+        8
+      ],
+      "pivotVoxels": [
+        5,
+        5,
+        0
+      ],
+      "extentXYZMetres": [
+        0.625,
+        0.625,
+        0.5
+      ],
+      "heightAbovePivotMetres": 0.5,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 512,
+      "paletteEntries": 4,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/stool-v1/vox-02/asset.vox"
+      },
+      "partsMetadata": null,
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-02/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/stool-v1/review-vox-02/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/stool-v1/review-vox-02/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "rawLearnedMesh": "assets/source/voxel/valley-onboarding/stool-v1/trellis-01/raw-mesh.npz",
+      "generationMetadata": "assets/source/voxel/valley-onboarding/stool-v1/trellis-01/generation.json",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "table",
+      "id": "table-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/table-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/table-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/table-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/table-v1/brief.json",
+      "sourceRoute": "single colored image -> pinned local TRELLIS -> native VOX",
+      "selectedJob": "vox-02",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/table-v1/vox-02/asset.vox",
+      "nativeSha256": "5ebff11fdc7af21cdb08affc26f2b63afedaf4d306e5ea4441012129b40ab203",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/table-v1/vox-02/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/table-v1/vox-02/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/table-v1/vox-02/scale-contract.json",
+      "gridXYZ": [
+        18,
+        32,
+        12
+      ],
+      "pivotVoxels": [
+        9,
+        16,
+        0
+      ],
+      "extentXYZMetres": [
+        1.125,
+        2.0,
+        0.75
+      ],
+      "heightAbovePivotMetres": 0.75,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 1829,
+      "paletteEntries": 4,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/table-v1/vox-02/asset.vox"
+      },
+      "partsMetadata": null,
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-02/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/table-v1/review-vox-02/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/table-v1/review-vox-02/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "rawLearnedMesh": "assets/source/voxel/valley-onboarding/table-v1/trellis-01/raw-mesh.npz",
+      "generationMetadata": "assets/source/voxel/valley-onboarding/table-v1/trellis-01/generation.json",
+      "suggestedQuarterTurns": 1,
+      "footprintNote": "Native long axis is sourceY;90degree rotation gives2m width and1.125m depth. Keep measured overhang; no per-axis fit.",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "bed",
+      "id": "bed-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/bed-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/bed-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/bed-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/bed-v1/brief.json",
+      "sourceRoute": "single colored image -> pinned local TRELLIS -> native VOX",
+      "selectedJob": "vox-02",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/bed-v1/vox-02/asset.vox",
+      "nativeSha256": "d5eeecc4820b37cf49cdcd75c447cdfa923a1c26ed51d6beb20aaebd4d4e556c",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/bed-v1/vox-02/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/bed-v1/vox-02/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/bed-v1/vox-02/scale-contract.json",
+      "gridXYZ": [
+        20,
+        30,
+        12
+      ],
+      "pivotVoxels": [
+        10,
+        15,
+        0
+      ],
+      "extentXYZMetres": [
+        1.25,
+        1.875,
+        0.75
+      ],
+      "heightAbovePivotMetres": 0.75,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 3285,
+      "paletteEntries": 10,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/bed-v1/vox-02/asset.vox"
+      },
+      "partsMetadata": null,
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-02/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/bed-v1/review-vox-02/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/bed-v1/review-vox-02/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "rawLearnedMesh": "assets/source/voxel/valley-onboarding/bed-v1/trellis-01/raw-mesh.npz",
+      "generationMetadata": "assets/source/voxel/valley-onboarding/bed-v1/trellis-01/generation.json",
+      "footprintNote": "Selected mesh uniformly reconverted at0.75m total headboard height; original1m variant preserved. Expected~1.25x1.875m measured footprint; no axis stretch.",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "shelf",
+      "id": "shelf-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/shelf-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/shelf-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/shelf-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/shelf-v1/brief.json",
+      "sourceRoute": "single colored image -> pinned local TRELLIS -> native VOX",
+      "selectedJob": "vox-02",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/shelf-v1/vox-02/asset.vox",
+      "nativeSha256": "49be064c96836e866a4ba5d93b14c9dec6a896d6f8206594b8505724ef5691b6",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/shelf-v1/vox-02/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/shelf-v1/vox-02/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/shelf-v1/vox-02/scale-contract.json",
+      "gridXYZ": [
+        24,
+        6,
+        20
+      ],
+      "pivotVoxels": [
+        12,
+        3,
+        0
+      ],
+      "extentXYZMetres": [
+        1.5,
+        0.375,
+        1.25
+      ],
+      "heightAbovePivotMetres": 1.25,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 1206,
+      "paletteEntries": 4,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/shelf-v1/vox-02/asset.vox"
+      },
+      "partsMetadata": null,
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-02/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/shelf-v1/review-vox-02/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/shelf-v1/review-vox-02/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "rawLearnedMesh": "assets/source/voxel/valley-onboarding/shelf-v1/trellis-01/raw-mesh.npz",
+      "generationMetadata": "assets/source/voxel/valley-onboarding/shelf-v1/trellis-01/generation.json",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "chest",
+      "id": "chest-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/chest-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/chest-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/chest-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/chest-v1/brief.json",
+      "sourceRoute": "single colored image -> pinned local TRELLIS -> native VOX",
+      "selectedJob": "vox-02",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/chest-v1/vox-02/asset.vox",
+      "nativeSha256": "6c2162a7eae5a5dae65c64b6e6fa1dcef046346db18211084041a0c0eb386313",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/chest-v1/vox-02/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/chest-v1/vox-02/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/chest-v1/vox-02/scale-contract.json",
+      "gridXYZ": [
+        12,
+        16,
+        8
+      ],
+      "pivotVoxels": [
+        6,
+        8,
+        0
+      ],
+      "extentXYZMetres": [
+        0.75,
+        1.0,
+        0.5
+      ],
+      "heightAbovePivotMetres": 0.5,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 1420,
+      "paletteEntries": 7,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/chest-v1/vox-02/asset.vox"
+      },
+      "partsMetadata": null,
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-02/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/chest-v1/review-vox-02/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/chest-v1/review-vox-02/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "rawLearnedMesh": "assets/source/voxel/valley-onboarding/chest-v1/trellis-01/raw-mesh.npz",
+      "generationMetadata": "assets/source/voxel/valley-onboarding/chest-v1/trellis-01/generation.json",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "planter",
+      "id": "planter-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/planter-v1",
+      "sourceImage": "assets/source/voxel/valley-onboarding/planter-v1/input.png",
+      "sourcePrompt": "assets/source/voxel/valley-onboarding/planter-v1/input.prompt.txt",
+      "physicalBrief": "assets/source/voxel/valley-onboarding/planter-v1/brief.json",
+      "sourceRoute": "single colored image -> pinned local TRELLIS -> native VOX",
+      "selectedJob": "vox-02",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/planter-v1/vox-02/asset.vox",
+      "nativeSha256": "a0b83c13f8123439963ffd9bdcaba72cead93610bf4dfbb228f3818e84e30e74",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/planter-v1/vox-02/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/planter-v1/vox-02/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/planter-v1/vox-02/scale-contract.json",
+      "gridXYZ": [
+        8,
+        8,
+        8
+      ],
+      "pivotVoxels": [
+        4,
+        4,
+        0
+      ],
+      "extentXYZMetres": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "heightAbovePivotMetres": 0.5,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 285,
+      "paletteEntries": 8,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/planter-v1/vox-02/asset.vox"
+      },
+      "partsMetadata": null,
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-02/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/planter-v1/review-vox-02/browser-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/planter-v1/review-vox-02/vox-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "rawLearnedMesh": "assets/source/voxel/valley-onboarding/planter-v1/trellis-01/raw-mesh.npz",
+      "generationMetadata": "assets/source/voxel/valley-onboarding/planter-v1/trellis-01/generation.json",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "flowers",
+      "id": "flowers-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/flowers-v1",
+      "sourceImage": null,
+      "sourcePrompt": null,
+      "physicalBrief": "assets/source/voxel/valley-onboarding/flowers-v1/brief.json",
+      "sourceRoute": "native-authored-vegetation",
+      "selectedJob": "vox-01",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/flowers-v1/vox-01/asset.vox",
+      "nativeSha256": "6a7281aab462b659e50200bee4247ba2936a4cccfed2e056416b0d5d13467644",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/flowers-v1/vox-01/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/flowers-v1/vox-01/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/flowers-v1/vox-01/scale-contract.json",
+      "gridXYZ": [
+        12,
+        12,
+        8
+      ],
+      "pivotVoxels": [
+        6,
+        6,
+        0
+      ],
+      "extentXYZMetres": [
+        0.75,
+        0.75,
+        0.5
+      ],
+      "heightAbovePivotMetres": 0.5,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 181,
+      "paletteEntries": 9,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/flowers-v1/vox-01/asset.vox"
+      },
+      "partsMetadata": "assets/source/voxel/valley-onboarding/flowers-v1/parts.json",
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-01/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/flowers-v1/art-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/flowers-v1/vox-01/software-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "sourceRecipe": "assets/source/voxel/valley-onboarding/flowers-v1/recipe.json",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    },
+    {
+      "kind": "sapling",
+      "id": "sapling-v1",
+      "sourceDirectory": "assets/source/voxel/valley-onboarding/sapling-v1",
+      "sourceImage": null,
+      "sourcePrompt": null,
+      "physicalBrief": "assets/source/voxel/valley-onboarding/sapling-v1/brief.json",
+      "sourceRoute": "native-authored-vegetation",
+      "selectedJob": "vox-01",
+      "nativeVoxel": "assets/source/voxel/valley-onboarding/sapling-v1/vox-01/asset.vox",
+      "nativeSha256": "bad4fc1c086ade45782129297f2d9a5d9ea14b25f542ce3ee96818b9100baab5",
+      "nativeGLB": "assets/source/voxel/valley-onboarding/sapling-v1/vox-01/asset.glb",
+      "nativeReport": "assets/source/voxel/valley-onboarding/sapling-v1/vox-01/report.json",
+      "scaleContract": "assets/source/voxel/valley-onboarding/sapling-v1/vox-01/scale-contract.json",
+      "gridXYZ": [
+        16,
+        16,
+        22
+      ],
+      "pivotVoxels": [
+        8,
+        8,
+        0
+      ],
+      "extentXYZMetres": [
+        1.0,
+        1.0,
+        1.375
+      ],
+      "heightAbovePivotMetres": 1.375,
+      "walkingFloorMetres": 0,
+      "occupiedCells": 571,
+      "paletteEntries": 9,
+      "models": {
+        "full": "assets/source/voxel/valley-onboarding/sapling-v1/vox-01/asset.vox"
+      },
+      "partsMetadata": "assets/source/voxel/valley-onboarding/sapling-v1/parts.json",
+      "partGroups": [
+        {
+          "id": "whole",
+          "file": "vox-01/asset.vox"
+        }
+      ],
+      "visualReviewEvidence": "assets/source/voxel/valley-onboarding/sapling-v1/art-review.json",
+      "preview": "assets/source/voxel/valley-onboarding/sapling-v1/vox-01/software-iso.png",
+      "specialistVisualStatus": "usable draft candidate",
+      "runtimeGameReviewed": true,
+      "artApproved": false,
+      "sourceRecipe": "assets/source/voxel/valley-onboarding/sapling-v1/recipe.json",
+      "runtimeReviewScope": "Static complete/cutaway appearance in supplied desktop and phone captures; no performance/deployment/user-final-art claim"
+    }
+  ],
+  "pending": [],
+  "staticInGameReview": "assets/source/voxel/valley-onboarding/in-game-review.json",
+  "pixelRuntimeAppearanceReview": "assets/source/voxel/valley-onboarding/in-game-review.json"
+}

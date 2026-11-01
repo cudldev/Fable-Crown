@@ -85,11 +85,11 @@ export class WorldCurve {
     if (entry.original === undefined) delete mesh.boundingSphere; else mesh.boundingSphere = entry.original;
   }
   /** Nearest positive intersection with the same cylindrical ground used by vertices. */
-  ground(ray: Ray): Vector3 | null {
+  ground(ray: Ray, height = 0): Vector3 | null {
     const axis = this.uniforms.fableCurveAxis.value, center = this.uniforms.fableCurveCenter.value;
     const d = (ray.origin.x - center.x) * axis.x + (ray.origin.z - center.y) * axis.y;
     const v = ray.direction.x * axis.x + ray.direction.z * axis.y, k = this.strength;
-    const a = k * v * v, b = ray.direction.y + 2 * k * d * v, c = ray.origin.y + k * d * d;
+    const a = k * v * v, b = ray.direction.y + 2 * k * d * v, c = ray.origin.y - height + k * d * d;
     let t: number;
     if (Math.abs(a) < 1e-12) { if (Math.abs(b) < 1e-12) return null; t = -c / b; }
     else {
@@ -99,7 +99,7 @@ export class WorldCurve {
       if (!roots.length) return null; t = Math.min(...roots);
     }
     if (t < 0 || !Number.isFinite(t)) return null;
-    const point = ray.at(t, new Vector3()); point.y = 0; return point;
+    const point = ray.at(t, new Vector3()); point.y = height; return point;
   }
   decorate(root: Object3D) {
     this.uniforms.fableViewEnabled.value = this.view.enabled ? 1 : 0;

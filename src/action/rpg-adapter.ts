@@ -2,7 +2,7 @@ import type { ActionEvent, ActionState, ActionWorld } from "./contracts";
 import type { RpgState, TilePosition, WorldDefinition } from "../rpg/types";
 import { isWalkable, canStep, tile, worldForState } from "../rpg/world";
 import { ITEMS, RESOURCES, ENEMIES, QUESTS } from "../rpg/content";
-import { addItems, itemCount, removeItems, exchangeItems } from "../rpg/inventory";
+import { addItems, itemCount, removeItems, exchangeItems, inventorySlots, BAG_SLOTS } from "../rpg/inventory";
 import { levelForXp } from "../rpg/skills";
 import { appendGameMessage, appendSimulationEffect } from "../rpg/events";
 
@@ -46,7 +46,7 @@ export function applyActionEvents(state:RpgState, action:ActionState, events:rea
         .some(stack=>{const tool=ITEMS[stack.itemId];return tool?.tool===resource.tool && (!tool.skill || levelForXp(state.player.skills[tool.skill]) >= (tool.level??1));});
       if (!hasTool || levelForXp(state.player.skills[resource.skill])<resource.level) { message=`Requires ${resource.tool} and ${resource.skill} ${resource.level}.`; continue; }
       if (resource.bait && !itemCount(state.player.inventory,resource.bait)) {message=`Requires ${ITEMS[resource.bait].name}.`;continue;}
-      state.player.action={kind:"gather",targetId:object.id,duration:1,remaining:1};
+      state.player.action=null;
       if (random(state)>resource.success) { message=`Working on ${object.name}.`; continue; }
       if (!exchangeItems(state.player.inventory,resource.bait?[{itemId:resource.bait,quantity:1}]:[],[{itemId:resource.itemId,quantity:1}])) {message="Your backpack is full. Store or use some items.";continue;}
       state.player.skills[resource.skill]+=resource.xp;
@@ -64,7 +64,9 @@ export function applyActionEvents(state:RpgState, action:ActionState, events:rea
       if (old && enemy) {
         if(old.health===0 && old.respawnAt>0) continue;
         old.respawnAt=state.tick+ENEMIES[old.definitionId].respawnTicks;
-        state.drops.push({id:`action-loot-${event.targetId}-${action.frame}`,position:tile(Math.round(enemy.x),Math.round(enemy.z)),items:ENEMIES[old.definitionId].loot.map(item=>({...item})),expiresAt:state.tick+6000});
+        let drop=state.drops.find(value=>value.id===`loot-${event.targetId}`);
+        if(!drop){drop={id:`loot-${event.targetId}`,position:tile(Math.round(enemy.x),Math.round(enemy.z)),items:[],expiresAt:0};state.drops.push(drop);}
+        for(const item of ENEMIES[old.definitionId].loot)addItems(drop.items,item.itemId,item.quantity,Infinity);
         const road=state.quests.road;
         if(old.definitionId==="bandit" && road.accepted && !road.complete) road.kills=Math.min(3,road.kills+1);
         for(const [id,quest] of Object.entries(QUESTS)) {
@@ -88,6 +90,7 @@ export function applyActionEvents(state:RpgState, action:ActionState, events:rea
     }
   }
   state.player.position=tile(Math.round(action.player.x),Math.round(action.player.z));
+  action.player.maxHealth=levelForXp(state.player.skills.hitpoints);
   state.player.health=action.player.health;
   for (const enemy of action.enemies) {
     const old=state.enemies.find(value=>value.id===enemy.id);
@@ -108,14 +111,22 @@ export function syncActionRespawns(state:RpgState,action:ActionState):void {
 
 export function actionInteract(state:RpgState,action:ActionState):string {
   const near=(p:TilePosition)=>Math.hypot(p.x-action.player.x,p.y-action.player.z)<2;
+  const collect=(items:RpgState["player"]["inventory"])=>{
+    for(const item of [...items]){
+      const held=itemCount(state.player.inventory,item.itemId),room=ITEMS[item.itemId].stackable?
+        (held||inventorySlots(state.player.inventory)<BAG_SLOTS?2_000_000_000-held:0):BAG_SLOTS-inventorySlots(state.player.inventory);
+      const count=Math.min(item.quantity,room);
+      if(count>0&&addItems(state.player.inventory,item.itemId,count))removeItems(items,item.itemId,count);
+    }
+  };
   if (state.grave && near(state.grave.position)) {
-    for (const item of [...state.grave.items]) while (itemCount(state.grave.items,item.itemId)>0 && addItems(state.player.inventory,item.itemId,1)) removeItems(state.grave.items,item.itemId,1);
+    collect(state.grave.items);
     if (!state.grave.items.length) state.grave=null;
     return state.grave?"Recovered what fits. Remaining belongings are safe.":"Backpack recovered.";
   }
   const drop=state.drops.find(value=>near(value.position));
   if (drop) {
-    for (const item of [...drop.items]) while (itemCount(drop.items,item.itemId)>0 && addItems(state.player.inventory,item.itemId,1)) removeItems(drop.items,item.itemId,1);
+    collect(drop.items);
     state.drops=state.drops.filter(value=>value.items.length);
     return "Collected supplies that fit your backpack.";
   }

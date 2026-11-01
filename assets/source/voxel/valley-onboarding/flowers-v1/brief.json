@@ -1,0 +1,14 @@
+{
+  "id": "flowers-v1",
+  "sourceRoute": "native-authored-vegetation",
+  "physicalHeightMetres": 0.5,
+  "pitchMetres": 0.0625,
+  "logicalFootprintTiles": [
+    1,
+    1
+  ],
+  "groundPivot": "centerXY,minZ",
+  "front": "no required facing",
+  "status": "native usable draft candidate pending actual local/lead visual review",
+  "geometrySource": "recipe.json + editable vox-01/asset.vox"
+}

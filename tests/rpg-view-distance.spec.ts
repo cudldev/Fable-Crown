@@ -11,7 +11,7 @@ test("fogged targets cannot be clicked through the curved horizon and nearby act
   await mkdir(output, { recursive: true }); const errors: string[] = [], external: string[] = [];
   page.on("pageerror", e => errors.push(e.message)); page.on("console", e => { if (e.type() === "error") errors.push(e.text()); });
   page.on("request", r => { const url = new URL(r.url()); if (url.protocol.startsWith("http") && url.hostname !== "127.0.0.1") external.push(url.href); });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy");
   const world = page.getByTestId("rpg-world"), panel = page.getByRole("dialog", { name: "Visual settings" });
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const fixture = createRpg(Date.now(), 8128);

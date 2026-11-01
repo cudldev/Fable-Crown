@@ -12,7 +12,7 @@ async function restore(page: Page, state: RpgState) {
 
 test("world click cursor uses target color and exact screen point; drag, context and Escape suppress it", async ({ page }) => {
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const state = createRpg(Date.now(), 8128), ore = WORLD.objects.find(object => object.resourceId === "copper")!;
   applyRpgCommand(state, { type: "autoplay", enabled: false });
   state.player.position = { ...interactionTiles(ore)[0] }; state.player.previousPosition = { ...state.player.position };
@@ -42,7 +42,7 @@ test("world click cursor uses target color and exact screen point; drag, context
 });
 
 test("combat text stays on a free effects layer when HUD panels cross its path", async ({ page }) => {
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const state = createRpg(Date.now(), 8128), enemy = state.enemies.find(value => value.id === "boar-0")!;
   applyRpgCommand(state, { type: "autoplay", enabled: false });
   state.player.position = { ...enemy.position, x: enemy.position.x - 1 }; state.player.previousPosition = { ...state.player.position };

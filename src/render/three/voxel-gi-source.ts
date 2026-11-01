@@ -3,6 +3,7 @@ import type { ObjectArt } from "./contracts";
 import type { WorldDefinition } from "../../rpg/types";
 import type { VoxelLevel } from "./voxel-data";
 import { packRGB, type GIObjectSource, type GIWorldSource } from "./voxel-gi-core";
+import { captureGroundHeight } from "./ground-height";
 
 interface Pixels { data: ArrayLike<number>; width: number; height: number }
 const images = new WeakMap<Texture, Pixels | null>();
@@ -65,7 +66,7 @@ function captureBoxes(level: VoxelLevel, group: Group): Float32Array {
   return result;
 }
 
-export function captureGIWorld(objects: Iterable<{ object: { id: string }; art: ObjectArt }>, world: Pick<WorldDefinition, "width" | "height"> & { terrain: Readonly<WorldDefinition["terrain"]> }, terrain: Record<string, Material>): GIWorldSource {
+export function captureGIWorld(objects: Iterable<{ object: { id: string }; art: ObjectArt }>, world: Pick<WorldDefinition, "width" | "height"> & { terrain: Readonly<WorldDefinition["terrain"]>;sampleGround?:(x:number,z:number)=>number }, terrain: Record<string, Material>): GIWorldSource {
   const sources: GIObjectSource[] = [];
   for (const { object, art } of objects) {
     // A camera-facing alpha cutout is not a solid rectangular transport blocker.
@@ -89,5 +90,6 @@ export function captureGIWorld(objects: Iterable<{ object: { id: string }; art: 
     rgb.set(name, packRGB(color.r, color.g, color.b));
   }
   world.terrain.forEach((name, index) => { ground[index] = rgb.get(name)!; });
-  return { objects: sources, ground, width: world.width, height: world.height };
+  const heightField=world.sampleGround?captureGroundHeight(world.width,world.height,world.sampleGround):undefined;
+  return { objects: sources, ground, width: world.width, height: world.height,...(heightField?{heightField}:{}) };
 }

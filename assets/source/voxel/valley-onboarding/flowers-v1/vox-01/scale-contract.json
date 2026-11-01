@@ -1,0 +1,116 @@
+{
+  "assetId": "flowers-v1",
+  "mode": "asset-reference",
+  "sizeStatus": "Exact authored native size; no fit-to-fill",
+  "style": {
+    "status": "candidate",
+    "profile": "Original quiet warm-storybook planting"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    1,
+    1
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -0.375,
+      -0.375,
+      0.0
+    ],
+    "max": [
+      0.375,
+      0.375,
+      0.5
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -0.375,
+      -0.375,
+      0.0
+    ],
+    "max": [
+      0.375,
+      0.375,
+      0.5
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    12,
+    12,
+    8
+  ],
+  "assetPivotGrid": [
+    6,
+    6,
+    0
+  ],
+  "actualExtentUnits": [
+    0.75,
+    0.75,
+    0.5
+  ],
+  "viewFrameGrid": [
+    28,
+    28
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -0.875,
+      -0.875,
+      -0.5
+    ],
+    "max": [
+      0.875,
+      0.875,
+      1.25
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 504,
+  "pixelsPerVoxel": 18,
+  "outerMarginPixels": 4,
+  "pixelsPerWorldUnit": 288.0,
+  "pixelsPerTile": 288.0,
+  "baseline": 364,
+  "origins": {
+    "front": [
+      256.0,
+      364
+    ],
+    "back": [
+      256.0,
+      364
+    ],
+    "left": [
+      256.0,
+      364
+    ],
+    "right": [
+      256.0,
+      364
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

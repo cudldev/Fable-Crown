@@ -15,6 +15,7 @@ import { captureGIWorld } from "./voxel-gi-source";
 import { FrameMeter, GpuMeter } from "./performance";
 import { cycleVisual, giCycleVisual, DEFAULT_VISUAL_SETTINGS, type VisualSettings } from "./visual-settings";
 import { buildTerrainSurface, type TerrainSurface } from "./terrain-tiles";
+import { objectRotationY } from "./object-placement";
 import { LightingRig, type LightingPreset, type SceneLamp } from "./lighting";
 import { WaterSystem, WATER_HEIGHT } from "./water";
 import { appendShoreSkirts } from "./shoreline";
@@ -27,6 +28,7 @@ import { ContactDetail } from "./contact-detail";
 import { layoutFeedback, type FeedbackAnchor, type FeedbackRect } from "../feedback-layout";
 import { FloatingVials } from "./floating-vials";
 import { HitDimensions } from "./hit-dimensions";
+import { appendSteppedGround, pickSteppedGround } from "./stepped-ground";
 
 export type CameraMode = "perspective" | "orthographic";
 export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode; gi?: boolean; ao?: boolean; visual?: Readonly<VisualSettings> }
@@ -81,9 +83,14 @@ export class ThreeRuntime {
   private terrainGeometries: THREE.BufferGeometry[] = [];
   private terrainSurface?: TerrainSurface;
   private terrainSource?: WorldDefinition["terrain"];
+  private groundRevision?: string | number;
+  private floorKey="";
+  private preview = new THREE.Group();
+  private previewKey = "";
   private terrainWorldWidth = 0;
   private terrainWorldHeight = 0;
   private terrainMaterial?: THREE.MeshLambertMaterial;
+  private terrainEarthMaterial = new THREE.MeshLambertMaterial({color:0x8b6f4d});
   private contactDetail?: ContactDetail;
   private terrainBakes = 0;
   private terrainBakeMs = 0;
@@ -311,7 +318,17 @@ export class ThreeRuntime {
   private buildTerrain() {
     const { width, height, terrain } = this.world;
     const changed = this.terrainSource !== terrain || this.terrainWorldWidth !== width || this.terrainWorldHeight !== height;
-    if (!changed && this.terrain.children.length) return;
+    const floors=this.world.objects.filter(o=>o.art?.startsWith("valley-cottage")||o.art?.startsWith("valley-forge"));
+    const floorKey=JSON.stringify(floors.map(o=>[o.position.x,o.position.y,o.width,o.height]));
+    const groundChanged = this.groundRevision !== this.props.groundRevision;
+    if (!changed && !groundChanged && floorKey===this.floorKey && this.terrain.children.length) {
+      // A newly placed home changes foliage exclusion, while sharing ground pigment/geometry.
+      this.foliage.setWorld(this.world,this.terrainSurface?.presentationTerrain,this.terrainSurface,this.props.sampleGround,this.props.groundRevision);
+      return;
+    }
+    this.groundRevision = this.props.groundRevision;
+    this.floorKey=floorKey;
+    this.giWorldDirty = true;
     this.terrain.clear(); this.water.length = 0;
     this.terrainGeometries.forEach(g => g.dispose()); this.terrainGeometries = [];
     if (changed) {
@@ -333,16 +350,25 @@ export class ThreeRuntime {
       }
     }
     const surface = this.terrainSurface;
-    this.foliage.setWorld(this.world, surface?.presentationTerrain, surface);
+    this.terrainEarthMaterial.color.copy(this.art.terrain.dirt.color);
+    this.foliage.setWorld(this.world, surface?.presentationTerrain, surface, this.props.sampleGround, this.props.groundRevision);
     const types = surface ? ["land", "water"] as const : ["grass", "dirt", "stone", "sand", "water"] as const;
     for (let cy = 0; cy < height; cy += 32) for (let cx = 0; cx < width; cx += 32) {
       for (const kind of types) {
         const positions: number[] = [], uvs: number[] = [], normals: number[] = [], colors: number[] = [];
+        const earth={positions:[] as number[],normals:[] as number[],uvs:[] as number[]};
         const color = new THREE.Color();
         for (let y = cy; y < Math.min(cy + 32, height); y++) for (let x = cx; x < Math.min(cx + 32, width); x++) {
           const actual = terrain[y * width + x];
+          if(floors.some(o=>x>=o.position.x&&x<o.position.x+o.width&&y>=o.position.y&&y<o.position.y+o.height))continue;
           if (kind === "land" ? actual === "water" : actual !== kind) continue;
           const h = kind === "water" ? WATER_HEIGHT : 0;
+          if(kind!=="water" && this.props.sampleGround) {
+            const count=appendSteppedGround({positions,normals,uvs},x,y,(sx,sz)=>this.world.terrain[Math.floor(sz+.5)*width+Math.floor(sx+.5)]==="water"?WATER_HEIGHT:this.heightAt(sx,sz),
+              kind==="land"&&surface?surface.uvAt(x,y):[0,0,1,1],earth);
+            if(kind!=="land") {color.setScalar(.94+((x*13+y*7)%9)*.008);for(let p=0;p<count;p++)colors.push(color.r,color.g,color.b);}
+            continue;
+          }
           positions.push(x - .5, h, y - .5, x - .5, h, y + .5, x + .5, h, y + .5,
             x - .5, h, y - .5, x + .5, h, y + .5, x + .5, h, y - .5);
           if (kind === "land" && surface) {
@@ -368,6 +394,14 @@ export class ThreeRuntime {
         material.vertexColors = kind !== "land" && kind !== "water";
         const mesh = new THREE.Mesh(geometry, material); mesh.receiveShadow = true;
         this.terrain.add(mesh);
+        if(earth.positions.length) {
+          const sides=new THREE.BufferGeometry();
+          sides.setAttribute("position",new THREE.Float32BufferAttribute(earth.positions,3));
+          sides.setAttribute("normal",new THREE.Float32BufferAttribute(earth.normals,3));
+          sides.setAttribute("uv",new THREE.Float32BufferAttribute(earth.uvs,2));
+          sides.computeBoundingSphere();sides.computeBoundingBox();this.terrainGeometries.push(sides);
+          const earthMesh=new THREE.Mesh(sides,this.terrainEarthMaterial);earthMesh.receiveShadow=true;this.terrain.add(earthMesh);
+        }
         if (kind === "water") {
           this.water.push(mesh); mesh.renderOrder = -1;
           const bedGeometry = this.waterSystem.createBed(geometry);
@@ -381,27 +415,65 @@ export class ThreeRuntime {
       terrainFilter: surface ? "nearest" : "legacy", terrainBakes: String(this.terrainBakes), terrainChunks: String(this.terrain.children.length),
       terrainTextureBytes: String(surface?.stats.textureBytes ?? 0), terrainModules: String(surface?.stats.sourceModules ?? 0),
       terrainVariants: String(surface?.stats.paintedVariants ?? 0), terrainQuietedTiles: String(surface?.stats.quietedDirtTiles ?? 0),
-      terrainBakeMs: this.terrainBakeMs.toFixed(2), terrainGeometry: "flat-top-surfaces", terrainElevation: "flat" });
+      terrainBakeMs: this.terrainBakeMs.toFixed(2), terrainGeometry: "flat-top-surfaces", terrainElevation: this.props.sampleGround ? "half-metre-terraces" : "flat" });
+  }
+  private heightAt(x:number,z:number) { return this.props.sampleGround?.(x,z) ?? 0; }
+  private createObjectArt(object:WorldObject) {
+    const rotation=(object as WorldObject & {rotation?:number}).rotation??0;
+    return this.art.createObject(rotation%2?{...object,width:object.height,height:object.width}:object);
+  }
+  private updatePreview() {
+    const key=JSON.stringify([this.props.placementPreview,this.props.groundRevision]);
+    if(key===this.previewKey)return;this.previewKey=key;
+    this.preview.traverse(node=>{if(node instanceof THREE.Mesh){node.geometry.dispose();(node.material as THREE.Material).dispose();}});
+    this.preview.clear();
+    if(!this.preview.parent)this.scene.add(this.preview);
+    for(const rect of this.props.placementPreview??[]) {
+      if(rect.width>40){
+        const x0=rect.x-.5,z0=rect.z-.5,x1=x0+rect.width,z1=z0+rect.height;
+        for(const [x,z,w,h] of [[(x0+x1)/2,z0,rect.width,.07],[(x0+x1)/2,z1,rect.width,.07],[x0,(z0+z1)/2,.07,rect.height],[x1,(z0+z1)/2,.07,rect.height]]){
+          const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,.04,h),new THREE.MeshBasicMaterial({color:rect.color??0xd4e694,transparent:true,opacity:.85,depthWrite:false}));
+          mesh.position.set(x,this.heightAt(x,z)+.05,z);mesh.raycast=()=>{};this.preview.add(mesh);
+        }
+        continue;
+      }
+      const geometry=new THREE.BoxGeometry(rect.width,.035,rect.height);
+      const material=new THREE.MeshBasicMaterial({color:rect.color??0xd4e694,transparent:true,opacity:.35,depthWrite:false});
+      const mesh=new THREE.Mesh(geometry,material),x=rect.x+(rect.width-1)/2,z=rect.z+(rect.height-1)/2;
+      mesh.position.set(x,this.heightAt(x,z)+.05,z);mesh.raycast=()=>{};this.preview.add(mesh);
+    }
+  }
+  private positionObject(object:WorldObject, art:ObjectArt) {
+    const metadata=object as WorldObject & {rotation?:number;groundPadHeight?:number};
+    const x=object.position.x+(object.width-1)/2,z=object.position.y+(object.height-1)/2;
+    art.group.position.set(x,metadata.groundPadHeight ?? this.heightAt(x,z),z);
+    art.group.rotation.y=objectRotationY(metadata.rotation??0);
+    this.workAnchors.delete(art);
   }
   private buildObjects() {
     for (const entry of this.objects.values()) this.scene.remove(entry.art.group);
     this.objects.clear(); this.lamps = [];
     for (const object of this.world.objects) {
-      const art = this.art.createObject(object);
+      const art = this.createObjectArt(object);
       const x = object.position.x + (object.width - 1) / 2, z = object.position.y + (object.height - 1) / 2;
-      art.group.position.set(x, 0, z);
+      this.positionObject(object,art);
       art.group.userData.selection = { kind: "object", id: object.id } satisfies TileSelection;
       this.scene.add(art.group); this.objects.set(object.id, { object, art });
-      art.lights.forEach((lamp, index) => this.lamps.push({ ...lamp, id: `${object.id}:${index}`, position: lamp.position.clone().add(art.group.position) }));
+      art.lights.forEach((lamp, index) => this.lamps.push({ ...lamp, id: `${object.id}:${index}`, position: lamp.position.clone().applyEuler(art.group.rotation).add(art.group.position) }));
     }
     const voxelCounts: Record<string, number> = {};
     for (const { art } of this.objects.values()) if (art.voxels) {
       const id = String(art.group.userData.voxelAsset); voxelCounts[id] = (voxelCounts[id] ?? 0) + 1;
     }
     this.root.dataset.voxelObjectCounts = JSON.stringify(voxelCounts);
+    this.root.dataset.valleyFallbackObjects=[...this.objects.values()].filter(({object,art})=>object.art?.startsWith("valley-")&&!art.voxels).map(({object})=>object.id).join(",");
     this.buildStaticBatches();
   }
   private buildStaticBatches() {
+    this.root.dataset.valleyFallbackObjects=[...this.objects.values()].filter(({object,art})=>object.art?.startsWith("valley-")&&!art.voxels).map(({object})=>object.id).join(",");
+    const counts:Record<string,number>={};for(const {art}of this.objects.values())if(art.voxels){const id=String(art.group.userData.voxelAsset);counts[id]=(counts[id]??0)+1;}
+    this.root.dataset.voxelObjectCounts=JSON.stringify(counts);
+    this.root.dataset.cameraCutawayObjects=[...this.objects.values()].filter(({art})=>art.group.userData.cameraCutaway).map(({object})=>object.id).join(",");
     for (const batch of this.batches) { this.scene.remove(batch.mesh); batch.mesh.dispose(); }
     this.batches = []; this.batchedIds.clear();
     this.voxelBuckets.replace(this.objects.values());
@@ -455,10 +527,11 @@ export class ThreeRuntime {
       for (const [id, entry] of this.objects) if (!ids.has(id)) { this.scene.remove(entry.art.group); this.objects.delete(id); }
       for (const object of world.objects) {
         const known = this.objects.get(object.id);
-        if (known) known.object = object;
+        if (known && known.object.art===object.art) {known.object = object;this.positionObject(object,known.art);}
         else {
-          const art = this.art.createObject(object);
-          art.group.position.set(object.position.x + (object.width - 1) / 2, 0, object.position.y + (object.height - 1) / 2);
+          if(known)this.scene.remove(known.art.group);
+          const art = this.createObjectArt(object);
+          this.positionObject(object,art);
           art.group.userData.selection = { kind: "object", id: object.id };
           this.scene.add(art.group); this.objects.set(object.id, { object, art });
         }
@@ -496,11 +569,12 @@ export class ThreeRuntime {
         mesh.scale.set(1, .5, 1.5); mesh.position.y = .18; group.add(mesh); group.userData.selection = { kind: "drop", id: drop.id };
         this.drops.set(drop.id, group); this.scene.add(group);
       }
-      group.position.set(drop.position.x, 0, drop.position.y);
+      group.position.set(drop.position.x, this.heightAt(drop.position.x,drop.position.y), drop.position.y);
     }
     this.grave.visible = !!state.grave;
-    if (state.grave) this.grave.position.set(state.grave.position.x, .35, state.grave.position.y);
+    if (state.grave) this.grave.position.set(state.grave.position.x, this.heightAt(state.grave.position.x,state.grave.position.y)+.35, state.grave.position.y);
     for (const { object, art } of this.objects.values()) {
+      if(art.group.userData.cameraCutaway)continue;
       const available = state.resources[object.id]?.available !== false;
       if (art.available) art.available.visible = available;
       if (art.depleted) art.depleted.visible = !available;
@@ -509,11 +583,11 @@ export class ThreeRuntime {
     this.depletedForGI = Object.values(state.resources).filter(resource => !resource.available).map(resource => resource.objectId).sort();
     if (this.giWorldDirty) {
       this.gi.setWorld(captureGIWorld(this.objects.values(), { width: this.world.width, height: this.world.height,
-        terrain: this.terrainSurface?.presentationTerrain ?? this.world.terrain }, this.art.terrain));
+        terrain: this.terrainSurface?.presentationTerrain ?? this.world.terrain, sampleGround:this.props.sampleGround }, this.art.terrain));
       this.giWorldDirty = false;
     }
     this.updateStaticBatches();
-    const points = (this.props.previewRoute ?? []).map(p => new THREE.Vector3(p.x, .05, p.y));
+    const points = (this.props.previewRoute ?? []).map(p => new THREE.Vector3(p.x, this.heightAt(p.x,p.y)+.05, p.y));
     this.route.geometry.dispose(); this.route.geometry = new THREE.BufferGeometry().setFromPoints(points);
     const observed = consumeEffects(state, presentationEpoch, this.effectCursor); this.effectCursor = observed.cursor;
     if (observed.reset) { this.clearEffects(); this.pixelReactions.clear(); this.pixelStrikes.clear(); }
@@ -525,8 +599,8 @@ export class ThreeRuntime {
       }
       if ((effect.kind !== "projectile" && effect.kind !== "hit") || !effect.targetPosition) continue;
       const kind = effect.kind === "projectile" ? "projectile" : effect.success ? "impact" : "miss";
-      this.addTransient(kind, time, new THREE.Vector3(effect.position.x, .7, effect.position.y),
-        new THREE.Vector3(effect.targetPosition.x, .65, effect.targetPosition.y), effect.targetId === "player" ? 0xff997d : 0xffe3a0);
+      this.addTransient(kind, time, new THREE.Vector3(effect.position.x, this.heightAt(effect.position.x,effect.position.y)+.7, effect.position.y),
+        new THREE.Vector3(effect.targetPosition.x, this.heightAt(effect.targetPosition.x,effect.targetPosition.y)+.65, effect.targetPosition.y), effect.targetId === "player" ? 0xff997d : 0xffe3a0);
     }
   }
   private addTransient(kind: Transient["kind"], time: number, from: THREE.Vector3, to: THREE.Vector3, color: number) {
@@ -553,14 +627,14 @@ export class ThreeRuntime {
       const z = sample.fromZ + (sample.z - sample.fromZ) * fraction;
       const y = sample.fromY + (sample.y - sample.fromY) * fraction;
       const moving = Math.hypot(sample.x - sample.fromX, sample.z - sample.fromZ) > .0001;
-      entry.art.group.position.set(x, y, z);
-      const frame = p.swing > 0 ? p.swing > 24 ? 6 : 7 : p.blocking ? 5 : moving ? 1 + Math.floor(fast.frame / 8) % 4 : 0;
+      entry.art.group.position.set(x, this.props.sampleGround ? this.heightAt(x,z) : y, z);
+      const frame = p.swing > 0 ? p.swing > 24 ? 5 : p.swing > 12 ? 6 : 7 : p.blocking ? 5 : moving ? 1 + Math.floor(fast.frame / 8) % 4 : 0;
       const facing = p.facingX * this.camera.matrixWorld.elements[0] + p.facingZ * this.camera.matrixWorld.elements[2];
       if (Math.abs(facing) > .01) entry.flipX = facing < 0;
       const worked = this.objects.get(actor.action?.targetId ?? "")?.object ?? this.world.objects.find(object => object.resourceId && Math.hypot(object.position.x-p.x,object.position.y-p.z)<1.7);
       const toolPose = worked?.kind === "rock" ? "mine" : worked?.kind === "fish" ? "fish" : "cut";
-      this.pixelUnits.frame(entry.art.group, frame, 0, undefined, heldToolForActor(actor,fast.swingTool && p.swing>0 ? toolPose : undefined), entry.flipX ?? false);
-      this.playerRing.position.set(x, y + .035, z);
+      this.pixelUnits.frame(entry.art.group, frame, 0, undefined, p.blocking?"shield":heldToolForActor(actor,fast.swingTool && p.swing>0 ? toolPose : undefined), entry.flipX ?? false);
+      this.playerRing.position.set(x, entry.art.group.position.y + .035, z);
       this.root.dataset.characterClip = p.swing ? "strike" : p.blocking ? "block" : moving ? "walk" : "idle";
       this.root.dataset.actionFrame = String(fast.frame);
       this.root.dataset.continuousX = x.toFixed(4); this.root.dataset.continuousZ = z.toFixed(4);
@@ -568,7 +642,7 @@ export class ThreeRuntime {
     }
     const motion = sampleActorMotion(entry.timeline!, time, this.reducedMotion), { art } = entry;
     const oldX = art.group.position.x, oldZ = art.group.position.z;
-    art.group.position.set(motion.position.x, 0, motion.position.y);
+    art.group.position.set(motion.position.x, this.heightAt(motion.position.x,motion.position.y), motion.position.y);
     const dx = motion.position.x - oldX, dz = motion.position.y - oldZ;
     const target = this.objects.get(actor.action?.targetId ?? "")?.object;
     const stroke = workStroke(actor, this.props.state.tick, time - this.observedAt, target, motion);
@@ -587,7 +661,7 @@ export class ThreeRuntime {
       if (actor.id === 0) { this.root.dataset.characterRig = "billboard"; this.root.dataset.characterClip = motion.moving ? "walk" : stroke ? "work" : "idle"; this.root.dataset.spriteFrame = String(frame); this.root.dataset.spriteFlipX = String(entry.flipX ?? false); }
     }
     if (actor.id === 0) {
-      this.playerRing.position.set(motion.position.x, .035, motion.position.y);
+      this.playerRing.position.set(motion.position.x, art.group.position.y+.035, motion.position.y);
       const footstep = observeFootstep(this.footstepCursor, motion, entry.timeline!, this.props.presentationEpoch ?? 0);
       this.footstepCursor = footstep.cursor;
       if (footstep.mode) this.props.onFootstep?.(footstep.mode);
@@ -615,6 +689,7 @@ export class ThreeRuntime {
     const span = view.overview ? Math.max(this.world.height * 1.05, this.world.width / aspect) : gameplaySpan(view.zoom, aspect);
     this.target.set(view.overview ? this.world.width / 2 : view.follow && player ? player.x : view.x, player?.y ?? 0,
       view.overview ? this.world.height / 2 : view.follow && player ? player.z : view.y);
+    if(!view.follow)this.target.y=this.heightAt(this.target.x,this.target.z);
     const usePerspective = cameraMode === "perspective" && !view.overview;
     this.camera = usePerspective ? this.perspectiveCamera : this.orthographicCamera;
     const pitch = usePerspective ? cameraPitch(clampGameplayZoom(view.zoom)) : cameraPitch(.65);
@@ -629,7 +704,7 @@ export class ThreeRuntime {
     this.camera.far = Math.max(650, distance + this.world.width + this.world.height);
     this.camera.updateProjectionMatrix();
     // A long-lens20degree view gives subtle depth without distorting tile readability.
-    this.camera.lookAt(this.target.x, .4, this.target.z); this.camera.updateMatrixWorld();
+    this.camera.lookAt(this.target.x, this.target.y+.4, this.target.z); this.camera.updateMatrixWorld();
     this.root.dataset.billboardYaw = this.pixelUnits.faceCamera(this.camera, this.props.visual?.spriteNormalStrength ?? .35).toFixed(4);
     this.root.dataset.billboardCount = String(this.pixelUnits.count);
     this.root.dataset.spriteNormalStrength = String(this.props.visual?.spriteNormalStrength ?? .35);
@@ -644,6 +719,7 @@ export class ThreeRuntime {
       }
       const fraction = this.reducedMotion ? 1 : clamp((time - motion.at) / 600, 0, 1);
       group.position.set(motion.fromX + (motion.x - motion.fromX) * fraction, 0, motion.fromZ + (motion.z - motion.fromZ) * fraction);
+      group.position.y=this.heightAt(group.position.x,group.position.z);
       const dead = enemy.health <= 0; group.visible = !dead || time < motion.deathUntil;
       const strikeAge = time - (this.pixelStrikes.get(group) ?? -Infinity);
       const attackFrame = strikeAge >= 0 && strikeAge < 320 ? strikeAge < 140 ? 6 : 7 : enemy.engagedUntil > state.tick && enemy.cooldown <= 1 ? 5 : 0;
@@ -673,12 +749,19 @@ export class ThreeRuntime {
     this.grid.position.set(Math.round(this.target.x), 0, Math.round(this.target.z));
     const selected = this.selectionPosition(selection);
     this.ring.visible = !!selected && this.curve.view.pickable(selected);
-    if (selected) { this.ring.position.set(selected.x, .04, selected.z); this.ring.scale.setScalar(selection?.kind === "object" ? 1.4 : 1.1); }
+    if (selected) { this.ring.position.set(selected.x, this.heightAt(selected.x,selected.z)+.04, selected.z); this.ring.scale.setScalar(selection?.kind === "object" ? 1.4 : 1.1); }
+    this.updatePreview();
     // Explicit group visibility also bounds shadow work and scene traversal far from the camera.
     if (time - this.visibilityAt > 250) {
       const radius = Math.max(28, span * Math.max(1, aspect) * .9);
       for (const { object, art } of this.objects.values()) {
         if (!this.batchedIds.has(object.id)) art.group.visible = (view.overview || Math.hypot(art.group.position.x - this.target.x, art.group.position.z - this.target.z) < radius + 12) && this.curve.view.contains(art.group.position, Math.max(8, object.width, object.height));
+        if(art.group.userData.cameraCutaway) {
+          const inside=!!player&&player.x>=object.position.x-.5&&player.x<=object.position.x+object.width-.5&&player.z>=object.position.y-.5&&player.z<=object.position.y+object.height-.5;
+          const open=inside||(selection?.kind==="object"&&selection.id===object.id);
+          if(art.available)art.available.visible=!open;
+          if(art.depleted)art.depleted.visible=open;
+        }
         if (art.roof) {
           const inside = player && player.x >= object.position.x - .6 && player.x <= object.position.x + object.width - .4 && player.z >= object.position.y - .6 && player.z <= object.position.y + object.height - .4;
           art.roof.visible = !object.cutaway || (!inside && !(selection?.kind === "object" && selection.id === object.id));
@@ -814,7 +897,7 @@ export class ThreeRuntime {
     if (selection.kind === "enemy") return this.enemies.get(selection.id)?.position ?? null;
     if (selection.kind === "drop") return this.drops.get(selection.id)?.position ?? null;
     if (selection.kind === "grave") return this.props.state.grave ? this.grave.position : null;
-    if (selection.kind === "tile") return temp.set(selection.position.x, 0, selection.position.y);
+    if (selection.kind === "tile") return temp.set(selection.position.x, this.heightAt(selection.position.x,selection.position.y), selection.position.y);
     return null;
   }
   private workAnchor(prop: Prop) {
@@ -875,7 +958,7 @@ export class ThreeRuntime {
           const damage = floater.tone === "damage" || floater.tone === "player-damage" || floater.tone === "miss" || floater.tone === "heal";
           const victim = floater.targetId === "player" ? this.people.get(0)?.art.group : this.enemies.get(floater.targetId ?? "");
           const anchor = damage ? victim?.position : undefined;
-          position = temp.set(anchor?.x ?? floater.position.x, (damage ? .65 : 2.5) + (this.reducedMotion ? 0 : age / (damage ? 1700 : 2000)), anchor?.z ?? floater.position.y); height = 0;
+          position = temp.set(anchor?.x ?? floater.position.x, (anchor?.y??this.heightAt(floater.position.x,floater.position.y))+(damage ? .65 : 2.5) + (this.reducedMotion ? 0 : age / (damage ? 1700 : 2000)), anchor?.z ?? floater.position.y); height = 0;
           if (damage) element.dataset.targetId = floater.targetId ?? "";
           element.style.opacity = String(this.reducedMotion ? 1 : clamp((2000 - age) / 350, 0, 1));
         }
@@ -944,7 +1027,7 @@ export class ThreeRuntime {
     this.post.screenToScene(this.pointer);
     this.ray.setFromCamera(this.pointer, this.camera);
     // Drag anchors may extend through fog; only actual selections are bounded.
-    return this.curve.ground(this.ray.ray);
+    return this.props.sampleGround ? pickSteppedGround(this.ray.ray,this.curve,this.props.sampleGround) : this.curve.ground(this.ray.ray);
   }
   private bindInput() {
     const pointers = new Map<number, { x: number; y: number }>();
@@ -975,7 +1058,13 @@ export class ThreeRuntime {
       // A new secondary click is a fresh request, even just after a prior menu.
       // Keep the touch-hold guard for its synthesized contextmenu event only.
       if (event.button === 2) { contextAt = -Infinity; return; }
-      if (event.button !== 0) return;
+      if (event.button !== 0 && !(this.props.directInput && event.button===1)) return;
+      if(event.button===1)event.preventDefault();
+      if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
+      if(this.props.directInput && event.pointerType!=="touch" && event.button===0) {
+        this.clearClickIndicator();const selected=selectionAt(event);
+        if(selected){this.showClickIndicator(selected,event.clientX,event.clientY);(this.props.onInteract??this.props.onSelect)(selected);}return;
+      }
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       this.clearClickIndicator();
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
@@ -1024,7 +1113,7 @@ export class ThreeRuntime {
       if (!pointers.has(event.pointerId)) return;
       pointers.delete(event.pointerId);
       if (this.root.hasPointerCapture(event.pointerId)) this.root.releasePointerCapture(event.pointerId);
-      if (!dragged && !pinched && event.type !== "pointercancel") {
+      if (!dragged && !pinched && event.type !== "pointercancel" && event.button!==1) {
         if (downSelection) {
           const position = this.selectionPosition(downSelection);
           if (position && this.curve.view.pickable(position)) {
@@ -1057,7 +1146,7 @@ export class ThreeRuntime {
     const key = (event: KeyboardEvent) => {
       if ((event.target as HTMLElement).tagName !== "CANVAS") return;
       const steps: Record<string, [number, number]> = { ArrowLeft: [-2, 1], ArrowRight: [2, -1], ArrowUp: [-1, -2], ArrowDown: [1, 2] };
-      if (steps[event.key]) {
+      if (steps[event.key] && !this.props.directInput) {
         event.preventDefault(); const [dx, dz] = steps[event.key], x = this.target.x, y = this.target.z;
         this.props.onCamera(current => ({ ...current,
           x: clamp((current.follow || current.overview ? x : current.x) + dx, 0, this.world.width - 1),
@@ -1087,9 +1176,10 @@ export class ThreeRuntime {
     this.gpuMeter.dispose();
     this.post.dispose(); this.curve.dispose();
     this.waterSystem.dispose();
+    this.preview.traverse(node=>{if(node instanceof THREE.Mesh){node.geometry.dispose();(node.material as THREE.Material).dispose();}});
     document.removeEventListener("visibilitychange", this.visibilityChanged);
     this.voxelBuckets.dispose();
-    this.terrainSurface?.dispose(); this.terrainMaterial?.dispose();
+    this.terrainSurface?.dispose(); this.terrainMaterial?.dispose(); this.terrainEarthMaterial.dispose();
     this.contactDetail?.dispose();
     this.batches.forEach(batch => batch.mesh.dispose()); this.batches = [];
     this.art.dispose();

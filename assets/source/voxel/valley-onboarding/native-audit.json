@@ -1,0 +1,259 @@
+{
+  "assetCount": 11,
+  "modelBindingsChecked": 20,
+  "uniqueModelFilesChecked": 18,
+  "editableBuildingPartFilesChecked": 12,
+  "results": [
+    {
+      "kind": "tent",
+      "grid": [
+        48,
+        48,
+        32
+      ],
+      "pivot": [
+        24,
+        24,
+        2
+      ],
+      "cells": 11508,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": false,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/tent-v2/review-vox-04/browser-review.json"
+    },
+    {
+      "kind": "cottage",
+      "grid": [
+        96,
+        80,
+        58
+      ],
+      "pivot": [
+        48,
+        40,
+        2
+      ],
+      "cells": 67228,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": false,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/cottage-v1/art-review.json"
+    },
+    {
+      "kind": "forge",
+      "grid": [
+        64,
+        48,
+        50
+      ],
+      "pivot": [
+        32,
+        24,
+        2
+      ],
+      "cells": 32240,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": false,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/forge-v1/review-vox-01/browser-review.json"
+    },
+    {
+      "kind": "stool",
+      "grid": [
+        10,
+        10,
+        8
+      ],
+      "pivot": [
+        5,
+        5,
+        0
+      ],
+      "cells": 512,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 0,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": true,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/stool-v1/review-vox-02/browser-review.json"
+    },
+    {
+      "kind": "table",
+      "grid": [
+        18,
+        32,
+        12
+      ],
+      "pivot": [
+        9,
+        16,
+        0
+      ],
+      "cells": 1829,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": true,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/table-v1/review-vox-02/browser-review.json"
+    },
+    {
+      "kind": "bed",
+      "grid": [
+        20,
+        30,
+        12
+      ],
+      "pivot": [
+        10,
+        15,
+        0
+      ],
+      "cells": 3285,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": true,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/bed-v1/review-vox-02/browser-review.json"
+    },
+    {
+      "kind": "shelf",
+      "grid": [
+        24,
+        6,
+        20
+      ],
+      "pivot": [
+        12,
+        3,
+        0
+      ],
+      "cells": 1206,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": true,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/shelf-v1/review-vox-02/browser-review.json"
+    },
+    {
+      "kind": "chest",
+      "grid": [
+        12,
+        16,
+        8
+      ],
+      "pivot": [
+        6,
+        8,
+        0
+      ],
+      "cells": 1420,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": true,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/chest-v1/review-vox-02/browser-review.json"
+    },
+    {
+      "kind": "planter",
+      "grid": [
+        8,
+        8,
+        8
+      ],
+      "pivot": [
+        4,
+        4,
+        0
+      ],
+      "cells": 285,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": 1,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": true,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/planter-v1/review-vox-02/browser-review.json"
+    },
+    {
+      "kind": "flowers",
+      "grid": [
+        12,
+        12,
+        8
+      ],
+      "pivot": [
+        6,
+        6,
+        0
+      ],
+      "cells": 181,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": null,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": false,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/flowers-v1/art-review.json"
+    },
+    {
+      "kind": "sapling",
+      "grid": [
+        16,
+        16,
+        22
+      ],
+      "pivot": [
+        8,
+        8,
+        0
+      ],
+      "cells": 571,
+      "nativeReadback": true,
+      "independentGlbBounds": true,
+      "sourceHashAlpha": true,
+      "sourceEdgeAlphaMaxOf255": null,
+      "modelStatesSameGridSubset": true,
+      "palettePassGeometryPreserved": false,
+      "visualEvidence": "assets/source/voxel/valley-onboarding/sapling-v1/art-review.json"
+    }
+  ],
+  "pixelRecipeTools": 7,
+  "pixelBodyUnchangedBounds": [
+    7,
+    10,
+    24,
+    28
+  ],
+  "shieldNativeCells": [
+    8,
+    10
+  ],
+  "converterTests": {
+    "count": 5,
+    "result": "passed",
+    "command": "python -m unittest discover -s tools/trellis-vox -p test_*.py -v",
+    "scope": "Existing converter scale/ground/color,minority palette,open cavity,repeatability/translation andwide export gates; actual run2026-11-01"
+  },
+  "staticRuntimeReview": "in-game-review.json",
+  "allPassed": true,
+  "scope": "11selected native source assets,20model/state bindings(18unique files),12editable building parts and7pixel recipe tools, plus separately documented static in-game appearance. Does not establish timed construction transitions, animation playback, save/gameplay correctness, GPU/phone performance, native MagicaVoxel app compatibility, user final art approval or public deployment. Lead owns runtime tests/build/release."
+}

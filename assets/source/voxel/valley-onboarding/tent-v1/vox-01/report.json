@@ -1,0 +1,208 @@
+{
+  "dimensions": [
+    56,
+    48,
+    32
+  ],
+  "grid_min": [
+    -28,
+    -24,
+    0
+  ],
+  "grid_max": [
+    28,
+    24,
+    32
+  ],
+  "pivot_voxels": [
+    28,
+    24,
+    0
+  ],
+  "uniform_source_scale": 3.4518421040719978,
+  "source_translation_before_scale": [
+    1.9758939743041992e-05,
+    0.0005408674478530884,
+    0.28515389561653137
+  ],
+  "source_bounds_metres": {
+    "min": [
+      -1.727239162647422,
+      -1.492801622346959,
+      0.0
+    ],
+    "max": [
+      1.727239162647422,
+      1.492801622346959,
+      2.0
+    ]
+  },
+  "shell_cells": 9818,
+  "filled_cells": 109,
+  "boundary_touch_cells_clamped": 1,
+  "connected_components": 1,
+  "ground_cells": 283,
+  "nearest_source_vertex_distance_metres": {
+    "median": 0.016692802942804657,
+    "maximum": 0.06666466423194058
+  },
+  "color_method": "Nearest original dense TRELLIS vertex RGB; warm-hue/rest median-cut palette from surface cells; no relighting/repainting",
+  "fill_method": "Only fully enclosed cavities, scipy.ndimage.binary_fill_holes; open gaps/through-holes retained",
+  "method": "Trimesh 4.10.1 mesh.voxelized(subdivide); original TRELLIS mesh and generated vertex RGB",
+  "asset_id": "valley-tent",
+  "occupied_voxels": 9927,
+  "palette": [
+    [
+      226,
+      220,
+      193
+    ],
+    [
+      203,
+      194,
+      149
+    ],
+    [
+      193,
+      180,
+      133
+    ],
+    [
+      184,
+      169,
+      123
+    ],
+    [
+      176,
+      155,
+      101
+    ],
+    [
+      159,
+      131,
+      74
+    ],
+    [
+      127,
+      95,
+      48
+    ],
+    [
+      96,
+      60,
+      24
+    ],
+    [
+      246,
+      245,
+      236
+    ],
+    [
+      245,
+      244,
+      234
+    ],
+    [
+      244,
+      243,
+      233
+    ],
+    [
+      243,
+      242,
+      230
+    ],
+    [
+      241,
+      240,
+      228
+    ],
+    [
+      239,
+      237,
+      224
+    ],
+    [
+      238,
+      236,
+      219
+    ],
+    [
+      236,
+      233,
+      216
+    ],
+    [
+      234,
+      231,
+      214
+    ],
+    [
+      232,
+      229,
+      208
+    ],
+    [
+      227,
+      223,
+      203
+    ],
+    [
+      209,
+      206,
+      175
+    ],
+    [
+      195,
+      192,
+      155
+    ],
+    [
+      108,
+      119,
+      133
+    ],
+    [
+      78,
+      87,
+      105
+    ],
+    [
+      42,
+      44,
+      53
+    ]
+  ],
+  "mesh": {
+    "triangles": 12162,
+    "vertices": 24324,
+    "quads": 6081,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "physical_scale": {
+    "height_units": 2.0,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      28,
+      24,
+      0
+    ],
+    "units_per_tile": 1
+  },
+  "elapsed_seconds": 3.9506092240000044,
+  "source": {
+    "path": "tmp/valley-onboarding/assets/source/voxel/valley-onboarding/tent-v1/trellis-01/raw-mesh.npz",
+    "sha256": "db9aeb5f30ecaf08e62eac5ddafaaa2a76fa84605487232477836d1baa5f3c20"
+  },
+  "settings": {
+    "height_metres": 2.0,
+    "pitch_metres": 0.0625,
+    "colors": 24,
+    "fill_enclosed": true
+  },
+  "views_used": [],
+  "views_are": "Rendered projections of final volume, not reconstruction inputs",
+  "art_approved": false,
+  "game_integrated": false
+}

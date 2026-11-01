@@ -202,7 +202,7 @@ test("published native props and depleted states have no unreported shadow budge
       const shadow = model.shadowSurfaces?.[0] ?? model.surfaces![0].shadow ?? model.surfaces![0];
       expect(shadow.triangles, `${spec.id}/${state} native shadow triangles`).toBeLessThanOrEqual(VOXEL_SHADOW_TRIANGLE_BUDGET);
       expect(model.shadowBudgetExceeded?.[0], `${spec.id}/${state} native fallback`).not.toBe(true);
-      expect(shadow.bounds.min[1], `${spec.id}/${state} ground contact`).toBe(0);
+      expect(shadow.bounds.min[1], `${spec.id}/${state} ground contact`).toBe(-spec.pivot[2]*spec.pitch||0);
     }
   }
 });

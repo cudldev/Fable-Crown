@@ -1,5 +1,15 @@
 # Progress — 2026-10-29
 
+## Hands-on valley onboarding — 2026-11-01
+
+Implemented the approved three-day valley slice in isolated branch codex/valley-onboarding. Continuous controls/combat, tent/account/cottage, crafting/trade, visitors/guidance, forge, landscaping, persistent recovery and V6/offline saves are integrated. Previous workspaces and V3–V5 archives remain intact; earlier chapters stay available.
+
+684 unit tests, strict types, Pages-base build/native/baked/dist checks pass. Independent browser gates: 2 action, 6 integrated, 2 non-GPU release/PWA; local art/rotated-door/pixel review: 3 cases. Actual gathering/save, placement-input and held-controller-menu regressions were found and fixed. CI remains two non-GPU cases.
+
+Eleven original native assets and pixel poses are usable drafts. Native geometry audit and 5 converter tests pass. Minor roof/plant detail and some rotated-wall occlusion remain draft limits. Blender addon was unavailable; no successful MCP review claimed. See art-audit/valley-onboarding and valley-qa.md.
+
+Local input proxy median32.7ms keyboard,32ms portrait touch,34ms landscape touch; raw measurements/limits in performance/valley. No physical-phone or screen-to-photon claim. Usage29% used/~71% remaining; no reset or credits consumed. Public verification follows below; stop after this slice for human balance/device playtesting.
+
 ## LOD budget masking corrected — 2026-10-31
 
 Weekly usage: 10% used/~90% remaining; no reset redeemed.

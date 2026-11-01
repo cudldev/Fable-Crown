@@ -108,7 +108,7 @@ test("pixel sprite form normals follow world lights in both mirror states withou
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", message => { if (message.type() === "error" && /shader|WebGLProgram|VALIDATE_STATUS|GL_INVALID/i.test(message.text())) shaderErrors.push(message.text()); });
   page.on("request", request => { const url = new URL(request.url()); if (url.protocol.startsWith("http") && page.url().startsWith("http") && url.origin !== new URL(page.url()).origin) external.push(url.href); });
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await expect(world).toHaveAttribute("data-sprite-normal-strength", "0.85");

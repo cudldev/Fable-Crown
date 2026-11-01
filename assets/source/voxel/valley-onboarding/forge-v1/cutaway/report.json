@@ -1,0 +1,256 @@
+{
+  "asset_id": "forge-v1-cutaway",
+  "method": "Original authored exact native modular geometry; not inferred TRELLIS building geometry",
+  "dimensions": [
+    64,
+    48,
+    50
+  ],
+  "grid_min": [
+    -32,
+    -24,
+    -2
+  ],
+  "grid_max": [
+    32,
+    24,
+    48
+  ],
+  "pivot_voxels": [
+    32,
+    24,
+    2
+  ],
+  "physical_scale": {
+    "height_units": 3.125,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      32,
+      24,
+      2
+    ],
+    "units_per_tile": 1
+  },
+  "walking_floor": {
+    "runtimeHeightMetres": 0,
+    "sourceVolumeTopCell": 2,
+    "pivotZCells": 2,
+    "buriedBaseMetres": 0.125,
+    "supportCellsBelowFloor": 6144
+  },
+  "occupied_voxels": 22868,
+  "palette": [
+    [
+      224,
+      213,
+      179
+    ],
+    [
+      236,
+      224,
+      194
+    ],
+    [
+      213,
+      199,
+      163
+    ],
+    [
+      171,
+      169,
+      149
+    ],
+    [
+      193,
+      187,
+      163
+    ],
+    [
+      181,
+      170,
+      139
+    ],
+    [
+      154,
+      111,
+      64
+    ],
+    [
+      177,
+      130,
+      76
+    ],
+    [
+      130,
+      92,
+      53
+    ],
+    [
+      100,
+      120,
+      137
+    ],
+    [
+      113,
+      132,
+      147
+    ],
+    [
+      87,
+      106,
+      125
+    ],
+    [
+      92,
+      106,
+      111
+    ],
+    [
+      170,
+      128,
+      79
+    ],
+    [
+      192,
+      149,
+      92
+    ],
+    [
+      144,
+      106,
+      68
+    ],
+    [
+      65,
+      61,
+      53
+    ],
+    [
+      164,
+      83,
+      43
+    ],
+    [
+      181,
+      155,
+      111
+    ],
+    [
+      189,
+      164,
+      121
+    ],
+    [
+      155,
+      105,
+      59
+    ],
+    [
+      138,
+      93,
+      52
+    ],
+    [
+      127,
+      85,
+      47
+    ],
+    [
+      117,
+      77,
+      43
+    ],
+    [
+      110,
+      72,
+      39
+    ],
+    [
+      108,
+      70,
+      39
+    ],
+    [
+      106,
+      69,
+      38
+    ],
+    [
+      100,
+      64,
+      35
+    ],
+    [
+      116,
+      128,
+      148
+    ],
+    [
+      97,
+      108,
+      127
+    ],
+    [
+      92,
+      104,
+      122
+    ],
+    [
+      87,
+      98,
+      116
+    ],
+    [
+      81,
+      91,
+      109
+    ],
+    [
+      77,
+      88,
+      105
+    ],
+    [
+      70,
+      81,
+      98
+    ],
+    [
+      67,
+      78,
+      94
+    ],
+    [
+      64,
+      74,
+      90
+    ],
+    [
+      61,
+      71,
+      87
+    ],
+    [
+      58,
+      68,
+      84
+    ]
+  ],
+  "connected_components": 1,
+  "ground_cells": 3072,
+  "mesh": {
+    "triangles": 1376,
+    "vertices": 2752,
+    "quads": 688,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "authoredNotes": "Full volume minus separable roof/front facade; same grid/pivot; physical full roof remains in full source",
+  "style_source": {
+    "path": "../input.png",
+    "sha256": "543659a3fb2562db357ac818cac864b693636347b0c17ef151bff97f050f5949",
+    "role": "original generated appearance only; not a mesh or finished asset"
+  },
+  "art_approved": false,
+  "game_integrated": false
+}

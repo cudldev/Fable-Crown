@@ -8,7 +8,7 @@ test("visual controls update the renderer, copy a reusable preset, reset and fit
   await context.grantPermissions(["clipboard-read", "clipboard-write"], { origin: new URL(baseURL!).origin });
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"); await expect(world).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   const fixture = createRpg(Date.now(), 8128);
   Object.assign(fixture.control, { waiting: true, goal: null, active: null, source: null, queue: [], thought: null, thinkingUntil: 1_000_000_000 }); fixture.player.path = [];
@@ -75,7 +75,7 @@ test("visual controls update the renderer, copy a reusable preset, reset and fit
 
 test("copy settings offers selectable JSON when clipboard permission is denied", async ({ page }) => {
   await page.addInitScript(() => Object.defineProperty(navigator, "clipboard", { value: { writeText: async () => { throw Error("Clipboard denied for this test"); } }, configurable: true }));
-  await page.goto("./?renderer=3d"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 45000 });
+  await page.goto("./?chapter=legacy&renderer=3d"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 45000 });
   await page.getByRole("button", { name: "Visual settings", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "Visual settings" }); await panel.getByRole("button", { name: "Copy settings", exact: true }).click();
   const text = panel.getByRole("textbox", { name: "Settings to copy" }); await expect(text).toBeVisible(); await expect(text).toBeFocused();

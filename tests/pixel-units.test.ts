@@ -128,7 +128,11 @@ describe("authored pixel unit art", () => {
       expect(rest.length).toBeGreaterThan(0);
       expect(moved.length).toBe(rest.length);
       expect(sameFrame(held, 0, 1)).toBe(false);
-      for (let frame = 2; frame < UNIT_FRAME_COUNT; frame++) expect(sameFrame(held, 0, frame)).toBe(true);
+      for (const frame of [2,3,4,8,9]) expect(sameFrame(held, 0, frame)).toBe(true);
+      if(tool!=="none"&&tool!=="shield") {
+        expect(sameFrame(held,0,5),tool+" authored windup").toBe(false);
+        expect(normalizedMask(held,0)===normalizedMask(held,6),tool+" authored contact silhouette").toBe(false);
+      }
       const translatedPixelsMatch = rest.every(pixel => {
         const target = ((pixel.y - 1) * held.width + UNIT_FRAME_SIZE + pixel.x) * 4;
         return [0,1,2,3].every(channel => held.rgba[target+channel] === held.rgba[pixel.index+channel]

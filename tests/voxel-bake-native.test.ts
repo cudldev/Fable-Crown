@@ -20,7 +20,7 @@ beforeAll(async () => {
   compressed = Uint8Array.from(await readFile(location("meshes.bin"))).buffer;
   const native = JSON.parse(await readFile(location("manifest.json"), "utf8"));
   const inputs = await Promise.all(voxelAssetSpecs(native).map(async spec => ({ spec, buffer: Uint8Array.from(await readFile(location(spec.file))).buffer })));
-  expect(inputs).toHaveLength(9);
+  expect(inputs).toHaveLength(27);
   fresh = bakeVoxelAssets(native.version, inputs);
   loaded = await unpackVoxelBake(compressed, manifest.sourceVersion, manifest.decodedBytes, manifest.packSha256);
 }, 15000);
@@ -48,8 +48,8 @@ function sameContents(actual: unknown, expected: unknown, path = "pack", seen = 
   for (const key of Object.keys(reference)) sameContents(target[key], reference[key], path + "." + key, seen);
 }
 
-test("all nine native sources and baked supplies match fresh geometry, LOD, color, AO, lighting and shadow bytes", () => {
-  expect(loaded.assets).toHaveLength(10);
+test("all native sources and baked supplies match fresh geometry, LOD, color, AO, lighting and shadow bytes", () => {
+  expect(loaded.assets).toHaveLength(28);
   expect(loaded.assets.map(({ id, size }) => ({ id, size }))).toEqual(manifest.assets);
   sameContents(loaded, fresh);
   const aliases = new Map<object, object>();

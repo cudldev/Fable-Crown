@@ -15,7 +15,7 @@ async function restore(page: Page, state: RpgState) {
 const hit = (page: Page, kind: string, id: string) => page.locator(`[data-three-selection='${JSON.stringify({ kind, id })}']`);
 
 test("left click mines, right click offers options without acting, Escape cancels and keyboard activates", async ({ page }) => {
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const state = fresh(), ore = WORLD.objects.find(value => value.resourceId === "copper")!;
   state.player.position = { ...interactionTiles(ore)[0] }; state.player.previousPosition = { ...state.player.position };
   await restore(page, state);
@@ -56,7 +56,7 @@ test("left click mines, right click offers options without acting, Escape cancel
 });
 
 test("left click attacks and animated damage originates at its victim", async ({ page }) => {
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const state = fresh(), enemy = state.enemies.find(value => value.id === "boar-0")!;
   state.player.position = { ...enemy.position, x: enemy.position.x - 1 }; state.player.previousPosition = { ...state.player.position };
   state.player.skills.attack = XP_THRESHOLDS[19];
@@ -82,7 +82,7 @@ test("left click attacks and animated damage originates at its victim", async ({
 
 test("touch hold opens a bounded menu, while a tap gathers", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("./"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
+  await page.goto("./?chapter=legacy"); await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready", { timeout: 30000 });
   const state = fresh(), ore = WORLD.objects.find(value => value.resourceId === "copper")!;
   state.player.position = { ...interactionTiles(ore)[0] }; state.player.previousPosition = { ...state.player.position };
   await restore(page, state);

@@ -38,7 +38,7 @@ test("reviewed voxel props replace world bindings, deplete and survive stale-cac
   page.on("pageerror", error => errors.push(error.message)); page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
   page.on("request", request => { const url = new URL(request.url()); if (url.pathname.includes("/art3d/voxel/")) requests.push(url.href);
     if (url.protocol.startsWith("http") && page.url().startsWith("http") && url.origin !== new URL(page.url()).origin) external.push(url.href); });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"); await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const expected = { tree: 240, anvil: 3, supplies: 7, "ore-copper": 12, "ore-tin": 6, "ore-iron": 6, "ore-coal": 6 };
   await expect.poll(async () => JSON.parse((await world.getAttribute("data-voxel-object-counts"))!)).toEqual(expected);

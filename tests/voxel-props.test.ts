@@ -34,7 +34,7 @@ beforeAll(async () => {
 afterEach(() => vi.unstubAllGlobals());
 
 test("reviewed props load with versioned local URLs and preserve metre-scale grounding", () => {
-  expect(models.size).toBe(10); expect(urls).toHaveLength(2);
+  expect(models.size).toBe(28); expect(urls).toHaveLength(2);
   expect(urls.some(url => /\.vox(?:\?|$)/.test(url))).toBe(false);
   for (const url of urls) expect(new URL(url).searchParams.get("v")).toBe(VOXEL_BAKE_VERSION);
   for (const [id, height] of [["anvil", 1], ["barrel", .9375], ["crate", .75], ["ore-copper", .75]] as const) {
@@ -44,6 +44,9 @@ test("reviewed props load with versioned local URLs and preserve metre-scale gro
 });
 
 test("every existing anvil, supply group and ore resource resolves to a native binding", () => {
+  for(const id of ["tent","cottage","cottage-build","forge","forge-build","stool","table","bed","shelf","chest","planter","flowers","sapling"]){
+    const binding=voxelBindingId({kind:"decor",art:`valley-${id}`});expect(binding).toBe(`valley-${id}`);expect(models.has(binding!)).toBe(true);
+  }
   const counts: Record<string, number> = {};
   for (const object of WORLD.objects) { const id = voxelBindingId(object); if (id) counts[id] = (counts[id] ?? 0) + 1; }
   expect(counts).toMatchObject({ tree: 240, anvil: 3, supplies: 7, "ore-copper": 12, "ore-tin": 6, "ore-iron": 6, "ore-coal": 6 });

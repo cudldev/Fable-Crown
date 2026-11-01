@@ -1,0 +1,64 @@
+{
+  "id": "flowers-v1",
+  "sourceScript": "tools/valley-art/build_landscaping.py",
+  "method": "Original authored native cells, connected stems/trunk and deliberate stepped leaf/petal masses",
+  "pitchMetres": 0.0625,
+  "gridXYZ": [
+    12,
+    12,
+    8
+  ],
+  "pivotVoxels": [
+    6,
+    6,
+    0
+  ],
+  "palette": {
+    "wood": [
+      137,
+      100,
+      57
+    ],
+    "woodLight": [
+      153,
+      117,
+      67
+    ],
+    "leaf": [
+      102,
+      130,
+      61
+    ],
+    "leafLight": [
+      117,
+      143,
+      72
+    ],
+    "leafShade": [
+      91,
+      119,
+      55
+    ],
+    "creamPetal": [
+      235,
+      222,
+      181
+    ],
+    "gold": [
+      218,
+      175,
+      77
+    ],
+    "rose": [
+      190,
+      127,
+      126
+    ],
+    "stem": [
+      85,
+      112,
+      56
+    ]
+  },
+  "notes": "Three original low cream/gold/rose blossoms on connected stepped sage leaves/stems. Declared native extent0.75x0.75x0.5m, logical1x1m; original editable cell source, no paid/inference stage."
+}

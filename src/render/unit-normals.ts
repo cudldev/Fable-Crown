@@ -46,6 +46,7 @@ export function authorUnitNormals(sheet: UnitSheet, kind: UnitKind, tool?: UnitT
   return sheet;
 }
 function heldForm(tool: UnitTool, x: number, y: number): Form {
+  if(tool==='shield')return [25,21,4,5,.65,.4];
   if (x >= 24 && x < 26 && y >= 24) return [25, 25, 1, 1, .6, .5];
   if (tool === 'sword') {
     if (y < 20) return [25, 16, 1, 4, .7, .25];

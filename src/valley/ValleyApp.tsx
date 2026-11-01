@@ -1,0 +1,170 @@
+import {useCallback,useEffect,useMemo,useRef,useState} from "react";
+import type {KeyboardEvent} from "react";
+import {SceneHost} from "../render/SceneHost";
+import type {ScenePreparation,TileCamera,TileSelection} from "../render/scene-types";
+import {ActionControls} from "../action/ActionControls";
+import {useActionControls} from "../action/useActionControls";
+import {mapScreenMovement} from "../action/input";
+import type {ActionState} from "../action/contracts";
+import {ITEMS} from "../rpg/content";
+import {itemCount,inventorySlots} from "../rpg/inventory";
+import {levelForXp} from "../rpg/skills";
+import type {EquipmentSlot} from "../rpg/types";
+import {COTTAGE_TICKS,FIRST_BILL,FORGE_TICKS} from "./contracts";
+import type {FurnitureId,ValleyCommand,ValleySave,ValleyWorkerMessage,ValleyWorkerRequest} from "./contracts";
+import {VALLEY_COMMISSIONS,VALLEY_RECIPES,VALLEY_STOCK,visitorStock} from "./content";
+import {getOnboarding,getVisitors} from "./onboarding";
+import {createValleyWorld,homeFootprints,furnitureFootprint,sampleValleyGround,validateHomePlacement,validateFurniturePlacement,editValleyGround,OWNED_BOUNDS} from "./world";
+import "./valley.css";
+
+type Panel="inventory"|"craft"|"trade"|"home"|"projects"|"visitor"|"journal"|"land"|"settings"|null;
+type TerrainOperation=Extract<ValleyCommand,{type:"terrain"}>["operation"];
+type Placement={kind:"home"|"furniture"|"move"|"terrain"|"plant";x:number;z:number;rotation:0|1|2|3;itemId?:FurnitureId;id?:string;operation?:TerrainOperation;plant?:"flowers"|"sapling"};
+const AXES={right:{x:45/55.217,z:-32/55.217},forward:{x:-32/55.217,z:-45/55.217}};
+const FURNITURE:FurnitureId[]=["stool","table","bed","shelf","chest","planter"];
+const name=(id:string)=>ITEMS[id]?.name??id;
+const amount=(value:number)=>Number.isFinite(value)?Math.min(100,Math.max(1,Math.floor(value))):1;
+const time=(ticks:number)=>`${Math.ceil(Math.max(0,ticks)*.6/60)} min`;
+const TITLES:Record<Exclude<Panel,null>,string>={inventory:"Backpack & storage",craft:"Carpentry & cooking",trade:"Supply caravan",home:"Your home",projects:"Orders & public projects",visitor:"Valley visitors",journal:"Valley journal",land:"Ground & garden",settings:"Valley tools"};
+function download(save:ValleySave){const url=URL.createObjectURL(new Blob([JSON.stringify(save)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="fable-crown-valley.json";a.click();URL.revokeObjectURL(url);}
+
+export default function ValleyApp(){
+  const [save,setSave]=useState<ValleySave|null>(null),[hud,setHud]=useState<ActionState>();
+  const [camera,setCamera]=useState<TileCamera>({x:48,y:140,zoom:1.35,follow:true,overview:false,grid:false});
+  const [preparation,setPreparation]=useState<ScenePreparation>({stage:"chapter"}),[startupError,setStartupError]=useState("");
+  const [panel,setPanel]=useState<Panel>(null),[placement,setPlacement]=useState<Placement|null>(null),[selection,setSelection]=useState<TileSelection|null>(null);
+  const [tool,setTool]=useState(true),[message,setMessage]=useState("A quiet valley, and room to make a home.");
+  const [quantity,setQuantity]=useState(1),[payment,setPayment]=useState(10),[visitorId,setVisitorId]=useState("builder");
+  const [storageOkay,setStorageOkay]=useState(true),[resetConfirm,setResetConfirm]=useState(false),[pending,setPending]=useState(false);
+  const worker=useRef<Worker|null>(null),action=useRef<ActionState|undefined>(undefined),sequence=useRef(0);
+  const pendingSave=useRef<ValleySave|undefined>(undefined);
+  const receipts=useRef(new Map<number,(ok:boolean)=>void>()),panelElement=useRef<HTMLElement>(null),fileInput=useRef<HTMLInputElement>(null);
+  const unavailable=preparation.stage==="unavailable";
+  const ready=!!save&&(preparation.stage==="ready"||unavailable)&&!startupError;
+  const enabled=ready&&!panel&&!placement&&!unavailable;
+  const live=useRef({ready,tool,enabled});live.current={ready,tool,enabled};
+  const post=useCallback((request:ValleyWorkerRequest)=>worker.current?.postMessage(request),[]);
+  const command=(value:ValleyCommand,callback?:(ok:boolean)=>void)=>{const requestId=++sequence.current;if(callback)receipts.current.set(requestId,callback);post({type:"command",command:value,requestId});};
+  const open=(next:Panel)=>{setPlacement(null);setPanel(next);};
+  const controls=useActionControls({enabled,cameraAxes:AXES,onInteract:()=>post({type:"interact"}),onInventory:()=>{if(ready)open(panel==="inventory"?null:"inventory");},onBuild:()=>{if(ready)open(panel==="land"?null:"land");},onBack:()=>{if(panel)setPanel(null);else setPlacement(null);},onCameraPan:(x,y,deltaSeconds)=>{const vector=mapScreenMovement(x,y,AXES);setCamera(old=>({...old,x:Math.max(0,Math.min(255,(old.follow?action.current?.player.x??old.x:old.x)+vector.x*deltaSeconds*7.2)),y:Math.max(0,Math.min(191,(old.follow?action.current?.player.z??old.y:old.y)+vector.z*deltaSeconds*7.2)),follow:false}));},onFollow:()=>setCamera(old=>({...old,follow:true,overview:false}))});
+  const readAction=useCallback(()=>action.current,[]);
+  const onPreparation=useCallback((next:ScenePreparation)=>setPreparation(old=>old.stage===next.stage&&old.message===next.message?old:next),[]);
+
+  useEffect(()=>{
+    let instance:Worker;try{instance=new Worker(new URL("./game.worker.ts",import.meta.url),{type:"module"});}catch{setStartupError("The valley could not start. Reload to try again.");return;}
+    worker.current=instance;let first=true;
+    instance.onmessage=(event:MessageEvent<ValleyWorkerMessage>)=>{
+      const next=event.data;if(next.save){if(first){first=false;setSave(next.save);setCamera(old=>({...old,x:next.save!.action.player.x,y:next.save!.action.player.z}));}else pendingSave.current=next.save;}
+      if(next.action)action.current=next.action;if(next.message)setMessage(next.message);
+      if(next.storageOkay!==undefined)setStorageOkay(next.storageOkay);
+      if(next.open){setPlacement(null);setPanel(next.open);if(next.visitorId)setVisitorId(next.visitorId);}
+      if(next.receipt?.requestId!==undefined){receipts.current.get(next.receipt.requestId)?.(next.receipt.ok);receipts.current.delete(next.receipt.requestId);}
+      if(next.export)download(next.export);
+    };
+    instance.onerror=()=>setStartupError("The valley worker stopped. Export or reload after checking your saved chapter.");
+    instance.postMessage({type:"pause"});return()=>{instance.terminate();worker.current=null;};
+  },[]);
+  useEffect(()=>{const sync=()=>post({type:live.current.ready&&!document.hidden?"resume":"pause"});sync();document.addEventListener("visibilitychange",sync);return()=>document.removeEventListener("visibilitychange",sync);},[ready,post]);
+  useEffect(()=>{let frame=0,last=-Infinity;const update=(now:number)=>{const input=controls.inputBuffer.read();input.tool=live.current.tool;if(!live.current.enabled){input.moveX=0;input.moveZ=0;input.strike=false;input.block=false;}post({type:"input",input});if(now-last>=100){last=now;setHud(action.current);if(pendingSave.current){setSave(pendingSave.current);pendingSave.current=undefined;}}frame=requestAnimationFrame(update);};frame=requestAnimationFrame(update);return()=>cancelAnimationFrame(frame);},[controls.inputBuffer,post]);
+  useEffect(()=>{if(!panel&&!placement)return;const previous=document.activeElement;panelElement.current?.querySelector<HTMLButtonElement>("button")?.focus();return()=>{if(previous instanceof HTMLElement&&previous.isConnected)previous.focus();};},[panel,!!placement]);
+  useEffect(()=>{if(!placement)return;const key=(event:globalThis.KeyboardEvent)=>{if(event.target instanceof Element&&event.target.closest("input,textarea,select,[contenteditable]"))return;const delta:Record<string,[number,number]>={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};if(delta[event.key]){event.preventDefault();const [dx,dz]=delta[event.key];setPlacement(old=>old?{...old,x:old.x+dx,z:old.z+dz}:null);}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);},[!!placement]);
+
+  const world=useMemo(()=>save?createValleyWorld(save.valley,save.chapter):undefined,[save]);
+  const sampleGround=useCallback((x:number,z:number)=>save?sampleValleyGround(save.valley,x,z):0,[save?.valley]);
+  const groundRevision=save?JSON.stringify(save.valley.ground):"";
+  const visitors=save?getVisitors(save,Date.now()):[],onboarding=save?getOnboarding(save,Date.now()):undefined;
+  const player=hud?.player??save?.action.player,complete=!!save&&save.valley.cottageTicks>=COTTAGE_TICKS;
+  const footprint=save?homeFootprints(save.valley):null,coins=save?itemCount(save.chapter.player.inventory,"coins")+itemCount(save.chapter.bank,"coins"):0;
+  const stockDate=new Date().toDateString();
+  const todayStock=useMemo(()=>new Set(visitorStock(Date.now()).map(stock=>stock.itemId)),[stockDate]);
+  // Worker snapshots replace valley objects; this content key keeps route checks off HUD-only renders.
+  const placementLayoutKey=save?JSON.stringify([save.valley.layoutRevision,save.valley.home,save.valley.paid===FIRST_BILL,complete,save.valley.ground,save.valley.furniture,save.valley.plants]):"";
+  const playerX=player?.x??0,playerZ=player?.z??0;
+  const plantingSupplies=save&&placement?.kind==="plant"?itemCount(save.chapter.player.inventory,placement.plant==="flowers"?"valley-flower-seeds":"valley-sapling"):0;
+  const placementCheck=useMemo(()=>{
+    if(!placement||!save)return {error:null as string|null,description:""};
+    const p=placement,v=save.valley;
+    if(p.kind==="home")return {error:validateHomePlacement(v,p.x,p.z,p.rotation),description:"Confirm to place your tent and reserve the cottage pad."};
+    const rangeError=Math.hypot(p.x-playerX,p.z-playerZ)>6?"Stand within six metres of the chosen spot.":null;
+    if(p.kind==="furniture"||p.kind==="move")return {error:rangeError??validateFurniturePlacement(v,p.itemId!,p.x,p.z,p.rotation,p.id),description:`Confirm to ${p.kind==="move"?"move":"place"} your ${p.itemId}.`};
+    if(p.kind==="plant")return {error:!v.home?"Place your tent before planting.":validateFurniturePlacement(v,"planter",p.x,p.z,0)??rangeError??(!plantingSupplies?`Carry ${p.plant==="flowers"?"flower seeds":"a young sapling"} for planting.`:null),description:`Confirm to plant ${p.plant==="flowers"?"flowers":"a young sapling"} at ${p.x}, ${p.z}.`};
+    const original=v.ground[`${p.x},${p.z}`]??{level:0,path:false};
+    let level:number=original.level,stairs:number|undefined=original.stairs,path=original.path;
+    const directions=["north","east","south","west"];
+    if(p.operation==="raise"){level++;stairs=undefined;}else if(p.operation==="lower"){level--;stairs=undefined;}
+    else if(p.operation==="path"||p.operation==="grass")path=p.operation==="path";
+    else {stairs=directions.indexOf(p.operation?.replace("stairs-","")??"");if(level===1)level=0;}
+    const height=level*.5;
+    const description=`Preview: ${height>0?"+":""}${height.toFixed(1)} m terrace${stairs!==undefined?`, four treads rising ${directions[stairs]}`:""}, ${path?"path":"grass"}. Confirm to apply ${p.operation?.replace("-"," ")}.`;
+    const candidate=structuredClone(v),result=editValleyGround(candidate,p.x,p.z,p.operation!,{x:playerX,z:playerZ});
+    return {error:result.ok?rangeError:result.message,description};
+  },[placement,placementLayoutKey,playerX,playerZ,plantingSupplies]);
+  const placementError=placementCheck.error;
+  const preview=useMemo(()=>{if(!placement)return[];const color=placementError?0xf28c72:0xc5e392;
+    if(placement.kind==="home"){const fp=homeFootprints({x:placement.x,z:placement.z,rotation:placement.rotation,tentPacked:false})!;return[{x:OWNED_BOUNDS.minX,z:OWNED_BOUNDS.minZ,width:64,height:32,color:0xc5e392},{...fp.pad,color},{...fp.tent,color:0xe9d49b},{...fp.cottage,color:0x8bcad5}];}
+    if(placement.itemId)return[{...furnitureFootprint(placement.itemId,placement.x,placement.z,placement.rotation),color}];
+    return[{x:placement.x,z:placement.z,width:1,height:1,color}];},[placement,placementError]);
+  function focusCamera(x:number,z:number){setCamera(old=>({...old,x,y:z,follow:false,overview:false}));setPanel(null);}
+  function focus(selected:TileSelection){
+    if(placement){const position=selected.kind==="tile"?selected.position:selected.kind==="object"?world?.objects.find(o=>o.id===selected.id)?.position:undefined;if(position)setPlacement(old=>old?{...old,x:Math.round(position.x),z:Math.round(position.y)}:null);return;}
+    if(!live.current.enabled)return;setSelection(selected);post({type:"focus",selection:selected});
+  }
+  function startPlacement(kind:Placement["kind"],extra:Partial<Placement>={}){controls.clear();setPanel(null);setPlacement({kind,x:Math.round(player?.x??40),z:Math.round(player?.z??155),rotation:0,...extra});}
+  function confirmPlacement(){if(!placement||pending||placementError)return;const p=placement;let value:ValleyCommand;
+    if(p.kind==="home")value={type:"place-home",x:p.x,z:p.z,rotation:p.rotation};
+    else if(p.kind==="furniture")value={type:"place-furniture",itemId:p.itemId!,x:p.x,z:p.z,rotation:p.rotation};
+    else if(p.kind==="move")value={type:"move-furniture",id:p.id!,x:p.x,z:p.z,rotation:p.rotation};
+    else if(p.kind==="terrain")value={type:"terrain",x:p.x,z:p.z,operation:p.operation!};
+    else value={type:"plant",x:p.x,z:p.z,kind:p.plant!};
+    setPending(true);command(value,ok=>{setPending(false);if(ok&&p.kind!=="terrain"&&p.kind!=="plant")setPlacement(null);});
+  }
+  function trap(event:KeyboardEvent<HTMLElement>){if(event.key!=="Tab")return;const elements=[...event.currentTarget.querySelectorAll<HTMLElement>("button:not(:disabled),input:not(:disabled),select:not(:disabled),a[href]")],first=elements[0],last=elements.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
+  const locationButton=(label:string,x:number,z:number)=><button type="button" className="valley-location" onClick={()=>focusCamera(x,z)}>View {label} ({x}, {z})</button>;
+  const quantityField=<label className="valley-quantity">Quantity <input aria-label="Quantity" type="number" min={1} max={100} value={quantity} onChange={e=>setQuantity(amount(e.currentTarget.valueAsNumber))}/></label>;
+
+  return <main className="game-shell valley-app" data-testid="valley-app" data-ready={ready} data-mode={unavailable?"dashboard":"world"} data-preparing={!ready} data-panel-open={!!panel}
+    data-player-x={player?.x.toFixed(3)} data-player-z={player?.z.toFixed(3)} data-guard={player?.guard.toFixed(2)} data-action-frame={hud?.frame}>
+    <div className="valley-viewport" {...controls.worldBindings} inert={!ready||!!panel}>
+      {save&&world&&!unavailable&&<SceneHost state={save.chapter} worldOverride={world} readAction={readAction} sampleGround={sampleGround} groundRevision={groundRevision}
+        directInput={!placement} placementPreview={preview} camera={camera} onCamera={setCamera} selection={selection} onSelect={focus} onInteract={focus} onPreparation={onPreparation}/>}
+    </div>
+    {ready&&save&&<>
+      {unavailable&&<section className="valley-dashboard" aria-label="Valley dashboard"><h1>Your valley</h1><p>The 3D view is unavailable. Your journal, crafting, storage and save tools remain accessible. World actions still require standing nearby.</p><p>{preparation.message}</p><button onClick={()=>location.reload()}>Retry 3D view</button></section>}
+      <header className="valley-hud"><div className="valley-vitals"><strong>Fable Crown <small>Your valley</small></strong><div className="valley-meter-row"><label>HP {player?.health}/{player?.maxHealth}<meter aria-label="Player health" min={0} max={player?.maxHealth??10} value={player?.health??10}/></label><label>Guard {Math.round(player?.guard??100)}%<meter aria-label="Guard stamina" min={0} max={100} value={player?.guard??100}/></label></div><span>{coins} coins · Bag {inventorySlots(save.chapter.player.inventory)}/28</span></div>
+      <nav className="valley-hud-actions" aria-label="Valley menus"><div className="valley-strike-mode" role="group" aria-label="Strike mode"><button aria-pressed={tool} onClick={()=>{setTool(true);controls.clear();}}>Tool</button><button aria-pressed={!tool} onClick={()=>{setTool(false);controls.clear();}}>Weapon</button></div><button onClick={()=>open("inventory")}>Bag</button><button onClick={()=>open("home")}>Home</button><button onClick={()=>open("journal")}>Journal</button><button onClick={()=>open("settings")}>More</button></nav></header>
+      <div className="valley-current-goal"><button onClick={()=>open("journal")} aria-label="Open current goal">{save.valley.goal||onboarding?.nextGoal}</button></div>
+      {!panel&&!placement&&!unavailable&&<nav className="valley-camera" aria-label="Camera controls"><button onClick={()=>setCamera(old=>({...old,follow:true,overview:false}))}>Follow</button><button aria-label="Zoom out" onClick={()=>setCamera(old=>({...old,zoom:Math.max(.65,old.zoom/1.2)}))}>−</button><button aria-label="Zoom in" onClick={()=>setCamera(old=>({...old,zoom:Math.min(3,old.zoom*1.2)}))}>+</button></nav>}
+      <div className="valley-message" role="status">{message}</div>
+      {!storageOkay&&<div className="valley-storage-warning" role="alert">Device saving is unavailable. Export your valley from More.</div>}
+      {!panel&&!placement&&!unavailable&&<ActionControls {...controls.controlsProps} onInventory={undefined} onBuild={undefined}/>}
+      <output className="valley-observable" data-testid="valley-player-position">{player?`${player.x.toFixed(2)}, ${player.z.toFixed(2)}`:"—"}</output>
+    </>}
+    {!ready&&<section className="valley-preparation" role={startupError?"alert":"status"} aria-live="polite"><div><span>Fable Crown</span><h1>{startupError?"The valley could not open":"Preparing your valley"}</h1><p>{startupError||preparation.message||(preparation.stage==="chapter"?"Opening your saved chapter…":"Loading the world and preparing the light…")}</p>{startupError&&<button onClick={()=>location.reload()}>Reload</button>}</div></section>}
+    {ready&&placement&&<aside className="valley-placement" ref={panelElement} role="dialog" aria-label="Placement controls" onKeyDown={trap}>
+      <header><h2>{placement.kind==="home"?"Choose your home pad":placement.kind==="terrain"?"Shape one tile":placement.kind==="plant"?"Plant your garden":"Place furnishing"}</h2><button onClick={()=>setPlacement(null)}>Cancel</button></header>
+      <p>{placement.kind==="home"?"Select clear owned ground. Gold marks the tent; blue reserves the future cottage. The full pad is 10 × 8 tiles.":"Select a world tile or adjust X/Z. Stand near the chosen spot before confirming."}</p>
+      <div className="valley-coordinates"><label>X <input aria-label="Placement X" type="number" value={placement.x} onChange={e=>{const x=Math.trunc(e.currentTarget.valueAsNumber||0);setPlacement(p=>p?{...p,x}:p);}}/></label><label>Z <input aria-label="Placement Z" type="number" value={placement.z} onChange={e=>{const z=Math.trunc(e.currentTarget.valueAsNumber||0);setPlacement(p=>p?{...p,z}:p);}}/></label>
+      <button aria-label="Move placement west" onClick={()=>setPlacement(p=>p?{...p,x:p.x-1}:p)}>X −</button><button aria-label="Move placement east" onClick={()=>setPlacement(p=>p?{...p,x:p.x+1}:p)}>X +</button><button aria-label="Move placement north" onClick={()=>setPlacement(p=>p?{...p,z:p.z-1}:p)}>Z −</button><button aria-label="Move placement south" onClick={()=>setPlacement(p=>p?{...p,z:p.z+1}:p)}>Z +</button></div>
+      <div className="valley-button-row">{(placement.kind==="home"||placement.kind==="furniture"||placement.kind==="move")&&<button onClick={()=>setPlacement(p=>p?{...p,rotation:((p.rotation+1)%4)as 0|1|2|3}:p)}>Rotate {placement.rotation*90}°</button>}<button onClick={()=>focusCamera(placement.x,placement.z)}>View spot</button><button className="valley-primary" disabled={!!placementError||pending} onClick={confirmPlacement}>{pending?"Checking…":"Confirm"}</button></div>
+      <p className="valley-placement-summary" data-testid="placement-preview-summary">{placementCheck.description}</p>
+      {placementError&&<p role="status">{placementError}</p>}
+    </aside>}
+    {ready&&panel&&save&&<div className="valley-backdrop" onPointerDown={e=>{if(e.target===e.currentTarget)setPanel(null);}}><section className="valley-panel" ref={panelElement} role="dialog" aria-modal="true" aria-labelledby="valley-panel-title" onKeyDown={trap}>
+      <header><h2 id="valley-panel-title">{TITLES[panel]}</h2><button onClick={()=>setPanel(null)}>Close</button></header>
+      <nav className="valley-panel-tabs" aria-label="Valley activities">{(["inventory","home","craft","trade","projects","land","visitor","journal"]as const).map(p=><button key={p} aria-pressed={panel===p} onClick={()=>setPanel(p)}>{p==="inventory"?"Bag":p==="visitor"?"Visitors":p[0].toUpperCase()+p.slice(1)}</button>)}</nav>
+      {panel==="inventory"&&<>{quantityField}<p>Connected storage is shared between your tent, cottage and caravan. Transfers require being nearby.</p>{locationButton("caravan storage",74,140)}<div className="valley-columns"><section><h3>Carried</h3>{save.chapter.player.inventory.length?save.chapter.player.inventory.map((i,index)=><div className="valley-item" key={`${i.itemId}-${index}`}><span>{name(i.itemId)} ×{i.quantity}</span><div className="valley-button-row">{ITEMS[i.itemId]?.heals&&<button onClick={()=>command({type:"eat",itemId:i.itemId})}>Eat</button>}{ITEMS[i.itemId]?.slot&&<button onClick={()=>command({type:"equip",itemId:i.itemId})}>Equip</button>}<button onClick={()=>command({type:"store",itemId:i.itemId,quantity:Math.min(quantity,i.quantity)})}>Store {Math.min(quantity,i.quantity)}</button></div></div>):<p>Backpack empty.</p>}</section><section><h3>Connected storage</h3>{save.chapter.bank.length?save.chapter.bank.map((i,index)=><div className="valley-item" key={`${i.itemId}-${index}`}><span>{name(i.itemId)} ×{i.quantity}</span><button onClick={()=>command({type:"withdraw",itemId:i.itemId,quantity:Math.min(quantity,i.quantity)})}>Take {Math.min(quantity,i.quantity)}</button></div>):<p>Storage empty.</p>}</section></div><h3>Equipped</h3>{Object.entries(save.chapter.player.equipment).map(([slot,itemId])=>itemId&&<div className="valley-item" key={slot}><span>{slot}: {name(itemId)}</span><button onClick={()=>command({type:"unequip",slot:slot as EquipmentSlot})}>Unequip</button></div>)}</>}
+      {panel==="home"&&<>{!save.valley.home?<><p>Your free tent comes with a reserved pad for the future cottage.</p><button className="valley-primary" onClick={()=>startPlacement("home",{x:32,z:154})}>Place free tent</button></>:<><p>Cottage account: {save.valley.paid} / {FIRST_BILL} coins.</p>{save.valley.paid<FIRST_BILL?<><label className="valley-quantity">Payment <input aria-label="Cottage payment" type="number" min={1} max={FIRST_BILL-save.valley.paid} value={payment} onChange={e=>setPayment(amount(e.currentTarget.valueAsNumber))}/></label><div className="valley-button-row"><button onClick={()=>command({type:"pay",amount:payment})}>Pay {payment} coins</button><button onClick={()=>command({type:"pay",amount:FIRST_BILL-save.valley.paid})}>Pay remaining {FIRST_BILL-save.valley.paid}</button></div></>:<><progress aria-label="Cottage construction" max={COTTAGE_TICKS} value={save.valley.cottageTicks}/><p>{complete?"Your cottage is ready.":`${time(COTTAGE_TICKS-save.valley.cottageTicks)} active construction remaining. Chores never speed it up.`}</p></>}{footprint&&locationButton("home",footprint.approach.x,footprint.approach.z)}{complete&&!save.valley.home.tentPacked&&<button onClick={()=>command({type:"pack-tent"})}>Pack the tent</button>}</>}
+      {complete&&footprint&&<><h3>Inside your cottage</h3><div className="valley-button-row">{locationButton("your cottage workbench",footprint.workbench.x,footprint.workbench.z)}{locationButton("your planning table",footprint.planningTable.x,footprint.planningTable.z)}<button onClick={()=>open("projects")}>Planning-table orders</button></div><p>Use your workbench for carpentry and the planning table for supply orders and optional projects.</p></>}<h3>Furnishings</h3><div className="valley-button-row">{FURNITURE.map(id=><button key={id} disabled={!itemCount(save.chapter.player.inventory,`valley-${id}`)} onClick={()=>startPlacement("furniture",{itemId:id})}>Place {id} ({itemCount(save.chapter.player.inventory,`valley-${id}`)})</button>)}</div>{save.valley.furniture.map(f=><div className="valley-item" key={f.id}><span>{f.itemId} · {f.x}, {f.z}</span><button onClick={()=>startPlacement("move",{id:f.id,itemId:f.itemId,x:f.x,z:f.z,rotation:f.rotation})}>Move / rotate</button></div>)}<p>A cottage takes 90 active minutes. Away time advances construction at one quarter speed for up to 24 hours.</p><h3>Beyond the cottage</h3><p>Future journeys may offer larger homes or royal grants; this chapter has no further housing unlocks.</p></>}
+      {panel==="craft"&&<><p className="valley-carpentry" data-testid="carpentry-progress">Carpentry level {levelForXp(save.valley.carpentryXp)} · {(save.valley.carpentryXp/10).toLocaleString()} XP</p>{quantityField}<div className="valley-button-row">{locationButton("communal workbench",69,139)}{complete&&footprint&&locationButton("your cottage workbench",footprint.workbench.x,footprint.workbench.z)}{locationButton("brazier",78,139)}{locationButton("cooking fire",81,139)}</div>{save.valley.workQueue.map(job=><div className="valley-job" key={job.recipeId}><strong>{VALLEY_RECIPES[job.recipeId]?.name} ×{job.quantity}</strong><p>{Math.ceil(job.remainingTicks*.6)} seconds left. Ingredients are reserved.</p></div>)}{Object.values(VALLEY_RECIPES).map(recipe=><article className="valley-card" key={recipe.id}><h3>{recipe.name}</h3><p>{recipe.inputs.map(i=>`${i.quantity} ${name(i.itemId)}`).join(" + ")} → {recipe.output.quantity} {name(recipe.output.itemId)} · {recipe.station}</p>{recipe.requiresCottage&&!complete&&<p>Unlocks with your cottage.</p>}<div className="valley-button-row"><button disabled={!!save.valley.workQueue.length||(recipe.requiresCottage&&!complete)} onClick={()=>command({type:"craft",recipeId:recipe.id,quantity:1})}>Make one</button><button disabled={!!save.valley.workQueue.length||(recipe.requiresCottage&&!complete)} onClick={()=>command({type:"craft",recipeId:recipe.id,quantity})}>Make {quantity}</button></div></article>)}</>}
+      {panel==="trade"&&<>{quantityField}<p>Carry supplies to the caravan to trade. Two furnishing choices rotate each local day; ordinary supplies stay in stock. You can still sell items that are off today's display.</p>{locationButton("supply caravan",74,140)}{VALLEY_STOCK.map(stock=><div className="valley-item valley-trade" key={stock.itemId} data-stock-today={todayStock.has(stock.itemId)}><span>{name(stock.itemId)}<small>Have {itemCount(save.chapter.player.inventory,stock.itemId)} · Buy {stock.buy} / sell {stock.sell} coins each{stock.requiresCottage&&!complete?" · Cottage required":""}{!todayStock.has(stock.itemId)?" · Not in today's stock":""}</small></span><div className="valley-button-row"><button disabled={(stock.requiresCottage&&!complete)||!todayStock.has(stock.itemId)} onClick={()=>command({type:"buy",itemId:stock.itemId,quantity})}>Buy {quantity}</button><button disabled={(stock.requiresCottage&&!complete)||itemCount(save.chapter.player.inventory,stock.itemId)<quantity} onClick={()=>command({type:"sell",itemId:stock.itemId,quantity})}>Sell {quantity}</button></div></div>)}</>}
+      {panel==="projects"&&<><h3>Supply commissions</h3><p>Bring carried materials to Rowan or the caravan for payment.</p>{locationButton("Rowan",51,141)}{VALLEY_COMMISSIONS.map(order=>{const available=visitors[0]?.offers.some(o=>o.id===order.id);return <article className="valley-card" key={order.id}><h3>{order.name} {order.daily&&<small>Daily</small>}</h3><p>{order.inputs.map(i=>`${i.quantity} ${name(i.itemId)}`).join(" + ")} · Pays {order.coins} coins</p><button disabled={!available} onClick={()=>command({type:"commission",id:order.id})}>{available?"Deliver order":"Complete / unavailable today"}</button></article>;})}<h3>Optional public forge</h3><p>Logs {save.valley.forge.logs}/12 · Bronze bars {save.valley.forge.bars}/2</p><progress aria-label="Public forge construction" max={FORGE_TICKS} value={save.valley.forge.ticks}/><p>{save.valley.forge.ticks>=FORGE_TICKS?"The public forge is ready.":"Deliver the actual materials at the site; the build then takes 18 active minutes."}</p>{locationButton("forge site",70,178)}{quantityField}<div className="valley-button-row"><button onClick={()=>command({type:"forge-deliver",itemId:"logs",quantity})}>Deliver {quantity} logs</button><button onClick={()=>command({type:"forge-deliver",itemId:"bronze-bar",quantity})}>Deliver {quantity} bronze bars</button></div></>}
+      {panel==="land"&&<><p>Ground edits are limited to ±0.5 metres on owned land, with four-tread stairs. Routes, water and home entrances are protected.</p><div className="valley-land-grid">{(["path","grass","raise","lower","stairs-north","stairs-east","stairs-south","stairs-west"]as const).map(operation=><button key={operation} onClick={()=>startPlacement("terrain",{operation})}>{operation.replace("-"," ")}</button>)}<button disabled={!save.valley.undo.length} onClick={()=>command({type:"undo-terrain"})}>Undo last ground edit</button></div><h3>Planting</h3><div className="valley-button-row"><button onClick={()=>startPlacement("plant",{plant:"flowers"})}>Plant flower seeds</button><button onClick={()=>startPlacement("plant",{plant:"sapling"})}>Plant young sapling</button></div><p>Carry the seeds or sapling and stand near the chosen spot. Lift existing plantings to reclaim their original seed or sapling, then move them elsewhere.</p>{save.valley.plants.map(plant=><div className="valley-item" key={plant.id}><span>{plant.kind} · {plant.x}, {plant.z}</span><button onClick={()=>command({type:"lift-plant",id:plant.id})}>Lift planting</button></div>)}</>}
+      {panel==="visitor"&&<>{visitors.map(visitor=><article className="valley-card" key={visitor.id} data-selected={visitor.id===visitorId}><h3>{visitor.name} · {visitor.role}</h3><p>{visitor.dialogue}</p><div className="valley-button-row"><button onClick={()=>{setVisitorId(visitor.id);command({type:"talk-visitor",id:visitor.id});}}>Talk to {visitor.name}</button>{locationButton(visitor.name,visitor.x,visitor.z)}{visitor.id==="builder"&&<button onClick={()=>command({type:"daily-help"})}>Ask for today's four logs</button>}</div></article>)}</>}
+      {panel==="journal"&&onboarding&&<><span className="valley-eyebrow">Chapter {onboarding.day}</span><h3>{onboarding.title}</h3><p>{onboarding.body}</p>{onboarding.help&&<p>{onboarding.help}</p>}<ul className="valley-steps">{onboarding.steps.map(step=><li key={step.id}><span>{step.complete?"✓":"○"} {step.label}</span>{!step.complete&&<button onClick={()=>command({type:"pin-goal",goal:step.label})}>Pin goal</button>}</li>)}</ul><p>Current goal: {save.valley.goal||onboarding.nextGoal}</p><button onClick={()=>command({type:"pin-goal",goal:onboarding.nextGoal})}>Pin next suggested goal</button><h3>Places in your valley</h3><div className="valley-button-row">{locationButton("timber",25,139)}{locationButton("pond",36,150)}{locationButton("ore",83,152)}{locationButton("workbench",69,139)}{locationButton("caravan",74,140)}{locationButton("Rowan",51,141)}</div><p>View moves the camera. Walk there using WASD, a controller or the joystick.</p></>}
+      {panel==="settings"&&<><div className="valley-land-grid"><button onClick={()=>{setCamera(old=>({...old,follow:true,overview:false}));setPanel(null);}}>Follow prince</button><button onClick={()=>open("land")}>Ground & garden</button><button onClick={()=>open("visitor")}>Visitors</button><button onClick={()=>open("craft")}>Crafting</button><button onClick={()=>open("trade")}>Caravan</button><button onClick={()=>open("projects")}>Orders & forge</button><button onClick={()=>post({type:"save"})}>Save on this device</button><button onClick={()=>post({type:"export"})}>Export valley</button><button onClick={()=>fileInput.current?.click()}>Import valley file</button></div><input ref={fileInput} className="valley-file-input" hidden type="file" accept="application/json,.json" aria-label="Import valley archive" onChange={async e=>{const file=e.currentTarget.files?.[0];if(!file)return;try{const value:unknown=JSON.parse(await file.text());post({type:"import",value});}catch{setMessage("That file is not readable JSON.");}e.target.value="";}}/>
+      <details><summary>Start a new valley</summary><p>This replaces the active valley. Export your current valley first if you want to keep it.</p><label><input type="checkbox" checked={resetConfirm} onChange={e=>setResetConfirm(e.currentTarget.checked)}/> I have kept any archive I need</label><button disabled={!resetConfirm} onClick={()=>{post({type:"reset"});setResetConfirm(false);setPanel(null);setPlacement(null);}}>Confirm new valley</button></details>
+      <a className="valley-earlier-journey" href="?chapter=legacy">Earlier journey</a><h3>Controls</h3><p>WASD / left stick / joystick: move. Left mouse / RT / Tool: one strike per press. Hold right mouse / LT / Block: guard. E / A / Interact: use nearby things. I / Menu: bag. B / X: ground tools. Escape / controller B: back.</p><p>Middle mouse, the right stick, or a drag on the touch world pans the camera; wheel or pinch zooms. Press the right stick to follow. Use Follow prince to return. D-pad and A navigate panels. Placement also has X/Z fields and step buttons.</p><p>All gameplay and saving run on this device. The valley needs no paid service.</p></>}
+      <footer className="valley-panel-message" role="status">{message}</footer>
+    </section></div>}
+  </main>;
+}

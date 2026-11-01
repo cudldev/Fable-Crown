@@ -1,0 +1,10 @@
+{
+  "selectedJob":"vox-01",
+  "actualPreview":"vox-01/software-iso.png",
+  "silhouette":{"status":"usable draft","reason":"Small forked trunk and asymmetric main/left leaf masses read as a sapling"},
+  "construction":{"status":"usable draft","reason":"One connected volume, grounded roots and stout branch-to-crown supports"},
+  "material":{"status":"usable draft","reason":"Quiet olive green clusters and warm timber, no micro-noise"},
+  "cohesion":{"status":"usable draft","reason":"Shared voxel pitch and warm world palette; deliberately simple planting draft"},
+  "integration":{"status":"placeholder","reason":"Native readback/1.375m height checked; independent game loader/camera check belongs to lead"},
+  "artApproved":false
+}

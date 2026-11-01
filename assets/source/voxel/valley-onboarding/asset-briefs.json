@@ -1,0 +1,20 @@
+{
+  "pitchMetres": 0.0625,
+  "unitsPerTile": 1,
+  "actorOccupiedHeightMetres": 1.125,
+  "sourceAxes": "X width; Y depth; Z up; front -Y",
+  "runtimeAxes": "X width; Y up; front +Z",
+  "groundPivot": "center XY and minimum Z unless explicit part pivot provided",
+  "status": "physical production briefs; no asset completion implied",
+  "assets": [
+    {"id":"tent-v1","targetXYZ":[3,3,2],"logicalFootprint":[3,3],"homePadXY":[0,2],"front":"south","requiredParts":["canvas","supports","stakes"],"notes":"Open doorway and real hollow interior; uniform inferred aspect must fit pad."},
+    {"id":"cottage-v1","targetXYZ":[6,5,3.5],"logicalFootprint":[6,5],"homePadXY":[4,1],"front":"south","requiredParts":["roof","facade","interior","foundation"],"minimumDoorHeight":1.5,"notes":"Warm cream stone, timber and gable. Walk-in interior and separate roof/facade visibility are mandatory; a monolithic reconstruction cannot count as an interior."},
+    {"id":"forge-v1","targetXYZ":[4,3,3],"logicalFootprint":[4,3],"front":"south","requiredParts":["roof","facade","interior","hearth","anvil"],"states":["foundation","scaffold","complete"],"notes":"Open working front, dark readable hearth aperture; unobstructed actor reach. Construction states reuse validated parts/materials."},
+    {"id":"stool-v1","targetXYZ":[0.5,0.5,0.5],"logicalFootprint":[1,1],"materials":"warm honey timber","notes":"Broad simple seat, visibly separated stout legs, grounded supports."},
+    {"id":"table-v1","targetXYZ":[1.5,0.875,0.75],"logicalFootprint":[2,1],"materials":"warm honey timber","notes":"Working-height broad plank top, four legs, empty usable knee space."},
+    {"id":"bed-v1","targetXYZ":[1,2,0.625],"logicalFootprint":[1,2],"materials":"warm timber; cream linen; muted blue blanket","notes":"Low cottage bed, restrained headboard, clear pillow/blanket masses."},
+    {"id":"shelf-v1","targetXYZ":[1,0.375,1.25],"logicalFootprint":[1,1],"materials":"warm honey timber","notes":"Two substantial empty shelf gaps survive native grid, quiet palette."},
+    {"id":"chest-v1","targetXYZ":[0.75,0.5,0.5],"logicalFootprint":[1,1],"materials":"warm timber; quiet slate iron straps","notes":"Readable lidded storage chest with broad lid and one small muted latch."},
+    {"id":"planter-v1","targetXYZ":[0.5,0.5,0.5],"logicalFootprint":[1,1],"materials":"muted ochre clay; dark earth; soft sage leaves","notes":"Broad contained pot with sparse simple sprouting leaves, no delicate foliage."}
+  ]
+}

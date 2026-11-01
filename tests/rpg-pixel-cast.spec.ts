@@ -78,7 +78,7 @@ async function expectAnimatedFrame(page: Page, low: number, high: number) {
 test("full Three pixel cast draws, animates and responds to optional normals without changing gameplay", async ({ page, context }) => {
   await mkdir(output, { recursive: true });
   const observed = watch(page);
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"), canvas = page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const state = fixture(); await restore(page, state);
@@ -184,7 +184,7 @@ test("full Three pixel cast draws, animates and responds to optional normals wit
 
 test("Alden style checkpoint shows the native pixel sprite clearly in the voxel world", async ({ page }) => {
   await mkdir(output, { recursive: true }); const observed = watch(page);
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"), canvas = page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const state = fixture(), positions = worldForState(state).spawns;
@@ -225,7 +225,7 @@ test("Alden style checkpoint shows the native pixel sprite clearly in the voxel 
 
 test("unobstructed work contact keeps the pickaxe on Alden's shared cell grid", async ({ page }) => {
   await mkdir(output, { recursive: true }); const observed = watch(page);
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const state = fixture(), ore = objectById("oakrest-ore-0")!;

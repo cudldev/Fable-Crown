@@ -1,0 +1,174 @@
+{
+  "dimensions": [
+    12,
+    16,
+    8
+  ],
+  "grid_min": [
+    -6,
+    -8,
+    0
+  ],
+  "grid_max": [
+    6,
+    8,
+    8
+  ],
+  "pivot_voxels": [
+    6,
+    8,
+    0
+  ],
+  "uniform_source_scale": 0.9643345651235884,
+  "source_translation_before_scale": [
+    0.0028758198022842407,
+    -0.00013300776481628418,
+    0.2586292326450348
+  ],
+  "source_bounds_metres": {
+    "min": [
+      -0.3562540231581013,
+      -0.4830053524851226,
+      0.0
+    ],
+    "max": [
+      0.3562540231581013,
+      0.4830053524851226,
+      0.5
+    ]
+  },
+  "shell_cells": 823,
+  "filled_cells": 597,
+  "boundary_touch_cells_clamped": 1,
+  "connected_components": 1,
+  "ground_cells": 176,
+  "nearest_source_vertex_distance_metres": {
+    "median": 0.02533491481877971,
+    "maximum": 0.19637545545748245
+  },
+  "color_method": "Explicit authored material-ramp palette correction; no albedo recovery claim",
+  "fill_method": "Only fully enclosed cavities, scipy.ndimage.binary_fill_holes; open gaps/through-holes retained",
+  "method": "Trimesh 4.10.1 mesh.voxelized(subdivide); original TRELLIS mesh and generated vertex RGB",
+  "asset_id": "chest-v1",
+  "occupied_voxels": 1420,
+  "palette": [
+    [
+      92,
+      111,
+      126
+    ],
+    [
+      110,
+      129,
+      141
+    ],
+    [
+      128,
+      145,
+      153
+    ],
+    [
+      130,
+      94,
+      55
+    ],
+    [
+      148,
+      109,
+      64
+    ],
+    [
+      166,
+      125,
+      74
+    ],
+    [
+      184,
+      141,
+      86
+    ]
+  ],
+  "mesh": {
+    "triangles": 590,
+    "vertices": 1180,
+    "quads": 295,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "physical_scale": {
+    "height_units": 0.5,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      6,
+      8,
+      0
+    ],
+    "units_per_tile": 1
+  },
+  "elapsed_seconds": 6.725454260999982,
+  "source": {
+    "path": "/mnt/c/Users/antto/Documents/ChatGPT/Fable Crown/tmp/valley-onboarding/assets/source/voxel/valley-onboarding/chest-v1/trellis-01/raw-mesh.npz",
+    "sha256": "f20df492609c549666efdbe4cbfdc6cae70ecfe705df2a619e32771c81cf5ff0"
+  },
+  "settings": {
+    "height_metres": 0.5,
+    "pitch_metres": 0.0625,
+    "colors": 24,
+    "fill_enclosed": true
+  },
+  "views_used": [],
+  "views_are": "Rendered projections of final volume, not reconstruction inputs",
+  "art_approved": false,
+  "game_integrated": false,
+  "palette_correction": {
+    "raw": "../vox-01",
+    "geometryUnchanged": true,
+    "materials": [
+      "metal",
+      "wood"
+    ],
+    "ramps": {
+      "metal": [
+        [
+          92,
+          111,
+          126
+        ],
+        [
+          110,
+          129,
+          141
+        ],
+        [
+          128,
+          145,
+          153
+        ]
+      ],
+      "wood": [
+        [
+          130,
+          94,
+          55
+        ],
+        [
+          148,
+          109,
+          64
+        ],
+        [
+          166,
+          125,
+          74
+        ],
+        [
+          184,
+          141,
+          86
+        ]
+      ]
+    },
+    "assignment": "Manual broad hue/relative-color rules; planter soil uses explicit upper-center region. These are art choices, not inferred physical materials.",
+    "notPhysicalAlbedoRecovery": true
+  }
+}

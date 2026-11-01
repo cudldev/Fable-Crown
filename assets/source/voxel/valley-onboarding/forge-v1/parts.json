@@ -1,0 +1,114 @@
+{
+  "id": "forge-v1",
+  "pitch": 0.0625,
+  "unitsPerTile": 1,
+  "nativeJob": "vox-01",
+  "sourceRoute": "native-modular",
+  "gridXYZ": [
+    64,
+    48,
+    50
+  ],
+  "pivotVoxels": [
+    32,
+    24,
+    2
+  ],
+  "logicalFootprint": [
+    4.0,
+    3.0
+  ],
+  "boundsXYZMetres": {
+    "min": [
+      -2.0,
+      -1.5,
+      -0.125
+    ],
+    "max": [
+      2.0,
+      1.5,
+      3.0
+    ]
+  },
+  "walkingFloor": {
+    "height": 0,
+    "baseBuriedMetres": 0.125
+  },
+  "entrance": {
+    "side": "south",
+    "clearWidth": 2.0,
+    "clearHeight": 1.75,
+    "clearDepth": 1.25
+  },
+  "models": {
+    "full": "vox-01/asset.vox",
+    "cutaway": "cutaway/asset.vox",
+    "foundation": "states/foundation/asset.vox",
+    "scaffold": "states/scaffold/asset.vox",
+    "complete": "vox-01/asset.vox"
+  },
+  "parts": [
+    {
+      "id": "foundation",
+      "file": "parts/foundation/asset.vox",
+      "glb": "parts/foundation/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 6144
+    },
+    {
+      "id": "interior",
+      "file": "parts/interior/asset.vox",
+      "glb": "parts/interior/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 8388
+    },
+    {
+      "id": "facade",
+      "file": "parts/facade/asset.vox",
+      "glb": "parts/facade/asset.glb",
+      "hiddenInCutaway": true,
+      "cells": 3444
+    },
+    {
+      "id": "roof",
+      "file": "parts/roof/asset.vox",
+      "glb": "parts/roof/asset.glb",
+      "hiddenInCutaway": true,
+      "cells": 5928
+    },
+    {
+      "id": "hearth",
+      "file": "parts/hearth/asset.vox",
+      "glb": "parts/hearth/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 7076
+    },
+    {
+      "id": "anvil",
+      "file": "parts/anvil/asset.vox",
+      "glb": "parts/anvil/asset.glb",
+      "hiddenInCutaway": false,
+      "cells": 1260
+    }
+  ],
+  "physicalRoofSource": "vox-01/asset.vox; cutaway visibility must not delete physical/GI roof occupancy",
+  "provenance": "Original generated forge image is a style source only. Exact64x48x50 authored native open shell/hearth/chimney and3construction states. Anvil reuses accepted local prop-batch-anvil-v1/vox-02 native geometry/RGB at identical pitch, with explicit4bottom-cell stump crop for0.75m working height. No external asset library; no paid service.",
+  "status": "native usable-draft candidate; actual visual and lead game review pending",
+  "workSocketsSourceXYZ": {
+    "hearthStand": [
+      -0.8125,
+      0.125,
+      0
+    ],
+    "anvilStand": [
+      0.8125,
+      -0.125,
+      0
+    ],
+    "anvilTop": [
+      0.8125,
+      0.375,
+      0.75
+    ]
+  }
+}

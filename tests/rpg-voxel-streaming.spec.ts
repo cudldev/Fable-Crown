@@ -44,7 +44,7 @@ test("asynchronous voxel and probe work converges after rapid camera changes and
     if (url.protocol.startsWith("http") && page.url().startsWith("http") && url.origin !== new URL(page.url()).origin) external.push(url.href);
   });
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("./?renderer=3d");
+  await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"), canvas = page.getByTestId("three-canvas");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   const fixture = createRpg(Date.now(), 8128), tree = WORLD.objects.find(object => object.kind === "tree")!;

@@ -1,0 +1,8 @@
+# Preserve raw learned intermediates locally; editable native VOX, prompts,
+# settings/hashes and review PNGs are the compact reviewable repository source.
+**/trellis-*/raw-mesh.npz
+**/trellis-*/*.glb
+**/trellis-*/*.ply
+**/trellis-*/preprocessed.png
+**/blender-*/review.blend
+**/asset.glb

@@ -1,0 +1,116 @@
+{
+  "assetId": "valley-tent",
+  "mode": "asset-reference",
+  "sizeStatus": "declared 2.0m height; uniform scaling preserves inferred aspect ratio",
+  "style": {
+    "status": "candidate",
+    "profile": "TRELLIS-generated RGB;24-color voxel reduction"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    1,
+    1
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -1.75,
+      -1.5,
+      0.0
+    ],
+    "max": [
+      1.75,
+      1.5,
+      2.0
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -1.75,
+      -1.5,
+      0.0
+    ],
+    "max": [
+      1.75,
+      1.5,
+      2.0
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    56,
+    48,
+    32
+  ],
+  "assetPivotGrid": [
+    28,
+    24,
+    0
+  ],
+  "actualExtentUnits": [
+    3.5,
+    3.0,
+    2.0
+  ],
+  "viewFrameGrid": [
+    72,
+    72
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -2.25,
+      -2.25,
+      -0.5
+    ],
+    "max": [
+      2.25,
+      2.25,
+      4.0
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 504,
+  "pixelsPerVoxel": 7,
+  "outerMarginPixels": 4,
+  "pixelsPerWorldUnit": 112.0,
+  "pixelsPerTile": 112.0,
+  "baseline": 452,
+  "origins": {
+    "front": [
+      256.0,
+      452
+    ],
+    "back": [
+      256.0,
+      452
+    ],
+    "left": [
+      256.0,
+      452
+    ],
+    "right": [
+      256.0,
+      452
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

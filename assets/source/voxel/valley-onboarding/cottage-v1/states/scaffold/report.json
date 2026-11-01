@@ -1,0 +1,161 @@
+{
+  "asset_id": "cottage-v1-states-scaffold",
+  "method": "Original authored exact native modular geometry; not inferred TRELLIS building geometry",
+  "dimensions": [
+    96,
+    80,
+    58
+  ],
+  "grid_min": [
+    -48,
+    -40,
+    -2
+  ],
+  "grid_max": [
+    48,
+    40,
+    56
+  ],
+  "pivot_voxels": [
+    48,
+    40,
+    2
+  ],
+  "physical_scale": {
+    "height_units": 3.625,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      48,
+      40,
+      2
+    ],
+    "units_per_tile": 1
+  },
+  "walking_floor": {
+    "runtimeHeightMetres": 0,
+    "sourceVolumeTopCell": 2,
+    "pivotZCells": 2,
+    "buriedBaseMetres": 0.125,
+    "supportCellsBelowFloor": 15360
+  },
+  "occupied_voxels": 36736,
+  "palette": [
+    [
+      224,
+      213,
+      179
+    ],
+    [
+      236,
+      224,
+      194
+    ],
+    [
+      213,
+      199,
+      163
+    ],
+    [
+      171,
+      169,
+      149
+    ],
+    [
+      193,
+      187,
+      163
+    ],
+    [
+      181,
+      170,
+      139
+    ],
+    [
+      154,
+      111,
+      64
+    ],
+    [
+      177,
+      130,
+      76
+    ],
+    [
+      130,
+      92,
+      53
+    ],
+    [
+      100,
+      120,
+      137
+    ],
+    [
+      113,
+      132,
+      147
+    ],
+    [
+      87,
+      106,
+      125
+    ],
+    [
+      92,
+      106,
+      111
+    ],
+    [
+      170,
+      128,
+      79
+    ],
+    [
+      192,
+      149,
+      92
+    ],
+    [
+      144,
+      106,
+      68
+    ],
+    [
+      65,
+      61,
+      53
+    ],
+    [
+      164,
+      83,
+      43
+    ],
+    [
+      181,
+      155,
+      111
+    ],
+    [
+      189,
+      164,
+      121
+    ]
+  ],
+  "connected_components": 9,
+  "ground_cells": 7680,
+  "mesh": {
+    "triangles": 1548,
+    "vertices": 3096,
+    "quads": 774,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "authoredNotes": "Foundation, partial low walls and structural timber; no completed roof or work equipment",
+  "style_source": {
+    "path": "../input.png",
+    "sha256": "26f7eed1eff289f4331e857d825d5a8f36e3c3c04fc1f6fe66a37b35bb369ff8",
+    "role": "original generated appearance only; not a mesh or finished asset"
+  },
+  "art_approved": false,
+  "game_integrated": false
+}

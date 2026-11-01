@@ -1,0 +1,19 @@
+{
+  "id":"cottage-v1",
+  "sourceRoute":"native-modular",
+  "status":"modular source construction pending visual review",
+  "physicalTargetXYZ":[6,5,3.5],
+  "physicalHeightMetres":3.625,
+  "heightAboveWalkingFloorMetres":3.5,
+  "pitchMetres":0.0625,
+  "logicalFootprintTiles":[6,5],
+  "groundPivot":"center XY, actual floor top;0.125m foundation buried",
+  "front":"-Y source / south runtime",
+  "homePadLocalXY":[4,1],
+  "homePadSize":[10,8],
+  "rotationQuarterTurns":0,
+  "entranceClearance":[1.5,1.75],
+  "requiredParts":["foundation","interior","facade","roof"],
+  "styleSource":"input.png generated original appearance only; exact hollow native modules define geometry",
+  "authorization":"Lead approved native modular shell construction2026-11-01; no monolithic inferred-solid interior claim"
+}

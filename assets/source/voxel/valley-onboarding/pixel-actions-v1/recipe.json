@@ -1,0 +1,6236 @@
+{
+  "id": "fable-original-held-action-v1",
+  "nativeCellPitchMetres": 0.0625,
+  "canvasPixels": [
+    32,
+    32
+  ],
+  "bodySource": "src/render/pixel-units.ts ALDEN_TRACE col<17; unchanged preview copy only",
+  "bodyOccupiedPixels": [
+    17,
+    18
+  ],
+  "footAnchorPixels": [
+    16,
+    28
+  ],
+  "baseHandGripTopLeftPixels": [
+    24,
+    24
+  ],
+  "baseHandSizePixels": [
+    2,
+    2
+  ],
+  "rotationPivotPixelCentre": [
+    25,
+    25
+  ],
+  "poses": {
+    "rest": {
+      "frame": 0,
+      "angleDegrees": 0,
+      "gripOffset": [
+        0,
+        0
+      ]
+    },
+    "windup": {
+      "frame": 5,
+      "angleDegrees": 0,
+      "gripOffset": [
+        0,
+        -2
+      ]
+    },
+    "contact": {
+      "frame": 6,
+      "angleDegrees": 30,
+      "gripOffset": [
+        -3,
+        -1
+      ]
+    },
+    "recovery": {
+      "frame": 7,
+      "angleDegrees": 12,
+      "gripOffset": [
+        -1,
+        0
+      ]
+    },
+    "guard": {
+      "frame": 5,
+      "angleDegrees": 0,
+      "gripOffset": [
+        0,
+        -3
+      ]
+    }
+  },
+  "sampling": "inverse nearest-cell lookup, floor source coordinates after rotation around pixel-centre pivot; retain0/255 alpha and unchanged native cell pitch",
+  "paletteRGB": {
+    "H": [
+      140,
+      78,
+      54
+    ],
+    "h": [
+      136,
+      76,
+      54
+    ],
+    "S": [
+      253,
+      213,
+      155
+    ],
+    "E": [
+      60,
+      38,
+      28
+    ],
+    "B": [
+      66,
+      94,
+      191
+    ],
+    "D": [
+      45,
+      67,
+      126
+    ],
+    "G": [
+      249,
+      199,
+      101
+    ],
+    "W": [
+      248,
+      238,
+      215
+    ],
+    "F": [
+      128,
+      75,
+      58
+    ],
+    "T": [
+      178,
+      172,
+      169
+    ],
+    "t": [
+      208,
+      202,
+      196
+    ],
+    "K": [
+      148,
+      84,
+      60
+    ],
+    "A": [
+      253,
+      214,
+      155
+    ],
+    "wood": [
+      148,
+      84,
+      60
+    ],
+    "woodLight": [
+      166,
+      116,
+      65
+    ],
+    "metal": [
+      178,
+      172,
+      169
+    ],
+    "gold": [
+      249,
+      199,
+      101
+    ],
+    "cream": [
+      232,
+      219,
+      177
+    ],
+    "shieldWood": [
+      143,
+      95,
+      53
+    ],
+    "shieldLight": [
+      166,
+      116,
+      65
+    ],
+    "shieldGold": [
+      222,
+      171,
+      63
+    ]
+  },
+  "tools": {
+    "sword": {
+      "sourceCells": [
+        {
+          "x": 24,
+          "y": 12,
+          "pigment": "t"
+        },
+        {
+          "x": 24,
+          "y": 13,
+          "pigment": "t"
+        },
+        {
+          "x": 24,
+          "y": 14,
+          "pigment": "T"
+        },
+        {
+          "x": 24,
+          "y": 15,
+          "pigment": "T"
+        },
+        {
+          "x": 24,
+          "y": 16,
+          "pigment": "T"
+        },
+        {
+          "x": 24,
+          "y": 17,
+          "pigment": "T"
+        },
+        {
+          "x": 24,
+          "y": 18,
+          "pigment": "T"
+        },
+        {
+          "x": 24,
+          "y": 19,
+          "pigment": "T"
+        },
+        {
+          "x": 24,
+          "y": 20,
+          "pigment": "G"
+        },
+        {
+          "x": 24,
+          "y": 21,
+          "pigment": "G"
+        },
+        {
+          "x": 24,
+          "y": 22,
+          "pigment": "K"
+        },
+        {
+          "x": 24,
+          "y": 23,
+          "pigment": "K"
+        },
+        {
+          "x": 25,
+          "y": 12,
+          "pigment": "t"
+        },
+        {
+          "x": 25,
+          "y": 13,
+          "pigment": "t"
+        },
+        {
+          "x": 25,
+          "y": 14,
+          "pigment": "T"
+        },
+        {
+          "x": 25,
+          "y": 15,
+          "pigment": "T"
+        },
+        {
+          "x": 25,
+          "y": 16,
+          "pigment": "T"
+        },
+        {
+          "x": 25,
+          "y": 17,
+          "pigment": "T"
+        },
+        {
+          "x": 25,
+          "y": 18,
+          "pigment": "T"
+        },
+        {
+          "x": 25,
+          "y": 19,
+          "pigment": "T"
+        },
+        {
+          "x": 25,
+          "y": 20,
+          "pigment": "G"
+        },
+        {
+          "x": 25,
+          "y": 21,
+          "pigment": "G"
+        },
+        {
+          "x": 25,
+          "y": 22,
+          "pigment": "K"
+        },
+        {
+          "x": 25,
+          "y": 23,
+          "pigment": "K"
+        },
+        {
+          "x": 26,
+          "y": 20,
+          "pigment": "G"
+        },
+        {
+          "x": 26,
+          "y": 21,
+          "pigment": "G"
+        }
+      ],
+      "frames": {
+        "rest": {
+          "atlasFrame": 0,
+          "gripTopLeft": [
+            24,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "t"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "t"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "G"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "K"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "K"
+            },
+            {
+              "x": 25,
+              "y": 12,
+              "pigment": "t"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "t"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "K"
+            },
+            {
+              "x": 25,
+              "y": 23,
+              "pigment": "K"
+            },
+            {
+              "x": 26,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 26,
+              "y": 21,
+              "pigment": "G"
+            }
+          ],
+          "nativeToolPNG": "sword-rest-tool.png",
+          "assembledPNG": "sword-rest-assembled.png"
+        },
+        "windup": {
+          "atlasFrame": 5,
+          "gripTopLeft": [
+            24,
+            22
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 10,
+              "pigment": "t"
+            },
+            {
+              "x": 24,
+              "y": 11,
+              "pigment": "t"
+            },
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "G"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "G"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "K"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "K"
+            },
+            {
+              "x": 25,
+              "y": 10,
+              "pigment": "t"
+            },
+            {
+              "x": 25,
+              "y": 11,
+              "pigment": "t"
+            },
+            {
+              "x": 25,
+              "y": 12,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "K"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "K"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "G"
+            },
+            {
+              "x": 26,
+              "y": 19,
+              "pigment": "G"
+            }
+          ],
+          "nativeToolPNG": "sword-windup-tool.png",
+          "assembledPNG": "sword-windup-assembled.png"
+        },
+        "contact": {
+          "atlasFrame": 6,
+          "gripTopLeft": [
+            21,
+            23
+          ],
+          "toolCells": [
+            {
+              "x": 22,
+              "y": 21,
+              "pigment": "K"
+            },
+            {
+              "x": 22,
+              "y": 22,
+              "pigment": "K"
+            },
+            {
+              "x": 23,
+              "y": 19,
+              "pigment": "G"
+            },
+            {
+              "x": 23,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 23,
+              "y": 21,
+              "pigment": "K"
+            },
+            {
+              "x": 23,
+              "y": 22,
+              "pigment": "K"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "G"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "t"
+            },
+            {
+              "x": 27,
+              "y": 13,
+              "pigment": "t"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 28,
+              "y": 13,
+              "pigment": "t"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "t"
+            }
+          ],
+          "nativeToolPNG": "sword-contact-tool.png",
+          "assembledPNG": "sword-contact-assembled.png"
+        },
+        "recovery": {
+          "atlasFrame": 7,
+          "gripTopLeft": [
+            23,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "K"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "T"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "G"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "K"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "K"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "t"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "T"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "G"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "K"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "t"
+            },
+            {
+              "x": 26,
+              "y": 13,
+              "pigment": "t"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "T"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "T"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "T"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "T"
+            },
+            {
+              "x": 26,
+              "y": 20,
+              "pigment": "G"
+            },
+            {
+              "x": 26,
+              "y": 21,
+              "pigment": "G"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "t"
+            }
+          ],
+          "nativeToolPNG": "sword-recovery-tool.png",
+          "assembledPNG": "sword-recovery-assembled.png"
+        }
+      }
+    },
+    "axe": {
+      "sourceCells": [
+        {
+          "x": 24,
+          "y": 14,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 15,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 16,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 17,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 14,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 15,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 16,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 17,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 26,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 26,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 26,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 17,
+          "pigment": "metal"
+        }
+      ],
+      "frames": {
+        "rest": {
+          "atlasFrame": 0,
+          "gripTopLeft": [
+            24,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "axe-rest-tool.png",
+          "assembledPNG": "axe-rest-assembled.png"
+        },
+        "windup": {
+          "atlasFrame": 5,
+          "gripTopLeft": [
+            24,
+            22
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "axe-windup-tool.png",
+          "assembledPNG": "axe-windup-assembled.png"
+        },
+        "contact": {
+          "atlasFrame": 6,
+          "gripTopLeft": [
+            21,
+            23
+          ],
+          "toolCells": [
+            {
+              "x": 22,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 22,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 19,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 19,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 31,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "axe-contact-tool.png",
+          "assembledPNG": "axe-contact-assembled.png"
+        },
+        "recovery": {
+          "atlasFrame": 7,
+          "gripTopLeft": [
+            23,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "axe-recovery-tool.png",
+          "assembledPNG": "axe-recovery-assembled.png"
+        }
+      }
+    },
+    "pickaxe": {
+      "sourceCells": [
+        {
+          "x": 20,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 20,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 20,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 20,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 21,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 21,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 21,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 21,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 22,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 22,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 23,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 23,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 16,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 17,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 25,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 25,
+          "y": 16,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 17,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 26,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 28,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 29,
+          "y": 17,
+          "pigment": "metal"
+        }
+      ],
+      "frames": {
+        "rest": {
+          "atlasFrame": 0,
+          "gripTopLeft": [
+            24,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 20,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 20,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 20,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 20,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "pickaxe-rest-tool.png",
+          "assembledPNG": "pickaxe-rest-assembled.png"
+        },
+        "windup": {
+          "atlasFrame": 5,
+          "gripTopLeft": [
+            24,
+            22
+          ],
+          "toolCells": [
+            {
+              "x": 20,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 20,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 20,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 20,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "pickaxe-windup-tool.png",
+          "assembledPNG": "pickaxe-windup-assembled.png"
+        },
+        "contact": {
+          "atlasFrame": 6,
+          "gripTopLeft": [
+            21,
+            23
+          ],
+          "toolCells": [
+            {
+              "x": 21,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 22,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 19,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 19,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 31,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "pickaxe-contact-tool.png",
+          "assembledPNG": "pickaxe-contact-assembled.png"
+        },
+        "recovery": {
+          "atlasFrame": 7,
+          "gripTopLeft": [
+            23,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 21,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 21,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 30,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "pickaxe-recovery-tool.png",
+          "assembledPNG": "pickaxe-recovery-assembled.png"
+        }
+      }
+    },
+    "hammer": {
+      "sourceCells": [
+        {
+          "x": 22,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 22,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 22,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 22,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 23,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 23,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 23,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 23,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 24,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 25,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 25,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 25,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 25,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 26,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 26,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 26,
+          "y": 17,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 14,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 15,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 16,
+          "pigment": "metal"
+        },
+        {
+          "x": 27,
+          "y": 17,
+          "pigment": "metal"
+        }
+      ],
+      "frames": {
+        "rest": {
+          "atlasFrame": 0,
+          "gripTopLeft": [
+            24,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 22,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "hammer-rest-tool.png",
+          "assembledPNG": "hammer-rest-assembled.png"
+        },
+        "windup": {
+          "atlasFrame": 5,
+          "gripTopLeft": [
+            24,
+            22
+          ],
+          "toolCells": [
+            {
+              "x": 22,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 22,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "hammer-windup-tool.png",
+          "assembledPNG": "hammer-windup-assembled.png"
+        },
+        "contact": {
+          "atlasFrame": 6,
+          "gripTopLeft": [
+            21,
+            23
+          ],
+          "toolCells": [
+            {
+              "x": 22,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 22,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "hammer-contact-tool.png",
+          "assembledPNG": "hammer-contact-assembled.png"
+        },
+        "recovery": {
+          "atlasFrame": 7,
+          "gripTopLeft": [
+            23,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 23,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "metal"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "metal"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "metal"
+            }
+          ],
+          "nativeToolPNG": "hammer-recovery-tool.png",
+          "assembledPNG": "hammer-recovery-assembled.png"
+        }
+      }
+    },
+    "rod": {
+      "sourceCells": [
+        {
+          "x": 24,
+          "y": 10,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 11,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 12,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 13,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 14,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 15,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 16,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 17,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 10,
+          "pigment": "cream"
+        },
+        {
+          "x": 26,
+          "y": 10,
+          "pigment": "cream"
+        },
+        {
+          "x": 27,
+          "y": 10,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 10,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 11,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 12,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 13,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 14,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 15,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 16,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 17,
+          "pigment": "cream"
+        },
+        {
+          "x": 28,
+          "y": 18,
+          "pigment": "cream"
+        }
+      ],
+      "frames": {
+        "rest": {
+          "atlasFrame": 0,
+          "gripTopLeft": [
+            24,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 10,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 11,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 10,
+              "pigment": "cream"
+            },
+            {
+              "x": 26,
+              "y": 10,
+              "pigment": "cream"
+            },
+            {
+              "x": 27,
+              "y": 10,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 10,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 11,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 12,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 13,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "cream"
+            }
+          ],
+          "nativeToolPNG": "rod-rest-tool.png",
+          "assembledPNG": "rod-rest-assembled.png"
+        },
+        "windup": {
+          "atlasFrame": 5,
+          "gripTopLeft": [
+            24,
+            22
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 8,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 9,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 10,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 11,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 8,
+              "pigment": "cream"
+            },
+            {
+              "x": 26,
+              "y": 8,
+              "pigment": "cream"
+            },
+            {
+              "x": 27,
+              "y": 8,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 8,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 9,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 10,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 11,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 12,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 13,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "cream"
+            }
+          ],
+          "nativeToolPNG": "rod-windup-tool.png",
+          "assembledPNG": "rod-windup-assembled.png"
+        },
+        "contact": {
+          "atlasFrame": 6,
+          "gripTopLeft": [
+            20,
+            23
+          ],
+          "toolCells": [
+            {
+              "x": 21,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 21,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 22,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 22,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 23,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 11,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 19,
+              "pigment": "cream"
+            },
+            {
+              "x": 27,
+              "y": 20,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 11,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 12,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "cream"
+            },
+            {
+              "x": 30,
+              "y": 12,
+              "pigment": "cream"
+            },
+            {
+              "x": 30,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 30,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 31,
+              "y": 13,
+              "pigment": "cream"
+            }
+          ],
+          "nativeToolPNG": "rod-contact-tool.png",
+          "assembledPNG": "rod-contact-assembled.png"
+        },
+        "recovery": {
+          "atlasFrame": 7,
+          "gripTopLeft": [
+            23,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 10,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 11,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 10,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 11,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "cream"
+            },
+            {
+              "x": 28,
+              "y": 19,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 11,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "cream"
+            },
+            {
+              "x": 29,
+              "y": 17,
+              "pigment": "cream"
+            },
+            {
+              "x": 30,
+              "y": 11,
+              "pigment": "cream"
+            },
+            {
+              "x": 30,
+              "y": 12,
+              "pigment": "cream"
+            },
+            {
+              "x": 30,
+              "y": 13,
+              "pigment": "cream"
+            }
+          ],
+          "nativeToolPNG": "rod-recovery-tool.png",
+          "assembledPNG": "rod-recovery-assembled.png"
+        }
+      }
+    },
+    "bow": {
+      "sourceCells": [
+        {
+          "x": 24,
+          "y": 12,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 13,
+          "pigment": "wood"
+        },
+        {
+          "x": 24,
+          "y": 14,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 15,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 16,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 17,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 18,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 19,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 20,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 21,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 22,
+          "pigment": "cream"
+        },
+        {
+          "x": 24,
+          "y": 23,
+          "pigment": "cream"
+        },
+        {
+          "x": 25,
+          "y": 12,
+          "pigment": "wood"
+        },
+        {
+          "x": 25,
+          "y": 13,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 14,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 15,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 16,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 17,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 26,
+          "y": 23,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 14,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 15,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 16,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 17,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 18,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 19,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 20,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 21,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 22,
+          "pigment": "wood"
+        },
+        {
+          "x": 27,
+          "y": 23,
+          "pigment": "wood"
+        }
+      ],
+      "frames": {
+        "rest": {
+          "atlasFrame": 0,
+          "gripTopLeft": [
+            24,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 23,
+              "pigment": "wood"
+            }
+          ],
+          "nativeToolPNG": "bow-rest-tool.png",
+          "assembledPNG": "bow-rest-assembled.png"
+        },
+        "windup": {
+          "atlasFrame": 5,
+          "gripTopLeft": [
+            24,
+            22
+          ],
+          "toolCells": [
+            {
+              "x": 24,
+              "y": 10,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 11,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 12,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 13,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 10,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 11,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 21,
+              "pigment": "wood"
+            }
+          ],
+          "nativeToolPNG": "bow-windup-tool.png",
+          "assembledPNG": "bow-windup-assembled.png"
+        },
+        "contact": {
+          "atlasFrame": 6,
+          "gripTopLeft": [
+            21,
+            23
+          ],
+          "toolCells": [
+            {
+              "x": 22,
+              "y": 21,
+              "pigment": "cream"
+            },
+            {
+              "x": 22,
+              "y": 22,
+              "pigment": "cream"
+            },
+            {
+              "x": 23,
+              "y": 19,
+              "pigment": "cream"
+            },
+            {
+              "x": 23,
+              "y": 20,
+              "pigment": "cream"
+            },
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 26,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 29,
+              "y": 16,
+              "pigment": "wood"
+            }
+          ],
+          "nativeToolPNG": "bow-contact-tool.png",
+          "assembledPNG": "bow-contact-assembled.png"
+        },
+        "recovery": {
+          "atlasFrame": 7,
+          "gripTopLeft": [
+            23,
+            24
+          ],
+          "toolCells": [
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "cream"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 25,
+              "y": 14,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 15,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "cream"
+            },
+            {
+              "x": 25,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 13,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 23,
+              "pigment": "wood"
+            },
+            {
+              "x": 26,
+              "y": 24,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 12,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 14,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 19,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 20,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 21,
+              "pigment": "wood"
+            },
+            {
+              "x": 27,
+              "y": 22,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 15,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 16,
+              "pigment": "wood"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "wood"
+            }
+          ],
+          "nativeToolPNG": "bow-recovery-tool.png",
+          "assembledPNG": "bow-recovery-assembled.png"
+        }
+      }
+    },
+    "shield": {
+      "sourceCells": [
+        {
+          "x": 21,
+          "y": 20,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 21,
+          "y": 21,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 21,
+          "y": 22,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 21,
+          "y": 23,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 21,
+          "y": 24,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 21,
+          "y": 25,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 22,
+          "y": 19,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 22,
+          "y": 20,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 22,
+          "y": 21,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 22,
+          "y": 22,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 22,
+          "y": 23,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 22,
+          "y": 24,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 22,
+          "y": 25,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 22,
+          "y": 26,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 23,
+          "y": 19,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 23,
+          "y": 20,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 23,
+          "y": 21,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 23,
+          "y": 22,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 23,
+          "y": 23,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 23,
+          "y": 24,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 23,
+          "y": 25,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 23,
+          "y": 26,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 23,
+          "y": 27,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 24,
+          "y": 19,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 24,
+          "y": 20,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 24,
+          "y": 21,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 24,
+          "y": 22,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 24,
+          "y": 23,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 24,
+          "y": 24,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 24,
+          "y": 25,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 24,
+          "y": 26,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 24,
+          "y": 27,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 24,
+          "y": 28,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 25,
+          "y": 19,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 25,
+          "y": 20,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 25,
+          "y": 21,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 25,
+          "y": 22,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 25,
+          "y": 23,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 25,
+          "y": 24,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 25,
+          "y": 25,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 25,
+          "y": 26,
+          "pigment": "shieldLight"
+        },
+        {
+          "x": 25,
+          "y": 27,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 25,
+          "y": 28,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 26,
+          "y": 19,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 26,
+          "y": 20,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 26,
+          "y": 21,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 26,
+          "y": 22,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 26,
+          "y": 23,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 26,
+          "y": 24,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 26,
+          "y": 25,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 26,
+          "y": 26,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 26,
+          "y": 27,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 27,
+          "y": 19,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 27,
+          "y": 20,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 27,
+          "y": 21,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 27,
+          "y": 22,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 27,
+          "y": 23,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 27,
+          "y": 24,
+          "pigment": "shieldWood"
+        },
+        {
+          "x": 27,
+          "y": 25,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 27,
+          "y": 26,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 28,
+          "y": 20,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 28,
+          "y": 21,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 28,
+          "y": 22,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 28,
+          "y": 23,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 28,
+          "y": 24,
+          "pigment": "shieldGold"
+        },
+        {
+          "x": 28,
+          "y": 25,
+          "pigment": "shieldGold"
+        }
+      ],
+      "frames": {
+        "guard": {
+          "atlasFrame": 5,
+          "gripTopLeft": [
+            24,
+            21
+          ],
+          "toolCells": [
+            {
+              "x": 21,
+              "y": 17,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 21,
+              "y": 18,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 21,
+              "y": 19,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 21,
+              "y": 20,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 21,
+              "y": 21,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 21,
+              "y": 22,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 22,
+              "y": 16,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 22,
+              "y": 17,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 22,
+              "y": 18,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 22,
+              "y": 19,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 22,
+              "y": 20,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 22,
+              "y": 21,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 22,
+              "y": 22,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 22,
+              "y": 23,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 23,
+              "y": 16,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 23,
+              "y": 17,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 23,
+              "y": 18,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 23,
+              "y": 19,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 23,
+              "y": 20,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 23,
+              "y": 21,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 23,
+              "y": 22,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 23,
+              "y": 23,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 23,
+              "y": 24,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 24,
+              "y": 16,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 24,
+              "y": 17,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 24,
+              "y": 18,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 24,
+              "y": 19,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 24,
+              "y": 20,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 24,
+              "y": 21,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 24,
+              "y": 22,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 24,
+              "y": 23,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 24,
+              "y": 24,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 24,
+              "y": 25,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 25,
+              "y": 16,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 25,
+              "y": 17,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 25,
+              "y": 18,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 25,
+              "y": 19,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 25,
+              "y": 20,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 25,
+              "y": 21,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 25,
+              "y": 22,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 25,
+              "y": 23,
+              "pigment": "shieldLight"
+            },
+            {
+              "x": 25,
+              "y": 24,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 25,
+              "y": 25,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 26,
+              "y": 16,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 26,
+              "y": 17,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 26,
+              "y": 18,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 26,
+              "y": 19,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 26,
+              "y": 20,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 26,
+              "y": 21,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 26,
+              "y": 22,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 26,
+              "y": 23,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 26,
+              "y": 24,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 27,
+              "y": 16,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 27,
+              "y": 17,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 27,
+              "y": 18,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 27,
+              "y": 19,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 27,
+              "y": 20,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 27,
+              "y": 21,
+              "pigment": "shieldWood"
+            },
+            {
+              "x": 27,
+              "y": 22,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 27,
+              "y": 23,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 28,
+              "y": 17,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 28,
+              "y": 18,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 28,
+              "y": 19,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 28,
+              "y": 20,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 28,
+              "y": 21,
+              "pigment": "shieldGold"
+            },
+            {
+              "x": 28,
+              "y": 22,
+              "pigment": "shieldGold"
+            }
+          ],
+          "nativeToolPNG": "shield-guard-tool.png",
+          "assembledPNG": "shield-guard-assembled.png"
+        }
+      }
+    }
+  },
+  "integration": {
+    "runtimeOwnership": "lead; no shared pixel-unit or renderer source was edited",
+    "atlas": "Map source authored frames5/6/7 directly; existing renderer frame6->held1 and7->held0 would discard these silhouettes",
+    "toolHandTogether": "Apply the same pose grip offset to the2x2 holding hand. Body/feet remain still. Rod contact alone needsXoffset-4 to avoid atlas clipping.",
+    "shieldOrder": "Shield only whileblocking; active guard grip is[24,21], tool origin[21,16],8x10cells. Draw existing skin hand behind shield face forguard, or omit the occluded hand. No sword retained underneath.",
+    "normals": "Keep zero emission. Use flat normals initially or inverse-transform authored source normal coordinates with the same pose; do not treat pigment variation as height.",
+    "authority": "Pure presentation only; visual contact never awards damage/resources or sets60Hz action deadlines."
+  }
+}

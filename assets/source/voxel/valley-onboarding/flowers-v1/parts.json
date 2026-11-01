@@ -1,0 +1,33 @@
+{
+  "id": "flowers-v1",
+  "pitch": 0.0625,
+  "unitsPerTile": 1,
+  "nativeJob": "vox-01",
+  "sourceRoute": "native-authored-vegetation",
+  "gridXYZ": [
+    12,
+    12,
+    8
+  ],
+  "pivotVoxels": [
+    6,
+    6,
+    0
+  ],
+  "logicalFootprint": [
+    1,
+    1
+  ],
+  "models": {
+    "full": "vox-01/asset.vox"
+  },
+  "parts": [
+    {
+      "id": "whole",
+      "file": "vox-01/asset.vox"
+    }
+  ],
+  "sourceRecipe": "recipe.json",
+  "provenance": "Three original low cream/gold/rose blossoms on connected stepped sage leaves/stems. Declared native extent0.75x0.75x0.5m, logical1x1m; original editable cell source, no paid/inference stage.",
+  "status": "native usable draft candidate; lead game integration pending"
+}

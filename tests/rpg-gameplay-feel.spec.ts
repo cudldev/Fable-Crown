@@ -21,7 +21,7 @@ test("harvesting has readable world and HUD cycles in all three professions", as
   const errors: string[] = [], external: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   page.on("request", request => { if (!request.url().startsWith("http://127.0.0.1") && !request.url().startsWith("blob:") && !request.url().startsWith("data:")) external.push(request.url()); });
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready");
   for (const [resource, label] of [["tree", "Chopping"], ["copper", "Mining"], ["shrimp", "Fishing"]]) {
     const state = fixture(), node = WORLD.objects.find(object => object.resourceId === resource)!;
@@ -51,7 +51,7 @@ test("harvesting has readable world and HUD cycles in all three professions", as
 });
 
 test("combat shows victim damage, health and separated reward labels", async ({ page }) => {
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready");
   const state = fixture(), enemy = state.enemies.find(value => value.id === "boar-0")!;
   state.player.position = { ...enemy.position, x: enemy.position.x - 1 };
@@ -74,7 +74,7 @@ test("combat shows victim damage, health and separated reward labels", async ({ 
 });
 
 test("manual idle, inventory tools, orientations and offline reload", async ({ page, context }) => {
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready");
   const state = fixture();
   state.player.inventory.push({ itemId: "iron-ore", quantity: 3 });

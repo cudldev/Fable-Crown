@@ -1,0 +1,60 @@
+{
+  "model": "microsoft/TRELLIS-image-large",
+  "model_download": {
+    "repo": "microsoft/TRELLIS-image-large",
+    "revision": "25e0d31ffbebe4b5a97464dd851910efc3002d96",
+    "patterns": [
+      "pipeline.json",
+      "LICENSE*",
+      "README*",
+      "ckpts/ss_dec_conv3d_16l8_fp16.json",
+      "ckpts/ss_dec_conv3d_16l8_fp16.safetensors",
+      "ckpts/ss_flow_img_dit_L_16l8_fp16.json",
+      "ckpts/ss_flow_img_dit_L_16l8_fp16.safetensors",
+      "ckpts/slat_dec_gs_swin8_B_64l8gs32_fp16.json",
+      "ckpts/slat_dec_gs_swin8_B_64l8gs32_fp16.safetensors",
+      "ckpts/slat_dec_mesh_swin8_B_64l8m256c_fp16.json",
+      "ckpts/slat_dec_mesh_swin8_B_64l8m256c_fp16.safetensors",
+      "ckpts/slat_flow_img_dit_L_64l8p2_fp16.json",
+      "ckpts/slat_flow_img_dit_L_64l8p2_fp16.safetensors"
+    ]
+  },
+  "source_revision": "193e0502b5cb3eb5997ec457d5340e95d09b158e",
+  "input_sha256": "59f3708816f9834c90958d3bd3f3034a2979f1fdf41162a89524ff726a3b0674",
+  "seed": 42,
+  "steps": 12,
+  "vertices": 278120,
+  "triangles": 556244,
+  "color_range": [
+    0.026167405769228935,
+    0.973297119140625
+  ],
+  "raw_bounds_z_up": {
+    "min": [
+      -0.5004016160964966,
+      -0.43300607800483704,
+      -0.28515389561653137
+    ],
+    "max": [
+      0.5003620982170105,
+      0.43192434310913086,
+      0.2942468822002411
+    ]
+  },
+  "timings": {
+    "load_seconds": 116.04520889399998,
+    "image_encode_seconds": 1.5468696530000159,
+    "structure_seconds": 8.944821982999997,
+    "surface_latents_seconds": 7.332637290000008,
+    "mesh_decode_seconds": 3.421598270000004
+  },
+  "total_seconds": 173.181907175,
+  "cuda_peak_allocated_bytes": 7170608128,
+  "cuda_peak_reserved_bytes": 10429136896,
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.7.0+cu128",
+  "color_method": "TRELLIS mesh decoder vertex RGB; UV texture bake follows",
+  "memory_strategy": "stagewise official-model GPU loading; pretrained weights/shape algorithm unchanged",
+  "art_approved": false,
+  "attention_backend": "xformers CUTLASS (Blackwell-compatible; default Hopper-only FlashAttention disabled)"
+}

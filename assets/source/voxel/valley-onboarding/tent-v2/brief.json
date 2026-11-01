@@ -1,0 +1,16 @@
+{
+  "id": "valley-tent-v2",
+  "status": "focused doorway/footprint correction; reconstruction pending",
+  "physicalTargetXYZ": [3, 3, 2],
+  "physicalHeightMetres": 2,
+  "logicalFootprintTiles": [3, 3],
+  "pitchMetres": 0.0625,
+  "groundPivot": "center XY, minimum Z",
+  "front": "-Y source / south runtime",
+  "requiredClearanceXYZ": [1.25, 2, 1.5],
+  "materials": ["warm cream canvas", "muted blue repair patches", "warm timber", "ochre rope"],
+  "correction": "v1 arch only1.25m center clearance and stake width3.5m. Use1.5m tall vertical side walls, shallow gable and open rectangular front; keep stakes compact. No source or raw geometry replacement claims.",
+  "homePadLocalXY": [0, 2],
+  "rotationQuarterTurns": 0,
+  "requestedScope": "original colored image -> pinned local TRELLIS -> native VOX; no production bake or runtime binding"
+}

@@ -12,7 +12,7 @@ async function fpsVisible(page: Page) {
 }
 
 async function start(page: Page) {
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toHaveAttribute("data-status", "ready");
   const state = createRpg(Date.now(), 8128);
   Object.assign(state.control, { autoplay: false, waiting: false, active: null, goal: null, source: null,

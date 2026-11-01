@@ -1,0 +1,116 @@
+{
+  "assetId": "forge-v1-parts-foundation",
+  "mode": "asset-reference",
+  "sizeStatus": "Exact native modules with shared origin and walking-floor pivot",
+  "style": {
+    "status": "candidate",
+    "profile": "Original warm cream-stone timber and quiet slate roof"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    4,
+    3
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -2.0,
+      -1.5,
+      -0.125
+    ],
+    "max": [
+      2.0,
+      1.5,
+      3.0
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -2.0,
+      -1.5,
+      -0.125
+    ],
+    "max": [
+      2.0,
+      1.5,
+      3.0
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    64,
+    48,
+    50
+  ],
+  "assetPivotGrid": [
+    32,
+    24,
+    2
+  ],
+  "actualExtentUnits": [
+    4.0,
+    3.0,
+    3.125
+  ],
+  "viewFrameGrid": [
+    80,
+    80
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -2.5,
+      -2.5,
+      -0.625
+    ],
+    "max": [
+      2.5,
+      2.5,
+      4.375
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 480,
+  "pixelsPerVoxel": 6,
+  "outerMarginPixels": 16,
+  "pixelsPerWorldUnit": 96.0,
+  "pixelsPerTile": 96.0,
+  "baseline": 436,
+  "origins": {
+    "front": [
+      256.0,
+      436
+    ],
+    "back": [
+      256.0,
+      436
+    ],
+    "left": [
+      256.0,
+      436
+    ],
+    "right": [
+      256.0,
+      436
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

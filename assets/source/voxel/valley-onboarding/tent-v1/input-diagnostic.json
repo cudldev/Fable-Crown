@@ -1,0 +1,36 @@
+{
+  "images": [
+    {
+      "file": "tmp/valley-onboarding/assets/source/voxel/valley-onboarding/tent-v1/input.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "opaquePixels": 488466,
+      "transparentPixels": 1013347,
+      "foliage": {
+        "interiorPixels": 18576,
+        "medianRGB": [
+          115.0,
+          130.0,
+          153.0
+        ],
+        "lumaP05": 0.4769254901960784,
+        "lumaP95": 0.5531231372549019,
+        "lumaStdDev": 0.02032265010530024
+      },
+      "wood": {
+        "interiorPixels": 447559,
+        "medianRGB": [
+          218.0,
+          196.0,
+          171.0
+        ],
+        "lumaP05": 0.2889529411764706,
+        "lumaP95": 0.9031317647058824,
+        "lumaStdDev": 0.20848648104827328
+      }
+    }
+  ],
+  "limits": "Color variation diagnostic; not proof of physical albedo or calibrated illumination"
+}

@@ -131,7 +131,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
       const bounds = button.getBoundingClientRect();
       props.onContextMenu?.(JSON.parse(button.dataset.threeSelection!), { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 });
     }}>
-      <canvas ref={canvas} data-testid="three-canvas" aria-label="The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused." tabIndex={0} />
+      <canvas ref={canvas} data-testid="three-canvas" aria-label={props.directInput?"The Fable Crown valley. WASD or arrow keys move; middle mouse pans; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
       {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the voxel village…</div>}
       {status === "ready" && <>
         <span className="three-performance" data-testid="fps-indicator" aria-label="Rendering performance" aria-live="off">FPS —</span>

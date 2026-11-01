@@ -62,6 +62,7 @@ export class VoxelGI {
   private registries = new Map<Object3D, { lease: SceneRegistryLease; version: number }>();
   private signature = "";
   private worldVersion = 0;
+  private groundMin=0;
   private version = 0;
   private sourceReady = false;
   private busy = false;
@@ -92,9 +93,11 @@ export class VoxelGI {
   }
 
   setWorld(world: GIWorldSource) {
+    this.groundMin=world.heightField?.min??0;
     this.worldVersion++; this.sourceReady = true;
     this.sourceBounds = new Map(world.objects.map(object => [object.id, object.bounds]));
     const buffers = new Set<ArrayBuffer>(); buffers.add(world.ground.buffer as ArrayBuffer);
+    if(world.heightField)buffers.add(world.heightField.heights.buffer as ArrayBuffer);
     for (const object of world.objects) for (const array of [object.triangles, object.availableTriangles, object.depletedTriangles, object.boxes?.available, object.boxes?.depleted]) if (array) buffers.add(array.buffer as ArrayBuffer);
     this.worker.postMessage({ type: "world", world }, [...buffers]);
   }
@@ -143,7 +146,7 @@ vFableGIPosition=(modelMatrix*fablePosition).xyz;`);
     const signature = `${critical}:${nearDepleted.join(",")}`;
     if (signature === this.signature) return; this.signature = signature;
     const p = resolveLighting(preset, visual), sun = new Color(p.sun), sky = new Color(p.fill);
-    const config: GISolveConfig = { origin: [x - 20, 0, z - 20], size: [80, 16, 80], pitch: .5, stride: 4, rays: 32, bounces: visual.giBounces,
+    const config: GISolveConfig = { origin: [x - 20, Math.min(0,this.groundMin), z - 20], size: [80, 16, 80], pitch: .5, stride: 4, rays: 32, bounces: visual.giBounces,
       sunDirection: p.direction, sunColor: sun.toArray() as V3, skyColor: sky.toArray() as V3, sunPower: p.sunPower, skyPower: p.fillPower, aoDistance: visual.aoDistance,
       depleted: nearDepleted, lamps: lamps.filter(lamp => Math.hypot(lamp.position.x - x, lamp.position.z - z) < 34).map(lamp => ({ position: lamp.position.toArray(), color: new Color(lamp.color).toArray() as V3, intensity: lamp.intensity * p.lamps, distance: lamp.distance })) };
     if (this.busy && this.activeCritical === critical) this.pending = { config, critical };

@@ -24,7 +24,7 @@ test("fidelity controls, diffuse bounce comparison and default saved-time daylig
   test.setTimeout(210000); await mkdir(output, { recursive: true }); const errors: string[] = [], external: string[] = [];
   page.on("pageerror", e => errors.push(e.message)); page.on("console", e => { if (e.type() === "error") errors.push(e.text()); });
   page.on("request", r => { const u = new URL(r.url()); if (u.protocol.startsWith("http") && u.hostname !== "127.0.0.1") external.push(u.href); });
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?renderer=3d");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy&renderer=3d");
   const world = page.getByTestId("rpg-world"), panel = page.getByRole("dialog", { name: "Visual settings" });
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await expect(world).toHaveAttribute("data-day-night-cycle", "true");

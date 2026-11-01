@@ -392,7 +392,7 @@ test("pending intentions can be reordered, held and resumed through thought cont
   page,
 }) => {
   await trackPlayerPositions(page);
-  await page.goto("./");
+  await page.goto("./?chapter=legacy");
   await expect(page.getByTestId("rpg-world")).toBeVisible();
   const s = fixture();
   s.control.queue = [

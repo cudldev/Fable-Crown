@@ -1,0 +1,208 @@
+{
+  "dimensions": [
+    20,
+    30,
+    12
+  ],
+  "grid_min": [
+    -10,
+    -15,
+    0
+  ],
+  "grid_max": [
+    10,
+    15,
+    12
+  ],
+  "pivot_voxels": [
+    10,
+    15,
+    0
+  ],
+  "uniform_source_scale": 1.855996497727963,
+  "source_translation_before_scale": [
+    -0.00038242340087890625,
+    -0.00013878941535949707,
+    0.2010461837053299
+  ],
+  "source_bounds_metres": {
+    "min": [
+      -0.615787913857442,
+      -0.9298047163261426,
+      0.0
+    ],
+    "max": [
+      0.615787913857442,
+      0.9298047163261426,
+      0.75
+    ]
+  },
+  "shell_cells": 2782,
+  "filled_cells": 503,
+  "boundary_touch_cells_clamped": 1,
+  "connected_components": 1,
+  "ground_cells": 36,
+  "nearest_source_vertex_distance_metres": {
+    "median": 0.015462346318149542,
+    "maximum": 0.1040250052676557
+  },
+  "color_method": "Nearest original dense TRELLIS vertex RGB; warm-hue/rest median-cut palette from surface cells; no relighting/repainting",
+  "fill_method": "Only fully enclosed cavities, scipy.ndimage.binary_fill_holes; open gaps/through-holes retained",
+  "method": "Trimesh 4.10.1 mesh.voxelized(subdivide); original TRELLIS mesh and generated vertex RGB",
+  "asset_id": "valley-bed",
+  "occupied_voxels": 3285,
+  "palette": [
+    [
+      172,
+      161,
+      145
+    ],
+    [
+      124,
+      105,
+      83
+    ],
+    [
+      117,
+      83,
+      52
+    ],
+    [
+      100,
+      83,
+      68
+    ],
+    [
+      98,
+      60,
+      30
+    ],
+    [
+      79,
+      50,
+      29
+    ],
+    [
+      67,
+      39,
+      21
+    ],
+    [
+      58,
+      31,
+      16
+    ],
+    [
+      120,
+      129,
+      152
+    ],
+    [
+      83,
+      102,
+      141
+    ],
+    [
+      79,
+      99,
+      139
+    ],
+    [
+      73,
+      92,
+      132
+    ],
+    [
+      71,
+      90,
+      129
+    ],
+    [
+      70,
+      88,
+      127
+    ],
+    [
+      73,
+      81,
+      105
+    ],
+    [
+      64,
+      81,
+      119
+    ],
+    [
+      60,
+      74,
+      107
+    ],
+    [
+      62,
+      69,
+      89
+    ],
+    [
+      58,
+      62,
+      78
+    ],
+    [
+      50,
+      62,
+      92
+    ],
+    [
+      49,
+      58,
+      84
+    ],
+    [
+      52,
+      56,
+      75
+    ],
+    [
+      45,
+      56,
+      82
+    ],
+    [
+      46,
+      51,
+      70
+    ]
+  ],
+  "mesh": {
+    "triangles": 1484,
+    "vertices": 2968,
+    "quads": 742,
+    "pitch_metres": 0.0625
+  },
+  "vox_roundtrip": true,
+  "physical_scale": {
+    "height_units": 0.75,
+    "voxel_size_units": 0.0625,
+    "pivot_voxels": [
+      10,
+      15,
+      0
+    ],
+    "units_per_tile": 1
+  },
+  "elapsed_seconds": 2.26544370900001,
+  "source": {
+    "path": "tmp/valley-onboarding/assets/source/voxel/valley-onboarding/bed-v1/trellis-01/raw-mesh.npz",
+    "sha256": "287ada89e5a227c293b8eec3d70feeff56f7d6fd9f63adf4e7d7a1aed9b18807"
+  },
+  "settings": {
+    "height_metres": 0.75,
+    "pitch_metres": 0.0625,
+    "colors": 24,
+    "fill_enclosed": true
+  },
+  "views_used": [],
+  "views_are": "Rendered projections of final volume, not reconstruction inputs",
+  "art_approved": false,
+  "game_integrated": false
+}

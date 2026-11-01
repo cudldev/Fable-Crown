@@ -1,0 +1,116 @@
+{
+  "assetId": "stool-v1",
+  "mode": "asset-reference",
+  "sizeStatus": "declared 0.5m height; uniform scaling preserves inferred aspect ratio",
+  "style": {
+    "status": "candidate",
+    "profile": "TRELLIS-generated RGB;24-color voxel reduction"
+  },
+  "gameplayPreview": {
+    "status": "unmeasured"
+  },
+  "worldUnitsPerTile": 1,
+  "logicalFootprintTiles": [
+    1,
+    1
+  ],
+  "requestedBoundsUnits": {
+    "min": [
+      -0.3125,
+      -0.3125,
+      0.0
+    ],
+    "max": [
+      0.3125,
+      0.3125,
+      0.5
+    ]
+  },
+  "snappedBoundsUnits": {
+    "min": [
+      -0.3125,
+      -0.3125,
+      0.0
+    ],
+    "max": [
+      0.3125,
+      0.3125,
+      0.5
+    ]
+  },
+  "voxelSizeUnits": 0.0625,
+  "voxelsPerTile": 16.0,
+  "assetGridXYZ": [
+    10,
+    10,
+    8
+  ],
+  "assetPivotGrid": [
+    5,
+    5,
+    0
+  ],
+  "actualExtentUnits": [
+    0.625,
+    0.625,
+    0.5
+  ],
+  "viewFrameGrid": [
+    26,
+    26
+  ],
+  "viewFrameBoundsUnits": {
+    "min": [
+      -0.8125,
+      -0.8125,
+      -0.5
+    ],
+    "max": [
+      0.8125,
+      0.8125,
+      1.125
+    ]
+  },
+  "cellSize": 512,
+  "sheetPixels": [
+    1536,
+    1024
+  ],
+  "gridPixels": 494,
+  "pixelsPerVoxel": 19,
+  "outerMarginPixels": 9,
+  "pixelsPerWorldUnit": 304.0,
+  "pixelsPerTile": 304.0,
+  "baseline": 351,
+  "origins": {
+    "front": [
+      256.0,
+      351
+    ],
+    "back": [
+      256.0,
+      351
+    ],
+    "left": [
+      256.0,
+      351
+    ],
+    "right": [
+      256.0,
+      351
+    ],
+    "top": [
+      256.0,
+      256.0
+    ],
+    "bottom": [
+      256.0,
+      256.0
+    ]
+  },
+  "limits": [
+    "Planning contract only; imagegen output must be measured against it",
+    "Logical footprint is independent of visual overhang",
+    "Legacy reconstruction scripts do not automatically enforce this physical plan"
+  ]
+}

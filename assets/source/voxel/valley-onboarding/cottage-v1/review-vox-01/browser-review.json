@@ -1,0 +1,42 @@
+{
+  "verification": {
+    "nativeLoader": true,
+    "glbLoader": true,
+    "dimensionsWHD": [
+      6,
+      3.625,
+      5
+    ],
+    "groundY": -0.125,
+    "pitch": 0.0625,
+    "cells": 66508,
+    "externalRuntime": false,
+    "sourceRoute": "native-modular",
+    "modelChecks": [
+      {
+        "file": "cutaway/asset.vox",
+        "independentLoader": true,
+        "cells": 35198,
+        "sameGridPivot": true
+      },
+      {
+        "file": "states/foundation/asset.vox",
+        "independentLoader": true,
+        "cells": 15360,
+        "sameGridPivot": true
+      },
+      {
+        "file": "states/scaffold/asset.vox",
+        "independentLoader": true,
+        "cells": 36736,
+        "sameGridPivot": true
+      }
+    ]
+  },
+  "errors": [],
+  "external": [],
+  "glError": 0,
+  "artApproved": false,
+  "gameIntegrated": false,
+  "magicaVoxelOpened": false
+}

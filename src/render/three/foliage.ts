@@ -181,6 +181,7 @@ export class FoliageSystem {
   readonly meshes: InstancedMesh[] = [];
   private layout?: FoliageLayout;
   private surface?: TerrainSurface;
+  private sampleGround?: (x:number,z:number)=>number;
   private centerX = Infinity; private centerZ = Infinity; private previousTime?: number;
   private density = -1;
   private countedAt = -Infinity;
@@ -267,7 +268,8 @@ export class FoliageSystem {
       this.meshes.push(mesh); scene.add(mesh);
     }
   }
-  setWorld(world: WorldDefinition, terrain?: readonly Terrain[], surface?: TerrainSurface) {
+  setWorld(world: WorldDefinition, terrain?: readonly Terrain[], surface?: TerrainSurface, sampleGround?: (x:number,z:number)=>number, _groundRevision?:string|number) {
+    this.sampleGround=sampleGround;
     this.layout = buildFoliageLayout(world, terrain); this.surface = surface; this.centerX = this.centerZ = Infinity;
     this.chunks.clear(); this.job = this.pending = undefined; this.counts = undefined;
     this.stats.plants = this.stats.visiblePlants = this.stats.queued = this.stats.countQueued = this.stats.cacheChunks = 0;
@@ -332,12 +334,13 @@ export class FoliageSystem {
         }
         stage.matrices.set(this.rotations[Math.round(plant.angle / (Math.PI / 2))], at * 16);
         stage.matrices[at * 16 + 12] = plant.x; stage.matrices[at * 16 + 14] = plant.z;
+        const groundY=this.sampleGround?.(plant.x,plant.z)??0;stage.matrices[at*16+13]=groundY;
         stage.colors[at * 3] = chunk.colors[i * 3]; stage.colors[at * 3 + 1] = chunk.colors[i * 3 + 1]; stage.colors[at * 3 + 2] = chunk.colors[i * 3 + 2];
         stage.ranks[at] = plant.rank; stage.count++;
         const [width, height] = FOLIAGE_CARD_SIZE[plant.kind], half = width / 2;
         stage.bounds.min.x = Math.min(stage.bounds.min.x, plant.x - half); stage.bounds.max.x = Math.max(stage.bounds.max.x, plant.x + half);
         stage.bounds.min.z = Math.min(stage.bounds.min.z, plant.z - half); stage.bounds.max.z = Math.max(stage.bounds.max.z, plant.z + half);
-        stage.bounds.min.y = plant.kind === "groundcover" ? .012 : 0; stage.bounds.max.y = plant.kind === "groundcover" ? .012 : height;
+        stage.bounds.min.y = Math.min(stage.bounds.min.y,groundY+(plant.kind === "groundcover" ? .012 : 0)); stage.bounds.max.y = Math.max(stage.bounds.max.y,groundY+(plant.kind === "groundcover" ? .012 : height));
       }
       job.cursor++; tiles++;
       // Bound both deterministic work and wall time; a single tiny source chunk is atomic.

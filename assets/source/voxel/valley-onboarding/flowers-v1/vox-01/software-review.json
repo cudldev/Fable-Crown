@@ -1,0 +1,11 @@
+{
+  "source": "volume.npz labels and palette; exact visible cube faces",
+  "gpuUsed": false,
+  "pixelsPerMetre": 416,
+  "pitchMetres": 0.0625,
+  "bodyHeightMetres": 1.125,
+  "bodyPixelsUnchanged": true,
+  "previewShading": "flat face factors0.88/0.95/1.0 only; not baked into source",
+  "actualGameCameraReviewed": false,
+  "artApproved": false
+}

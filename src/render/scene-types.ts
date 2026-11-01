@@ -23,6 +23,10 @@ export interface TileSceneProps {
   actionState?: import("../action/contracts").ActionState;
   readAction?: () => import("../action/contracts").ActionState | undefined;
   sampleGround?: (x: number, z: number) => number;
+  /** Height edits change this key; pigment texture reuse follows terrain-array identity. */
+  groundRevision?: string | number;
+  directInput?: boolean;
+  placementPreview?: readonly {x:number;z:number;width:number;height:number;color?:number}[];
   state: RpgState;
   camera: TileCamera;
   onCamera: (update: TileCamera | ((current: TileCamera) => TileCamera)) => void;

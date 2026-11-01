@@ -25,7 +25,7 @@ test("camera pans retain foliage and cached label dimensions in forest and open 
   test.setTimeout(120000);
   await mkdir("docs/performance/camera-stutter", { recursive: true });
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./");
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.goto("./?chapter=legacy");
   const world = page.getByTestId("rpg-world");
   await expect(world).toHaveAttribute("data-status", "ready", { timeout: 60000 });
   await expect(world).toHaveAttribute("data-voxel-template-builds", "37");

@@ -1,0 +1,25 @@
+{
+  "id": "chest-v1",
+  "targetXYZ": [
+    0.75,
+    0.5,
+    0.5
+  ],
+  "logicalFootprint": [
+    1,
+    1
+  ],
+  "materials": "warm timber; quiet slate iron straps",
+  "notes": "Readable lidded storage chest with broad lid and one small muted latch.",
+  "physicalTargetXYZ": [
+    0.75,
+    0.5,
+    0.5
+  ],
+  "physicalHeightMetres": 0.5,
+  "pitchMetres": 0.0625,
+  "groundPivot": "center XY, minimum Z",
+  "front": "-Y",
+  "status": "source/reconstruction pending visual review",
+  "requestedScope": "original colored image -> local TRELLIS -> native VOX; no production bake or runtime binding"
+}

@@ -137,6 +137,11 @@ describe("continuous fixed action simulation", () => {
     expect(advance(state, 80, { strike: true }, strip)).toEqual([]);
     expect(state.enemies[0].health).toBe(6);
   });
+  it("requires releasing block before guard recovers after a break",()=>{
+    const state=createActionState(0,0);state.player.guard=0;state.player.guardBroken=45;
+    advance(state,180,{block:true});expect(state.player.guardBroken).toBe(0);expect(state.player.guard).toBe(0);
+    advance(state,44);expect(state.player.guard).toBe(0);advance(state,1);expect(state.player.guard).toBeCloseTo(1/3);
+  });
 
   it("leashes enemies home and never moves them into safe terrain", () => {
     const state = createActionState(20, 0);
