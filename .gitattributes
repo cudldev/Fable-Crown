@@ -1,2 +1,4 @@
 # Unified-diff provenance keeps its required single-space blank context lines.
+*.bin binary
+*.vox binary
 assets/source/voxel/valley-onboarding/**/*.diff whitespace=-blank-at-eol
