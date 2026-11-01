@@ -2,6 +2,8 @@
 
 Interaction revision:802unit checks/88files, strict types/Pages-base build/assets/dist pass. Full24WebGL checks pass on620f2c6b525c; finald9f624747690 has6affected WebGL checks and2lightweight release checks passing, zero page errors. Actual17captures in valley-interactions verify five viewport layouts and desktop/mobile/controller visibility. Exact response suspension and successful/invalid archive transitions pass. See UX_LAYOUT_RULES.md and INTERACTION_UX_REVIEW.md. Older public evidence follows; new publication is recorded after verification.
 
+Publishedaf76f3c / Actions41310935982 passed. Public5a2441116df9: actual cache upgrade/current-save/old-key preservation, offline WebGL11assets, organic dialogue, combined crafting with native preview/real completion, hidden HUD and mobile/controller handover pass. Public info proportions33.33%/31.91%/32.40%; zero page errors/external requests. See release/{valley,interactions}-public.json. Public runtime entry matches the tested local artifact.
+
 Published contextual UX2cfc688 / Actions41265086021 passed. Publice6498778b998 verifies console Menu/Back, personal-only backpack, actual cached upgrade, current valley progress/old-key preservation, both orientations and offline WebGL/all11 assets; zero page errors/external requests. See release/valley-public.json. Full739 units pass; staged local browser evidence below remains distinct from the public smoke test.
 
 Current format **7** uses `valley-v1` / `valley-v1-backup`: fresh25 coins, no V3–V6 migration/import, old keys untouched.

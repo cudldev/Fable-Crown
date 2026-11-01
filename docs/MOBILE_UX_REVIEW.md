@@ -2,6 +2,8 @@
 
 Current layout candidate: [rules](UX_LAYOUT_RULES.md) and [actual interaction review](INTERACTION_UX_REVIEW.md). Original thumbnails, organic dialogue, encounter camera and combined one-third crafting details replace shared tabs. Desktop has no touch dock; mobile switches on intentional device use.802units/type/build/dist pass; full24GPU on620f2c6b525c, finald9f624747690 affected6GPU+2release pass.17captures reviewed; physical hardware remains follow-up. The publication evidence below describes the preceding release until the new public check is recorded.
 
+Now publishedaf76f3c / Actions41310935982, actual public5a2441116df9. Upgrade/current-save/old-key preservation and offline11assets pass; real public NPC/craft/thumbnail/HUD/device-handover checks pass, no page errors/external requests. Measured crafting information:33.33%portrait,31.91%844×390 and32.40%1280×720. See release/interactions-public.json and the four public interaction captures. Earlier release history follows.
+
 Published2cfc688 / Actions41265086021 succeeded. Actual publice6498778b998: console Menu/Back, personal-only backpack,8daf→e649 cache upgrade, current valley progress and old keys preserved, both orientations and offline WebGL/all11 assets, zero page errors/external requests. Public runtime entry matches local candidate; see release/valley-public.json and the public mobile/menu captures. Physical-device playtesting remains.
 
 Initial evidence: code at isolated `5e2ea12` and existing public390×844/844×390 captures. No new GPU or physical-device review yet. Later console-menu steering supersedes the old nine-tab navigation.

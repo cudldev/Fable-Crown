@@ -1,0 +1,32 @@
+{
+  "url": "https://cudldev.github.io/Fable-Crown/",
+  "date": "2026-11-01T13:27:50.973Z",
+  "version": "5a2441116df9",
+  "conversation": true,
+  "terminalEnding": true,
+  "exclusiveHud": true,
+  "encounterCamera": true,
+  "fullScreenCombinedCrafting": true,
+  "nativePreview": true,
+  "realCraftCompletion": true,
+  "touchControllerHandover": true,
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "infoRatio": 0.3333271623222749
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "infoRatio": 0.31912766587677727
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "infoRatio": 0.3239501953125
+    }
+  ],
+  "errors": [],
+  "external": []
+}

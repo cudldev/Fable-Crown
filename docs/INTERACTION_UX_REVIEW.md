@@ -10,4 +10,6 @@ Evidence: [portrait crafting](screenshots/valley-interactions/craft-390x844.png)
 
 Local gates are recorded in PROGRESS.md. Tests cover camera projection/restoration, original thumbnails, exact-once parcel/payment, peaceful crafting results, inventory/skill conservation, all three inputs, orientation, held-input clearing, child/response suspension, current saves and offline work. GPU checks stay local; release CI retains two non-GPU cases. Public upgrade/offline and interaction checks use the two verify-*-public.mjs scripts.
 
+Publishedaf76f3c / Actions41310935982; actual public5a2441116df9. Public checks pass with zero page errors/external requests. Measured information-panel proportions:390×844 portrait33.33%,844×390 landscape31.91%,1280×720 desktop32.40%. [Public conversation](screenshots/valley-interactions/public-conversation.png), [public crafting](screenshots/valley-interactions/public-crafting-390.png). Preserved current progress and earlier archive keys; offline WebGL/all11 assets pass.
+
 Physical-device comfort and performance comparisons remain playtest work; no new FPS or latency claim. Current format7 saves and earlier archive isolation remain intact. There are no new dependencies, paid APIs or external runtime requests.

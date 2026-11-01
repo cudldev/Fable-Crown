@@ -1,10 +1,12 @@
 # Progress — 2026-10-29
 
-## Interaction layout implementation — 2026-11-01 (release candidate)
+## Interaction layouts and active-device controls — 2026-11-01
 
 Rules: UX_LAYOUT_RULES.md. Nearby NPC/object prompt replaces the exploration HUD; organic NPC turns and terminal endings; full-screen crafting keeps illustrated recipes and selected requirements/action together, with roughly one-third information space. Original furniture previews borrow ready baked geometry. Camera fits Alden/target and restores the previous view. Caravan storage is a separate nonblocking chest. Desktop has no touch dock; mobile hides it on actual controller use and restores it on touch/disconnect. Format7 and balance retained.
 
 Lead integrated contracts/UI/docs; controls specialist supplied crafting; camera specialist supplied framing; independent QA exercised the integrated game. Baseline worker timing failure was a Vitest5 fake-clock reset in its restart test, corrected without simulation changes. Local802units/88files, strict type/Pages-base build/native/baked/dist pass. Full24local GPU cases pass on620f2c6b525c; finald9f624747690 passes6affected GPU and2release checks after exact NPC-response resume/archive-context fixes.17actual captures reviewed; see INTERACTION_UX_REVIEW.md. No new performance claim or physical-device test. Public publication/verification follows this checkpoint.
+
+Publishedaf76f3c / Actions41310935982: validate/browser/deploy succeeded. Public5a2441116df9 verifies e649→5a cache upgrade, preserved format7 inventory/skills/storage/quests/home/terrain and untouched V3–V6 keys, desktop without touch controls, both orientations and offline WebGL/all11 assets. Separate public session verifies organic conversation/ending, encounter camera/HUD exclusion, native thumbnails, real stool completion and touch↔controller handover. Actual info area33.33%portrait,31.91%phone landscape,32.40%desktop16:9; public JS entry matches local index-DgJZnsZ1.js. Zero page errors/external requests. Evidence: release/valley-public.json and interactions-public.json. Actual weekly39%used/~61%remaining; no reset/credits/paid calls. Stop for device playtesting.
 
 ## Contextual console/mobile UX — 2026-11-01
 
