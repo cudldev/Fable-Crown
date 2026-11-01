@@ -8,6 +8,9 @@ export interface TileCamera {
   follow: boolean;
   overview: boolean;
   grid: boolean;
+  /** Hands-on exploration stays anchored to the player, with a slight movement lead. */
+  dynamicFollow?: boolean;
+  reducedMotion?: boolean;
   /** Transient presentation framing; never saved or authoritative. */
   interaction?: import("./interaction-camera").InteractionCameraFocus;
 }
@@ -28,6 +31,8 @@ export interface TileSceneProps {
   /** Height edits change this key; pigment texture reuse follows terrain-array identity. */
   groundRevision?: string | number;
   directInput?: boolean;
+  readInteractionCue?: () => {player:{x:number;z:number;facingX:number;facingZ:number};target?:{x:number;z:number;label:string}} | undefined;
+  canInteractSelection?: (selection:TileSelection) => boolean;
   placementPreview?: readonly {x:number;z:number;width:number;height:number;color?:number}[];
   state: RpgState;
   camera: TileCamera;

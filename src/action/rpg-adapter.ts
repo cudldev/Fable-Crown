@@ -109,7 +109,7 @@ export function syncActionRespawns(state:RpgState,action:ActionState):void {
   }
 }
 
-export function actionInteract(state:RpgState,action:ActionState):string {
+export function actionInteract(state:RpgState,action:ActionState,target?:{kind:"grave"}|{kind:"drop";id:string}):string {
   const near=(p:TilePosition)=>Math.hypot(p.x-action.player.x,p.y-action.player.z)<2;
   const collect=(items:RpgState["player"]["inventory"])=>{
     for(const item of [...items]){
@@ -119,12 +119,12 @@ export function actionInteract(state:RpgState,action:ActionState):string {
       if(count>0&&addItems(state.player.inventory,item.itemId,count))removeItems(items,item.itemId,count);
     }
   };
-  if (state.grave && near(state.grave.position)) {
+  if (state.grave && (!target||target.kind==="grave") && near(state.grave.position)) {
     collect(state.grave.items);
     if (!state.grave.items.length) state.grave=null;
     return state.grave?"Recovered what fits. Remaining belongings are safe.":"Backpack recovered.";
   }
-  const drop=state.drops.find(value=>near(value.position));
+  const drop=target?.kind==="grave"?undefined:state.drops.find(value=>(!target||target.id===value.id)&&near(value.position));
   if (drop) {
     collect(drop.items);
     state.drops=state.drops.filter(value=>value.items.length);

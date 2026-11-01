@@ -115,12 +115,13 @@ export default function ThreeScene(props: ThreeSceneProps) {
     // Pointer selection is handled by the drag-aware runtime, keyboard activation by React.
     if (event.detail === 0) {
       event.stopPropagation();
+      if(props.camera.dynamicFollow&&!props.canInteractSelection?.(selection))return;
       const bounds = event.currentTarget.getBoundingClientRect();
       runtime.current?.showClickIndicator(selection, bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
       (props.onInteract ?? props.onSelect)(selection);
     }
   };
-  const objectButtons = world.objects.filter(object => objectHitTarget(object, props.camera.zoom, props.camera.overview,
+  const objectButtons = world.objects.filter(object => props.camera.dynamicFollow&&!!object.serviceId || objectHitTarget(object, props.camera.zoom, props.camera.overview,
     props.selection?.kind === "object" && props.selection.id === object.id));
   return (
     <div ref={root} className="tile-world three-world" data-testid="rpg-world" data-renderer="3d" data-render-style={visual.renderStyle} data-status={status} data-lighting={lighting} data-assets={assets.source} data-production-assets={assets.ids.join(",")} data-voxel-assets={assets.voxelIds.join(",")} data-character-style={assets.characterStyle} data-character-ready={assets.characterReady} onKeyDown={event => {
@@ -131,7 +132,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
       const bounds = button.getBoundingClientRect();
       props.onContextMenu?.(JSON.parse(button.dataset.threeSelection!), { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 });
     }}>
-      <canvas ref={canvas} data-testid="three-canvas" aria-label={props.directInput?"The Fable Crown valley. WASD or arrow keys move; middle mouse pans; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
+      <canvas ref={canvas} data-testid="three-canvas" aria-label={props.camera.dynamicFollow?"The Fable Crown valley. Move with WASD, a controller or joystick. The camera follows you; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
       {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the voxel village…</div>}
       {status === "ready" && <>
         <span className="three-performance" data-testid="fps-indicator" aria-label="Rendering performance" aria-live="off">FPS —</span>
@@ -153,8 +154,8 @@ export default function ThreeScene(props: ThreeSceneProps) {
           {objectButtons.map(object => {
             const selection: TileSelection = { kind: "object", id: object.id };
             const selected = props.selection?.kind === "object" && props.selection.id === object.id;
-            return <button key={object.id} ref={bind(`object-${object.id}`)} className={`tile-object ${["tree", "rock"].includes(object.kind) ? "resource" : ""}`} aria-label={`Inspect ${object.name}`} aria-description={`Left click: ${defaultInteraction(props.state, selection).label}. Right click for options.`} aria-pressed={selected} title={defaultInteraction(props.state, selection).label} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)}>
-              <span>{["bank", "quest"].includes(object.kind) || selected || props.camera.overview && object.kind === "landmark" ? object.name : ""}</span>
+            return <button key={object.id} ref={bind(`object-${object.id}`)} className={`tile-object ${["tree", "rock"].includes(object.kind) ? "resource" : ""}`} aria-label={`Inspect ${object.name}`} aria-description={props.camera.dynamicFollow?"Mouse interaction requires nearby range. Face the target to use Interact.":`Left click: ${defaultInteraction(props.state, selection).label}. Right click for options.`} aria-pressed={selected} title={props.camera.dynamicFollow?`Interact with ${object.name} when nearby`:defaultInteraction(props.state, selection).label} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)}>
+              <span>{!props.camera.dynamicFollow&&(["bank", "quest"].includes(object.kind) || selected || props.camera.overview && object.kind === "landmark") ? object.name : ""}</span>
             </button>;
           })}
           {!props.camera.overview && [props.state.player, ...props.state.npcs].filter(actor=>!props.directInput||actor.id!==props.state.player.id).map(actor => {
@@ -192,6 +193,9 @@ export default function ThreeScene(props: ThreeSceneProps) {
           </span>}
         </div>
         <div className="world-effects-layer" data-testid="world-effects-layer">
+          {props.camera.dynamicFollow&&<>
+            <span ref={bind("interaction-target")} className="valley-aim-target" data-testid="interaction-indicator" aria-hidden="true" hidden><i>◇</i><span/></span>
+          </>}
           {(props.feedback ?? []).map(floater => <span ref={bind(`feedback-${floater.id}`)} className={`three-feedback three-feedback-${floater.tone}`} key={floater.id}><span className="floater-number">{floater.text}</span></span>)}
           <span className="world-click-indicator" data-testid="click-indicator" aria-hidden="true" hidden>
             <svg viewBox="0 0 28 28" width="28" height="28" fill="none">

@@ -10,7 +10,7 @@ import { actionInteract,actionSafe,applyActionEvents,rpgActionWorld,syncActionRe
 import { calendarDate } from "../rpg/engine";
 import { tile } from "../rpg/world";
 import type { TileSelection } from "../render/scene-types";
-import {actionResultFeedback,emptySwingFeedback,nearbyValleyInteraction,rewardChanges,rewardSnapshot} from "./interaction-feedback";
+import {actionResultFeedback,emptySwingFeedback,nearbyValleyInteraction,rewardChanges,rewardSnapshot,selectionInRange} from "./interaction-feedback";
 import {serviceDistance,serviceForObject,servicePanel} from "./services";
 import {VALLEY_RECIPES} from "./content";
 import {itemCount} from "../rpg/inventory";
@@ -69,21 +69,21 @@ function openSelection(selection:TileSelection):void {
     const object=layout.objects.find(value=>value.id===selection.id);if(!object)return;
     const distance=Math.hypot(object.position.x+(object.width-1)/2-save.action.player.x,object.position.y+(object.height-1)/2-save.action.player.z);
     if(object.resourceId){
-      if(distance>1.65){announce({tone:"info",title:`Walk closer to ${object.name}`,detail:`${Math.ceil(distance)} m away · face the spot and tap your tool.`});return;}
+      if(!selectionInRange(save,save.action,layout,selection)){announce({tone:"info",title:`Walk closer to ${object.name}`,detail:`Face the spot and tap your tool.`});return;}
       if(save.chapter.resources[object.id]?.available===false){announce({tone:"info",title:`${object.name} is resting`,detail:"Try another spot while it replenishes."});return;}
       face(object.position.x,object.position.y);input={...input,strike:true,tool:true};return;
     }
     const service=serviceForObject(save,object);
-    if(service){const range=serviceDistance(save.action,service);if(range>service.range){announce({tone:"info",title:`Walk closer to ${object.name} to interact.`,detail:`${Math.ceil(range)} m away · stand within ${service.range} m.`});return;}send({open:servicePanel(service),service,visitorId:service.visitorId});return;}
+    if(service){const range=serviceDistance(save.action,service);if(range>service.range){announce({tone:"info",title:`Walk closer to ${object.name} to interact.`,detail:`${Math.ceil(range)} m away · stand within ${service.range} m.`});return;}face(service.x,service.z);send({action:save.action,open:servicePanel(service),service,visitorId:service.visitorId});return;}
     if(distance>5){announce({tone:"info",title:`Walk closer to ${object.name} to interact.`,detail:`${Math.ceil(distance)} m away`});return;}
     announce({tone:"info",title:object.name,detail:object.description});
   } else if(selection.kind==="enemy"){
-    const enemy=save.action.enemies.find(value=>value.id===selection.id);if(enemy){face(enemy.x,enemy.z);input={...input,strike:true,tool:false};}
+    const enemy=save.action.enemies.find(value=>value.id===selection.id);if(enemy&&selectionInRange(save,save.action,layout,selection)){face(enemy.x,enemy.z);input={...input,strike:true,tool:false};}
   } else if(selection.kind==="grave"||selection.kind==="drop"){
     const position=selection.kind==="grave"?save.chapter.grave?.position:save.chapter.drops.find(drop=>drop.id===selection.id)?.position;
     if(!position){announce({tone:"info",title:"These belongings have already been collected."});return;}
     if(Math.hypot(position.x-save.action.player.x,position.y-save.action.player.z)>=2){announce({tone:"info",title:"Walk closer to your belongings",detail:"Stand beside the recovery marker, then collect what fits."});return;}
-    const before=rewardSnapshot(save.chapter),message=actionInteract(save.chapter,save.action),gains=rewardChanges(before,save.chapter);
+    const before=rewardSnapshot(save.chapter),message=actionInteract(save.chapter,save.action,selection.kind==="grave"?{kind:"grave"}:{kind:"drop",id:selection.id}),gains=rewardChanges(before,save.chapter);
     emit(message,{tone:gains?"success":"warning",title:message,detail:gains||"Make room in your backpack first. Anything left at the marker stays safe."});
   }
 }
@@ -106,8 +106,8 @@ self.onmessage=async(event:MessageEvent<ValleyWorkerRequest>)=>{
     const before=rewardSnapshot(save.chapter,save.valley.carpentryXp);
     const result=applyValleyCommand(save,request.command,Date.now());
     save.chapter.action=save.action;ensureValleyResources(save);emit(result.message,{tone:result.ok?"success":"warning",title:result.message,detail:result.ok?rewardChanges(before,save.chapter,save.valley.carpentryXp):undefined});send({receipt:{requestId:request.requestId,ok:result.ok}});if(result.ok)await persist();
-  }else if(request.type==="focus")openSelection(request.selection);
-  else if(request.type==="interact"){interact();await persist();}
+  }else if(request.type==="focus"){if(!interfaceOpen)openSelection(request.selection);}
+  else if(request.type==="interact"){if(!interfaceOpen)interact();await persist();}
   else if(request.type==="pause"){captureLiveBackground();running=false;input=idleActionInput();save.action.player.blocking=false;save.action.strikeHeld=false;await persist();}
   else if(request.type==="resume"){
     if(running){if(captureLiveBackground())emit();return;}

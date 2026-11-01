@@ -27,7 +27,7 @@ test("native valley structures, furnishings and terraces share the actor scale",
     await settings(page);
     await page.getByLabel("Import valley archive").setInputFiles({name:"art-review.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(fixture))});
     await expect(page.locator(".valley-panel-message")).toContainText("Chapter restored");await page.getByRole("dialog").getByRole("button",{name:"Close",exact:true}).click();
-    await page.getByRole("button",{name:"Follow",exact:true}).click();
+    await expect(page.getByTestId("valley-app")).toHaveAttribute("data-camera-follow","true");
     await expect(root).toHaveAttribute("data-player-x",x.toFixed(3));await page.waitForTimeout(2500);
   };
   await restore(59,162);await page.screenshot({path:"docs/screenshots/valley-home-exterior.png"});

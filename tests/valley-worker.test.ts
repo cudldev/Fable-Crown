@@ -44,6 +44,20 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("actual valley worker lifecycle", () => {
+  it("collects the faced bag and preserves nearby recovery markers",async()=>{
+    const fixture=createValleySave(Date.now());
+    fixture.chapter.grave={position:tile(51,141),items:[{itemId:"logs",quantity:2}],attempts:0,retryAt:0};
+    fixture.chapter.drops=[{id:"faced-bag",position:tile(53,141),items:[{itemId:"copper-ore",quantity:1}],expiresAt:0}];
+    Object.assign(fixture.action.player,{facingX:1,facingZ:0});
+    await boot(fixture);await send({type:"interact"});const result=await exported();
+    expect(result.chapter.grave).toEqual(fixture.chapter.grave);expect(result.chapter.drops).toEqual([]);
+    expect(itemCount(result.chapter.player.inventory,"copper-ore")).toBe(itemCount(fixture.chapter.player.inventory,"copper-ore")+1);
+  });
+  it("does not turn or swing at a distant clicked enemy",async()=>{
+    await boot();const before=await exported();await send({type:"focus",selection:{kind:"enemy",id:"rock-mite-0"}});
+    await send({type:"resume"});vi.advanceTimersByTime(32);const after=await exported();
+    expect(after.action.player.facingX).toBe(before.action.player.facingX);expect(after.action.player.swing).toBe(0);
+  });
   it("names connected storage when a finished batch cannot fit in the backpack",async()=>{
     const fixture=createValleySave(Date.now());fixture.chapter.player.inventory=[{itemId:"logs",quantity:28}];
     fixture.valley.workQueue=[{recipeId:"valley-plank",quantity:1,remainingTicks:1}];
@@ -86,7 +100,7 @@ describe("actual valley worker lifecycle", () => {
     await boot();await send({type:"focus",selection:{kind:"object",id:"valley-workbench"}});
     expect(messages.some(message=>message.open)).toBe(false);
     expect(messages.at(-1)?.feedback?.title).toContain("Walk closer");
-    const fixture=createValleySave(Date.now());fixture.action.player.x=81;fixture.action.player.z=141;
+    const fixture=createValleySave(Date.now());Object.assign(fixture.action.player,{x:81,z:141,facingX:0,facingZ:-1});
     await boot(fixture);await send({type:"interact"});
     expect(messages.find(message=>message.open)?.service).toMatchObject({objectId:"valley-cooking-fire",kind:"range",station:"range"});
     expect(messages.find(message=>message.open)?.open).toBe("craft");

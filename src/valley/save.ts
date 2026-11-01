@@ -20,6 +20,7 @@ export function createValleySave(now:number,seed=1234567):ValleySave {
   for(const npc of chapter.npcs){npc.previousPosition={...npc.position};npc.path=[];npc.movement=null;npc.action=null;}
   chapter.control.autoplay=false;chapter.control.waiting=true;chapter.control.active=null;chapter.control.source=null;chapter.control.thought=null;chapter.control.queue=[];chapter.dialogue=null;
   const action=createActionState(position.x,position.y,maxHealth(chapter.player));
+  action.player.facingX=-1;action.player.facingZ=0;
   action.player.health=chapter.player.health;
   const first=chapter.enemies.find(enemy=>enemy.id==="rock-mite-0");
   if(first){first.position=tile(94,158);first.home={...first.position};}

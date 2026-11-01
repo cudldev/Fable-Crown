@@ -1,5 +1,11 @@
 # Progress — 2026-10-29
 
+## Following and facing controls — 2026-11-01
+
+Always-follow valley camera, eased movement lead (cap1.1m), idle settling and reduced-motion handling; no parked pan/right-stick camera. Find pins destinations. Forward-facing nearby actions share the target marker; small depth-tested 3D ground ring/arrow shows facing and conforms to terrain at fixed world scale. Touch world activation disabled outside placement; mouse requires real range and consumes its click. Service props have hit areas, RMB guard works over world objects, selected recovery bags stay distinct. Current saves/legacy camera/balance retained. Rules and actual captures: CONTROLS_REVIEW.md.
+
+Lead integrated input/worker/UI; camera and targeting specialists supplied isolated modules/tests; camera specialist independently reviewed integration.826units/90files, strict types/Pages-base build/assets/dist and2release cases pass.27distinct local WebGL scenarios verified across broad run and focused reruns; final candidateece04d1e7981 passes14affected cases (13together plus peaceful craft/trade rerun). Final65d1f54a0221 replaces the screen direction element with actual terrain-conforming geometry;4geometry tests and4affected WebGL scenarios pass, with new actual captures reviewed. Mouse-range, touch exclusion, world facing arrow, camera lead/settling, contextual menus, controller handover, recovery and current saves covered. No physical-device or new performance claim. Actual weekly42%used/~58%remaining; no reset/credits/paid calls. Publication verification pending.
+
 ## Interaction layouts and active-device controls — 2026-11-01
 
 Rules: UX_LAYOUT_RULES.md. Nearby NPC/object prompt replaces the exploration HUD; organic NPC turns and terminal endings; full-screen crafting keeps illustrated recipes and selected requirements/action together, with roughly one-third information space. Original furniture previews borrow ready baked geometry. Camera fits Alden/target and restores the previous view. Caravan storage is a separate nonblocking chest. Desktop has no touch dock; mobile hides it on actual controller use and restores it on touch/disconnect. Format7 and balance retained.

@@ -46,7 +46,7 @@ try{
   await expect.poll(async()=>JSON.parse(await page.locator('[data-voxel-object-counts]').getAttribute('data-voxel-object-counts'))['valley-tent']).toBe(1);
   await expect.poll(async()=>!!(await read('valley-v1')).valley.home).toBe(true);
   await page.screenshot({path:'docs/screenshots/valley-public-desktop.png'});
-  for(const viewport of [{width:390,height:844},{width:844,height:390}]){await page.setViewportSize(viewport);await expect(page.getByRole('button',{name:'Follow',exact:true})).toBeVisible();await page.screenshot({path:`docs/screenshots/valley-public-${viewport.width}.png`});}
+  for(const viewport of [{width:390,height:844},{width:844,height:390}]){await page.setViewportSize(viewport);await expect(page.getByRole('button',{name:'Camera',exact:true})).toBeVisible();await page.screenshot({path:`docs/screenshots/valley-public-${viewport.width}.png`});}
   const scope=await page.evaluate(async()=> (await navigator.serviceWorker.ready).scope);expect(scope).toBe(url);
   await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await expect(root).toHaveAttribute('data-ready','true',{timeout:90000});await expect(root).toHaveAttribute('data-mode','world');
   const offline=await page.evaluate(async()=>{const m=await(await fetch(new URL('world-assets.json',location.href))).json();return await Promise.all(m.files.map(async file=>{const response=await fetch(new URL(file,location.href));return response.ok&&(await response.arrayBuffer()).byteLength>0;}));});

@@ -176,7 +176,8 @@ export function useActionControls(options: UseActionControlsOptions) {
 
   const worldBindings: HTMLAttributes<HTMLElement> = {
     onPointerDown(event) {
-      if (latest.current.enabled === false || event.pointerType === "touch" || isInterfaceTarget(event.target)) return;
+      const worldTarget=event.target instanceof Element&&!!event.target.closest("[data-three-selection]");
+      if (event.defaultPrevented || latest.current.enabled === false || event.pointerType === "touch" || isInterfaceTarget(event.target)&&!(worldTarget&&event.button===2)) return;
       if (event.button === 0) inputBuffer.setStrike("mouse", true);
       if (event.button === 2) inputBuffer.setBlock("mouse", true);
     },

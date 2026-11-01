@@ -25,6 +25,8 @@ import { PostProcessing } from "./post-processing";
 import { WorldCurve, cameraPitch, closeCameraBlend } from "./world-curve";
 import { clampGameplayZoom, gameplaySpan } from "../camera-limits";
 import { InteractionCameraTransition } from "../interaction-camera";
+import { FollowCamera } from "../follow-camera";
+import { WorldFacingIndicator } from "./facing-indicator";
 import { ContactDetail } from "./contact-detail";
 import { layoutFeedback, type FeedbackAnchor, type FeedbackRect } from "../feedback-layout";
 import { FloatingVials } from "./floating-vials";
@@ -79,6 +81,11 @@ export class ThreeRuntime {
   private height = 1;
   private target = new THREE.Vector3();
   private interactionCamera = new InteractionCameraTransition();
+  private followCamera = new FollowCamera();
+  private facingIndicator = new WorldFacingIndicator();
+  private facingKey="";
+  private interactionCue?: ReturnType<NonNullable<RuntimeInput["readInteractionCue"]>>;
+  private cueAnchor = new THREE.Vector3();
   private ray = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private terrain = new THREE.Group();
@@ -171,6 +178,7 @@ export class ThreeRuntime {
     this.ring = new THREE.Mesh(ringGeometry, gold);
     this.playerRing = new THREE.Mesh(ringGeometry, gold);
     for (const ring of [this.ring, this.playerRing]) { ring.rotation.x = -Math.PI / 2; ring.position.y = 0.035; this.scene.add(ring); }
+    this.facingIndicator.group.visible=false;this.scene.add(this.facingIndicator.group);
     this.grave = new THREE.Mesh(this.ownGeometry(new THREE.BoxGeometry(0.48, 0.7, 0.2)),
       this.ownMaterial(new THREE.MeshLambertMaterial({ color: 0x8a8b7d })));
     this.grave.castShadow = true; this.grave.userData.selection = { kind: "grave" }; this.scene.add(this.grave);
@@ -519,6 +527,7 @@ export class ThreeRuntime {
     const { state, presentationEpoch = 0 } = this.props;
     if (this.observedState === state && this.observedEpoch === presentationEpoch) return;
     const resetPresentation = this.observedEpoch !== presentationEpoch;
+    if(resetPresentation){this.fastPlayer=undefined;this.followCamera.reset();}
     const tickChanged = this.observedState?.tick !== state.tick || resetPresentation;
     this.observedState = state; this.observedEpoch = presentationEpoch;
     if (tickChanged) this.observedAt = time;
@@ -619,10 +628,11 @@ export class ThreeRuntime {
     const fast = actor.id === 0 ? this.props.readAction?.() ?? this.props.actionState : undefined;
     if (fast) {
       const p = fast.player, old = this.fastPlayer;
-      if (!old || old.frame !== fast.frame) this.fastPlayer = { frame: fast.frame, at: time,
-        fromX: old && fast.frame - old.frame < 6 ? old.x : p.x,
-        fromZ: old && fast.frame - old.frame < 6 ? old.z : p.z,
-        fromY: old && fast.frame - old.frame < 6 ? old.y : p.height,
+      const continuous=old&&fast.frame>old.frame&&fast.frame-old.frame<6&&Math.hypot(p.x-old.x,p.z-old.z)<1;
+      if (!old || old.frame !== fast.frame || old.x!==p.x || old.z!==p.z) this.fastPlayer = { frame: fast.frame, at: time,
+        fromX: continuous ? old.x : p.x,
+        fromZ: continuous ? old.z : p.z,
+        fromY: continuous ? old.y : p.height,
         x: p.x, z: p.z, y: p.height };
       const sample = this.fastPlayer!, fraction = Math.min(1, Math.max(0, (time - sample.at) / (1000 / 60)));
       const x = sample.fromX + (sample.x - sample.fromX) * fraction;
@@ -689,9 +699,15 @@ export class ThreeRuntime {
     const player = this.people.get(0)?.art.group.position;
     const aspect = this.width / this.height;
     let span = view.overview ? Math.max(this.world.height * 1.05, this.world.width / aspect) : gameplaySpan(view.zoom, aspect);
-    this.target.set(view.overview ? this.world.width / 2 : view.follow && player ? player.x : view.x, player?.y ?? 0,
-      view.overview ? this.world.height / 2 : view.follow && player ? player.z : view.y);
-    if(!view.follow)this.target.y=this.heightAt(this.target.x,this.target.z);
+    const followsPlayer=(view.follow||view.dynamicFollow)&&player;
+    this.target.set(view.overview ? this.world.width / 2 : followsPlayer ? player.x : view.x, player?.y ?? 0,
+      view.overview ? this.world.height / 2 : followsPlayer ? player.z : view.y);
+    if(!followsPlayer)this.target.y=this.heightAt(this.target.x,this.target.z);
+    if(view.dynamicFollow&&player&&!view.overview){
+      const follow=this.followCamera.update(player,time,view.reducedMotion??this.reducedMotion);
+      this.target.x=follow.x;this.target.z=follow.z;
+      this.root.dataset.cameraLead=`${follow.leadX.toFixed(4)},${follow.leadZ.toFixed(4)}`;
+    }else{this.followCamera.reset();delete this.root.dataset.cameraLead;}
     const usePerspective = cameraMode === "perspective" && !view.overview;
     this.camera = usePerspective ? this.perspectiveCamera : this.orthographicCamera;
     let pitch = usePerspective ? cameraPitch(clampGameplayZoom(view.zoom)) : cameraPitch(.65);
@@ -763,7 +779,14 @@ export class ThreeRuntime {
     this.grid.visible = view.grid && !view.overview;
     this.grid.position.set(Math.round(this.target.x), 0, Math.round(this.target.z));
     const selected = this.selectionPosition(selection);
-    this.ring.visible = !!selected && this.curve.view.pickable(selected);
+    this.playerRing.visible = !view.dynamicFollow;
+    this.interactionCue=this.props.readInteractionCue?.();
+    this.facingIndicator.group.visible=!!this.interactionCue&&!view.overview;
+    if(this.interactionCue){const p={...this.interactionCue.player,x:player?.x??this.interactionCue.player.x,z:player?.z??this.interactionCue.player.z};const key=`${p.x},${p.z},${p.facingX},${p.facingZ},${this.props.groundRevision}`;if(key!==this.facingKey){this.facingKey=key;this.facingIndicator.update(p,(x,z)=>this.heightAt(x,z));}}
+    this.root.dataset.facingIndicator=this.facingIndicator.group.visible?"world":"hidden";
+    this.root.dataset.facingYaw=this.facingIndicator.group.rotation.y.toFixed(5);
+    this.root.dataset.facingPosition=JSON.stringify(this.facingIndicator.group.position.toArray());
+    this.ring.visible = !view.dynamicFollow && !!selected && this.curve.view.pickable(selected);
     if (selected) { this.ring.position.set(selected.x, this.heightAt(selected.x,selected.z)+.04, selected.z); this.ring.scale.setScalar(selection?.kind === "object" ? 1.4 : 1.1); }
     this.updatePreview();
     // Explicit group visibility also bounds shadow work and scene traversal far from the camera.
@@ -831,7 +854,7 @@ export class ThreeRuntime {
     this.renderer.info.reset();
     this.gpuMeter.begin();
     this.waterSystem.update(this.renderer, this.scene, this.camera, this.water,
-      [this.ring, this.playerRing, this.route, this.grid, this.mist], time, lighting, visual, view.overview, this.reducedMotion);
+      [this.ring, this.playerRing, this.facingIndicator.group, this.route, this.grid, this.mist], time, lighting, visual, view.overview, this.reducedMotion);
     this.post.render(this.renderer, this.scene, this.camera, visual, distance, closeCameraBlend(view.zoom), view.overview, this.canvas.width / this.width, this.sky.lightSource, this.rig.sun,
       { center: this.target, strength: this.curve.strength, range: this.curve.view.range.y });
     this.gpuMeter.end();
@@ -940,9 +963,11 @@ export class ThreeRuntime {
     this.vials ??= new FloatingVials(this.root);
     this.vials.beginFrame(time, this.rig, this.camera);
     const feedback: FeedbackAnchor[] = [], reserved: FeedbackRect[] = [];
+    const cue=this.interactionCue;
     for (const [key, element] of this.hits) {
       let position: THREE.Vector3 | undefined, height = 0;
-      if (key.startsWith("object-")) { const object = this.objects.get(key.slice(7)); if (object?.art.group.visible) position = object.art.group.position; height = object?.object.kind === "tree" ? 1.1 : .4; }
+      if(key==="interaction-target"&&cue?.target){position=this.cueAnchor.set(cue.target.x,this.heightAt(cue.target.x,cue.target.z)+.8,cue.target.z);if(element.dataset.label!==cue.target.label){element.dataset.label=cue.target.label;const label=element.querySelector("span");if(label)label.textContent=cue.target.label;}}
+      else if (key.startsWith("object-")) { const object = this.objects.get(key.slice(7)); if (object?.art.group.visible) position = object.art.group.position; height = object?.object.kind === "tree" ? 1.1 : .4; }
       else if (key.startsWith("actor-")) { const person = this.people.get(Number(key.slice(6))); if (person?.art.group.visible) position = person.art.group.position; height = 1; }
       else if (key.startsWith("enemy-")) { const enemy = this.enemies.get(key.slice(6)); if (enemy?.visible) position = enemy.position; height = .6; }
       else if (key.startsWith("drop-")) position = this.drops.get(key.slice(5))?.position;
@@ -1065,6 +1090,7 @@ export class ThreeRuntime {
     const context = (event: MouseEvent) => {
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       event.preventDefault(); clearHold(); this.clearClickIndicator();
+      if(this.props.camera.dynamicFollow)return;
       if (performance.now() - contextAt < 500) return;
       const selected = selectionAt(event);
       if (selected) { contextAt = performance.now(); this.props.onContextMenu?.(selected, { x: event.clientX, y: event.clientY }); }
@@ -1078,7 +1104,11 @@ export class ThreeRuntime {
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       if(this.props.directInput && event.pointerType!=="touch" && event.button===0) {
         this.clearClickIndicator();const selected=selectionAt(event);
-        if(selected){this.showClickIndicator(selected,event.clientX,event.clientY);(this.props.onInteract??this.props.onSelect)(selected);}return;
+        if(this.props.camera.dynamicFollow){
+          if(selected&&selected.kind!=="tile"&&this.props.canInteractSelection?.(selected)){
+            event.preventDefault();(this.props.onInteract??this.props.onSelect)(selected);
+          }
+        }else if(selected){this.showClickIndicator(selected,event.clientX,event.clientY);(this.props.onInteract??this.props.onSelect)(selected);}return;
       }
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       this.clearClickIndicator();
@@ -1088,7 +1118,7 @@ export class ThreeRuntime {
         dragAnchor = this.groundAt(startX, startY);
         const hit = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-three-selection]");
         downSelection = hit ? JSON.parse(hit.dataset.threeSelection!) as TileSelection : null;
-        if (event.pointerType === "touch") hold = setTimeout(() => {
+        if (event.pointerType === "touch"&&!this.props.camera.dynamicFollow) hold = setTimeout(() => {
           const selected = downSelection ?? selectionAt(event);
           if (selected && !dragged && pointers.size === 1) {
             pinched = true; contextAt = performance.now();
@@ -1110,7 +1140,7 @@ export class ThreeRuntime {
       }
       if (pinched) return;
       if (Math.hypot(event.clientX - startX, event.clientY - startY) > 6) { dragged = true; clearHold(); }
-      if (dragged) {
+      if (dragged&&!this.props.camera.dynamicFollow) {
         const point = this.groundAt(event.clientX, event.clientY);
         // Keep the grabbed world point under the pointer. Incremental pointer
         // deltas lose movement when several events share the last rendered target.
@@ -1128,6 +1158,7 @@ export class ThreeRuntime {
       if (!pointers.has(event.pointerId)) return;
       pointers.delete(event.pointerId);
       if (this.root.hasPointerCapture(event.pointerId)) this.root.releasePointerCapture(event.pointerId);
+      if(this.props.camera.dynamicFollow&&this.props.directInput&&event.pointerType==="touch")return;
       if (!dragged && !pinched && event.type !== "pointercancel" && event.button!==1) {
         if (downSelection) {
           const position = this.selectionPosition(downSelection);
@@ -1161,7 +1192,7 @@ export class ThreeRuntime {
     const key = (event: KeyboardEvent) => {
       if ((event.target as HTMLElement).tagName !== "CANVAS") return;
       const steps: Record<string, [number, number]> = { ArrowLeft: [-2, 1], ArrowRight: [2, -1], ArrowUp: [-1, -2], ArrowDown: [1, 2] };
-      if (steps[event.key] && !this.props.directInput) {
+      if (steps[event.key] && !this.props.directInput&&!this.props.camera.dynamicFollow) {
         event.preventDefault(); const [dx, dz] = steps[event.key], x = this.target.x, y = this.target.z;
         this.props.onCamera(current => ({ ...current,
           x: clamp((current.follow || current.overview ? x : current.x) + dx, 0, this.world.width - 1),
@@ -1190,6 +1221,7 @@ export class ThreeRuntime {
     this.gi.dispose();
     this.gpuMeter.dispose();
     this.post.dispose(); this.curve.dispose();
+    this.facingIndicator.dispose();
     this.waterSystem.dispose();
     this.preview.traverse(node=>{if(node instanceof THREE.Mesh){node.geometry.dispose();(node.material as THREE.Material).dispose();}});
     document.removeEventListener("visibilitychange", this.visibilityChanged);

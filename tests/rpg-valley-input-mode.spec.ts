@@ -50,6 +50,9 @@ test("fine-pointer desktop has no touch dock and supports real keyboard and worl
   await page.keyboard.down("d");
   try { await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(before + .1); }
   finally { await page.keyboard.up("d"); }
+  await page.keyboard.down("a");
+  try { await expect(page.getByTestId("interaction-indicator")).toBeVisible(); await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label", /Talk · Rowan/); }
+  finally { await page.keyboard.up("a"); }
   await page.keyboard.press("e");
   await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan");
   await page.keyboard.press("Escape"); await expect(dialog(page)).toHaveCount(0);
@@ -95,6 +98,9 @@ test.describe("mobile touch and controller handover", () => {
     await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
     await page.setViewportSize({ width: 844, height: 390 });
     await expect(app(page)).toHaveAttribute("data-input-mode", "controller"); await expect(dock(page)).toHaveCount(0);
+    await axis(page, 0, -1);
+    try { await expect(page.getByTestId("interaction-indicator")).toBeVisible(); await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label", /Talk · Rowan/); }
+    finally { await axis(page, 0, 0); }
     await press(page, 0); await expect(dialog(page)).toHaveAccessibleName("Conversation with Rowan");
     await press(page, 0); await expect(dialog(page).getByRole("button", { name: "About my home…", exact: true })).toBeFocused();
     await press(page, 13); await expect(dialog(page).getByRole("button", { name: "Need a hand with anything?", exact: true })).toBeFocused();

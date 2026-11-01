@@ -25,6 +25,8 @@ async function closePanels(page: Page) {
   await expect(panel(page)).toHaveCount(0);
 }
 async function rowanAccount(page: Page, payment = true) {
+  await expect(page.getByTestId("interaction-indicator")).toBeVisible();
+  await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label",/Talk · Rowan/);
   await page.keyboard.press("e");
   await expect(panel(page)).toHaveAttribute("data-menu-panel", "interaction");
   await panel(page).getByRole("button", { name: "Continue conversation", exact: true }).click();
@@ -80,8 +82,9 @@ function home(now: number) {
   expect(applyValleyCommand(save, { type: "pay", amount: 100 }, now).ok).toBe(true);
   return save;
 }
-function position(save: ValleySave, x: number, z: number) {
-  save.action.player.x = x; save.action.player.z = z;
+function position(save: ValleySave, x: number, z: number, target = { x, z: z - 1 }) {
+  const dx = target.x - x, dz = target.z - z, length = Math.hypot(dx, dz) || 1;
+  Object.assign(save.action.player, { x, z, facingX: dx / length, facingZ: dz / length });
   save.chapter.player.position = tile(x, z); save.chapter.player.previousPosition = tile(x, z);
 }
 
@@ -115,7 +118,7 @@ test("valley UI places a free tent, pays the account in parts and advances guida
 
 test("valley UI reserves a real craft batch and sells the finished planks at the nearby caravan", async ({ page }) => {
   await page.goto("./?chapter=valley"); await ready(page);
-  const fixture = createValleySave(Date.now()); position(fixture, 69, 140); addItems(fixture.chapter.player.inventory, "logs", 2);
+  const fixture = createValleySave(Date.now()); position(fixture, 69, 140, { x: 69, z: 139 }); addItems(fixture.chapter.player.inventory, "logs", 2);
   await restore(page, fixture); await open(page, "Craft");
   await panel(page).getByTestId("recipe-grid").locator('[data-recipe-id="valley-plank"]').click();
   await page.getByLabel("Craft quantity", { exact: true }).fill("2");
@@ -131,12 +134,10 @@ test("valley UI reserves a real craft batch and sells the finished planks at the
   await page.keyboard.down("d");
   try { await expect.poll(async () => Number(await root(page).getAttribute("data-player-x"))).toBeGreaterThan(73.5); }
   finally { await page.keyboard.up("d"); }
-  // Return to the west side of the caravan so its separate storage chest is
-  // not the nearest service after the camera-relative approach.
-  await page.keyboard.down("a");
-  try { await expect.poll(async () => Number(await root(page).getAttribute("data-player-x"))).toBeLessThan(74.4); }
-  finally { await page.keyboard.up("a"); }
-  await open(page, "Trade");
+  // Deliberate mouse activation turns to the caravan after walking into its range.
+  await page.getByRole("button",{name:"Inspect Travelling supply caravan",exact:true}).click();
+  await expect(panel(page)).toHaveAttribute("data-menu-panel","interaction");
+  await panel(page).getByRole("button",{name:"Browse supplies",exact:true}).click();
   await panel(page).getByRole("group", { name: "Goods", exact: true }).getByRole("button", { name: "Sawn plank", exact: true }).click();
   const planks = panel(page).getByTestId("trade-detail");
   await expect(planks).toContainText("Have 4");
@@ -271,7 +272,7 @@ test("production valley keyboard, emulated controller and touch cancellation wor
   expect(Number(await root(page).getAttribute("data-player-x"))).toBeCloseTo(stopped, 2);
   for (const size of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(size);
-    await expect(page.getByRole("button", { name: "Follow", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Camera", exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     for (const control of await page.locator("[data-action-controls] button, .valley-camera button").all()) {
       const bounds = await control.boundingBox(); expect(bounds).not.toBeNull();

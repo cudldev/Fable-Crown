@@ -79,8 +79,9 @@ async function saved(page: Page): Promise<ValleySave> {
     };
   }));
 }
-function at(save: ValleySave, x: number, z: number) {
-  Object.assign(save.action.player, { x, z, facingX: 0, facingZ: -1, health: save.action.player.maxHealth, swing: 0, blocking: false });
+function at(save: ValleySave, x: number, z: number, target = { x, z: z - 1 }) {
+  const dx = target.x - x, dz = target.z - z, length = Math.hypot(dx, dz) || 1;
+  Object.assign(save.action.player, { x, z, facingX: dx / length, facingZ: dz / length, health: save.action.player.maxHealth, swing: 0, blocking: false });
   Object.assign(save.chapter.player, { position: tile(x, z), previousPosition: tile(x, z), health: save.action.player.health, path: [], movement: null, action: null });
   const now = Date.now(); save.savedAt = now; save.chapter.savedAt = now; save.chapter.calendar = calendarDate(now);
 }
@@ -151,7 +152,7 @@ test("standard controller selects weapon once per Y hold, attacks, blocks and re
 
   const safe = createValleySave(Date.now()); await restore(page, safe);
   await page.evaluate(() => { (window as unknown as { valleyControllerTestPad: TestPad }).valleyControllerTestPad.axes[2] = 1; });
-  await expect(root(page)).toHaveAttribute("data-camera-follow", "false");
+  await expect(root(page)).toHaveAttribute("data-camera-follow", "true");
   await page.evaluate(() => { (window as unknown as { valleyControllerTestPad: TestPad }).valleyControllerTestPad.axes[2] = 0; });
   await press(page, 9);
   await expect(dialog(page).getByRole("heading", { name: "Game menu" })).toBeVisible();
@@ -182,14 +183,15 @@ test("standard controller selects weapon once per Y hold, attacks, blocks and re
   await expect(dialog(page).getByRole("button", { name: "Use weapon", exact: true })).toHaveAttribute("aria-pressed", "true");
   await select(page, "Use tool");
   await expect(dialog(page).getByRole("button", { name: "Use tool", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await select(page, "Follow prince");
+  await press(page, 9);
   await expect(root(page)).toHaveAttribute("data-camera-follow", "true");
   await page.waitForTimeout(250);
   await expect(root(page)).toHaveAttribute("data-tool-mode", "tool");
   await button(page, 3, false); await press(page, 1);
   await expect(dialog(page)).toHaveCount(0);
-  const workbench = createValleySave(Date.now()); at(workbench, 69, 140);
+  const workbench = createValleySave(Date.now()); at(workbench, 69, 140, { x: 69, z: 139 });
   await restore(page, workbench);
+  await expect(page.getByTestId("interaction-indicator")).toHaveAttribute("data-label", /Open · Communal carpentry workbench/);
   await press(page, 0); // Real world Interact, then D-pad/A edit the station quantity.
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
   await select(page, "Craft something");

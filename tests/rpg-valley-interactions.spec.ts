@@ -102,6 +102,7 @@ test("conversation turns frame both people, trap focus, suspend the exact child 
   await page.setViewportSize({ width: 1280, height: 720 }); await ready(page);
   await restore(page, fixtureAt(51, 142));
   await expect(camera(page)).toHaveAttribute("data-interaction-camera", "none");
+  await expect(camera(page)).toHaveAttribute("data-camera-lead","0.0000,0.0000");
   const pose = await camera(page).getAttribute("data-camera-pose"), zoom = await root(page).getAttribute("data-camera-zoom"), follow = await root(page).getAttribute("data-camera-follow");
   await press(page, 0); await expect(panel(page)).toHaveAttribute("data-interaction-kind", "conversation");
   await framed(page);

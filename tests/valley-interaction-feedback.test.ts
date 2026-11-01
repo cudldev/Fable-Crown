@@ -138,15 +138,14 @@ describe("read-only contextual action feedback",()=>{
 });
 
 describe("nearby interaction resolver",()=>{
-  it("prioritizes a recoverable grave, then drops, over even closer services",()=>{
+  it("prioritizes recovery then drops when forward candidates share the same position",()=>{
     for(const priority of ["grave","drop","service"]as const){
-      const save=fresh();Object.assign(save.action.player,{x:74,z:140});
-      save.chapter.grave={position:tile(75.9,140),items:[{itemId:"logs",quantity:1}],attempts:0,retryAt:0};
-      save.chapter.drops=[{id:"supplies",position:tile(74.1,140),items:[],expiresAt:100}];
+      const save=fresh();Object.assign(save.action.player,{x:74,z:140,facingX:1,facingZ:0});
+      save.chapter.grave={position:tile(75,140),items:[{itemId:"logs",quantity:1}],attempts:0,retryAt:0};
+      save.chapter.drops=[{id:"supplies",position:tile(75,140),items:[],expiresAt:100}];
       if(priority!=="grave")save.chapter.grave.position=tile(76,140);
       if(priority==="service")save.chapter.drops[0].position=tile(76,140);
-      const caravan=createValleyWorld(save.valley,save.chapter).objects.find(object=>object.id==="valley-caravan")!;
-      const world=onlyObjects(save,[caravan]);
+      const world=onlyObjects(save,[service("supplies-station",75,140)]);
       const choice=readOnly(save,()=>nearbyValleyInteraction(save,save.action,world));
       expect(choice?.selection.kind).toBe(priority==="service"?"object":priority);
       expect(choice?.label).toBe(priority==="grave"?"Recover":priority==="drop"?"Collect":"Open");
@@ -155,12 +154,12 @@ describe("nearby interaction resolver",()=>{
 
   it("keeps the generic non-service building inspection centre at five metres",()=>{
     for(const extra of [0,.001]){
-      const save=fresh();Object.assign(save.action.player,{x:16+extra,z:11});
+      const save=fresh();Object.assign(save.action.player,{x:16+extra,z:11,facingX:-1,facingZ:0});
       const world=onlyObjects(save,[service("large-home",10,10,3,3)]);
       const result=readOnly(save,()=>nearbyValleyInteraction(save,save.action,world));
       if(extra===0)expect(result?.selection).toEqual({kind:"object",id:"large-home"});else expect(result).toBeNull();
     }
-    const save=fresh();Object.assign(save.action.player,{x:9.9,z:10});
+    const save=fresh();Object.assign(save.action.player,{x:9.9,z:10,facingX:1,facingZ:0});
     const world=onlyObjects(save,[service("wide-house",10,10,11,1)]);
     expect(readOnly(save,()=>nearbyValleyInteraction(save,save.action,world))).toBeNull();
   });
@@ -169,7 +168,7 @@ describe("nearby interaction resolver",()=>{
     for(const extra of [0,.001]){
       const save=fresh(),world=createValleyWorld(save.valley,save.chapter);
       const caravan=world.objects.find(object=>object.id==="valley-caravan")!;
-      Object.assign(save.action.player,{x:77+extra,z:140});
+      Object.assign(save.action.player,{x:77+extra,z:140,facingX:-1,facingZ:0});
       const isolated={...world,objects:[caravan]};
       const result=readOnly(save,()=>nearbyValleyInteraction(save,save.action,isolated));
       if(extra===0)expect(result?.selection).toEqual({kind:"object",id:caravan.id});else expect(result).toBeNull();
@@ -177,8 +176,8 @@ describe("nearby interaction resolver",()=>{
   });
 
   it("ignores resources and resolves equal-distance services by stable id",()=>{
-    const {save,tree}=resourceFixture();Object.assign(save.action.player,{x:50,z:150});
-    const world=onlyObjects(save,[{...tree,position:tile(50,150)},service("z-service",54,150),service("a-service",46,150)]);
+    const {save,tree}=resourceFixture();Object.assign(save.action.player,{x:50,z:150,facingX:0,facingZ:1});
+    const world=onlyObjects(save,[{...tree,position:tile(50,150)},service("z-service",52,154),service("a-service",48,154)]);
     expect(readOnly(save,()=>nearbyValleyInteraction(save,save.action,world))?.selection).toEqual({kind:"object",id:"a-service"});
   });
 });

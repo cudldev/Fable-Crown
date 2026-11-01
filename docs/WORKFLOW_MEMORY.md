@@ -1,13 +1,13 @@
 # Working notes
 
 - Layouts: follow UX_LAYOUT_RULES.md. NPC dialogue ends through turns; object prompt opens one action. Craft list/details stay together; info including action is roughly one-third. Hide HUD/FPS while panels own focus, restore camera on exit. Thumbnail previews borrow loaded baked geometry; release strips raw VOX.
-- Input: desktop has no touch dock; last intentional touch/controller/keyboard use owns controls. Idle pads/drift do not switch. Clear held input on handoff; never save device mode. Keyboard Q switches tool/weapon.
+- Input: desktop has no touch dock; last intentional touch/controller/keyboard use owns controls. Idle pads/drift do not switch. Clear held input on handoff; never save device mode. Q switches mode. Valley camera always follows, with movement lead; face targets for Interact, mouse needs range, world touch selects only placement.
 
 - Multitouch regression: reuse the real two-touch helper in rpg-valley-mobile-ux.spec.ts and verify native pointerup, not synthetic clicks. Mode/Interact explicitly handle touch releases and deduplicate click; mode changes must preserve held movement.
 
 - UI: keep action menus contextual to world objects (services.ts), console Menu/Back hierarchy, one selected recipe/good. Personal backpack stays global; storage/account/workshop actions need their matching interaction. Feedback/service context and touch preferences never enter format7. Validate coarse-pointer portrait+landscape, mirrored reach, menu action-pause/background work, repeated feedback and recovery; keep GPU local.
 
-- Valley release: use isolated tmp/valley-onboarding. Build with VITE_BASE_PATH=/Fable-Crown/; production preview5398; serialize local GPU checks. Audit against APPROVED_ONBOARDING_PLAN.md, then verify the actual public PWA/WebGL with scripts/verify-valley-public.mjs (host Node uses --use-system-ca). Keep CI at two non-GPU cases.
+- Valley release: use isolated tmp/valley-onboarding. Set VITE_BASE_PATH=/Fable-Crown/ for both build AND preview5398; serialize GPU checks. Verify public PWA/WebGL with scripts/verify-valley-public.mjs (host Node uses --use-system-ca). Keep CI at two non-GPU cases.
 
 - Latest save decision: major redesign starts fresh. Format7 reads/writes only valley-v1 and valley-v1-backup; never migrate or import V3–V6. Keep old keys untouched. Current-format backup, import/export and offline reconciliation still apply.
 
