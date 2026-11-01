@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ActionCycle } from "./ActionCycle";
 import { HealthVial } from "./HealthVial";
 import type { TileSceneProps, TileSelection } from "./scene-types";
@@ -34,17 +34,20 @@ export default function ThreeScene(props: ThreeSceneProps) {
   const [shadows, setShadows] = useState(DEFAULT_VISUAL_PRESET.shadows);
   const [gi, setGI] = useState(DEFAULT_VISUAL_PRESET.gi), [ao, setAO] = useState(DEFAULT_VISUAL_PRESET.ao);
   const [cameraMode, setCameraMode] = useState<CameraMode>(DEFAULT_VISUAL_PRESET.cameraMode);
-  const [visual, setVisual] = useState<VisualSettings>(() => {
+  const [storedVisual, setVisual] = useState<VisualSettings>(() => {
     try {
       const saved: unknown = JSON.parse(localStorage.getItem(FOLIAGE_SETTINGS_KEY) ?? "{}");
       const foliage = saved && typeof saved === "object" ? saved as Partial<VisualSettings> : {};
       const daylight: Partial<VisualSettings> = JSON.parse(localStorage.getItem(DAYLIGHT_SETTINGS_KEY) ?? "{}") ?? {};
       const lens: Partial<VisualSettings> = JSON.parse(localStorage.getItem(LENS_SETTINGS_KEY) ?? "{}") ?? {};
+      const surface: Partial<VisualSettings> = JSON.parse(localStorage.getItem("fable-crown.voxel-surface-settings") ?? "{}") ?? {};
       return normalizeVisualSettings({ foliageEnabled: foliage.foliageEnabled, foliageDensity: foliage.foliageDensity, windStrength: foliage.windStrength,
-        dayNightCycle: daylight.dayNightCycle, dayTime: daylight.dayTime, cycleMinutes: daylight.cycleMinutes, lensDistortion: lens.lensDistortion });
+        dayNightCycle: daylight.dayNightCycle, dayTime: daylight.dayTime, cycleMinutes: daylight.cycleMinutes, lensDistortion: lens.lensDistortion,voxelSurfaceStrength:surface.voxelSurfaceStrength,voxelSurfaceVariation:surface.voxelSurfaceVariation });
     }
     catch { return { ...DEFAULT_VISUAL_SETTINGS }; }
   });
+  const visual=useMemo(()=>props.surfaceDetail?normalizeVisualSettings({...storedVisual,voxelSurfaceStrength:props.surfaceDetail.strength,voxelSurfaceVariation:props.surfaceDetail.variation}):storedVisual,[storedVisual,props.surfaceDetail?.strength,props.surfaceDetail?.variation]);
+  useEffect(()=>{try{localStorage.setItem("fable-crown.voxel-surface-settings",JSON.stringify({voxelSurfaceStrength:visual.voxelSurfaceStrength,voxelSurfaceVariation:visual.voxelSurfaceVariation}));}catch{/* Cosmetic controls work without storage. */}},[visual.voxelSurfaceStrength,visual.voxelSurfaceVariation]);
   useEffect(() => {
     try { localStorage.setItem(FOLIAGE_SETTINGS_KEY, JSON.stringify({ foliageEnabled: visual.foliageEnabled, foliageDensity: visual.foliageDensity, windStrength: visual.windStrength })); }
     catch { /* Foliage still works when device storage is unavailable. */ }

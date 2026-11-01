@@ -9,7 +9,7 @@ import { DEFAULT_VISUAL_SETTINGS } from "./visual-settings";
 import type { WorldCurve } from "./world-curve";
 
 const FADE_MS = 140;
-interface Template { id: number; data: VoxelSurfaceData; shadowData?: VoxelShadowData; cells: number; ready: boolean; geometry?: BufferGeometry; shadowGeometry?: BufferGeometry; material?: MeshLambertMaterial }
+interface Template { id: number; data: VoxelSurfaceData; nativePitch:number; nativeOrigin:readonly[number,number,number]; shadowData?: VoxelShadowData; cells: number; ready: boolean; geometry?: BufferGeometry; shadowGeometry?: BufferGeometry; material?: MeshLambertMaterial }
 interface Appearance { model: VoxelModel; lod: number; template: Template }
 interface Entry {
   id: number; art: ObjectArt; voxel: VoxelObject; localBounds: Box3; bounds: Box3; center: Vector3;
@@ -74,9 +74,11 @@ export class VoxelMeshes {
   private batches = new Map<string,Batch>();
   private views = new Set<BufferGeometry>();
   private warm: Batch[] = [];
-  private materials = new Map<number,MeshLambertMaterial>();
+  private materials = new Map<string,MeshLambertMaterial>();
   private aoStrength = { value: 1 };
   private aoDistance = { value: DEFAULT_VISUAL_SETTINGS.aoDistance };
+  private surfaceStrength = {value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceStrength};
+  private surfaceVariation = {value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceVariation};
   private depth = createVoxelTransitionDepthMaterial();
   private shadowMaterial = new MeshBasicMaterial({ colorWrite: false, depthWrite: false });
   private builds = 0;
@@ -88,13 +90,14 @@ export class VoxelMeshes {
   stats: VoxelMeshStats = stats();
   constructor(private scene: Scene, private options: VoxelMeshOptions = {}) {}
   setAO(enabled: boolean, strength = 1, distance = DEFAULT_VISUAL_SETTINGS.aoDistance) { this.aoStrength.value=enabled?strength:0; this.aoDistance.value=distance; }
+  setSurfaceDetail(strength:number,variation:number) {this.surfaceStrength.value=strength;this.surfaceVariation.value=variation;}
   private template(model: VoxelModel, lod: number) {
     const data=model.surfaces?.[lod];
     if (!data) throw Error("A voxel prop is missing its baked static surface.");
     let template=this.templates.get(data);
     if (!template) {
       const shadow=model.shadowSurfaces?.[lod]??data.shadow;
-      template={id:this.nextTemplate++,data,shadowData:shadow&&shadow.triangles<data.triangles?shadow:undefined,cells:model.levels[lod].count,ready:false};
+      template={id:this.nextTemplate++,data,nativePitch:model.pitch,nativeOrigin:[...model.surfaces![0].bounds.min],shadowData:shadow&&shadow.triangles<data.triangles?shadow:undefined,cells:model.levels[lod].count,ready:false};
       this.templates.set(data,template);
     }
     return template;
@@ -113,8 +116,9 @@ export class VoxelMeshes {
   }
   private admit(template: Template) {
     if (template.ready) return;
-    let material=this.materials.get(template.data.pitch);
-    if(!material) { material=voxelMeshMaterial(template.data.pitch,this.aoStrength,this.aoDistance);this.materials.set(template.data.pitch,material); }
+    const key=JSON.stringify([template.data.pitch,template.nativePitch,template.nativeOrigin]);
+    let material=this.materials.get(key);
+    if(!material) { material=voxelMeshMaterial(template.data.pitch,this.aoStrength,this.aoDistance,{pitch:template.nativePitch,origin:template.nativeOrigin,strength:this.surfaceStrength,variation:this.surfaceVariation});this.materials.set(key,material); }
     template.material=material;template.geometry=geometry(template.data,template.data);
     if(template.shadowData) {
       let cached=this.shadowGeometries.get(template.shadowData);

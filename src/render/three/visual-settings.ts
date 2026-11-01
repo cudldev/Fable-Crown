@@ -2,6 +2,7 @@ export interface VisualSettings {
   renderStyle: "smooth";
   bloom: number; chromaticAberration: number; lensDistortion: number; depthOfField: number; worldCurvature: number;
   spriteNormalStrength: number;
+  voxelSurfaceStrength: number; voxelSurfaceVariation: number;
   exposure: number; sunStrength: number; ambientStrength: number; lampStrength: number;
   sunAzimuth: number; sunElevation: number;
   sunTint: string | null; ambientTint: string | null; skyTint: string | null;
@@ -18,6 +19,7 @@ export interface VisualSettings {
 }
 export const DEFAULT_VISUAL_SETTINGS: Readonly<VisualSettings> = Object.freeze({
   renderStyle: "smooth", spriteNormalStrength: .85,
+  voxelSurfaceStrength: .55, voxelSurfaceVariation: .65,
   bloom: .12, chromaticAberration: .18, lensDistortion: .15, depthOfField: .25, worldCurvature: 2,
   exposure: 1.05, sunStrength: 1, ambientStrength: .85, lampStrength: 1,
   sunAzimuth: 23.3, sunElevation: 62.3,
@@ -34,6 +36,7 @@ export const DEFAULT_VISUAL_SETTINGS: Readonly<VisualSettings> = Object.freeze({
 export const VISUAL_RANGES = {
   bloom: [0, .5, .01], chromaticAberration: [0, 1, .01], lensDistortion: [0, 1, .01], depthOfField: [0, 1, .01], worldCurvature: [0, 2, .05],
   spriteNormalStrength: [0, 1, .05],
+  voxelSurfaceStrength: [0, 1, .05], voxelSurfaceVariation: [0, 1, .05],
   exposure: [.35, 2, .05], sunStrength: [0, 3, .05], ambientStrength: [0, 3, .05], lampStrength: [0, 3, .05],
   sunAzimuth: [0, 360, .1], sunElevation: [5, 85, .1], shadowSoftness: [0, 5, .1], shadowCoverage: [16, 80, 1],
   shadowBias: [-.005, .005, .0001], shadowNormalBias: [0, .3, .005], giStrength: [0, 2, .05], aoStrength: [0, 1, .05], aoDistance: [.125, 8, .125], fogReach: [20, 160, 5],

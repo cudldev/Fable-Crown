@@ -1,0 +1,41 @@
+{
+  "pitch": 0.0625,
+  "offDelta": 0,
+  "shadingDelta": 0.8904166666666666,
+  "variationDelta": 0.3813671875,
+  "repeatDelta": 0,
+  "uniformCellDelta": 0,
+  "variedCellDelta": 0.49174377713600914,
+  "transformDeltas": [
+    {
+      "name": "identity instance",
+      "delta": 0
+    },
+    {
+      "name": "fractional translation",
+      "delta": 0
+    },
+    {
+      "name": "quarter-turn Y",
+      "delta": 0
+    },
+    {
+      "name": "quarter-turn X",
+      "delta": 0
+    },
+    {
+      "name": "uniform scale",
+      "delta": 0.000008680555555555556
+    }
+  ],
+  "topologyUnchanged": true,
+  "textures": 0,
+  "programCounts": [
+    3,
+    3
+  ],
+  "glError": 0,
+  "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "errors": [],
+  "note": "Actual WebGL pixels from a coplanar 0.0625 m native grid under fixed directional lighting. No per-cell color or geometry variation."
+}

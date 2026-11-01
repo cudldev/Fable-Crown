@@ -1,5 +1,13 @@
 # Progress — 2026-10-29
 
+## Varied voxel normal overlay — 2026-11-02
+
+Added deterministic normal relief to native voxel props/resources/buildings/furnishings and voxel-derived terrain. Cell bevel width, apparent depth and facet tilt vary on the finest source grid; LOD/instance changes preserve the pattern and subpixel filtering limits shimmer. No new textures, asset bake, geometry or save changes. Camera settings expose persisted depth0.55/variation0.65, reset and controller/keyboard/touch adjustment. Legacy presets copy/reset the same controls. Shader hooks retain AO, GI, curvature and transitions. GPU diagnostics also exposed an initial reflection draw using an unallocated sun-shadow comparison texture; reflections now wait for the main shadow pass.
+
+908units/96files, strict types/build/native/baked/dist pass.9local WebGL cases cover native assets, LODs, normal invariance, desktop/touch controls and water/offline. Final candidate 0e529fe1e90d passes5affected WebGL cases (including controller range edits) and2release cases. Exact depth0/repeat pixels, varied cell responses and unchanged template/geometry/cache counts verified. Host RAF means off/on/off: desktop8.342/8.342/8.579ms; touch emulation8.629/8.679/8.341ms on RTX5070Ti,DPR1. Refresh-capped host samples are not isolated GPU cost or physical-phone benchmarks. Raw data/captures: performance/voxel-surface-detail and screenshots/voxel-surface-detail; contract: VOXEL_SURFACE_DETAIL.md.
+
+Local preview updated; public publication remains pending the earlier explicit-approval request after automatic review blocked the production push. No push attempted here. Actual weekly53%used/~47%remaining; no reset, credits or paid calls.
+
 ## Stable scenery and camera panning — 2026-11-02
 
 Moving visitor snapshots were clearing foliage and replacing every static prop batch, restarting voxel LOD/reveal state. Static habitat/scenery identities now exclude mobile visitors; equivalent snapshots retain buffers and preparation. Actual building, furnishing, terrain and pigment edits still refresh correctly. Same-world grass edits retain committed cover during replacement. Unchanged props keep their transforms/work anchors and static GI.

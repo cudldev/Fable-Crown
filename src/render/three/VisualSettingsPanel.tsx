@@ -59,6 +59,10 @@ export default function VisualSettingsPanel({ id, settings, preset, shadows, gi,
         {slider("depthOfField", "Depth of field")}{slider("worldCurvature", "World curvature")}
         <small>A gentle glow, subtle barrel distortion and round distant bokeh. Set Lens distortion to 0 to turn it off. Closer zoom lowers the camera slightly and rounds the distant ground.</small>
       </fieldset>
+      <fieldset><legend>Voxel surfaces</legend>
+        {slider("voxelSurfaceStrength", "Voxel depth")}{slider("voxelSurfaceVariation", "Voxel variation")}
+        <small>Subtle light-catching cell edges with varied depth. Set depth to zero for flat faces.</small>
+      </fieldset>
       <fieldset><legend>Sprite lighting</legend>
         {slider("spriteNormalStrength", "Sprite depth")}
         <small>Subtle surface normals react to world lighting. Set to zero for flat pixel shapes.</small>

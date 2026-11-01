@@ -33,6 +33,7 @@ import { FloatingVials } from "./floating-vials";
 import { HitDimensions } from "./hit-dimensions";
 import { appendSteppedGround, pickSteppedGround } from "./stepped-ground";
 import {staticSceneKey,objectTransformKey} from "./static-scene";
+import {installVoxelSurfaceDetail} from "./voxel-surface-detail";
 
 export type CameraMode = "perspective" | "orthographic";
 export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode; gi?: boolean; ao?: boolean; visual?: Readonly<VisualSettings> }
@@ -151,6 +152,8 @@ export class ThreeRuntime {
   private inputDispose: () => void;
   private staticSceneIdentity = "";
   private staticBatchBuilds = 0;
+  private surfaceStrength={value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceStrength};
+  private surfaceVariation={value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceVariation};
   private clickAnimation?: Animation;
   private clickExpiry?: ReturnType<typeof setTimeout>;
 
@@ -359,6 +362,7 @@ export class ThreeRuntime {
           this.terrainSurface = buildTerrainSurface(this.art.terrainTiles, this.world, { quietDirtSpeckles: true }); this.terrainBakes++;
           this.terrainBakeMs = performance.now() - started;
           this.terrainMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, map: this.terrainSurface.texture });
+          installVoxelSurfaceDetail(this.terrainMaterial,{pitch:.0625,strength:this.surfaceStrength,variation:this.surfaceVariation});
           this.terrainMaterial.name = "native-voxel-ground";
           this.contactDetail.decorate(this.terrainMaterial);
         } catch (error) { this.root.dataset.terrainWarning = error instanceof Error ? error.message : "Native ground baking unavailable."; }
@@ -881,6 +885,9 @@ export class ThreeRuntime {
     const voxelStart = performance.now();
     this.foliage.update(time, this.target, visual, view.overview, this.reducedMotion);
     this.voxelBuckets.setAO(this.props.ao !== false, visual.aoStrength, visual.aoDistance);
+    this.voxelBuckets.setSurfaceDetail(visual.voxelSurfaceStrength,visual.voxelSurfaceVariation);
+    this.surfaceStrength.value=visual.voxelSurfaceStrength;this.surfaceVariation.value=visual.voxelSurfaceVariation;
+    this.root.dataset.voxelSurfaceStrength=String(visual.voxelSurfaceStrength);this.root.dataset.voxelSurfaceVariation=String(visual.voxelSurfaceVariation);
     this.voxelBuckets.update(this.camera, this.height, this.curve, time);
     // Continuity probes need frame-level observations; avoid unchanged DOM writes.
     const voxel = this.voxelBuckets.stats;
@@ -899,7 +906,9 @@ export class ThreeRuntime {
     if (draw) {
     this.renderer.info.reset();
     this.gpuMeter.begin();
-    this.waterSystem.update(this.renderer, this.scene, this.camera, this.water,
+    // Reflection draws reuse the sun shadow. Let the main pass allocate its
+    // comparison texture first, including after shadow-resolution changes.
+    if(!this.rig.sun.castShadow||this.rig.sun.shadow.map)this.waterSystem.update(this.renderer, this.scene, this.camera, this.water,
       [this.ring, this.playerRing, this.facingIndicator.group, this.route, this.grid, this.mist], time, lighting, visual, view.overview, this.reducedMotion);
     this.post.render(this.renderer, this.scene, this.camera, visual, distance, closeCameraBlend(view.zoom), view.overview, this.canvas.width / this.width, this.sky.lightSource, this.rig.sun,
       { center: this.target, strength: this.curve.strength, range: this.curve.view.range.y });

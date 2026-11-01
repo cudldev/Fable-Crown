@@ -30,6 +30,8 @@ export interface TileSceneProps {
   sampleGround?: (x: number, z: number) => number;
   /** Height edits change this key; pigment texture reuse follows terrain-array identity. */
   groundRevision?: string | number;
+  /** Cosmetic preferences from the valley settings; never part of the save. */
+  surfaceDetail?: {strength:number;variation:number};
   directInput?: boolean;
   /** Point-and-click exploration; selection approaches targets through the worker. */
   pointControls?: boolean;

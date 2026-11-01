@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { BufferGeometry, InstancedMesh, Matrix4, MeshBasicMaterial, OrthographicCamera, Scene } from "three";
+import { BufferGeometry, InstancedMesh, Matrix4, MeshBasicMaterial, MeshLambertMaterial, OrthographicCamera, Scene,ShaderLib } from "three";
 import { VoxelMeshes, type VoxelMeshOptions } from "../src/render/three/voxel-meshes";
 import { voxelObject } from "../src/render/three/voxel-assets";
 import { voxelModel, type VoxelGrid } from "../src/render/three/voxel-data";
@@ -18,11 +18,31 @@ function move(c: OrthographicCamera,x:number) {c.position.x=x;c.lookAt(x,0,2);c.
 function meshes(scene: Scene) {const all:InstancedMesh[]=[];scene.traverse(object=>{if(object instanceof InstancedMesh)all.push(object);});return all;}
 const color=(scene:Scene)=>meshes(scene).filter(mesh=>mesh.userData.voxelStatic&&mesh.visible&&mesh.count>0);
 const shadow=(scene:Scene)=>meshes(scene).filter(mesh=>mesh.userData.voxelStaticShadow&&mesh.visible);
+function surfaceShader(material:MeshLambertMaterial){const shader={...ShaderLib.lambert,uniforms:{...ShaderLib.lambert.uniforms}};material.onBeforeCompile(shader as never,{}as never);return shader;}
 class Frames {now=0;tick(renderer:VoxelMeshes,c:OrthographicCamera,height=2000){this.now+=16;renderer.update(c,height,undefined,this.now);}}
 function settle(renderer:VoxelMeshes,c:OrthographicCamera,clock:Frames,height=2000) {
   let count=0;do{clock.tick(renderer,c,height);count++;}while((renderer.stats.queued||renderer.stats.transitions)&&count<200);
   expect(renderer.stats.queued).toBe(0);expect(renderer.stats.transitions).toBe(0);
 }
+
+test("surface normals keep the source grid through LOD changes and live tuning preserves geometry",()=>{
+  const scene=new Scene(),model=baked(16,false),art=voxelObject({model}),c=camera(),clock=new Frames(),renderer=new VoxelMeshes(scene);
+  art.group.position.x=2;scene.add(art.group);
+  try{
+    renderer.replace([{art}]);settle(renderer,c,clock);
+    const first=color(scene)[0],material=first.material as MeshLambertMaterial,shader=surfaceShader(material),geometry=first.geometry,builds=renderer.stats.templateBuilds,key=material.customProgramCacheKey();
+    expect(shader.uniforms.fableSurfacePitch.value).toBe(model.pitch);
+    expect(shader.uniforms.fableSurfaceOrigin.value.toArray()).toEqual(model.surfaces![0].bounds.min);
+    renderer.setSurfaceDetail(0,.9);clock.tick(renderer,c);
+    expect(shader.uniforms.fableSurfaceStrength.value).toBe(0);expect(shader.uniforms.fableSurfaceVariation.value).toBe(.9);
+    expect(color(scene)[0].geometry).toBe(geometry);expect(renderer.stats.templateBuilds).toBe(builds);expect(material.customProgramCacheKey()).toBe(key);
+    settle(renderer,c,clock,100);
+    const coarse=surfaceShader(color(scene)[0].material as MeshLambertMaterial);
+    expect(coarse.uniforms.voxelSurfacePitch.value).toBeGreaterThan(shader.uniforms.voxelSurfacePitch.value);
+    expect(coarse.uniforms.fableSurfacePitch.value).toBe(model.pitch);expect(coarse.uniforms.fableSurfaceOrigin.value.toArray()).toEqual(model.surfaces![0].bounds.min);
+    expect(coarse.uniforms.fableSurfaceStrength.value).toBe(0);
+  }finally{renderer.dispose();}
+});
 
 test("first appearance stays hidden until the requested static template is ready, then fades for140ms",()=>{
   const scene=new Scene(), model=baked(), art=voxelObject({model}), c=camera(), clock=new Frames();art.group.position.x=2;scene.add(art.group);

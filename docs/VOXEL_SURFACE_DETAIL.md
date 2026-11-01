@@ -1,0 +1,11 @@
+# Voxel surface relief — 2026-11-02
+
+The shared native-voxel materials now add an original procedural normal overlay. Each cell has seeded bevel width, apparent depth and a small face tilt. This gives broad same-colored faces individual light-catching cells without changing their cubic geometry or pigment. Baked props, resources, buildings and furnishings use it, as does voxel-derived terrain. Pixel actors, foliage and non-voxel models keep their existing materials.
+
+Camera → Voxel surfaces exposes **Voxel depth** (default0.55) and **Voxel variation** (default0.65), with Reset. Depth0 exactly restores the original normals. The controls accept touch, keyboard arrows and controller horizontal input; vertical controller input moves focus. Preferences use `fable-crown.voxel-surface-settings`, outside game saves. Legacy Visual settings also copies/resets both values; older presets acquire the defaults.
+
+`voxel-surface-detail.ts` evaluates a deterministic height profile on the native object-local grid and perturbs Lambert normals before scene lighting. Bevel widths span0.07–0.14cells; apparent depths0.01–0.05cells; facet slopes stay small. The finest source pitch and bounds origin remain identical across LOD materials. Derivatives supply the normal frame after instance transforms and world curvature, with screen-footprint filtering as cells become too small to resolve. No texture, mesh subdivision, time seed, new request or authoritative state is involved.
+
+Shader hooks retain pigment, AO, transitions, GI and curvature. Tuning changes shared uniforms rather than scene geometry or GI transport. A GPU review exposed an initial reflection draw sampling an unallocated shadow-comparison texture; reflection now waits for the first main shadow pass, including after shadow-map resizing.
+
+Evidence: [measured host comparisons](performance/voxel-surface-detail/README.md), [shader/scene captures](screenshots/voxel-surface-detail). The isolated flat face verifies exact depth0 output, individual-cell variation and transform covariance. The actual valley checks desktop/touch tuning, controller steps, copied/reset defaults, unchanged geometry/cache counts and graphics errors. Relief affects lighting, not silhouettes or physical shadow geometry. Physical-phone performance remains unmeasured.

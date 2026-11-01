@@ -151,10 +151,15 @@ export function useActionControls(options: UseActionControlsOptions) {
           if (edges.update("back", pressed(1))) latest.current.onBack?.();
           if (edges.update("inventory", pressed(9))) (latest.current.onMenu??latest.current.onInventory)?.();
           if (edges.update("build", pressed(2))) latest.current.onBuild?.();
-          const previous = edges.update("previous", pressed(12) || pressed(14) || stick.y < -0.55 || stick.x < -0.55);
-          const next = edges.update("next", pressed(13) || pressed(15) || stick.y > 0.55 || stick.x > 0.55);
-          if (buttons && previous) moveMenuFocus(buttons, -1);
-          if (buttons && next) moveMenuFocus(buttons, 1);
+          const previous = edges.update("previous", pressed(12) || stick.y < -0.55);
+          const next = edges.update("next", pressed(13) || stick.y > 0.55);
+          const left=edges.update("menuLeft",pressed(14)||stick.x<-.55),right=edges.update("menuRight",pressed(15)||stick.x>.55);
+          const range=document.activeElement instanceof HTMLInputElement&&document.activeElement.type==="range"?document.activeElement:null;
+          if(buttons&&range&&buttons.includes(range)&&(left||right)){
+            range.stepUp(right?1:-1);range.dispatchEvent(new Event("input",{bubbles:true}));
+          }
+          if (buttons && (previous||left&&!range)) moveMenuFocus(buttons, -1);
+          if (buttons && (next||right&&!range)) moveMenuFocus(buttons, 1);
         }
       }
       animationFrame = requestAnimationFrame(pollGamepad);

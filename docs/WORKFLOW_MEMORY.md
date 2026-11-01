@@ -51,6 +51,7 @@
 
 - Camera drags: anchor the grabbed world point; never combine per-event deltas with a last-rendered camera. Regression: batched events + direction reversal, both renderers/camera modes and phone orientations.
 - Grass: moving visitors never invalidate static habitat. Preserve committed cover while streaming edits; browser foliage counters lag500ms, so wait for the destination window upload before sampling. Serialize full unit suites and GPU checks to avoid host contention.
+- Voxel relief: native finest-grid pitch/origin must survive LOD changes; shared normal uniforms never rebake geometry/GI. See VOXEL_SURFACE_DETAIL.md. Reflections need an allocated sun shadow map before sampling its comparison texture.
 
 - Historical voxel-volume character sources: use fable-voxel-reference, one transparent three-quarter neutral pose, physical brief/shared pitch, clear limb gaps and short cape; inspect alpha on light/dark. Alden source candidate: assets/explorations/voxel/alden-source-v1/. Image only; no mesh/animation acceptance.
 
