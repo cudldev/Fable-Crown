@@ -1,5 +1,7 @@
 # Valley QA
 
+Public release c56f611 verified: format7 starts fresh with25coins; V3–V6 keys untouched. Continuous movement, native tent, current saving, both mobile orientations, correct Pages/PWA scope and offline WebGL/all11 asset entries pass. No page errors or external requests. See release/valley-public.json; deployed cache141aac213cf0.
+
 Current format: **7**, keys `valley-v1` / `valley-v1-backup`. Every player starts fresh with 25 coins. Old v3–v6 storage stays untouched; old files are rejected. No major-version migration.
 
 Verified against production `http://127.0.0.1:5398/Fable-Crown/`:
