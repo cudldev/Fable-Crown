@@ -1,7 +1,7 @@
 # Working notes
 
 - Layouts: follow UX_LAYOUT_RULES.md. NPC dialogue ends through turns; object prompt opens one action. Craft list/details stay together; info including action is roughly one-third. Hide HUD/FPS while panels own focus, restore camera on exit. Thumbnail previews borrow loaded baked geometry; release strips raw VOX.
-- Input: valley uses click/tap walking and approach-to-interact; right-click/hold options. No virtual dock. Keyboard/controller remain alternatives; clear held inputs on handoff. Explicit selected work stops on new destination/Stop/menu/visibility; never save or advance it offline. Camera follows; direction geometry stays in world.
+- Input: valley uses click/tap walking and approach-to-interact; right-click/hold options. No virtual dock. Keyboard/controller remain alternatives; clear held inputs on handoff. Explicit selected work stops on new destination/Stop/menu/visibility; never save or advance it offline. Drag/right stick detach the camera; F/right-stick press/HUD Follow reattach. Direction geometry stays in world.
 
 - Pointer QA: use actual mouse/CDP touch releases; test drag, pinch, long-press release suppression and approach range. NPC holds use service.objectId, span child menus, and release on exit. Clear NPC movement traces during offline reconciliation; preserve swing recovery when cancelling work.
 
@@ -50,6 +50,7 @@
 - Pixel cast review: fable-pixel-characters skill installed. Measure actual reference blocks/offsets before native tracing; guessed9×9/10×10prototypes were rejected. LatestAlden uses measured20×18finechart, separate hand/tool atsamepitch, staticbody/feet, tinyhand-onlygesture, truecameraquaternion billboards +horizontalmirror. STOPatrequestedAldenreview; restcastdraft. See PIXEL_CAST.md.
 
 - Camera drags: anchor the grabbed world point; never combine per-event deltas with a last-rendered camera. Regression: batched events + direction reversal, both renderers/camera modes and phone orientations.
+- Grass: moving visitors never invalidate static habitat. Preserve committed cover while streaming edits; browser foliage counters lag500ms, so wait for the destination window upload before sampling. Serialize full unit suites and GPU checks to avoid host contention.
 
 - Historical voxel-volume character sources: use fable-voxel-reference, one transparent three-quarter neutral pose, physical brief/shared pitch, clear limb gaps and short cape; inspect alpha on light/dark. Alden source candidate: assets/explorations/voxel/alden-source-v1/. Image only; no mesh/animation acceptance.
 

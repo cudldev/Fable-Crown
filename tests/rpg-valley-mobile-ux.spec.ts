@@ -110,12 +110,15 @@ test("touch drag, pinch and long-press do not dispatch an accidental walk",async
  await page.setViewportSize({width:390,height:844});await page.goto("./?chapter=valley");await ready(page);const fixture=createValleySave(Date.now());at(fixture,52,150);await restore(page,fixture);
  const cdp=await page.context().newCDPSession(page),before=await app(page).getAttribute("data-player-x");
  await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:1,x:195,y:350}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{id:1,x:280,y:430}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
- await page.waitForTimeout(200);await expect(app(page)).toHaveAttribute("data-player-x",before!);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");
+ await page.waitForTimeout(200);await expect(app(page)).toHaveAttribute("data-player-x",before!);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");await expect(app(page)).toHaveAttribute("data-camera-follow","false");
  const zoom=Number(await app(page).getAttribute("data-camera-zoom"));
  await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:1,x:140,y:350},{id:2,x:250,y:350}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{id:1,x:105,y:350},{id:2,x:285,y:350}]});await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
- await expect.poll(async()=>Number(await app(page).getAttribute("data-camera-zoom"))).toBeGreaterThan(zoom);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");await expect(app(page)).toHaveAttribute("data-camera-follow","true");
+ await expect.poll(async()=>Number(await app(page).getAttribute("data-camera-zoom"))).toBeGreaterThan(zoom);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");await expect(app(page)).toHaveAttribute("data-camera-follow","false");
+ const follow=page.getByRole("button",{name:"Follow Alden",exact:true});await expect(follow).toBeVisible();await expect(follow).toHaveAttribute("aria-pressed","false");await page.screenshot({path:"docs/screenshots/valley-camera/mobile-detached.png"});await follow.tap();await expect(app(page)).toHaveAttribute("data-camera-follow","true");await expect(follow).toHaveAttribute("aria-pressed","true");
  await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:3,x:195,y:370}]});await expect(page.getByRole("menu",{name:"World actions"})).toBeVisible({timeout:3000});await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
  await expect(page.getByRole("menuitem",{name:"Walk here",exact:true})).toBeVisible();await page.keyboard.press("Escape");await expect(page.locator(".valley-world-menu")).toHaveCount(0);await page.waitForTimeout(200);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");await expect(app(page)).toHaveAttribute("data-player-x",before!);
+ await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{id:4,x:195,y:370}]});await page.setViewportSize({width:844,height:390});await page.waitForTimeout(650);await cdp.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+ await expect(page.getByRole("menu",{name:"World actions"})).toHaveCount(0);await expect(app(page)).toHaveAttribute("data-pointer-kind","none");
 });
 
 test("world stations filter services, finish real work while actors pause, and keep a suspended placement draft", async ({ page }) => {

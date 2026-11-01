@@ -1,6 +1,9 @@
 .valley-app { font-family: system-ui,sans-serif; color:#f7edce; background:#314d43; }
 .valley-camera {position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));display:flex;gap:5px;z-index:9;}
-.valley-camera button {min-width:44px;min-height:44px;padding:8px;border:1px solid #d9c58c99;border-radius:9px;background:#24443bed;color:#fff0cd;font:13px system-ui;}
+.valley-camera button {min-width:44px;min-height:44px;padding:8px;border:1px solid #d9c58c99;border-radius:9px;background:#24443bed;color:#fff0cd;font:13px system-ui;touch-action:manipulation;}
+.valley-camera .valley-follow {min-width:80px;display:inline-flex;align-items:center;justify-content:center;gap:5px;}
+.valley-camera .valley-follow[aria-pressed=false] {background:#ebd49c;color:#203b36;border-color:#fff0bd;box-shadow:0 2px 9px #102d2880;}
+.valley-camera .valley-follow span {font-size:19px;line-height:1;}
 .valley-app .three-performance {pointer-events:none;}
 .valley-viewport {position:absolute;inset:0;}
 .valley-hud {position:absolute;inset:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) auto max(10px,env(safe-area-inset-left));display:flex;justify-content:space-between;gap:10px;z-index:9;pointer-events:none;}
@@ -79,7 +82,7 @@
 .valley-device-hints{font-size:11px!important;}
 @media(max-width:760px),(max-height:500px){
   .valley-vitals{width:168px;padding:6px 8px;font-size:10px;gap:3px;}.valley-vitals strong{font-size:15px;}.valley-vitals small{display:none;}.valley-meter-row{gap:7px;}.valley-hud-actions{max-width:none;}.valley-hud button{padding:8px;font-size:12px;}
-  .valley-current-goal{top:max(90px,calc(env(safe-area-inset-top) + 90px));max-width:calc(100% - 148px);}.valley-current-goal button{font-size:11px;padding:7px 9px;}
+  .valley-current-goal{top:max(90px,calc(env(safe-area-inset-top) + 90px));max-width:calc(100% - 176px);}.valley-current-goal button{font-size:11px;padding:7px 9px;}
   .valley-camera{top:max(90px,calc(env(safe-area-inset-top) + 90px));gap:4px;}.valley-camera button{font-size:12px;padding:6px;}
   .valley-app .three-performance{top:max(143px,calc(env(safe-area-inset-top) + 143px));bottom:auto;z-index:7;}
   .valley-working{top:146px;max-width:calc(100% - 120px);font-size:11px;}.valley-destination{top:174px;}

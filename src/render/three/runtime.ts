@@ -32,6 +32,7 @@ import { layoutFeedback, type FeedbackAnchor, type FeedbackRect } from "../feedb
 import { FloatingVials } from "./floating-vials";
 import { HitDimensions } from "./hit-dimensions";
 import { appendSteppedGround, pickSteppedGround } from "./stepped-ground";
+import {staticSceneKey,objectTransformKey} from "./static-scene";
 
 export type CameraMode = "perspective" | "orthographic";
 export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode; gi?: boolean; ao?: boolean; visual?: Readonly<VisualSettings> }
@@ -148,6 +149,8 @@ export class ThreeRuntime {
   private onError: (message: string) => void;
   private contextLost: (event: Event) => void;
   private inputDispose: () => void;
+  private staticSceneIdentity = "";
+  private staticBatchBuilds = 0;
   private clickAnimation?: Animation;
   private clickExpiry?: ReturnType<typeof setTimeout>;
 
@@ -490,6 +493,8 @@ export class ThreeRuntime {
     this.buildStaticBatches();
   }
   private buildStaticBatches() {
+    this.staticSceneIdentity=staticSceneKey(this.world,this.props.groundRevision);
+    this.root.dataset.staticBatchBuilds=String(++this.staticBatchBuilds);
     this.root.dataset.valleyFallbackObjects=[...this.objects.values()].filter(({object,art})=>object.art?.startsWith("valley-")&&!art.voxels).map(({object})=>object.id).join(",");
     const counts:Record<string,number>={};for(const {art}of this.objects.values())if(art.voxels){const id=String(art.group.userData.voxelAsset);counts[id]=(counts[id]??0)+1;}
     this.root.dataset.voxelObjectCounts=JSON.stringify(counts);
@@ -543,12 +548,16 @@ export class ThreeRuntime {
     if (tickChanged) this.observedAt = time;
     const world = this.props.worldOverride ?? worldForState(state);
     if (this.world !== world) {
+      const groundChanged=this.groundRevision!==this.props.groundRevision;
       this.world = world; this.buildTerrain();
       const ids = new Set(world.objects.map(object => object.id));
       for (const [id, entry] of this.objects) if (!ids.has(id)) { this.scene.remove(entry.art.group); this.objects.delete(id); }
       for (const object of world.objects) {
         const known = this.objects.get(object.id);
-        if (known && known.object.art===object.art) {known.object = object;this.positionObject(object,known.art);}
+        if (known && known.object.art===object.art&&known.object.kind===object.kind&&known.object.width===object.width&&known.object.height===object.height) {
+          if(groundChanged||objectTransformKey(known.object)!==objectTransformKey(object))this.positionObject(object,known.art);
+          known.object = object;
+        }
         else {
           if(known)this.scene.remove(known.art.group);
           const art = this.createObjectArt(object);
@@ -557,7 +566,9 @@ export class ThreeRuntime {
           this.scene.add(art.group); this.objects.set(object.id, { object, art });
         }
       }
-      this.buildStaticBatches();
+      // Mobile visitor anchors share the world snapshot for interaction range,
+      // but must not discard static prop instances, LODs or reveal transitions.
+      if(staticSceneKey(world,this.props.groundRevision)!==this.staticSceneIdentity)this.buildStaticBatches();
     }
     for (const actor of [state.player, ...state.npcs]) {
       let entry = this.people.get(actor.id);
@@ -732,15 +743,15 @@ export class ThreeRuntime {
     const player = this.people.get(0)?.art.group.position;
     const aspect = this.width / this.height;
     let span = view.overview ? Math.max(this.world.height * 1.05, this.world.width / aspect) : gameplaySpan(view.zoom, aspect);
-    const followsPlayer=(view.follow||view.dynamicFollow)&&player;
+    const followsPlayer=view.follow&&player;
     this.target.set(view.overview ? this.world.width / 2 : followsPlayer ? player.x : view.x, player?.y ?? 0,
       view.overview ? this.world.height / 2 : followsPlayer ? player.z : view.y);
     if(!followsPlayer)this.target.y=this.heightAt(this.target.x,this.target.z);
-    if(view.dynamicFollow&&player&&!view.overview){
+    if(view.dynamicFollow&&view.follow&&player&&!view.overview){
       const follow=this.followCamera.update(player,time,view.reducedMotion??this.reducedMotion);
       this.target.x=follow.x;this.target.z=follow.z;
       this.root.dataset.cameraLead=`${follow.leadX.toFixed(4)},${follow.leadZ.toFixed(4)}`;
-    }else{this.followCamera.reset();delete this.root.dataset.cameraLead;}
+    }else{this.followCamera.reset();if(view.dynamicFollow)this.root.dataset.cameraLead="0.0000,0.0000";else delete this.root.dataset.cameraLead;}
     const usePerspective = cameraMode === "perspective" && !view.overview;
     this.camera = usePerspective ? this.perspectiveCamera : this.orthographicCamera;
     let pitch = usePerspective ? cameraPitch(clampGameplayZoom(view.zoom)) : cameraPitch(.65);
@@ -748,6 +759,7 @@ export class ThreeRuntime {
       directionX:32/Math.hypot(32,45),directionZ:45/Math.hypot(32,45)},view.interaction,aspect,time,(x,z)=>this.heightAt(x,z));
     const framingActive=this.interactionCamera.status!=="none";
     if(framingActive){span=framing.span;pitch=framing.pitch;this.target.set(framing.x,framing.y-.4,framing.z);}
+    this.props.onCameraTarget?.(this.target.x,this.target.z);
     const direction = framingActive?temp.set(framing.directionX*Math.cos(pitch),Math.sin(pitch),framing.directionZ*Math.cos(pitch))
       :temp.set(32, Math.hypot(32, 45) * Math.tan(pitch), 45).normalize();
     const distance = usePerspective ? span / (2 * Math.tan(THREE.MathUtils.degToRad(this.perspectiveCamera.fov) / 2)) : Math.max(1, span / 35) * 66.5;
@@ -1111,11 +1123,12 @@ export class ThreeRuntime {
     let hold: ReturnType<typeof setTimeout> | undefined;
     let contextAt = -Infinity;
     const pointMode=()=>this.props.pointControls===true&&this.props.directInput===true;
+    const inputBlocked=()=>document.hidden||!!this.root.closest("[inert]");
     const clearHold = () => { if (hold) clearTimeout(hold); hold = undefined; };
     const cancelPointers=()=>{
       clearHold();dragged=true;pinched=true;
-      for(const id of pointers.keys())if(this.root.hasPointerCapture(id))this.root.releasePointerCapture(id);
-      pointers.clear();downSelection=null;
+      const ids=[...pointers.keys()];pointers.clear();downSelection=null;
+      for(const id of ids)if(this.root.hasPointerCapture(id))this.root.releasePointerCapture(id);
     };
     const selectionAt = (event: MouseEvent): TileSelection | null => {
       const hit = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-three-selection]");
@@ -1128,6 +1141,7 @@ export class ThreeRuntime {
       return point && this.curve.view.pickable(point) ? { kind: "tile", position: { x: clamp(Math.round(point.x), 0, this.world.width - 1), y: clamp(Math.round(point.z), 0, this.world.height - 1), worldId: this.world.id, plane: 0 } } : null;
     };
     const context = (event: MouseEvent) => {
+      if(inputBlocked())return;
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       event.preventDefault(); clearHold(); this.clearClickIndicator();
       if(this.props.camera.dynamicFollow&&!pointMode())return;
@@ -1136,10 +1150,11 @@ export class ThreeRuntime {
       if (selected) { contextAt = performance.now();cancelPointers();this.props.onContextMenu?.(selected, { x: event.clientX, y: event.clientY }); }
     };
     const down = (event: PointerEvent) => {
+      if(inputBlocked())return;
       // A new secondary click is a fresh request, even just after a prior menu.
       // Keep the touch-hold guard for its synthesized contextmenu event only.
       if (event.button === 2) { contextAt = -Infinity;clearHold();dragged=true;return; }
-      if (event.button !== 0 && !(this.props.directInput && event.button===1)) return;
+      if (event.button !== 0 && event.button!==1) return;
       if(event.button===1)event.preventDefault();
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       if(this.props.directInput&&!pointMode() && event.pointerType!=="touch" && event.button===0) {
@@ -1160,7 +1175,7 @@ export class ThreeRuntime {
         downSelection = hit ? JSON.parse(hit.dataset.threeSelection!) as TileSelection : null;
         if (event.pointerType === "touch"&&(!this.props.camera.dynamicFollow||pointMode())) hold = setTimeout(() => {
           const selected = downSelection ?? selectionAt(event);
-          if (selected && !dragged && pointers.size === 1) {
+          if (selected && !inputBlocked() && !dragged && pointers.size === 1) {
             contextAt = performance.now();cancelPointers();
             this.props.onContextMenu?.(selected, { x: startX, y: startY });
           }
@@ -1170,6 +1185,7 @@ export class ThreeRuntime {
       this.root.setPointerCapture(event.pointerId);
     };
     const move = (event: PointerEvent) => {
+      if(inputBlocked()){cancelPointers();return;}
       if (!pointers.has(event.pointerId)) return;
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       if (pointers.size > 1) {
@@ -1180,7 +1196,7 @@ export class ThreeRuntime {
       }
       if (pinched) return;
       if (Math.hypot(event.clientX - startX, event.clientY - startY) > 6) { dragged = true; clearHold(); }
-      if (dragged&&!this.props.camera.dynamicFollow&&!pointMode()) {
+      if (dragged) {
         const point = this.groundAt(event.clientX, event.clientY);
         // Keep the grabbed world point under the pointer. Incremental pointer
         // deltas lose movement when several events share the last rendered target.
@@ -1195,6 +1211,7 @@ export class ThreeRuntime {
     };
     const up = (event: PointerEvent) => {
       clearHold();
+      if(inputBlocked()){cancelPointers();return;}
       if (!pointers.has(event.pointerId)) return;
       pointers.delete(event.pointerId);
       if (this.root.hasPointerCapture(event.pointerId)) this.root.releasePointerCapture(event.pointerId);
@@ -1223,6 +1240,7 @@ export class ThreeRuntime {
       cancelPointers();
     };
     const wheel = (event: WheelEvent) => {
+      if(inputBlocked())return;
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings")) return;
       event.preventDefault(); const factor = Math.exp(-event.deltaY * .0015);
       this.props.onCamera(current => ({ ...current, zoom: clampGameplayZoom(current.zoom * factor), overview: false }));
@@ -1245,7 +1263,13 @@ export class ThreeRuntime {
     this.root.addEventListener("pointerup", up); this.root.addEventListener("pointercancel", up);
     this.root.addEventListener("wheel", wheel, { passive: false }); this.root.addEventListener("keydown", key);
     this.root.addEventListener("contextmenu", context); window.addEventListener("keydown", cancelInput);
-    return () => { clearHold(); this.root.removeEventListener("contextmenu", context); window.removeEventListener("keydown", cancelInput); this.root.removeEventListener("pointerdown", down); this.root.removeEventListener("pointermove", move); this.root.removeEventListener("pointerup", up); this.root.removeEventListener("pointercancel", up); this.root.removeEventListener("wheel", wheel); this.root.removeEventListener("keydown", key); };
+    const visibility=()=>{if(document.hidden)cancelPointers();};
+    const lostCapture=()=>{if(pointers.size)cancelPointers();};
+    const presentation=new MutationObserver(()=>{if(inputBlocked())cancelPointers();});
+    for(let node:HTMLElement|null=this.root;node;node=node.parentElement)presentation.observe(node,{attributes:true,attributeFilter:["inert"]});
+    window.addEventListener("blur",cancelPointers);window.addEventListener("resize",cancelPointers);window.addEventListener("orientationchange",cancelPointers);
+    document.addEventListener("visibilitychange",visibility);this.root.addEventListener("lostpointercapture",lostCapture);
+    return () => { cancelPointers();presentation.disconnect();window.removeEventListener("blur",cancelPointers);window.removeEventListener("resize",cancelPointers);window.removeEventListener("orientationchange",cancelPointers);document.removeEventListener("visibilitychange",visibility);this.root.removeEventListener("lostpointercapture",lostCapture);this.root.removeEventListener("contextmenu", context); window.removeEventListener("keydown", cancelInput); this.root.removeEventListener("pointerdown", down); this.root.removeEventListener("pointermove", move); this.root.removeEventListener("pointerup", up); this.root.removeEventListener("pointercancel", up); this.root.removeEventListener("wheel", wheel); this.root.removeEventListener("keydown", key); };
   }
   dispose() {
     this.hitDimensions.dispose();

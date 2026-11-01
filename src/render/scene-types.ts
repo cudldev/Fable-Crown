@@ -40,6 +40,8 @@ export interface TileSceneProps {
   state: RpgState;
   camera: TileCamera;
   onCamera: (update: TileCamera | ((current: TileCamera) => TileCamera)) => void;
+  /** Current rendered focus, without feeding presentation updates into React state. */
+  onCameraTarget?: (x: number, z: number) => void;
   selection: TileSelection | null;
   onSelect: (s: TileSelection) => void;
   onInteract?: (s: TileSelection) => void;

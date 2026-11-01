@@ -151,9 +151,20 @@ test("standard controller selects weapon once per Y hold, attacks, blocks and re
   await button(page, 6, false);
 
   const safe = createValleySave(Date.now()); await restore(page, safe);
+  const beforePan=JSON.parse((await page.getByTestId("rpg-world").getAttribute("data-camera-pose"))!).target as number[];
   await page.evaluate(() => { (window as unknown as { valleyControllerTestPad: TestPad }).valleyControllerTestPad.axes[2] = 1; });
-  await expect(root(page)).toHaveAttribute("data-camera-follow", "true");
+  await expect(root(page)).toHaveAttribute("data-camera-follow", "false");
+  await expect.poll(async()=>{const target=JSON.parse((await page.getByTestId("rpg-world").getAttribute("data-camera-pose"))!).target as number[];return Math.hypot(target[0]-beforePan[0],target[2]-beforePan[2]);}).toBeGreaterThan(.25);
+  await expect(root(page)).toHaveAttribute("data-pointer-kind","none");
+  await press(page,11);
+  await expect(root(page)).toHaveAttribute("data-camera-follow","true");
+  await page.waitForTimeout(300);await expect(root(page)).toHaveAttribute("data-camera-follow","true");
   await page.evaluate(() => { (window as unknown as { valleyControllerTestPad: TestPad }).valleyControllerTestPad.axes[2] = 0; });
+  await page.waitForTimeout(60);
+  await page.evaluate(() => { (window as unknown as { valleyControllerTestPad: TestPad }).valleyControllerTestPad.axes[2] = -1; });
+  await expect(root(page)).toHaveAttribute("data-camera-follow","false");
+  await page.evaluate(() => { (window as unknown as { valleyControllerTestPad: TestPad }).valleyControllerTestPad.axes[2] = 0; });
+  await press(page,11);await expect(root(page)).toHaveAttribute("data-camera-follow","true");
   await press(page, 9);
   await expect(dialog(page).getByRole("heading", { name: "Game menu" })).toBeVisible();
   await select(page, "Settings");

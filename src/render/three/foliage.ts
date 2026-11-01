@@ -1,5 +1,5 @@
 import { Box3, BufferGeometry, Color, DataTexture, DoubleSide, DynamicDrawUsage, Float32BufferAttribute, InstancedBufferAttribute, InstancedMesh, Matrix4, MeshLambertMaterial, NearestFilter, NearestMipmapNearestFilter, RGBAFormat, Sphere, SRGBColorSpace, Vector3, type Scene } from "three";
-import type { Terrain, WorldDefinition } from "../../rpg/types";
+import type { Terrain, WorldDefinition, WorldObject } from "../../rpg/types";
 import type { VisualSettings } from "./visual-settings";
 import { groundPivotDepthGLSL } from "./pivot-depth";
 import type { TerrainSurface } from "./terrain-tiles";
@@ -20,6 +20,14 @@ const random = (x: number, z: number, seed: number) => {
   let h = Math.imul(x + 17, 374761393) ^ Math.imul(z + 31, 668265263) ^ seed;
   h = Math.imul(h ^ h >>> 13, 1274126177); return ((h ^ h >>> 16) >>> 0) / 4294967296;
 };
+const mobileVisitor = (object: WorldObject) => object.kind === "quest" && object.id.startsWith("valley-visitor-");
+const sameValues = <T>(left: readonly T[], right: readonly T[]) => left.length === right.length && left.every((value, i) => value === right[i]);
+/** Only fields that influence habitat; moving people never carve temporary bare ground. */
+function foliageStaticKey(world: WorldDefinition): string {
+  const footprints = world.objects.filter(object => !mobileVisitor(object) && (object.kind !== "landmark" || object.art))
+    .map(object => JSON.stringify([object.kind, object.position.x, object.position.y, object.width, object.height, !!object.art])).sort();
+  return JSON.stringify([world.id, world.width, world.height, footprints]);
+}
 /** Smooth spatial patches avoid a visible grid of equally dense 4×4 squares. */
 function foliagePatch(x: number, z: number, seed: number): number {
   const gx = x / 5, gz = z / 5, ix = Math.floor(gx), iz = Math.floor(gz);
@@ -37,6 +45,7 @@ export function buildFoliageLayout(world: WorldDefinition, terrain: readonly Ter
       for (let x = Math.max(0, Math.ceil(x0)); x <= Math.min(width - 1, Math.floor(x1)); x++) apply(z * width + x);
   };
   for (const object of world.objects) {
+    if (mobileVisitor(object)) continue;
     const { x, y: z } = object.position;
     if (object.kind === "tree") visit(x - 3, z - 3, x + 3, z + 3, i => { woodland[i] = 1; });
     // Includes open doors, quest/service tiles, crops, bridges and nonblocking decorations.
@@ -182,6 +191,14 @@ export class FoliageSystem {
   private layout?: FoliageLayout;
   private surface?: TerrainSurface;
   private sampleGround?: (x:number,z:number)=>number;
+  private worldId?: string;
+  private worldWidth = 0; private worldHeight = 0;
+  private staticKey = "";
+  private terrainSnapshot: Terrain[] = [];
+  private collisionSnapshot: number[] = [];
+  private groundRevision?: string | number;
+  private surfaceVersion = -1;
+  private surfaceUV?: TerrainSurface["uvAt"];
   private centerX = Infinity; private centerZ = Infinity; private previousTime?: number;
   private density = -1;
   private countedAt = -Infinity;
@@ -268,12 +285,26 @@ export class FoliageSystem {
       this.meshes.push(mesh); scene.add(mesh);
     }
   }
-  setWorld(world: WorldDefinition, terrain?: readonly Terrain[], surface?: TerrainSurface, sampleGround?: (x:number,z:number)=>number, _groundRevision?:string|number) {
-    this.sampleGround=sampleGround;
-    this.layout = buildFoliageLayout(world, terrain); this.surface = surface; this.centerX = this.centerZ = Infinity;
+  setWorld(world: WorldDefinition, terrain?: readonly Terrain[], surface?: TerrainSurface, sampleGround?: (x:number,z:number)=>number, groundRevision?:string|number) {
+    const sourceTerrain = terrain ?? world.terrain, key = foliageStaticKey(world);
+    const replaced = this.worldId !== world.id || this.worldWidth !== world.width || this.worldHeight !== world.height;
+    const heightChanged = this.groundRevision !== groundRevision || !!this.sampleGround !== !!sampleGround ||
+      (groundRevision === undefined && this.sampleGround !== sampleGround);
+    const changed = replaced || key !== this.staticKey || !sameValues(sourceTerrain, this.terrainSnapshot) || !sameValues(world.collision, this.collisionSnapshot) ||
+      surface !== this.surface || (surface?.texture.version ?? -1) !== this.surfaceVersion || surface?.uvAt !== this.surfaceUV || heightChanged;
+    // React/worker snapshots may replace the callback without changing height data.
+    this.sampleGround = sampleGround;
+    if (!changed) return;
+    this.worldId = world.id; this.worldWidth = world.width; this.worldHeight = world.height; this.staticKey = key;
+    this.terrainSnapshot = [...sourceTerrain]; this.collisionSnapshot = [...world.collision]; this.groundRevision = groundRevision;
+    this.surfaceVersion = surface?.texture.version ?? -1; this.surfaceUV = surface?.uvAt;
+    this.layout = buildFoliageLayout(world, sourceTerrain); this.surface = surface; this.centerX = this.centerZ = Infinity;
+    if (this.job) this.stats.cancelled++;
     this.chunks.clear(); this.job = this.pending = undefined; this.counts = undefined;
-    this.stats.plants = this.stats.visiblePlants = this.stats.queued = this.stats.countQueued = this.stats.cacheChunks = 0;
-    for (const mesh of this.meshes) mesh.count = 0;
+    this.stats.queued = this.stats.countQueued = this.stats.cacheChunks = 0;
+    // Same-world edits stream into the existing buffers. Only another world's
+    // coordinates/seed may clear committed plants before its first window exists.
+    if (replaced) { for (const mesh of this.meshes) mesh.count = 0; this.stats.plants = this.stats.visiblePlants = 0; }
     this.countedAt = -Infinity;
   }
 
@@ -412,6 +443,7 @@ export class FoliageSystem {
   }
   dispose() {
     this.job = this.pending = undefined; this.counts = undefined; this.chunks.clear(); this.staging = [];
+    this.layout = undefined; this.surface = undefined; this.sampleGround = undefined; this.terrainSnapshot = []; this.collisionSnapshot = [];
     this.stats.queued = this.stats.countQueued = this.stats.cacheChunks = this.stats.stagingBytes = 0;
     for (const mesh of this.meshes) { this.scene.remove(mesh); mesh.dispose(); mesh.geometry.dispose(); (mesh.material as MeshLambertMaterial).dispose(); }
     for (const texture of this.textures) texture.dispose();

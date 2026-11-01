@@ -1,5 +1,15 @@
 # Progress — 2026-10-29
 
+## Stable scenery and camera panning — 2026-11-02
+
+Moving visitor snapshots were clearing foliage and replacing every static prop batch, restarting voxel LOD/reveal state. Static habitat/scenery identities now exclude mobile visitors; equivalent snapshots retain buffers and preparation. Actual building, furnishing, terrain and pigment edits still refresh correctly. Same-world grass edits retain committed cover during replacement. Unchanged props keep their transforms/work anchors and static GI.
+
+Restored mouse/middle-button/touch drag and right-stick panning. F, right-stick press or the visible highlighted Follow HUD button reattach Alden with gentle lead. Zoom and contextual camera restoration preserve manual state. Follow touch release works after world drags; R3 suppresses panning until stick release. Blur, hidden pages, rotation, inert presentations and lost capture cancel stale gestures.
+
+902units/95files pass with `npm test -- --maxWorkers=2`; an overlapping broad run hit host-contention timeouts, resolved by serialization without changing limits. Strict type/build/native/baked/dist checks pass.20local WebGL scenarios passed before the final prop refinement; final candidate ea32294c2eb3 passes16affected WebGL cases plus2release/offline cases. The off-camp test observes moving NPCs with unchanged grass uploads, prop-batch builds and terrain bakes, then streams a walking window without empty cover. Captures: screenshots/valley-camera. No new art, balance, save format, FPS or physical-device claim.
+
+Local preview remains http://127.0.0.1:5398/Fable-Crown/. Production publication still awaits explicit user approval after the earlier automatic-review rejection; no push attempted here. Actual weekly52%used/~48%remaining; no reset, credits or paid calls.
+
 ## Point controls, living NPCs and road-aware routes — 2026-11-01
 
 Kept the valley, art, contextual conversations/crafting, construction balance and current saves. Mouse/tap selects ground or approaches a target; right-click/hold offers options. Explicit gathering/combat repeats only for the selected target and cancels safely without skipping swing recovery. No virtual dock; keyboard/controller and contextual wilderness guard remain. NPCs work, wander and rest by role; a conversation holds only its target through child menus. Ambient work grants no player resources/XP. Visitor positions persist; offline reconciliation clears transient NPC traces. Occupied pads/ground and the future forge stay protected.

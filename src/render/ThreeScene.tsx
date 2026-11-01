@@ -134,7 +134,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
       const bounds = button.getBoundingClientRect();
       props.onContextMenu?.(JSON.parse(button.dataset.threeSelection!), { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 });
     }}>
-      <canvas ref={canvas} data-testid="three-canvas" aria-label={props.pointControls?"The Fable Crown valley. Click or tap to walk, or choose a target to approach and interact. Right click or touch and hold for options. The camera follows you; wheel or pinch zooms.":props.camera.dynamicFollow?"The Fable Crown valley. Move with WASD, a controller or joystick. The camera follows you; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
+      <canvas ref={canvas} data-testid="three-canvas" aria-label={props.pointControls?"The Fable Crown valley. Click or tap to walk, or choose a target to approach and interact. Right click or touch and hold for options. Drag to pan; Follow or F returns to Alden. Wheel or pinch zooms.":props.camera.dynamicFollow?"The Fable Crown valley. Move with WASD, a controller or joystick. The camera follows you; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
       {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the voxel village…</div>}
       {status === "ready" && <>
         <span className="three-performance" data-testid="fps-indicator" aria-label="Rendering performance" aria-live="off">FPS —</span>

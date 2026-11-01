@@ -76,6 +76,7 @@ export function useActionControls(options: UseActionControlsOptions) {
     let padIndex: number | null = null;
     let animationFrame = 0;
     let lastPadTime = 0;
+    let cameraPanBlocked = false;
     const heldKeys=new Set<string>(),releasedBeforeAction=new Set<string>();
     function clear() {
       for(const key of heldKeys)releasedBeforeAction.add(key);
@@ -103,6 +104,7 @@ export function useActionControls(options: UseActionControlsOptions) {
       if (event.repeat) return;
       if(event.code==="Space"&&enabled&&latest.current.mouseActions===false&&(!isInterfaceTarget(event.target)||event.target instanceof Element&&!!event.target.closest("[data-three-selection]"))){event.preventDefault();inputBuffer.setBlock("keyboard",true);}
       if (event.code === "KeyE" && enabled) { event.preventDefault(); latest.current.onInteract(); }
+      if (event.code === "KeyF" && enabled && !menu) { event.preventDefault(); latest.current.onFollow?.(); }
       if (event.code === "KeyQ" && enabled) { event.preventDefault(); latest.current.onToggleTool?.(); }
       if (event.code === "KeyI") { event.preventDefault(); latest.current.onInventory?.(); }
       if (event.code === "KeyB") { event.preventDefault(); latest.current.onBuild?.(); }
@@ -136,8 +138,9 @@ export function useActionControls(options: UseActionControlsOptions) {
           if(canAct&&strikeEdge)inputBuffer.setStrike("gamepad",true);
           inputBuffer.setBlock("gamepad", canAct && pressed(6));
           const cameraStick=applyStickDeadzone(pad.axes[2]??0,pad.axes[3]??0);
-          if(canAct&&(cameraStick.x||cameraStick.y))latest.current.onCameraPan?.(cameraStick.x,cameraStick.y,deltaSeconds);
-          if(edges.update("follow",pressed(11)))latest.current.onFollow?.();
+          if(!cameraStick.x&&!cameraStick.y&&!pressed(11))cameraPanBlocked=false;
+          if(edges.update("follow",pressed(11))&&canAct){cameraPanBlocked=true;latest.current.onFollow?.();}
+          if(canAct&&!cameraPanBlocked&&!pressed(11)&&(cameraStick.x||cameraStick.y))latest.current.onCameraPan?.(cameraStick.x,cameraStick.y,deltaSeconds);
           const confirm = edges.update("confirm", pressed(0));
           if (confirm) {
             if (buttons) {

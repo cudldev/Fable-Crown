@@ -22,4 +22,8 @@ Character bodies/tools retain ground-pivot depth. Vegetation keeps each card col
 
 Visual settings → Vegetation still controls enable, density and wind, with saved preferences. The28m fade and bounded34m instance window remain; uploads occur on8m region/density/world changes. Extra layers reserve4,096mat,2,048shrub and16,000short-grass slots rather than the32,000ceiling of each original type. Overview hides foliage. Alpha overdraw, repeated silhouettes, flat-world grounding and approximate wind normals remain limitations; physical-phone performance is unmeasured.
 
+Static habitat invalidation compares terrain, collision, stationary footprints, ground revision and pigment surface. Moving valley visitors neither carve bare patches nor invalidate buffers. Equivalent worker snapshots retain source chunks and in-flight preparation; genuine same-world edits keep committed cover visible until replacement uploads. Off-camp overlap tests verify identical matrices, ranks and colors. Browser checks must wait for the imported window's upload before sampling the500ms diagnostic counters.
+
+Static prop batches use a separate scenery identity too. Visitor movement updates its actor transform without replacing voxel instances, restarting LOD/reveal state or invalidating static GI. Actual building/furniture/support changes still refresh scenery. The browser regression checks that both static-batch and terrain-bake counts remain unchanged while a visitor moves.
+
 Current evidence: [quieter tips and card variation](art-audit/foliage-tips-v6/README.md); [layered vegetation](art-audit/foliage-layers-v5/README.md) records the earlier layer/edge pass. Earlier studies remain preserved. No deployment is implied.

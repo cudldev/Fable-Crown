@@ -1,6 +1,6 @@
-# Point controls and living neighbours — 2026-11-01
+# Point controls and living neighbours — 2026-11-02
 
-Valley exploration always follows Alden. Actual movement adds a gently eased lead capped at1.1m; stopping settles it, reduced motion disables it, and archive/reset presentation clears it. Zoom remains adjustable. Right-stick, middle-mouse and touch dragging cannot park the camera. Journal Find pins a destination.
+Valley exploration starts following Alden. Actual movement adds a gently eased lead capped at1.1m; stopping settles it, reduced motion disables it, and archive/reset presentation clears it. Zoom remains adjustable. Mouse dragging (including middle button), one-finger touch dragging and the right stick pan and park the camera. F, right-stick press or the highlighted HUD Follow button reattach it; wheel/pinch keep the current follow state. Journal Find pins a destination.
 
 Click or tap ground to walk; select a resource, station, person or foe to approach and act. Routes use continuous collision and terrace/stair traversal. Right-click or long press offers the target action, Walk here and Examine. Drag/pinch/long-press release never also walk. Menus open only within actual range. Keyboard/controller remain alternatives; the virtual dock is removed.
 
