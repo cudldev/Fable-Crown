@@ -1,7 +1,6 @@
 import {chromium,expect} from '@playwright/test';
-import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,writeFile} from 'node:fs/promises';
 const url='https://cudldev.github.io/Fable-Crown/';
-const previous=await readFile('tmp/public-valley-upgrade/before.json','utf8').then(JSON.parse).catch(()=>({caches:[]}));
 const context=await chromium.launchPersistentContext('tmp/public-valley-upgrade/profile',{channel:'chrome',headless:true,viewport:{width:1280,height:720}});
 try{
   const page=context.pages()[0]??await context.newPage(),errors=[],external=[];
@@ -9,6 +8,7 @@ try{
   const read=key=>page.evaluate(key=>new Promise((resolve,reject)=>{const open=indexedDB.open('fable-crown',1);open.onsuccess=()=>{const db=open.result,get=db.transaction('saves').objectStore('saves').get(key);get.onsuccess=()=>{resolve(get.result);db.close();};get.onerror=()=>reject(get.error);};open.onerror=()=>reject(open.error);}),key);
   // Neutral document prevents the previous game from running during the update check.
   await page.goto(url+'manifest.webmanifest');const oldKeys=['v3','v4','v5','v6'];
+  const previousCaches=await page.evaluate(()=>caches.keys());
   const old=await Promise.all(oldKeys.map(read));
   const response=await context.request.get(url+'world-assets.json?verify='+Date.now());expect(response.ok()).toBe(true);const manifest=await response.json();
   await page.evaluate(async()=>{await(await navigator.serviceWorker.ready).update();});
@@ -36,6 +36,6 @@ try{
   await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await expect(root).toHaveAttribute('data-ready','true',{timeout:90000});await expect(root).toHaveAttribute('data-mode','world');
   const offline=await page.evaluate(async()=>{const m=await(await fetch(new URL('world-assets.json',location.href))).json();return await Promise.all(m.files.map(async file=>{const response=await fetch(new URL(file,location.href));return response.ok&&(await response.arrayBuffer()).byteLength>0;}));});
   expect(offline.every(Boolean)).toBe(true);expect((await read('valley-v1')).valley.home).toMatchObject({x:54,z:155});await sameOld();expect(errors).toEqual([]);expect(external).toEqual([]);
-  await mkdir('docs/release',{recursive:true});await writeFile('docs/release/valley-public.json',JSON.stringify({url,date:new Date().toISOString(),version:manifest.version,scope,previousCaches:previous.caches,caches:expected,freshFormat:7,oldArchivesUntouched:true,noMigration:true,continuousMovement:true,nativeTentPlaced:true,webglOffline:true,offlineAssets:offline.length,errors,external},null,2));
+  await mkdir('docs/release',{recursive:true});await writeFile('docs/release/valley-public.json',JSON.stringify({url,date:new Date().toISOString(),version:manifest.version,scope,previousCaches,caches:expected,freshFormat:7,oldArchivesUntouched:true,noMigration:true,continuousMovement:true,nativeTentPlaced:true,webglOffline:true,offlineAssets:offline.length,errors,external},null,2));
   console.log(JSON.stringify({verified:true,version:manifest.version,freshFormat:7,offlineAssets:offline.length,errors,external}));
 }finally{await context.setOffline(false);await context.close();}

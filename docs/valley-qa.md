@@ -1,17 +1,16 @@
 # Valley QA
 
-Public release c56f611 verified: format7 starts fresh with25coins; V3–V6 keys untouched. Continuous movement, native tent, current saving, both mobile orientations, correct Pages/PWA scope and offline WebGL/all11 asset entries pass. No page errors or external requests. See release/valley-public.json; deployed cache141aac213cf0.
+Current format **7** uses `valley-v1` / `valley-v1-backup`: fresh25 coins, no V3–V6 migration/import, old keys untouched.
 
-Current format: **7**, keys `valley-v1` / `valley-v1-backup`. Every player starts fresh with 25 coins. Old v3–v6 storage stays untouched; old files are rejected. No major-version migration.
+Final local production candidate **c35e76d491e5**, `http://127.0.0.1:5398/Fable-Crown/`:
 
-Verified against production `http://127.0.0.1:5398/Fable-Crown/`:
+- Fresh-storage CPU: **6/6**; full unit/type/build/native/dist gate is lead-recorded in PROGRESS.
+- Functional GPU: **10/10**, serialized controller2 + existing8.
+- Release/PWA: **2/2**, retaining the two-case non-GPU CI boundary. Scope/offline assets/zero external requests pass.
+- No page errors. Public evidence in `release/valley-public.json` remains lead-owned; local results do not claim this candidate live.
 
-- Fresh storage CPU: **6/6**.
-- GPU functional cases: **8 pass across latest runs**. One obsolete exact-message assertion was corrected and its case rerun.
-- Non-GPU release/PWA: **2/2**. Repository scope, offline assets and zero external requests passed.
+Coverage: earned peaceful/mixed reference journeys; home/economy/offline/recovery/current saves; fresh isolation and legacy-file rejection; keyboard/emulated-pad/touch orientations. New controller proof covers Y once/hold, real RT damage/LT block, Settings camera/tool controls, disclosure/Tab wrap, five day3 pins and later grant inspection.
 
-Coverage: tent/payment, crafting/trading, offline construction, progress-based onboarding, current-format import/backup recovery, old-key isolation, legacy-file rejection, keyboard/emulated controller/touch, both mobile orientations, repeated defeat/graves, partial recovery, per-press gathering and reload persistence. No page errors.
+[Completion audit](VALLEY_COMPLETION_AUDIT.md) maps approved sections1–5. It records actual15-frame game-scale idle/locomotion/strike/block playback and visible draft limits. Physical hardware, hour-long pacing and unsampled animation cases remain human follow-up.
 
-Use valid current-format fixtures and the real UI/worker/IndexedDB. Keep GPU checks local; release CI remains two non-GPU cases. Run `tests/valley-fresh-save.test.ts`, `tests/rpg-valley*.spec.ts`, then `npm run test:release` against a production build.
-
-Block/strike screenshots are review references. Art acceptance, physical-device performance and actual public deployment verification remain lead-owned.
+Workflow: valid current fixtures → real UI/worker/IDB checks → local GPU suite → production `npm run test:release`. Never use dev mode for PWA acceptance.

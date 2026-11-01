@@ -1,5 +1,7 @@
 # Working notes
 
+- Valley release: use isolated tmp/valley-onboarding. Build with VITE_BASE_PATH=/Fable-Crown/; production preview5398; serialize local GPU checks. Audit against APPROVED_ONBOARDING_PLAN.md, then verify the actual public PWA/WebGL with scripts/verify-valley-public.mjs (host Node uses --use-system-ca). Keep CI at two non-GPU cases.
+
 - Latest save decision: major redesign starts fresh. Format7 reads/writes only valley-v1 and valley-v1-backup; never migrate or import V3–V6. Keep old keys untouched. Current-format backup, import/export and offline reconciliation still apply.
 
 - Full voxel bake: `npm run voxel:bake` compiles all props/LODs/states/supplies/shadows/GI inputs and terrain pigment; `voxel:check-bake` verifies deterministic artifacts. Runtime loads versioned baked.json/meshes.bin and terrain surface.json/bin; no raw VOX downloads or meshing. Use .bin for application-gzip payloads (.gz may be transparently decoded by static servers). Keep37templates/GPUwarmup; world atlas and GI remain dynamic. See performance/voxel-bake.

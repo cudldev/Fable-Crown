@@ -1,0 +1,145 @@
+{
+  "source": "Actual production WebGL playback; cropped screenshots are unedited",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "motion": "3m/s continuous locomotion uses renderer clip walk; no separate sprint state",
+  "samples": [
+    {
+      "phase": "idle",
+      "file": "docs/screenshots/valley-playback/idle-0.png",
+      "at": 19260.10000000894,
+      "clip": "idle",
+      "actionFrame": "42",
+      "x": "52.0000",
+      "z": "150.0000"
+    },
+    {
+      "phase": "idle",
+      "file": "docs/screenshots/valley-playback/idle-1.png",
+      "at": 19539.10000000894,
+      "clip": "idle",
+      "actionFrame": "59",
+      "x": "52.0000",
+      "z": "150.0000"
+    },
+    {
+      "phase": "locomotion",
+      "file": "docs/screenshots/valley-playback/locomotion-0.png",
+      "at": 19750.20000000298,
+      "clip": "walk",
+      "actionFrame": "71",
+      "x": "52.1631",
+      "z": "149.8838"
+    },
+    {
+      "phase": "locomotion",
+      "file": "docs/screenshots/valley-playback/locomotion-1.png",
+      "at": 20028.30000001192,
+      "clip": "walk",
+      "actionFrame": "88",
+      "x": "52.8356",
+      "z": "149.4061"
+    },
+    {
+      "phase": "locomotion",
+      "file": "docs/screenshots/valley-playback/locomotion-2.png",
+      "at": 20312.40000000596,
+      "clip": "walk",
+      "actionFrame": "105",
+      "x": "53.5280",
+      "z": "148.9133"
+    },
+    {
+      "phase": "strike",
+      "file": "docs/screenshots/valley-playback/strike-0.png",
+      "at": 20560.40000000596,
+      "clip": "strike",
+      "actionFrame": "120",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "strike",
+      "file": "docs/screenshots/valley-playback/strike-1.png",
+      "at": 20810.10000000894,
+      "clip": "strike",
+      "actionFrame": "135",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "strike",
+      "file": "docs/screenshots/valley-playback/strike-2.png",
+      "at": 21084.70000000298,
+      "clip": "idle",
+      "actionFrame": "152",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "strike",
+      "file": "docs/screenshots/valley-playback/strike-3.png",
+      "at": 21343.40000000596,
+      "clip": "idle",
+      "actionFrame": "167",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "strike",
+      "file": "docs/screenshots/valley-playback/strike-4.png",
+      "at": 21598.40000000596,
+      "clip": "idle",
+      "actionFrame": "182",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "block",
+      "file": "docs/screenshots/valley-playback/block-0.png",
+      "at": 21872.40000000596,
+      "clip": "block",
+      "actionFrame": "199",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "block",
+      "file": "docs/screenshots/valley-playback/block-1.png",
+      "at": 22166.30000001192,
+      "clip": "block",
+      "actionFrame": "216",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "block",
+      "file": "docs/screenshots/valley-playback/block-2.png",
+      "at": 22442.60000000894,
+      "clip": "block",
+      "actionFrame": "233",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "settled",
+      "file": "docs/screenshots/valley-playback/settled-0.png",
+      "at": 22678.80000001192,
+      "clip": "idle",
+      "actionFrame": "248",
+      "x": "53.9150",
+      "z": "148.6377"
+    },
+    {
+      "phase": "settled",
+      "file": "docs/screenshots/valley-playback/settled-1.png",
+      "at": 22952.5,
+      "clip": "idle",
+      "actionFrame": "264",
+      "x": "53.9150",
+      "z": "148.6377"
+    }
+  ]
+}

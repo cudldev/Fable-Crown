@@ -14,6 +14,7 @@ export interface UseActionControlsOptions {
   /** Called once per animation frame while the right stick is displaced. */
   onCameraPan?(x:number,y:number,deltaSeconds:number):void;
   onFollow?():void;
+  onToggleTool?():void;
 }
 
 const MOVEMENT_KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"]);
@@ -24,14 +25,20 @@ function isInterfaceTarget(target: EventTarget | null): boolean {
   return target instanceof Element && Boolean(target.closest("button, a, input, textarea, select, [role='button'], [role='dialog'], [data-action-controls], [data-action-menu]"));
 }
 function isVisible(element: HTMLElement): boolean {
+  for(let parent=element.parentElement;parent;parent=parent.parentElement){
+    if(parent instanceof HTMLDetailsElement&&!parent.open&&!parent.querySelector(":scope > summary")?.contains(element))return false;
+  }
   return element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden" && !element.closest("[inert], [aria-hidden='true']");
 }
 /** A dialog or data-action-menu opts into controller focus navigation. */
+export function focusableMenuElements(root:HTMLElement):HTMLElement[] {
+  return [...root.querySelectorAll<HTMLElement>("button:not(:disabled), [role='button']:not([aria-disabled='true']), a[href], input:not(:disabled), select:not(:disabled), summary")].filter(isVisible);
+}
 function menuButtons(): HTMLElement[] | null {
   const menus = [...document.querySelectorAll<HTMLElement>("dialog[open], [role='dialog'], [data-action-menu]")].filter(isVisible);
   const root = menus.at(-1);
   if (!root) return null;
-  return [...root.querySelectorAll<HTMLElement>("button:not(:disabled), [role='button']:not([aria-disabled='true']), a[href], input:not(:disabled), select:not(:disabled)")].filter(isVisible);
+  return focusableMenuElements(root);
 }
 function moveMenuFocus(buttons: HTMLElement[], direction: number): void {
   if (!buttons.length) return;
@@ -96,6 +103,8 @@ export function useActionControls(options: UseActionControlsOptions) {
           const pressed = (index: number) => Boolean(pad.buttons[index]?.pressed || (pad.buttons[index]?.value ?? 0) > 0.5);
           const buttons = menuButtons();
           const canAct = latest.current.enabled !== false && !buttons && !isTextTarget(document.activeElement);
+          const toggleToolEdge=edges.update("toggleTool",pressed(3));
+          if(canAct&&toggleToolEdge)latest.current.onToggleTool?.();
           const stick = applyStickDeadzone(pad.axes[0] ?? 0, pad.axes[1] ?? 0);
           inputBuffer.setMovement("gamepad", canAct ? stick.x : 0, canAct ? stick.y : 0);
           const strikeEdge=edges.update("strike",pressed(7));

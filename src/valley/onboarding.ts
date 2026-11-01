@@ -4,6 +4,19 @@ import { COTTAGE_TICKS, FIRST_BILL, FORGE_TICKS } from "./contracts";
 import type { ValleySave } from "./contracts";
 import { VALLEY_COMMISSIONS, VALLEY_STOCK, visitorStock } from "./content";
 
+export const VALLEY_DIRECTIONS = [
+  {id:"furnish",label:"Furnish my home",goal:"Craft and place another furnishing in my valley"},
+  {id:"garden",label:"Shape my garden",goal:"Lay a path, shape a terrace and plant my garden"},
+  {id:"produce",label:"Produce goods",goal:"Make goods and fulfil a supply commission"},
+  {id:"forge",label:"Build the optional forge",goal:"Contribute logs and bronze bars to the optional public forge"},
+  {id:"wilderness",label:"Explore the wilderness",goal:"Prepare food and equipment, then explore beyond the safe valley"},
+] as const;
+export const FUTURE_GRANTS = [
+  {id:"residence",title:"Larger residence",benefit:"More indoor room for furnishings and personal workshops."},
+  {id:"land",title:"Adjacent land grant",benefit:"More building space for gardens and shared settlement projects."},
+  {id:"residents",title:"Resident cottages",benefit:"Homes for permanent neighbours as the settlement grows."},
+] as const;
+
 export interface ValleyVisitor { id:string; name:string; role:string; x:number; z:number; dialogue:string; stock:typeof VALLEY_STOCK; offers:typeof VALLEY_COMMISSIONS }
 export function getVisitors(save:ValleySave,now:number):ValleyVisitor[] {
   const v=save.valley,complete=v.cottageTicks>=COTTAGE_TICKS,date=calendarDate(now);

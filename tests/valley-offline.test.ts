@@ -19,6 +19,13 @@ function commissioned() {
 }
 
 describe("quarter-speed offline valley construction", () => {
+  it("summarises actual partial construction and currently available visitors",()=>{
+    const s=commissioned();let summary=reconcileValley(s,NOW+HOUR);
+    expect(summary.message).toContain("75 active minutes remaining");expect(summary.message).toContain("Visiting today: Rowan");expect(summary.message).not.toContain("Pella");
+    summary=reconcileValley(s,NOW+6*HOUR);expect(summary.message).toContain("Your cottage is ready");expect(summary.message).toContain("Rowan, Pella, Garrick");
+    const late=createValleySave(NOW);summary=reconcileValley(late,NOW+72*HOUR);
+    expect(summary.message).toContain("free tent");expect(summary.message).not.toContain("cottage is ready");expect(summary.message).not.toContain("Pella");
+  });
   it.each([[0, 0, 0], [1, 1500, 1500], [6, 9000, 9000], [24, 36000, 9000], [72, 36000, 9000]])(
     "%ih away yields %i settlement ticks and %i cottage ticks", (hours, ticks, cottage) => {
       const save = commissioned();

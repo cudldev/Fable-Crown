@@ -55,6 +55,14 @@ describe("valley conservation and cottage account",()=>{
 });
 
 describe("saved settlement production",()=>{
+  it("provides basic timber and stool crafting at the caravan without unlocking cottage recipes",()=>{
+    const s=fresh();at(s,74,142);give(s,"logs",1);
+    run(s,{type:"craft",recipeId:"valley-plank",quantity:1});advanceSettlement(s,3,NOW);
+    expect(count(s,"logs")).toBe(0);expect(count(s,"valley-plank")).toBe(2);
+    fail(s,{type:"craft",recipeId:"valley-table",quantity:1});
+    run(s,{type:"craft",recipeId:"valley-stool",quantity:1});advanceSettlement(s,5,NOW);
+    expect(count(s,"valley-plank")).toBe(0);expect(count(s,"valley-stool")).toBe(1);
+  });
   it("enables the completed personal workbench in every home rotation",()=>{
     for(const rotation of [0,1,2,3] as const){
       const s=fresh();run(s,{type:"place-home",x:54,z:155,rotation});give(s,"coins",75);run(s,{type:"pay",amount:100});
@@ -115,7 +123,7 @@ describe("home storage, decoration and public development",()=>{
     s.valley.paid=100;s.valley.cottageTicks=COTTAGE_TICKS;run(s,{type:"pack-tent"});at(s,61,161);run(s,{type:"withdraw",itemId:"logs",quantity:1});expect(count(s,"logs")).toBe(1);
   });
   it("places a carried stool once and moves the same furnishing without another item",()=>{
-    const s=fresh();home(s);give(s,"valley-stool",1);at(s,58,168);run(s,{type:"place-furniture",itemId:"stool",x:58,z:168,rotation:0});expect(count(s,"valley-stool")).toBe(0);
+    const s=fresh();home(s);give(s,"valley-stool",1);at(s,57,168);run(s,{type:"place-furniture",itemId:"stool",x:58,z:168,rotation:0});expect(count(s,"valley-stool")).toBe(0);
     const id=s.valley.furniture[0].id;run(s,{type:"move-furniture",id,x:59,z:168,rotation:1});expect(s.valley.furniture).toHaveLength(1);expect(s.valley.furniture[0].id).toBe(id);expect(count(s,"valley-stool")).toBe(0);
     fail(s,{type:"place-furniture",itemId:"stool",x:60,z:168,rotation:0});
   });
@@ -131,7 +139,7 @@ describe("home storage, decoration and public development",()=>{
     fail(s,{type:"daily-help"});
   });
   it("requires complete cottage, actual carried materials and exact optional forge build time",()=>{
-    const s=fresh();at(s,70,178);give(s,"logs",12);give(s,"bronze-bar",2);fail(s,{type:"forge-deliver",itemId:"logs",quantity:12});s.chapter.player.inventory=[];at(s,52,141);cottage(s);at(s,70,178);s.chapter.bank.push({itemId:"logs",quantity:12});fail(s,{type:"forge-deliver",itemId:"logs",quantity:12});
+    const s=fresh();at(s,72,182);give(s,"logs",12);give(s,"bronze-bar",2);fail(s,{type:"forge-deliver",itemId:"logs",quantity:12});s.chapter.player.inventory=[];at(s,52,141);cottage(s);at(s,72,182);s.chapter.bank.push({itemId:"logs",quantity:12});fail(s,{type:"forge-deliver",itemId:"logs",quantity:12});
     give(s,"logs",12);give(s,"bronze-bar",2);run(s,{type:"forge-deliver",itemId:"logs",quantity:12});advanceSettlement(s,1800,NOW);expect(s.valley.forge.ticks).toBe(0);
     run(s,{type:"forge-deliver",itemId:"bronze-bar",quantity:2});advanceSettlement(s,1799,NOW);expect(s.valley.forge.ticks).toBe(1799);advanceSettlement(s,1,NOW);expect(s.valley.forge.ticks).toBe(FORGE_TICKS);fail(s,{type:"forge-deliver",itemId:"logs",quantity:1});
     at(s,78,141);give(s,"copper-ore",1);give(s,"tin-ore",1);run(s,{type:"craft",recipeId:"bronze-bar",quantity:1});expect(s.valley.workQueue[0].remainingTicks).toBe(4);
@@ -142,6 +150,15 @@ describe("home storage, decoration and public development",()=>{
 });
 
 describe("settlement-only clock",()=>{
+  it("never creates a furnishing or forge scaffold under the player",()=>{
+    const s=fresh();home(s);give(s,"valley-stool",1);at(s,58,168);
+    fail(s,{type:"place-furniture",itemId:"stool",x:58,z:168,rotation:0});
+    at(s,57,168);run(s,{type:"place-furniture",itemId:"stool",x:58,z:168,rotation:0});
+    const id=s.valley.furniture[0].id;fail(s,{type:"move-furniture",id,x:57,z:168,rotation:0});
+    at(s,52,141);give(s,"coins",75);run(s,{type:"pay",amount:100});advanceSettlement(s,COTTAGE_TICKS,NOW);
+    at(s,70,178);give(s,"logs",12);fail(s,{type:"forge-deliver",itemId:"logs",quantity:12});
+    at(s,72,182);run(s,{type:"forge-deliver",itemId:"logs",quantity:12});expect(s.valley.forge.logs).toBe(12);
+  });
   it("clears the deadline when ordinary overworld resources respawn",()=>{
     const s=fresh(),resource=Object.values(s.chapter.resources).find(r=>!r.objectId.startsWith("valley-"))!;
     resource.available=false;resource.respawnAt=s.chapter.tick+3;advanceSettlement(s,3,NOW);

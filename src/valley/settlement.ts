@@ -13,6 +13,10 @@ const result=(ok:boolean,message:string):ValleyResult=>({ok,message});
 const quantity=(n:number)=>Number.isSafeInteger(n)&&n>0&&n<=100;
 const complete=(save:ValleySave)=>save.valley.cottageTicks>=COTTAGE_TICKS;
 const near=(save:ValleySave,x:number,z:number,r=3)=>Math.hypot(save.action.player.x-x,save.action.player.z-z)<=r;
+const overlapsPlayer=(save:ValleySave,x:number,z:number,width:number,height:number)=>{
+  const p=save.action.player;
+  return p.x+.2>x-.5&&p.x-.2<x+width-.5&&p.z+.2>z-.5&&p.z-.2<z+height-.5;
+};
 const carried=(save:ValleySave)=>save.chapter.player.inventory;
 const flag=(save:ValleySave,id:string)=>{if(!save.valley.flags.includes(id))save.valley.flags.push(id);};
 function syncVisitors(save:ValleySave,now:number):void {
@@ -88,7 +92,8 @@ function execute(save:ValleySave,command:ValleyCommand,now:number):ValleyResult 
       if(recipe.requiresCottage&&!complete(save))return result(false,"This furnishing unlocks when your cottage is complete.");
       if(recipe.skill!=="carpentry"&&levelForXp(save.chapter.player.skills[recipe.skill])<recipe.level)return result(false,"Your skill level is too low.");
       const fp=homeFootprints(v),personalBench=complete(save)&&fp&&near(save,fp.workbench.x,fp.workbench.z);
-      const station=recipe.station==="workbench"?(near(save,69,139)||personalBench):recipe.station==="range"?near(save,81,139):near(save,78,139)||(v.forge.ticks>=FORGE_TICKS&&near(save,72,180));
+      const caravanBench=!recipe.requiresCottage&&near(save,74,140);
+      const station=recipe.station==="workbench"?(near(save,69,139)||personalBench||caravanBench):recipe.station==="range"?near(save,81,139):near(save,78,139)||(v.forge.ticks>=FORGE_TICKS&&near(save,72,180));
       if(!station)return result(false,"Stand near the communal workbench, brazier, or cooking fire for this recipe.");
       const inputs=recipe.inputs.map(i=>({...i,quantity:i.quantity*command.quantity})),output={...recipe.output,quantity:recipe.output.quantity*command.quantity};
       const staged=bag.map(i=>({...i}));if(!exchangeItems(staged,inputs,[output]))return result(false,"You need the exact carried ingredients and room for the finished batch.");
@@ -132,7 +137,7 @@ function execute(save:ValleySave,command:ValleyCommand,now:number):ValleyResult 
       const itemId=existing?.itemId??(command as Extract<ValleyCommand,{type:"place-furniture"}>).itemId;
       if(itemId!=="stool"&&!complete(save))return result(false,"Finish the cottage before placing this furnishing.");
       if(!v.home||!near(save,command.x,command.z,6))return result(false,"Place your tent, then stand near the furnishing's new position.");
-      const reason=validateFurniturePlacement(v,itemId,command.x,command.z,command.rotation,existing?.id);if(reason)return result(false,reason);
+      const reason=validateFurniturePlacement(v,itemId,command.x,command.z,command.rotation,existing?.id,save.action.player);if(reason)return result(false,reason);
       if(existing){existing.x=command.x;existing.z=command.z;existing.rotation=command.rotation;}
       else {if(!removeItems(bag,`valley-${itemId}`,1))return result(false,"Carry the furnishing you want to place.");v.furniture.push({id:`f-${v.layoutRevision}-${save.chapter.tick}`,itemId,x:command.x,z:command.z,rotation:command.rotation});}
       v.layoutRevision++;return result(true,moving?"Furnishing moved.":"Furnishing placed.");
@@ -165,6 +170,7 @@ function execute(save:ValleySave,command:ValleyCommand,now:number):ValleyResult 
     case "forge-deliver": {
       if(!complete(save))return result(false,"The public forge is optional after your cottage is complete.");
       if(!near(save,70,178,5))return result(false,"Carry materials to the public forge site.");
+      if(overlapsPlayer(save,70,178,4,3))return result(false,"Step clear of the forge's building pad before delivering materials.");
       if(!quantity(command.quantity)||!["logs","bronze-bar"].includes(command.itemId))return result(false,"Choose an exact material quantity.");
       const key=command.itemId==="logs"?"logs":"bars",limit=key==="logs"?12:2;
       if(command.quantity>limit-v.forge[key]||!removeItems(bag,command.itemId,command.quantity))return result(false,"Bring carried materials within the remaining project requirement.");

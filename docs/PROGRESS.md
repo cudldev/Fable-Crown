@@ -2,11 +2,11 @@
 
 ## Hands-on valley onboarding — 2026-11-01
 
-Release complete: c56f611 passed GitHub Actions41256670252 and is live at https://cudldev.github.io/Fable-Crown/. Public cache141aac213cf0 verified with fresh format7,25coins, unchanged old keys, continuous movement, native tent placement, both mobile orientations and offline WebGL reload/all11 asset entries. No page errors/external requests. Evidence: release/valley-public.json and screenshots/valley-public-*.png. Actual weekly usage30% used/~70% remaining; no reset or credits consumed. Stopping for playtesting.
+Published baseline: c56f611/Actions41256670252, public cache141aac213cf0. Completion audit adds controller weapon/Settings access, five direction pins/future-grant inspection, factual return summaries, caravan starter crafting and self-overlap placement protection. Final browser/public verification follows; see VALLEY_COMPLETION_AUDIT.md.
 
 Implemented the approved three-day slice in isolated branch codex/valley-onboarding: continuous controls/combat, free tent/account/cottage, craft/trade, visitors/guidance, forge, landscaping, recovery and offline progress. Latest user decision: start fresh. Format7 uses only valley-v1/backup, starts25coins and never reads, migrates or imports V3–V6; older keys stay untouched.
 
-687 units/81files, strict types and Pages-base build/native/baked/dist pass. Six storage-isolation tests verify the fresh boundary. Independent action/integrated/release and local art/rotated-door/pixel cases cover the playable journey. CI stays two non-GPU cases. Final public verification is recorded below when complete.
+692 units/82files, strict types and Pages-base build/native/baked/dist pass. Full peaceful/mixed reference journeys earn their cottage through real continuous input and commands, with no injected resources; offline construction time is compressed. Six storage-isolation tests verify the fresh boundary. CI stays two non-GPU cases.
 
 Eleven native assets and pixel poses are reviewed usable drafts. Minor roof/plant detail and partial rotated-wall occlusion remain. Local input proxy median32.7ms keyboard,32ms portrait touch,34ms landscape touch; raw evidence/limits in performance/valley. No physical-phone or screen-to-photon claim. No reset/credits consumed. Stop after the verified slice for human balance/device playtesting.
 

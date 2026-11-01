@@ -256,8 +256,11 @@ export function validateHomePlacement(data: ValleyData, x: number, z: number, ro
   if (!reachable(candidate, VALLEY_ENTRANCE, [footprint.tentApproach, footprint.approach])) return "Your front door needs a route to the valley entrance.";
   return null;
 }
-export function validateFurniturePlacement(data: ValleyData, itemId: FurnitureId, x: number, z: number, rotation: number, ignoreId?: string): string | null {
+export function validateFurniturePlacement(data: ValleyData, itemId: FurnitureId, x: number, z: number, rotation: number, ignoreId?: string, player?:ValleyPoint): string | null {
   if (!Object.hasOwn(FURNITURE_FOOTPRINTS, itemId) || !integerPoint(x, z) || !quarterTurn(rotation)) return "Choose a furnishing, whole tile and quarter-turn rotation.";
+  const furnishing=furnitureFootprint(itemId,x,z,rotation);
+  if(player&&player.x+.2>furnishing.x-.5&&player.x-.2<furnishing.x+furnishing.width-.5&&player.z+.2>furnishing.z-.5&&player.z-.2<furnishing.z+furnishing.height-.5)
+    return "Step clear of the furnishing's footprint before placing it.";
   const ps = cells(furnitureFootprint(itemId, x, z, rotation)), footprint = homeFootprints(data);
   if (!ps.every(p => isOwned(p.x, p.z))) return "Keep the whole furnishing on your land.";
   if (ps.some(p => shore(p.x, p.z))) return "Leave the pond and its shore clear.";
