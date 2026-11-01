@@ -8,6 +8,8 @@ export interface TileCamera {
   follow: boolean;
   overview: boolean;
   grid: boolean;
+  /** Transient presentation framing; never saved or authoritative. */
+  interaction?: import("./interaction-camera").InteractionCameraFocus;
 }
 export type TileSelection =
   | { kind: "object"; id: string }

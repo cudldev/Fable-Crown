@@ -3,6 +3,8 @@ import type { HTMLAttributes } from "react";
 import type { ActionControlsProps } from "./ActionControls";
 import { ActionInputBuffer, applyStickDeadzone, ButtonEdgeTracker } from "./input";
 import type { CameraAxes } from "./input";
+import {InputModeTracker} from "./input-mode";
+import type {ActionInputMode} from "./input-mode";
 
 export interface UseActionControlsOptions {
   enabled?: boolean;
@@ -56,6 +58,10 @@ export function useActionControls(options: UseActionControlsOptions) {
   const latest = useRef(options);
   latest.current = options;
   const [resetKey, setResetKey] = useState(0);
+  const deviceRef=useRef<InputModeTracker|null>(null);
+  if(!deviceRef.current)deviceRef.current=new InputModeTracker(typeof matchMedia==="function"&&matchMedia("(pointer: coarse)").matches&&(navigator.maxTouchPoints??0)>0);
+  const device=deviceRef.current;
+  const [inputMode,setInputMode]=useState<ActionInputMode>(device.mode);
   const clearRef = useRef<() => void>(() => inputBuffer.clear());
   useEffect(() => {
     if (options.cameraAxes) inputBuffer.setCameraAxes(options.cameraAxes);
@@ -69,11 +75,18 @@ export function useActionControls(options: UseActionControlsOptions) {
     let padIndex: number | null = null;
     let animationFrame = 0;
     let lastPadTime = 0;
+    const heldKeys=new Set<string>(),releasedBeforeAction=new Set<string>();
     function clear() {
+      for(const key of heldKeys)releasedBeforeAction.add(key);
       inputBuffer.clear(); setResetKey(value => value + 1);
     }
+    function activate(mode:ActionInputMode){if(device.use(mode)){clear();setInputMode(mode);}}
+    function pointerDevice(event:PointerEvent){if(event.pointerType==="touch")activate("touch");else if(event.pointerType==="mouse"||event.pointerType==="pen")activate("keyboard");}
     clearRef.current = clear;
     function onKeyDown(event: KeyboardEvent) {
+      if(event.defaultPrevented)return;
+      if(!isTextTarget(event.target)&&!event.repeat)activate("keyboard");
+      if(MOVEMENT_KEYS.has(event.code)){heldKeys.add(event.code);if(!event.repeat)releasedBeforeAction.delete(event.code);if(releasedBeforeAction.has(event.code))return;}
       if (isTextTarget(event.target)) { inputBuffer.clear(); return; }
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const menu=menuButtons();
@@ -82,33 +95,36 @@ export function useActionControls(options: UseActionControlsOptions) {
         moveMenuFocus(menu,event.code==="ArrowUp"||event.code==="ArrowLeft"?-1:1);return;
       }
       const enabled = latest.current.enabled !== false;
+      if(MOVEMENT_KEYS.has(event.code)&&!enabled)releasedBeforeAction.add(event.code);
       if (MOVEMENT_KEYS.has(event.code) && enabled && !menu) {
         event.preventDefault(); inputBuffer.setKey(event.code, true);
       }
       if (event.repeat) return;
       if (event.code === "KeyE" && enabled) { event.preventDefault(); latest.current.onInteract(); }
+      if (event.code === "KeyQ" && enabled) { event.preventDefault(); latest.current.onToggleTool?.(); }
       if (event.code === "KeyI") { event.preventDefault(); latest.current.onInventory?.(); }
       if (event.code === "KeyB") { event.preventDefault(); latest.current.onBuild?.(); }
       if (event.code === "Escape") latest.current.onBack?.();
     }
-    function onKeyUp(event: KeyboardEvent) { inputBuffer.setKey(event.code, false); }
+    function onKeyUp(event: KeyboardEvent) { heldKeys.delete(event.code);releasedBeforeAction.delete(event.code);inputBuffer.setKey(event.code, false); }
     function releaseMouse() {
       inputBuffer.setStrike("mouse", false); inputBuffer.setBlock("mouse", false);
     }
     function visibilityChanged() { if (document.hidden) clear(); }
     function focused(event: FocusEvent) { if (isTextTarget(event.target)) clear(); }
-    function disconnected() { padIndex = null; edges.clear(); clear(); }
+    function disconnected() { padIndex = null; edges.clear(); clear();if(device.disconnect())setInputMode(device.mode); }
     function pollGamepad(time:number) {
       const deltaSeconds=Math.min(.05,lastPadTime?(time-lastPadTime)/1000:1/60);lastPadTime=time;
       if (!document.hidden && document.hasFocus()) {
         const pads = typeof navigator.getGamepads === "function" ? navigator.getGamepads() : [];
         const pad = (padIndex === null ? undefined : pads[padIndex]) ?? [...pads].find(candidate => candidate?.connected);
-        if (!pad && padIndex !== null) { padIndex = null; clear(); }
+        if (!pad && padIndex !== null)disconnected();
         if (pad) {
-          if (pad.index !== padIndex) { clear(); edges.clear(); padIndex = pad.index; }
+          if (pad.index !== padIndex) { edges.clear(); padIndex = pad.index; }
           const pressed = (index: number) => Boolean(pad.buttons[index]?.pressed || (pad.buttons[index]?.value ?? 0) > 0.5);
+          if(device.observePad(Array.from(pad.buttons,(_,i)=>pressed(i)),pad.axes))activate("controller");
           const buttons = menuButtons();
-          const canAct = latest.current.enabled !== false && !buttons && !isTextTarget(document.activeElement);
+          const canAct = device.mode==="controller"&&latest.current.enabled !== false && !buttons && !isTextTarget(document.activeElement);
           const toggleToolEdge=edges.update("toggleTool",pressed(3));
           if(canAct&&toggleToolEdge)latest.current.onToggleTool?.();
           const stick = applyStickDeadzone(pad.axes[0] ?? 0, pad.axes[1] ?? 0);
@@ -139,6 +155,7 @@ export function useActionControls(options: UseActionControlsOptions) {
       animationFrame = requestAnimationFrame(pollGamepad);
     }
     window.addEventListener("keydown", onKeyDown); window.addEventListener("keyup", onKeyUp);
+    document.addEventListener("pointerdown",pointerDevice,true);
     window.addEventListener("blur", clear); document.addEventListener("visibilitychange", visibilityChanged);
     window.addEventListener("resize",clear); window.addEventListener("orientationchange",clear);
     document.addEventListener("focusin", focused);
@@ -148,6 +165,7 @@ export function useActionControls(options: UseActionControlsOptions) {
     return () => {
       cancelAnimationFrame(animationFrame); inputBuffer.clear();
       window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("pointerdown",pointerDevice,true);
       window.removeEventListener("blur", clear); document.removeEventListener("visibilitychange", visibilityChanged);
       window.removeEventListener("resize",clear); window.removeEventListener("orientationchange",clear);
       document.removeEventListener("focusin", focused);
@@ -173,5 +191,5 @@ export function useActionControls(options: UseActionControlsOptions) {
     onInventory: options.onInventory ? () => latest.current.onInventory?.() : undefined,
     onBuild: options.onBuild ? () => latest.current.onBuild?.() : undefined,
   };
-  return { inputBuffer, inputRef: bufferRef, worldBindings, controlsProps, clear: () => clearRef.current() };
+  return { inputBuffer, inputRef: bufferRef, worldBindings, controlsProps, inputMode, touchControls:device.touchControls, clear: () => clearRef.current() };
 }

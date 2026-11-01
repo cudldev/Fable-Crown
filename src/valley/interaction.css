@@ -1,0 +1,19 @@
+.valley-interaction-layer{position:absolute;inset:0;z-index:20;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding:max(16px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));}
+.valley-interaction{width:min(580px,100%);max-height:45%;pointer-events:auto;color:#3d4835;overflow:visible;font:15px/1.4 system-ui,sans-serif;}
+.valley-speech{position:relative;padding:24px 20px 10px;border-radius:27px 26px 24px 17px;background:#fff3d5;box-shadow:0 6px 0 #193a2b30;}
+.valley-speaker{position:absolute;left:18px;top:-16px;max-width:calc(100% - 36px);padding:6px 17px;border-radius:11px 15px 10px 13px;transform:rotate(-2deg);color:#fff1d1;background:#725336;font:500 14px/1.3 system-ui;}
+.valley-speech p{margin:0;font:20px/1.45 Georgia,serif;}
+.valley-interaction button{min-width:44px;min-height:44px;border:0;border-radius:14px;padding:10px 14px;color:#3d4835;background:#eadeba;font:500 15px/1.3 system-ui,sans-serif;touch-action:manipulation;}
+.valley-interaction button:focus-visible{outline:3px solid #335d43;outline-offset:2px;}
+.valley-interaction button:disabled{opacity:.55;}
+.valley-speech-advance{display:flex;justify-content:flex-end;margin-top:4px;}.valley-speech-advance button{background:#f0d583;font-size:22px;padding:6px 17px;}
+.valley-replies{display:grid;gap:3px;padding:10px;border-radius:25px 19px 24px 17px;background:#efd583;max-height:40dvh;overflow:auto;overscroll-behavior:contain;}.valley-replies button{background:transparent;text-align:left;}.valley-replies button:focus-visible,.valley-replies button:hover{background:#fff1c6;}.valley-replies p{margin:2px 12px;font-size:13px;}
+.valley-object-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}.valley-interaction .valley-interaction-primary{background:#f0d583;}
+.valley-app[data-panel-open=true] .valley-play-ui,.valley-app[data-panel-open=true] .three-performance,.valley-app[data-panel-open=true] .world-labels,.valley-app[data-panel-open=true] .three-world-labels{visibility:hidden;pointer-events:none;}
+.valley-app[data-panel-open=true] .three-hit-layer,.valley-app[data-panel-open=true] .world-status-layer,.valley-app[data-panel-open=true] .world-effects-layer{display:none!important;pointer-events:none;}
+.valley-goods-list button{display:flex;align-items:center;gap:8px;}.valley-goods-list .valley-item-preview{width:44px;height:44px;}.valley-goods-list .valley-item-initials{width:40px;height:36px;font-size:13px;}
+.valley-app[data-context-active=true] .valley-menu-backdrop{background:transparent;}
+.valley-app .valley-menu-sections{display:none;}
+@media(orientation:landscape) and (min-width:600px){.valley-interaction-layer{justify-content:flex-end;}.valley-interaction{width:34%;min-width:250px;max-height:85%;}.valley-speech{padding:23px 17px 10px;}.valley-speech p{font-size:19px;}.valley-replies{max-height:70dvh;}}
+@media(max-width:360px),(max-height:500px){.valley-speech p{font-size:18px;}.valley-interaction button{font-size:14px;}.valley-interaction{max-height:60%;}}
+@media(prefers-reduced-motion:reduce){.valley-speaker{transform:none;}}

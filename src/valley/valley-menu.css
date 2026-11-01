@@ -28,3 +28,17 @@
   .valley-console-menu > .valley-menu-footer { padding: 8px 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .valley-console-menu { scroll-behavior: auto; } }
+
+/* One quiet material system shared with the approved interaction and recipe layouts. */
+.valley-panel.valley-console-menu,.valley-console-menu>.valley-menu-header{background:#fff3d7;color:#3c4834;border-color:#bca87b;}
+.valley-console-menu button{background:#eaddb8;color:#3c4834;border-color:#bca87b;}
+.valley-console-menu p,.valley-console-menu small{color:#60684f;}
+.valley-console-menu>.valley-menu-footer{background:#ecdfbc;color:#49543d;border-color:#c9b88b;}
+.valley-console-menu .valley-menu-console-hint{color:#60684f;}
+.valley-console-menu .valley-service-name{background:#eaddb8;border-color:#b29a5d;}
+.valley-console-menu .valley-location{background:#eaddb8!important;color:#3c4834;}
+.valley-console-menu .valley-menu-primary .valley-menu-resume{background:#efd282;border-color:#bca05b;}
+.valley-console-menu button:focus-visible,.valley-console-menu a:focus-visible,.valley-console-menu summary:focus-visible{outline-color:#365d42;}
+.valley-console-menu .valley-item,.valley-console-menu .valley-card{border-color:#baa57955;}
+.valley-console-menu .valley-grant,.valley-console-menu .valley-activity li{background:#e8ddb9;color:#3c4834;}
+.valley-console-menu .valley-activity span,.valley-console-menu .valley-grant span{color:#60684f;}

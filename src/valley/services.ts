@@ -6,7 +6,8 @@ import type {ValleySave,ValleyService,ValleyServicePanel} from "./contracts";
 export function serviceForObject(save:ValleySave,object:WorldObject):ValleyService|null {
   const base={objectId:object.id,name:object.name,x:object.position.x,z:object.position.y,range:3};
   if(object.id.startsWith("valley-visitor-"))return {...base,kind:"visitor",visitorId:object.id.slice("valley-visitor-".length)};
-  if(object.id==="valley-caravan")return {...base,kind:"caravan",x:74,z:140,station:"workbench"};
+  if(object.id==="valley-caravan")return {...base,kind:"caravan",x:74,z:140};
+  if(object.id==="valley-caravan-chest")return {...base,kind:"storage"};
   if(object.id==="valley-workbench"||object.id==="valley-home-workbench")return {...base,kind:"workbench",station:"workbench"};
   if(object.id==="valley-home-planning-table")return {...base,kind:"planning"};
   if(object.id==="valley-forge-site")return {...base,kind:"forge",x:70,z:178,range:5};
@@ -24,11 +25,12 @@ export function serviceSections(service:ValleyService|null):{panel:ValleyService
   if(!service)return [];
   switch(service.kind){
     case "workbench":case "furnace":case "range":return [{panel:"craft",label:service.kind==="furnace"?"Smelting":service.kind==="range"?"Cooking":"Carpentry"}];
-    case "caravan":return [{panel:"trade",label:"Trade"},{panel:"craft",label:"Carpentry"},{panel:"inventory",label:"Storage"},{panel:"projects",label:"Orders"},{panel:"home",label:"Account"}];
-    case "home":return [{panel:"home",label:"Home"},{panel:"inventory",label:"Storage"}];
+    case "caravan":return [{panel:"trade",label:"Browse supplies"},{panel:"projects",label:"Supply orders"}];
+    case "storage":return [{panel:"inventory",label:"Open storage"}];
+    case "home":return [{panel:"home",label:"Arrange my home"},{panel:"inventory",label:"Open storage"}];
     case "planning":return [{panel:"projects",label:"Planning & orders"}];
     case "forge":return [{panel:"projects",label:"Forge project"}];
-    case "visitor":return service.visitorId==="builder"?[{panel:"visitor",label:"Rowan"},{panel:"projects",label:"Orders"},{panel:"home",label:"Royal account"}]:[{panel:"visitor",label:"Conversation"}];
+    case "visitor":return service.visitorId==="builder"?[{panel:"visitor",label:"Rowan"},{panel:"projects",label:"Orders"},{panel:"home",label:"Royal account"}]:service.visitorId==="merchant"?[{panel:"visitor",label:"Conversation"},{panel:"trade",label:"Trade"},{panel:"projects",label:"Orders"}]:[{panel:"visitor",label:"Conversation"},{panel:"projects",label:"Orders"}];
   }
 }
 export function servicePanel(service:ValleyService):ValleyServicePanel {return serviceSections(service)[0].panel;}

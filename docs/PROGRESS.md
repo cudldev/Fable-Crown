@@ -1,5 +1,11 @@
 # Progress — 2026-10-29
 
+## Interaction layout implementation — 2026-11-01 (release candidate)
+
+Rules: UX_LAYOUT_RULES.md. Nearby NPC/object prompt replaces the exploration HUD; organic NPC turns and terminal endings; full-screen crafting keeps illustrated recipes and selected requirements/action together, with roughly one-third information space. Original furniture previews borrow ready baked geometry. Camera fits Alden/target and restores the previous view. Caravan storage is a separate nonblocking chest. Desktop has no touch dock; mobile hides it on actual controller use and restores it on touch/disconnect. Format7 and balance retained.
+
+Lead integrated contracts/UI/docs; controls specialist supplied crafting; camera specialist supplied framing; independent QA exercised the integrated game. Baseline worker timing failure was a Vitest5 fake-clock reset in its restart test, corrected without simulation changes. Local802units/88files, strict type/Pages-base build/native/baked/dist pass. Full24local GPU cases pass on620f2c6b525c; finald9f624747690 passes6affected GPU and2release checks after exact NPC-response resume/archive-context fixes.17actual captures reviewed; see INTERACTION_UX_REVIEW.md. No new performance claim or physical-device test. Public publication/verification follows this checkpoint.
+
 ## Contextual console/mobile UX — 2026-11-01
 
 Replaced global action tabs with a console Menu/Back hierarchy and nearby-object services. Crafting/trade show one selected recipe/good; global backpack excludes storage; home/account, dialogue and projects follow context. Smaller HUD, mirrored/raised thumb docks, contextual labels, recovery ring, exact item/XP/coin results, recent activity and resumable placement drafts. Menus pause actors while ordinary background work continues. Format7/balance/assets unchanged.

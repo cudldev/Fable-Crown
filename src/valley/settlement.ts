@@ -23,11 +23,11 @@ function syncVisitors(save:ValleySave,now:number):void {
   for(const visitor of getVisitors(save,now)) if(!save.valley.introduced.includes(visitor.id)) {save.valley.introduced.push(visitor.id);save.valley.layoutRevision++;}
 }
 function bankNearby(save:ValleySave):boolean {
-  if(near(save,74,140))return true;
+  if(near(save,74,140)||near(save,76,140))return true;
   const fp=homeFootprints(save.valley);
   return !!fp&&((!save.valley.home?.tentPacked&&near(save,fp.tentDoor.x,fp.tentDoor.z))||(complete(save)&&near(save,fp.door.x,fp.door.z)));
 }
-function orderNearby(save:ValleySave):boolean {const fp=complete(save)?homeFootprints(save.valley):null;return near(save,51,141)||near(save,74,140)||bankNearby(save)||!!fp&&near(save,fp.planningTable.x,fp.planningTable.z);}
+function orderNearby(save:ValleySave):boolean {const fp=complete(save)?homeFootprints(save.valley):null;return near(save,51,141)||near(save,74,140)||bankNearby(save)||complete(save)&&(near(save,75,142)||near(save,76,178))||!!fp&&near(save,fp.planningTable.x,fp.planningTable.z);}
 function gift(save:ValleySave,itemId:string,n:number):boolean {
   if(!addItems(carried(save),itemId,n)) {
     // Connected storage has no slot limit, but the shared inventory integer ceiling still applies.
@@ -114,7 +114,7 @@ function execute(save:ValleySave,command:ValleyCommand,now:number):ValleyResult 
       return result(true,`${order.name} delivered. Earned ${order.coins} coins.`);
     }
     case "buy": case "sell": {
-      if(!near(save,74,140))return result(false,"Stand near the supply caravan to trade.");
+      if(!near(save,74,140)&&!(complete(save)&&near(save,75,142)))return result(false,"Stand near the supply caravan or Pella to trade.");
       if(!quantity(command.quantity))return result(false,"Choose a quantity from 1 to 100.");
       const stock=VALLEY_STOCK.find(s=>s.itemId===command.itemId);
       if(!stock||(stock.requiresCottage&&!complete(save)))return result(false,"That item is unavailable at the caravan.");

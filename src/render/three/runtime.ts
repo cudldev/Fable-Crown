@@ -24,6 +24,7 @@ import { FoliageSystem } from "./foliage";
 import { PostProcessing } from "./post-processing";
 import { WorldCurve, cameraPitch, closeCameraBlend } from "./world-curve";
 import { clampGameplayZoom, gameplaySpan } from "../camera-limits";
+import { InteractionCameraTransition } from "../interaction-camera";
 import { ContactDetail } from "./contact-detail";
 import { layoutFeedback, type FeedbackAnchor, type FeedbackRect } from "../feedback-layout";
 import { FloatingVials } from "./floating-vials";
@@ -77,6 +78,7 @@ export class ThreeRuntime {
   private width = 1;
   private height = 1;
   private target = new THREE.Vector3();
+  private interactionCamera = new InteractionCameraTransition();
   private ray = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private terrain = new THREE.Group();
@@ -686,14 +688,19 @@ export class ThreeRuntime {
     for (const actor of [state.player, ...state.npcs]) { const person = this.people.get(actor.id); if (person?.timeline) this.pose(actor, person, time); }
     const player = this.people.get(0)?.art.group.position;
     const aspect = this.width / this.height;
-    const span = view.overview ? Math.max(this.world.height * 1.05, this.world.width / aspect) : gameplaySpan(view.zoom, aspect);
+    let span = view.overview ? Math.max(this.world.height * 1.05, this.world.width / aspect) : gameplaySpan(view.zoom, aspect);
     this.target.set(view.overview ? this.world.width / 2 : view.follow && player ? player.x : view.x, player?.y ?? 0,
       view.overview ? this.world.height / 2 : view.follow && player ? player.z : view.y);
     if(!view.follow)this.target.y=this.heightAt(this.target.x,this.target.z);
     const usePerspective = cameraMode === "perspective" && !view.overview;
     this.camera = usePerspective ? this.perspectiveCamera : this.orthographicCamera;
-    const pitch = usePerspective ? cameraPitch(clampGameplayZoom(view.zoom)) : cameraPitch(.65);
-    const direction = temp.set(32, Math.hypot(32, 45) * Math.tan(pitch), 45).normalize();
+    let pitch = usePerspective ? cameraPitch(clampGameplayZoom(view.zoom)) : cameraPitch(.65);
+    const framing=this.interactionCamera.update({x:this.target.x,y:this.target.y+.4,z:this.target.z,span,pitch,
+      directionX:32/Math.hypot(32,45),directionZ:45/Math.hypot(32,45)},view.interaction,aspect,time,(x,z)=>this.heightAt(x,z));
+    const framingActive=this.interactionCamera.status!=="none";
+    if(framingActive){span=framing.span;pitch=framing.pitch;this.target.set(framing.x,framing.y-.4,framing.z);}
+    const direction = framingActive?temp.set(framing.directionX*Math.cos(pitch),Math.sin(pitch),framing.directionZ*Math.cos(pitch))
+      :temp.set(32, Math.hypot(32, 45) * Math.tan(pitch), 45).normalize();
     const distance = usePerspective ? span / (2 * Math.tan(THREE.MathUtils.degToRad(this.perspectiveCamera.fov) / 2)) : Math.max(1, span / 35) * 66.5;
     this.camera.position.copy(this.target).addScaledVector(direction, distance);
     this.camera.position.y += .4;
@@ -705,6 +712,14 @@ export class ThreeRuntime {
     this.camera.updateProjectionMatrix();
     // A long-lens20degree view gives subtle depth without distorting tile readability.
     this.camera.lookAt(this.target.x, this.target.y+.4, this.target.z); this.camera.updateMatrixWorld();
+    this.root.dataset.interactionCamera=this.interactionCamera.status;
+    this.root.dataset.cameraPose=JSON.stringify({position:this.camera.position.toArray().map(v=>+v.toFixed(5)),target:[this.target.x,this.target.y+.4,this.target.z].map(v=>+v.toFixed(5)),span:+span.toFixed(5),pitch:+pitch.toFixed(5)});
+    if(view.interaction){
+      const anchor=(point:{x:number;z:number})=>{temp.set(point.x,this.heightAt(point.x,point.z)+.6,point.z).project(this.camera);return `${((temp.x+1)/2).toFixed(4)},${((1-temp.y)/2).toFixed(4)}`;};
+      this.root.dataset.interactionPlayer=anchor(view.interaction.player);
+      this.root.dataset.interactionTarget=anchor(view.interaction.target);
+      this.root.dataset.interactionSafeArea=JSON.stringify(view.interaction.safeArea);
+    }else{delete this.root.dataset.interactionPlayer;delete this.root.dataset.interactionTarget;delete this.root.dataset.interactionSafeArea;}
     this.root.dataset.billboardYaw = this.pixelUnits.faceCamera(this.camera, this.props.visual?.spriteNormalStrength ?? .35).toFixed(4);
     this.root.dataset.billboardCount = String(this.pixelUnits.count);
     this.root.dataset.spriteNormalStrength = String(this.props.visual?.spriteNormalStrength ?? .35);

@@ -7,7 +7,7 @@ import type {ValleySave} from "../src/valley/contracts";
 import {VALLEY_RECIPES} from "../src/valley/content";
 import {createValleySave} from "../src/valley/save";
 import {applyValleyCommand,advanceSettlement} from "../src/valley/settlement";
-import {createValleyWorld,homeFootprints} from "../src/valley/world";
+import {canTraverseValley,createValleyWorld,homeFootprints} from "../src/valley/world";
 import {hasPlanningTable,serviceDistance,serviceForObject,servicePanel,serviceSections} from "../src/valley/services";
 import {nearbyValleyInteraction} from "../src/valley/interaction-feedback";
 
@@ -29,6 +29,10 @@ function freeze(value:unknown,seen=new WeakSet<object>()):void {
 }
 
 describe("physical station service contracts",()=>{
+  it("keeps the new chest route walkable for an existing save at its anchor",()=>{
+    const save=fresh();at(save,76,140);const chest=object(save,"valley-caravan-chest");
+    expect(chest.blocks).toBe(false);expect(canTraverseValley(save.valley,76,140,76,141,save.chapter)).toBe(true);
+  });
   it.each([
     {id:"valley-workbench",kind:"workbench",station:"workbench",label:"Carpentry",recipe:"valley-plank"},
     {id:"valley-brazier",kind:"furnace",station:"furnace",label:"Smelting",recipe:"bronze-bar"},
@@ -45,13 +49,13 @@ describe("physical station service contracts",()=>{
     expect(JSON.stringify(save)).toBe(before);expect(source).toEqual(objectBefore);
   });
 
-  it("gives the caravan its canonical anchor, ordinary trade, starter carpentry and account routes",()=>{
+  it("keeps caravan trade/orders separate from the nearby workbench and chest",()=>{
     const save=fresh(),context=serviceForObject(save,object(save,"valley-caravan"))!;
-    expect(context).toMatchObject({kind:"caravan",x:74,z:140,range:3,station:"workbench"});
+    expect(context).toMatchObject({kind:"caravan",x:74,z:140,range:3});expect(context.station).toBeUndefined();
     expect(servicePanel(context)).toBe("trade");
-    expect(serviceSections(context).map(section=>section.panel)).toEqual(["trade","craft","inventory","projects","home"]);
-    const starter=Object.values(VALLEY_RECIPES).filter(recipe=>recipe.station===context.station&&!recipe.requiresCottage);
-    expect(starter.map(recipe=>recipe.id).sort()).toEqual(["valley-plank","valley-stool"]);
+    expect(serviceSections(context).map(section=>section.panel)).toEqual(["trade","projects"]);
+    const chest=serviceForObject(save,object(save,"valley-caravan-chest"))!;
+    expect(chest.kind).toBe("storage");expect(serviceSections(chest)).toEqual([{panel:"inventory",label:"Open storage"}]);
   });
 
   it("allows actual starter carpentry at the caravan but rejects cottage work there",()=>{
@@ -82,7 +86,7 @@ describe("physical station service contracts",()=>{
     for(const visitor of ["merchant","smith"]){
       const context=serviceForObject(save,object(save,`valley-visitor-${visitor}`))!;
       expect(context.visitorId).toBe(visitor);expect(context.station).toBeUndefined();
-      expect(serviceSections(context).map(section=>section.panel)).toEqual(["visitor"]);
+      expect(serviceSections(context).map(section=>section.panel)).toEqual(visitor==="merchant"?["visitor","trade","projects"]:["visitor","projects"]);
     }
   });
 
@@ -143,6 +147,17 @@ describe("physical station service contracts",()=>{
 });
 
 describe("planning-table orders use their physical proximity",()=>{
+  it("trades with Pella and delivers to Garrick throughout their actual interaction ranges",()=>{
+    const merchant=cottage();at(merchant,77,144);
+    expect(Math.hypot(merchant.action.player.x-74,merchant.action.player.z-140)).toBeGreaterThan(3);
+    expect(applyValleyCommand(merchant,{type:"buy",itemId:"logs",quantity:1},NOW).ok).toBe(true);
+    expect(itemCount(merchant.chapter.player.inventory,"logs")).toBe(1);
+    const smith=cottage();at(smith,76,180);addItems(smith.chapter.player.inventory,"bronze-bar",2);
+    const coins=itemCount(smith.chapter.player.inventory,"coins");
+    expect(applyValleyCommand(smith,{type:"commission",id:"daily-smith"},NOW).ok).toBe(true);
+    expect(itemCount(smith.chapter.player.inventory,"coins")).toBe(coins+24);
+    const before=JSON.stringify(smith);expect(applyValleyCommand(smith,{type:"commission",id:"daily-smith"},NOW).ok).toBe(false);expect(JSON.stringify(smith)).toBe(before);
+  });
   function commissionedCottage(){
     const save=fresh();expect(applyValleyCommand(save,{type:"place-home",x:54,z:155,rotation:0},NOW).ok).toBe(true);
     expect(addItems(save.chapter.player.inventory,"coins",75)).toBe(true);

@@ -1,5 +1,7 @@
 # UX Specification
 
+Current interaction layouts follow [UX_LAYOUT_RULES.md](UX_LAYOUT_RULES.md): focused world interactions, organic NPC turns, encounter camera, and full-screen crafting with list/details together. Earlier autonomous/no-joystick and shared-panel guidance below is historical.
+
 Startup: a full-screen preparation view appears in the initial HTML and remains through chapter/assets, world construction, normal/overview shader warmup and initial lighting. Hide and block the entire HUD/world until the first prepared frame. Use honest stage text and indeterminate progress. Retry chapter failures; unavailable graphics exits preparation with the saved chapter controls still usable.
 
 Floating world labels use transparent backgrounds and restrained text shadows. Health/work tubes have a thin glass edge and softly luminous fill, tinted by existing daylight and nearby scene lights; full panels remain reserved for opened UI.

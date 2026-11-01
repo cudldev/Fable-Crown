@@ -72,14 +72,13 @@ test("authored shield and tool contact remain readable on clear ground",async({p
   await settings(page);
   for(let i=0;i<4;i++)await page.getByRole("button",{name:"Zoom in",exact:true}).click();
   await page.getByRole("dialog").getByRole("button",{name:"Close",exact:true}).click();
-  const block=page.locator(".action-block");
   for(const direction of ["left","right"]){
     if(direction==="right"){await page.keyboard.down("d");await page.waitForTimeout(120);await page.keyboard.up("d");}
-    await block.hover();await page.mouse.down();await page.waitForTimeout(250);
+    await page.mouse.move(1150,400);await page.mouse.down({button:"right"});await page.waitForTimeout(250);
     await expect(page.locator("[data-character-clip]")).toHaveAttribute("data-character-clip","block");
-    await page.screenshot({path:`docs/screenshots/valley-clear-block-${direction}.png`});await page.mouse.up();
+    await page.screenshot({path:`docs/screenshots/valley-clear-block-${direction}.png`});await page.mouse.up({button:"right"});
   }
-  await page.locator("[data-action-strike]").hover();await page.mouse.down();
+  await page.mouse.move(1150,400);await page.mouse.down();
   await expect(page.locator("[data-character-clip]")).toHaveAttribute("data-character-clip","strike");await page.waitForTimeout(205);
   await page.screenshot({path:"docs/screenshots/valley-clear-strike.png"});await page.mouse.up();
 });

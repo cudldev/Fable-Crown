@@ -18,6 +18,7 @@ try{
   console.log('Installed target cache '+manifest.version);
   await page.goto(url,{waitUntil:'domcontentloaded'});const root=page.getByTestId('valley-app');
   await expect(root).toHaveAttribute('data-ready','true',{timeout:90000});await expect(root).toHaveAttribute('data-mode','world');
+  await expect(root).toHaveAttribute('data-input-mode','keyboard');await expect(page.locator('[data-action-controls]')).toHaveCount(0);
   await page.getByRole('button',{name:'Menu',exact:true}).click();const menu=page.getByRole('dialog');
   await expect(menu).toHaveAttribute('data-menu-panel','menu');
   await expect(menu.getByRole('button',{name:'Crafting',exact:true})).toHaveCount(0);

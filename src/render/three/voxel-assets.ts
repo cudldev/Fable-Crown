@@ -1,11 +1,14 @@
 import { Group } from "three";
-import { type VoxelObject } from "./voxel-data";
+import { type VoxelObject, type VoxelLevel } from "./voxel-data";
 import { VoxelBakeDecoder } from "./voxel-bake-decoder";
 import { VOXEL_BAKE_VERSION } from "./voxel-bake-version";
 import { VOXEL_VERSION } from "./voxel-version";
 import type { WorldObject } from "../../rpg/types";
 
 export interface VoxelAssetSpec { id: string; file: string; pitch: number; pivot: [number, number, number]; cutHeight?: number; depletedAsset?: string }
+const previewLevels=new Map<string,VoxelLevel>();
+/** Borrow ready source buffers; crafting never downloads or decodes another asset pack. */
+export function loadedVoxelPreview(id:string):VoxelLevel|undefined{return previewLevels.get(id);}
 export function voxelAssetSpecs(value: unknown): VoxelAssetSpec[] {
   if (!value || typeof value !== "object" || !("assets" in value) || !Array.isArray(value.assets)) throw Error("Invalid voxel asset manifest.");
   const ids = new Set<string>();
@@ -57,6 +60,7 @@ export async function loadVoxelAssets(base: URL, signal: AbortSignal): Promise<M
       if (!spec || result.has(asset.id) || asset.size.some((n, i) => n !== spec.size[i])) throw Error("Baked voxel binding differs from the manifest.");
       for (const model of [asset.voxels.model, asset.voxels.depleted]) if (model && model.surfaces?.length !== model.levels.length) throw Error("A voxel binding is missing baked surfaces.");
       result.set(asset.id, asset.voxels);
+      if(["valley-stool","valley-table","valley-bed","valley-shelf","valley-chest","valley-planter"].includes(asset.id))previewLevels.set(asset.id,asset.voxels.model.levels[0]);
     }
     return result;
   } finally { decoder.dispose(); }

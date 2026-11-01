@@ -1,5 +1,7 @@
 # Valley onboarding — approved 2026-11-01
 
+Current layout authority: [UX_LAYOUT_RULES.md](UX_LAYOUT_RULES.md). Organic conversations, object action prompts, encounter camera and combined full-screen crafting replace shared service tabs. Desktop uses keyboard/mouse without touch controls; mobile hides its dock during controller use.
+
 Latest UX decisions: console-style Menu/Back hierarchy; most actions open only from the intended nearby object. Workbench/caravan carpentry, brazier/forge smelting, fire cooking, local trade/storage, Rowan account/orders and planning-table/project-board actions have focused screens. Global backpack is personal. Menus pause60Hz actors while600ms background work continues. Mobile controls support mirrored/raised docks and contextual results. See MOBILE_UX_REVIEW.md; format7/balance/offline guarantees remain.
 
 Latest user override: start fresh saves for the major redesign. Format7 uses separate valley-v1/valley-v1-backup keys. No V3–V6 migration or older-file import; older keys remain untouched. This replaces the compatibility/migration portions below and in the original plan.

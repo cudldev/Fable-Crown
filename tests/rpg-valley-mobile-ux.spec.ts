@@ -25,7 +25,10 @@ async function ready(page: Page) {
   expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
 }
 async function menu(page: Page, section: "Settings" | "Journal" | "Build & manage" | "Backpack") {
-  if (await dialog(page).isVisible()) await dialog(page).getByRole("button", { name: "Close", exact: true }).tap();
+  for (let i = 0; i < 8 && await dialog(page).isVisible(); i++) {
+    const close = dialog(page).getByRole("button", { name: "Close", exact: true }), back = dialog(page).getByRole("button", { name: "Back", exact: true }), away = dialog(page).getByRole("button", { name: "Step away", exact: true });
+    if (await close.isVisible()) await close.tap(); else if (await back.isVisible()) await back.tap(); else if (await away.isVisible()) await away.tap(); else await page.keyboard.press("Escape");
+  }
   await page.getByRole("button", { name: "Menu", exact: true }).tap();
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "menu");
   await dialog(page).getByRole("button", { name: section, exact: true }).tap();
@@ -62,6 +65,13 @@ async function bounds(locator: Locator) {
 async function fullyInsideMenu(page: Page, target: Locator) {
   // Read geometry directly: locator actions would scroll the target into view and hide cutoff.
   const hit = await bounds(target);
+  if (await dialog(page).getAttribute("data-menu-panel") === "craft") {
+    const detail = await bounds(dialog(page).getByTestId("recipe-detail")), header = await bounds(dialog(page).locator(".crafting-header"));
+    expect(hit.width).toBeGreaterThanOrEqual(44); expect(hit.height).toBeGreaterThanOrEqual(44);
+    expect(hit.x).toBeGreaterThanOrEqual(detail.x); expect(hit.x + hit.width).toBeLessThanOrEqual(detail.x + detail.width + .5);
+    expect(hit.y).toBeGreaterThanOrEqual(header.y + header.height); expect(hit.y + hit.height).toBeLessThanOrEqual(detail.y + detail.height + .5);
+    return;
+  }
   const visible = await dialog(page).locator(".valley-menu-body").evaluate(element => {
     const box = element.getBoundingClientRect();
     return { x: box.left + element.clientLeft, y: box.top + element.clientTop, width: element.clientWidth, height: element.clientHeight };
@@ -183,40 +193,50 @@ test("world stations filter services, finish real work while actors pause, and k
   await expect(dialog(page).getByRole("button", { name: /^Store / })).toHaveCount(0);
   await dialog(page).getByRole("button", { name: "Close", exact: true }).tap();
   await page.locator(".action-interact").tap();
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
+  await dialog(page).getByRole("button", { name: "Craft something", exact: true }).tap();
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "craft");
   await expect(dialog(page)).toContainText("Communal carpentry workbench");
   for (const recipe of Object.values(VALLEY_RECIPES)) {
-    await expect(dialog(page).getByRole("group", { name: "Recipes", exact: true }).getByRole("button", { name: recipe.name, exact: true })).toHaveCount(recipe.station === "workbench" ? 1 : 0);
+    await expect(dialog(page).getByTestId("recipe-grid").locator(`[data-recipe-id="${recipe.id}"]`)).toHaveCount(recipe.station === "workbench" ? 1 : 0);
   }
-  await dialog(page).getByRole("group", { name: "Recipes", exact: true }).getByRole("button", { name: "Saw two planks", exact: true }).tap();
+  await dialog(page).getByTestId("recipe-grid").locator('[data-recipe-id="valley-plank"]').tap();
   await expect(dialog(page).getByTestId("recipe-detail")).toHaveCount(1);
-  await expect(dialog(page).getByTestId("recipe-detail")).toHaveAttribute("data-recipe-id", "valley-plank");
+  await expect(dialog(page).getByTestId("recipe-detail")).toHaveAttribute("data-selected-recipe", "valley-plank");
   await capture(page, "station");
   await page.setViewportSize({ width: 844, height: 390 }); await capture(page, "station");
-  await fullyInsideMenu(page, dialog(page).getByTestId("recipe-detail").getByRole("button", { name: "Make one", exact: true }));
+  await fullyInsideMenu(page, dialog(page).getByTestId("craft-primary"));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(200); // Let the interface-open acknowledgement reach the observable HUD.
   const frame = await app(page).getAttribute("data-action-frame");
   const health = await page.locator('meter[aria-label="Player health"]').getAttribute("value");
   const planks = dialog(page).getByTestId("recipe-detail");
-  await planks.getByRole("button", { name: "Make one", exact: true }).tap();
-  await expect(dialog(page).locator(".valley-job")).toHaveCount(1);
-  await expect(dialog(page).locator(".valley-job")).toHaveCount(0, { timeout: 10000 });
-  await expect(dialog(page).locator(".valley-menu-footer")).toContainText("Crafting complete");
-  await expect(dialog(page).locator(".valley-menu-footer")).toContainText("+2 Sawn plank");
-  await expect(dialog(page).locator(".valley-menu-footer")).toContainText("+10 carpentry XP");
-  await expect(dialog(page).locator(".valley-menu-footer")).toContainText("Ready in your backpack.");
+  await planks.getByTestId("craft-primary").tap();
+  await expect(dialog(page).getByTestId("craft-queue")).toHaveCount(1);
+  await expect(dialog(page).getByTestId("craft-queue")).toHaveCount(0, { timeout: 10000 });
+  await expect(dialog(page).getByTestId("craft-status")).toContainText("+2 Sawn plank");
+  await expect(planks).toContainText("+10 XP");
+  await expect(feedback(page)).toContainText("+10 carpentry XP");
   await expect(app(page)).toHaveAttribute("data-action-frame", frame!);
   await expect(page.locator('meter[aria-label="Player health"]')).toHaveAttribute("value", health!);
   await dialog(page).getByRole("button", { name: "Back", exact: true }).tap();
-  await expect(dialog(page)).toHaveCount(0); // Direct object menus return to the world.
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
+  await dialog(page).getByRole("button", { name: "Step away", exact: true }).tap();
   await page.keyboard.down("s");
   try { await expect.poll(async () => Number(await app(page).getAttribute("data-player-z"))).toBeGreaterThan(141.8); }
   finally { await page.keyboard.up("s"); }
   await page.keyboard.down("d");
   try { await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(73.5); }
   finally { await page.keyboard.up("d"); }
+  // Approach from the west, where the caravan is the nearest service rather
+  // than its separate chest, and Alden does not cover its world hit target.
+  await page.keyboard.down("a");
+  try { await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeLessThan(74.4); }
+  finally { await page.keyboard.up("a"); }
+  await page.touchscreen.tap(20, 20); // Actual touch resumes the mobile dock after keyboard walking.
   await page.locator(".action-interact").tap();
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
+  await dialog(page).getByRole("button", { name: "Browse supplies", exact: true }).tap();
   await expect(dialog(page)).toHaveAttribute("data-menu-panel", "trade");
   await expect(dialog(page)).toContainText("Travelling supply caravan");
   await dialog(page).getByRole("group", { name: "Goods", exact: true }).getByRole("button", { name: "Sawn plank", exact: true }).tap();
@@ -231,12 +251,14 @@ test("world stations filter services, finish real work while actors pause, and k
   for (const station of [{ x: 78, z: 140, kind: "furnace" }, { x: 81, z: 140, kind: "range" }] as const) {
     const other = createValleySave(Date.now()); at(other, station.x, station.z); await restore(page, other);
     await page.locator(".action-interact").tap();
+    await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
+    await dialog(page).getByRole("button", { name: station.kind === "furnace" ? "Smelt something" : "Cook something", exact: true }).tap();
     await expect(dialog(page)).toHaveAttribute("data-menu-panel", "craft");
     for (const recipe of Object.values(VALLEY_RECIPES)) {
-      await expect(dialog(page).getByRole("group", { name: "Recipes", exact: true }).getByRole("button", { name: recipe.name, exact: true })).toHaveCount(recipe.station === station.kind ? 1 : 0);
+      await expect(dialog(page).getByTestId("recipe-grid").locator(`[data-recipe-id="${recipe.id}"]`)).toHaveCount(recipe.station === station.kind ? 1 : 0);
     }
     await expect(dialog(page).getByTestId("recipe-detail")).toHaveCount(1);
-    await expect(dialog(page).getByTestId("recipe-detail")).toHaveAttribute("data-recipe-id", Object.values(VALLEY_RECIPES).find(recipe => recipe.station === station.kind)!.id);
+    await expect(dialog(page).getByTestId("recipe-detail")).toHaveAttribute("data-selected-recipe", Object.values(VALLEY_RECIPES).find(recipe => recipe.station === station.kind)!.id);
   }
   const furnishing = createValleySave(Date.now());
   expect(applyValleyCommand(furnishing, { type: "place-home", x: 54, z: 155, rotation: 0 }, Date.now()).ok).toBe(true);
@@ -339,14 +361,15 @@ test("independent move and strike touches release on cancellation, orientation a
   await expect.poll(async () => Number(await app(page).getAttribute("data-player-x"))).toBeGreaterThan(69.1);
   await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [walkingPoint, interactPoint] });
   await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [interactPoint] });
-  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "craft");
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "interaction");
   await expect(dialog(page)).toContainText("Communal carpentry workbench");
+  await expect(dialog(page).getByRole("button", { name: "Craft something", exact: true })).toBeVisible();
   await page.waitForTimeout(200);
   const inMenu = Number(await app(page).getAttribute("data-player-x"));
   await page.waitForTimeout(250);
   expect(Number(await app(page).getAttribute("data-player-x"))).toBeCloseTo(inMenu, 2);
   await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
-  await dialog(page).getByRole("button", { name: "Back", exact: true }).tap();
+  await dialog(page).getByRole("button", { name: "Step away", exact: true }).tap();
   await page.waitForTimeout(250);
   expect(Number(await app(page).getAttribute("data-player-x"))).toBeCloseTo(inMenu, 2);
 });

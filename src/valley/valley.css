@@ -34,6 +34,8 @@
 
 /* Play HUD: menus above, contextual actions and results beside the thumb dock. */
 .valley-app {--valley-control-lift:0px;}
+.valley-app[data-input-mode=keyboard] .valley-context,.valley-app[data-input-mode=controller] .valley-context{bottom:max(18px,env(safe-area-inset-bottom));}
+.valley-app[data-input-mode=keyboard] .valley-message.valley-feedback,.valley-app[data-input-mode=controller] .valley-message.valley-feedback{bottom:calc(90px + env(safe-area-inset-bottom));}
 .valley-play-ui {display:contents;}
 .valley-columns[data-storage-access=false]{grid-template-columns:1fr;}
 .valley-quantity{gap:6px;}.valley-quantity input{width:64px;flex:0 0 64px;box-sizing:border-box;min-width:0;}.valley-quantity button{flex:0 0 44px;padding:6px;}
@@ -73,6 +75,8 @@
 .valley-activity ol{padding:0;list-style:none;}.valley-activity li{padding:10px 12px;margin:8px 0;border-left:3px solid #b7ce99;background:#2c483a;border-radius:6px;font-size:13px;}.valley-activity li[data-tone=warning],.valley-activity li[data-tone=danger]{border-left-color:#e4ac80;}.valley-activity strong,.valley-activity span{display:block;}.valley-activity span{font-size:12px;margin-top:5px;color:#d6dec7;}
 .valley-placement-adjust {display:none;}.valley-placement-error {padding:8px;border-radius:6px;background:#72513e;color:#fff0d0!important;}
 .valley-app[data-panel-open=true] .three-performance {z-index:7;}
+.valley-app[data-input-mode]:not([data-input-mode=touch]) .valley-context,.valley-app[data-input-mode]:not([data-input-mode=touch]) .valley-message.valley-feedback{left:50%;width:min(420px,calc(100% - 32px));}
+.valley-device-hints{font-size:11px!important;}
 @media(max-width:760px),(max-height:500px){
   .valley-vitals{width:168px;padding:6px 8px;font-size:10px;gap:3px;}.valley-vitals strong{font-size:15px;}.valley-vitals small{display:none;}.valley-meter-row{gap:7px;}.valley-hud-actions{max-width:none;}.valley-hud button{padding:8px;font-size:12px;}
   .valley-current-goal{top:max(90px,calc(env(safe-area-inset-top) + 90px));max-width:calc(100% - 148px);}.valley-current-goal button{font-size:11px;padding:7px 9px;}

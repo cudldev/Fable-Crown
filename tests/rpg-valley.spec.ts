@@ -20,19 +20,34 @@ async function ready(page: Page) {
   await expect(root(page)).toHaveAttribute("data-ready", "true", { timeout: 90000 });
   await expect(root(page)).toHaveAttribute("data-mode", "world");
 }
+async function closePanels(page: Page) {
+  for (let i = 0; i < 8 && await panel(page).isVisible(); i++) await page.keyboard.press("Escape");
+  await expect(panel(page)).toHaveCount(0);
+}
+async function rowanAccount(page: Page, payment = true) {
+  await page.keyboard.press("e");
+  await expect(panel(page)).toHaveAttribute("data-menu-panel", "interaction");
+  await panel(page).getByRole("button", { name: "Continue conversation", exact: true }).click();
+  await panel(page).getByRole("button", { name: "About my home…", exact: true }).click();
+  if (payment) {
+    await panel(page).getByRole("button", { name: "Continue conversation", exact: true }).click();
+    await panel(page).getByRole("button", { name: "I’d like to make a payment.", exact: true }).click();
+  }
+}
 async function open(page: Page, tab: string) {
   if (["Craft", "Trade", "Projects"].includes(tab)) {
-    if (!await panel(page).isVisible()) await page.locator(".action-interact").click();
-    if (tab === "Projects") { await expect(panel(page)).toHaveAttribute("data-menu-panel", "projects"); return; }
-    await panel(page).getByRole("button", { name: tab === "Craft" ? "Carpentry" : "Trade", exact: true }).click();
+    await closePanels(page);
+    await page.keyboard.press("e");
+    await expect(panel(page)).toHaveAttribute("data-menu-panel", "interaction");
+    await panel(page).getByRole("button", { name: tab === "Craft" ? "Craft something" : tab === "Trade" ? "Browse supplies" : "Forge project", exact: true }).click();
     return;
   }
-  if (await panel(page).isVisible()) await panel(page).getByRole("button", { name: "Close", exact: true }).click();
+  await closePanels(page);
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await panel(page).getByRole("button", { name: tab === "Home" ? "Build & manage" : tab === "Bag" ? "Backpack" : tab, exact: true }).click();
 }
 async function tools(page: Page) {
-  if (await panel(page).isVisible()) await panel(page).getByRole("button", { name: "Close", exact: true }).click();
+  await closePanels(page);
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await panel(page).getByRole("button", { name: "Settings", exact: true }).click();
 }
@@ -80,8 +95,7 @@ test("valley UI places a free tent, pays the account in parts and advances guida
   await page.getByLabel("Placement X").fill("54"); await page.getByLabel("Placement Z").fill("155");
   await panel(page).getByRole("button", { name: "Confirm", exact: true }).click();
   await expect(status(page)).toContainText("Your tent is ready");
-  await page.locator(".action-interact").click();
-  await panel(page).getByRole("button", { name: "Royal account", exact: true }).click();
+  await rowanAccount(page);
   await page.getByLabel("Cottage payment").fill("25");
   await panel(page).getByRole("button", { name: "Pay 25 coins", exact: true }).click();
   await expect(panel(page)).toContainText("Cottage account: 25 / 100 coins · 75 coins available.");
@@ -101,15 +115,27 @@ test("valley UI places a free tent, pays the account in parts and advances guida
 
 test("valley UI reserves a real craft batch and sells the finished planks at the nearby caravan", async ({ page }) => {
   await page.goto("./?chapter=valley"); await ready(page);
-  const fixture = createValleySave(Date.now()); position(fixture, 74, 142); addItems(fixture.chapter.player.inventory, "logs", 2);
+  const fixture = createValleySave(Date.now()); position(fixture, 69, 140); addItems(fixture.chapter.player.inventory, "logs", 2);
   await restore(page, fixture); await open(page, "Craft");
-  await panel(page).getByRole("group", { name: "Recipes", exact: true }).getByRole("button", { name: "Saw two planks", exact: true }).click();
-  await page.getByLabel("Quantity", { exact: true }).fill("2");
+  await panel(page).getByTestId("recipe-grid").locator('[data-recipe-id="valley-plank"]').click();
+  await page.getByLabel("Craft quantity", { exact: true }).fill("2");
   const recipe = panel(page).getByTestId("recipe-detail");
-  await recipe.getByRole("button", { name: "Make 2", exact: true }).click();
+  await recipe.getByTestId("craft-primary").click();
   await expect(status(page)).toContainText("Ingredients reserved");
-  await expect(panel(page).locator(".valley-job")).toHaveCount(1);
-  await expect(panel(page).locator(".valley-job")).toHaveCount(0, { timeout: 15000 });
+  await expect(panel(page).getByTestId("craft-queue")).toHaveCount(1);
+  await expect(panel(page).getByTestId("craft-queue")).toHaveCount(0, { timeout: 15000 });
+  await closePanels(page);
+  await page.keyboard.down("s");
+  try { await expect.poll(async () => Number(await root(page).getAttribute("data-player-z"))).toBeGreaterThan(141.8); }
+  finally { await page.keyboard.up("s"); }
+  await page.keyboard.down("d");
+  try { await expect.poll(async () => Number(await root(page).getAttribute("data-player-x"))).toBeGreaterThan(73.5); }
+  finally { await page.keyboard.up("d"); }
+  // Return to the west side of the caravan so its separate storage chest is
+  // not the nearest service after the camera-relative approach.
+  await page.keyboard.down("a");
+  try { await expect.poll(async () => Number(await root(page).getAttribute("data-player-x"))).toBeLessThan(74.4); }
+  finally { await page.keyboard.up("a"); }
   await open(page, "Trade");
   await panel(page).getByRole("group", { name: "Goods", exact: true }).getByRole("button", { name: "Sawn plank", exact: true }).click();
   const planks = panel(page).getByTestId("trade-detail");
@@ -128,10 +154,9 @@ test("actual import reconciles offline cottage and optional forge, with progress
   await page.goto("./?chapter=valley"); await ready(page);
   const before = Date.now() - 6 * HOUR, cottage = home(before);
   await restore(page, cottage);
-  await page.locator(".action-interact").click();
-  await panel(page).getByRole("button", { name: "Royal account", exact: true }).click();
-  await expect(panel(page)).toContainText("Your cottage is ready.");
-  await expect(page.getByRole("progressbar", { name: "Cottage construction" })).toHaveJSProperty("value", COTTAGE_TICKS);
+  await rowanAccount(page, false);
+  await expect(panel(page)).toContainText("Your cottage is ready!");
+  expect((await snapshot(page)).valley.cottageTicks).toBe(COTTAGE_TICKS);
   const forge = home(Date.now() - 2 * HOUR);
   forge.valley.cottageTicks = COTTAGE_TICKS; forge.valley.forge = { logs: 12, bars: 2, ticks: 0 };
   forge.valley.furniture = [{ id: "qa-stool", itemId: "stool", x: 58, z: 168, rotation: 0 }];
@@ -190,6 +215,8 @@ test("real IndexedDB starts fresh beside old archives and recovers only the curr
   expect(validateValleySave(recovered)).not.toBeNull();
 });
 
+test.describe("coarse pointer controls", () => {
+test.use({ hasTouch: true, isMobile: true, deviceScaleFactor: 1 });
 test("production valley keyboard, emulated controller and touch cancellation work in both mobile orientations", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.addInitScript(() => {
@@ -230,6 +257,7 @@ test("production valley keyboard, emulated controller and touch cancellation wor
     const pad = (window as unknown as { valleyTestPad: { buttons: { pressed: boolean; value: number }[] } }).valleyTestPad;
     pad.buttons[1].pressed = false; pad.buttons[1].value = 0;
   });
+  await page.touchscreen.tap(20, 20); // Resume touch after actual controller use.
   const stick = page.getByRole("group", { name: "Movement joystick" }), box = await stick.boundingBox(); expect(box).not.toBeNull();
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
@@ -252,6 +280,7 @@ test("production valley keyboard, emulated controller and touch cancellation wor
       expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(size.height);
     }
   }
+});
 });
 
 test("invalid UI imports preserve the current valley and device save", async ({ page }) => {

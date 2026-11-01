@@ -114,8 +114,10 @@ staticObject("entrance-sign", "Welcome to your valley", "sign", 45, 138, "prop-s
   "Your land begins south of this path. Timber is north and west; copper and tin are east. The pond is peaceful.";
 staticObject("wilderness-sign", "Wilderness trail — danger ahead", "sign", 86, 178, "prop-sign").description =
   "The safe valley ends east of this sign. Wildlife and combat are optional; prepare equipment and food before leaving.";
-staticObject("workbench", "Communal carpentry workbench", "decor", 69, 139, "prop-supplies", undefined, true, 2, 1).serviceId = "valley-carpentry";
+staticObject("workbench", "Communal carpentry workbench", "decor", 69, 139, "valley-table", undefined, true, 2, 1).serviceId = "valley-carpentry";
 staticObject("caravan", "Travelling supply caravan", "shop", 73, 139, "prop-supplies", undefined, true, 3, 2).shopId = "valley-caravan";
+// Keep the existing starter route and saved standing positions walkable.
+staticObject("caravan-chest", "Caravan storage chest", "decor", 76, 140, "valley-chest", undefined, false).serviceId="valley-storage";
 staticObject("brazier", "Communal smelting brazier", "furnace", 78, 139, "iso-workshop", undefined, true);
 staticObject("cooking-fire", "Communal cooking fire", "range", 81, 139, undefined, undefined, true);
 staticObject("forge-site", "Public forge project board", "sign", 70, 177, "prop-sign").serviceId="valley-forge-project";

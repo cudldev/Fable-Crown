@@ -157,7 +157,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
               <span>{["bank", "quest"].includes(object.kind) || selected || props.camera.overview && object.kind === "landmark" ? object.name : ""}</span>
             </button>;
           })}
-          {!props.camera.overview && [props.state.player, ...props.state.npcs].map(actor => {
+          {!props.camera.overview && [props.state.player, ...props.state.npcs].filter(actor=>!props.directInput||actor.id!==props.state.player.id).map(actor => {
             const selection: TileSelection = { kind: "actor", id: actor.id };
             return <button key={`actor-${actor.id}`} ref={bind(`actor-${actor.id}`)} className="tile-actor" aria-label={`Inspect ${actor.name}`} data-three-selection={JSON.stringify(selection)} onClick={event => keyboardSelect(event, selection)} />;
           })}

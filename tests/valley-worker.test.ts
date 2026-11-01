@@ -205,13 +205,23 @@ describe("actual valley worker lifecycle", () => {
     expect(snapshot.chapter.tick).toBe(0);
     expect(snapshot.offlineRemainder).toBeGreaterThanOrEqual(300);
     expect(snapshot.offlineRemainder).toBeLessThan(600);
+    const pausedAt=Date.now();
+    expect(pausedAt).toBe(NOW+320);
+    expect(snapshot.savedAt).toBe(pausedAt);
     vi.clearAllTimers();
-    await boot(snapshot); await send({ type: "resume" });
+    // Vitest5 clears timers by resetting its clock to installation time; keep this
+    // simulated worker restart at the saved instant rather than adding wall-clock offline work.
+    vi.setSystemTime(pausedAt);
+    expect(Date.now()).toBe(snapshot.savedAt);
+    await boot(snapshot);
+    expect(latest().chapter.tick).toBe(0);
+    expect(latest().offlineRemainder).toBe(snapshot.offlineRemainder);
+    await send({ type: "resume" });
     vi.advanceTimersByTime(320);
     await send({ type: "pause" });
     const restored = await exported();
     expect(restored.chapter.tick).toBe(1);
-    expect(restored.offlineRemainder).toBeLessThan(100);
+    expect(restored.offlineRemainder).toBe(40);
   });
 
   it("adds quarter-speed hidden time to partial visible time, exactly once", async () => {

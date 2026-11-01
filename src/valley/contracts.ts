@@ -41,7 +41,7 @@ export interface ValleyResult {ok:boolean;message:string}
 export interface ValleyFeedback {id:number;tone:"success"|"info"|"warning"|"danger";title:string;detail?:string}
 export type ValleyServicePanel="visitor"|"inventory"|"craft"|"trade"|"home"|"projects";
 /** Interaction context is granted by a nearby world object, never saved. */
-export interface ValleyService {objectId:string;name:string;kind:"workbench"|"furnace"|"range"|"caravan"|"home"|"planning"|"forge"|"visitor";x:number;z:number;range:number;station?:"workbench"|"furnace"|"range";visitorId?:string}
+export interface ValleyService {objectId:string;name:string;kind:"workbench"|"furnace"|"range"|"caravan"|"storage"|"home"|"planning"|"forge"|"visitor";x:number;z:number;range:number;station?:"workbench"|"furnace"|"range";visitorId?:string}
 export const COTTAGE_TICKS=9000;
 export const FORGE_TICKS=1800;
 export const FIRST_BILL=100;
