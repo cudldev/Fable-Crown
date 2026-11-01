@@ -9,137 +9,137 @@
     {
       "phase": "idle",
       "file": "docs/screenshots/valley-playback/idle-0.png",
-      "at": 19260.10000000894,
+      "at": 18504.59999999404,
       "clip": "idle",
-      "actionFrame": "42",
+      "actionFrame": "11",
       "x": "52.0000",
       "z": "150.0000"
     },
     {
       "phase": "idle",
       "file": "docs/screenshots/valley-playback/idle-1.png",
-      "at": 19539.10000000894,
+      "at": 18768.79999999702,
       "clip": "idle",
-      "actionFrame": "59",
+      "actionFrame": "27",
       "x": "52.0000",
       "z": "150.0000"
     },
     {
       "phase": "locomotion",
       "file": "docs/screenshots/valley-playback/locomotion-0.png",
-      "at": 19750.20000000298,
+      "at": 18976.09999999404,
       "clip": "walk",
-      "actionFrame": "71",
-      "x": "52.1631",
-      "z": "149.8838"
+      "actionFrame": "39",
+      "x": "52.1423",
+      "z": "149.8987"
     },
     {
       "phase": "locomotion",
       "file": "docs/screenshots/valley-playback/locomotion-1.png",
-      "at": 20028.30000001192,
+      "at": 19237.89999999106,
       "clip": "walk",
-      "actionFrame": "88",
-      "x": "52.8356",
-      "z": "149.4061"
+      "actionFrame": "55",
+      "x": "52.7744",
+      "z": "149.4492"
     },
     {
       "phase": "locomotion",
       "file": "docs/screenshots/valley-playback/locomotion-2.png",
-      "at": 20312.40000000596,
+      "at": 19502.29999999702,
       "clip": "walk",
-      "actionFrame": "105",
-      "x": "53.5280",
-      "z": "148.9133"
+      "actionFrame": "71",
+      "x": "53.4258",
+      "z": "148.9854"
     },
     {
       "phase": "strike",
       "file": "docs/screenshots/valley-playback/strike-0.png",
-      "at": 20560.40000000596,
+      "at": 19758.79999999702,
       "clip": "strike",
-      "actionFrame": "120",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "86",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "strike",
       "file": "docs/screenshots/valley-playback/strike-1.png",
-      "at": 20810.10000000894,
+      "at": 19978.70000000298,
       "clip": "strike",
-      "actionFrame": "135",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "99",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "strike",
       "file": "docs/screenshots/valley-playback/strike-2.png",
-      "at": 21084.70000000298,
-      "clip": "idle",
-      "actionFrame": "152",
-      "x": "53.9150",
-      "z": "148.6377"
+      "at": 20215.29999999702,
+      "clip": "strike",
+      "actionFrame": "113",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "strike",
       "file": "docs/screenshots/valley-playback/strike-3.png",
-      "at": 21343.40000000596,
+      "at": 20423.70000000298,
       "clip": "idle",
-      "actionFrame": "167",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "126",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "strike",
       "file": "docs/screenshots/valley-playback/strike-4.png",
-      "at": 21598.40000000596,
+      "at": 20633.39999999106,
       "clip": "idle",
-      "actionFrame": "182",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "138",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "block",
       "file": "docs/screenshots/valley-playback/block-0.png",
-      "at": 21872.40000000596,
+      "at": 20848.70000000298,
       "clip": "block",
-      "actionFrame": "199",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "152",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "block",
       "file": "docs/screenshots/valley-playback/block-1.png",
-      "at": 22166.30000001192,
+      "at": 21101.09999999404,
       "clip": "block",
-      "actionFrame": "216",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "167",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "block",
       "file": "docs/screenshots/valley-playback/block-2.png",
-      "at": 22442.60000000894,
+      "at": 21368.39999999106,
       "clip": "block",
-      "actionFrame": "233",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "183",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "settled",
       "file": "docs/screenshots/valley-playback/settled-0.png",
-      "at": 22678.80000001192,
+      "at": 21580.39999999106,
       "clip": "idle",
-      "actionFrame": "248",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "195",
+      "x": "53.7930",
+      "z": "148.7246"
     },
     {
       "phase": "settled",
       "file": "docs/screenshots/valley-playback/settled-1.png",
-      "at": 22952.5,
+      "at": 21826.09999999404,
       "clip": "idle",
-      "actionFrame": "264",
-      "x": "53.9150",
-      "z": "148.6377"
+      "actionFrame": "210",
+      "x": "53.7930",
+      "z": "148.7246"
     }
   ]
 }

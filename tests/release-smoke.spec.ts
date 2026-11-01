@@ -21,7 +21,8 @@ async function menu(page: Page) {
   if (await page.getByRole("button", { name: "Save on this device", exact: true }).isVisible()) return;
   const dialog = page.getByRole("dialog");
   if (await dialog.isVisible()) await dialog.getByRole("button", { name: "Close", exact: true }).click();
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await dialog.getByRole("button", { name: "Settings", exact: true }).click();
 }
 async function ready(page: Page) {
   await expect(page.getByTestId("valley-app")).toHaveAttribute("data-ready", "true");
@@ -81,6 +82,7 @@ test("real valley worker, local guidance and durable saves work without graphics
   expect(await read(page, "v5")).toEqual(legacy);
   expect(await read(page, "v6")).toEqual(beta);
   await expect.poll(async () => (await snapshot(page)).chapter.tick).toBeGreaterThan(first.chapter.tick);
+  await page.getByRole("dialog").getByRole("button", { name: "Back", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Journal", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("Your own quiet valley");
   await page.getByRole("button", { name: "Pin next suggested goal", exact: true }).click();
@@ -98,7 +100,7 @@ test("real valley worker, local guidance and durable saves work without graphics
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    const control = await page.getByRole("button", { name: "More", exact: true }).boundingBox();
+    const control = await page.getByRole("button", { name: "Menu", exact: true }).boundingBox();
     expect(control!.width).toBeGreaterThanOrEqual(44);
     expect(control!.height).toBeGreaterThanOrEqual(44);
   }

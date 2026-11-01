@@ -2,12 +2,14 @@
 
 Current format **7** uses `valley-v1` / `valley-v1-backup`: fresh25 coins, no V3–V6 migration/import, old keys untouched.
 
-Final local production candidate **c35e76d491e5**, `http://127.0.0.1:5398/Fable-Crown/`:
+Current local production **5b79dde599fd**, `http://127.0.0.1:5398/Fable-Crown/`:
 
-- Fresh-storage CPU: **6/6**; full unit/type/build/native/dist gate is lead-recorded in PROGRESS.
-- Functional GPU: **10/10**, serialized controller2 + existing8.
-- Release/PWA: **2/2**, retaining the two-case non-GPU CI boundary. Scope/offline assets/zero external requests pass.
-- No page errors. Lead verified published8b21ba4/Actions41259232063, public8daf56535279: actual cache upgrade, saved tent/25coins, untouched old keys, both orientations, scope and offline WebGL/all11 assets; zero external requests. See `release/valley-public.json`.
+- Fresh-storage CPU: **6/6**; lead records full unit/type/build/native/dist gates in PROGRESS.
+- GPU evidence: base `24e5df24de08` **17/17** (functional14 + art3); density/steppers `d703064e57e6` **7/7 affected**; final pointer fix **3/3 touch/controller** in42.3s. Contextual stations, console Back flows, exact feedback, actor pause/background craft, four coarse sizes, handedness/raised controls and real multitouch pass.
+- Final release/PWA: **2/2** in16.9s, retaining the two-case non-GPU CI boundary. Scope/offline assets/zero external requests pass. No page errors.
+- [Mobile review](MOBILE_UX_REVIEW.md) and ten captures verify gold-primary contrast, partial-grave feedback, full unscrolled landscape craft/menu targets and pad-editable quantity. Secondary Mode keeps movement; secondary Interact pauses it; cancel/outside/Back leave no stale input. Expanded placement scrolls; no physical-device claim.
+
+Historical public evidence predates this UI pass: lead verified published8b21ba4/Actions41259232063, public8daf56535279, cache upgrade, saved tent/25coins, untouched old keys, both orientations, scope and offline WebGL/all11 assets; zero external requests. See `release/valley-public.json`. Lead owns current publication verification.
 
 Coverage: earned peaceful/mixed reference journeys; home/economy/offline/recovery/current saves; fresh isolation and legacy-file rejection; keyboard/emulated-pad/touch orientations. New controller proof covers Y once/hold, real RT damage/LT block, Settings camera/tool controls, disclosure/Tab wrap, five day3 pins and later grant inspection.
 

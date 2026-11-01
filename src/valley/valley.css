@@ -31,3 +31,65 @@
 .valley-app .three-light-controls,.valley-app .three-test-note,.valley-app .world-health-player{display:none;}.valley-app .three-performance{top:112px;right:12px;left:auto;transform:none;z-index:6;}
 @media(max-width:600px){.valley-vitals{width:166px;padding:8px;}.valley-vitals strong{font-size:17px;}.valley-vitals small{display:block;margin:2px 0 0;}.valley-hud-actions{max-width:165px;min-width:0;gap:4px;}.valley-hud button{padding:7px 9px;font-size:12px;}.valley-current-goal{top:150px;}.valley-message{top:208px;font-size:11px;}.valley-app .three-performance{display:block;top:auto;bottom:225px;right:12px;z-index:25;}.valley-panel{padding:13px;}.valley-panel h2{font-size:24px;}.valley-columns{grid-template-columns:1fr;}.valley-panel-message{bottom:-13px;margin:16px -13px -13px;padding:10px 13px;}.valley-dashboard{top:278px;}}
 @media (orientation:landscape) and (max-height:500px){.valley-vitals{width:210px;gap:3px;padding:7px 10px;}.valley-vitals strong{font-size:16px;}.valley-vitals small{display:inline;}.valley-current-goal{top:108px;max-width:360px;}.valley-message{top:160px;max-width:350px;}.valley-app .three-performance{top:auto;bottom:225px;right:12px;z-index:25;}.valley-placement{max-height:70%;width:min(650px,calc(100% - 24px));}.valley-panel{width:min(800px,100%);}.valley-dashboard{inset:210px 14px 12px;}}
+
+/* Play HUD: menus above, contextual actions and results beside the thumb dock. */
+.valley-app {--valley-control-lift:0px;}
+.valley-play-ui {display:contents;}
+.valley-columns[data-storage-access=false]{grid-template-columns:1fr;}
+.valley-quantity{gap:6px;}.valley-quantity input{width:64px;flex:0 0 64px;box-sizing:border-box;min-width:0;}.valley-quantity button{flex:0 0 44px;padding:6px;}
+.valley-service-name {padding:9px 12px;border-left:3px solid #e4d59c;background:#304d3c;border-radius:7px;}
+.valley-item {flex-wrap:wrap;}.valley-item>span{flex:1 1 130px;overflow-wrap:anywhere;}.valley-item .valley-button-row{flex:0 1 auto;}
+.valley-console-menu .valley-service-name{margin:0 0 8px;padding:7px 10px;font-size:12px;}
+.valley-console-menu .valley-carpentry{margin:4px 0 10px;font-size:12px;}
+.valley-selection-layout{display:grid;grid-template-columns:minmax(170px,.8fr) minmax(0,1.2fr);align-items:start;gap:14px;}
+.valley-choice-list{display:grid;gap:6px;max-height:350px;overflow:auto;overscroll-behavior:contain;padding:4px;scroll-padding:5px;}
+.valley-choice-list button{text-align:left;min-height:44px;}
+.valley-panel .valley-selection-detail{padding:0 0 12px;border:0;min-width:0;}.valley-selection-detail h3{margin:4px 0 8px;}.valley-selection-detail p{margin:7px 0 10px;}.valley-job{margin-top:12px;}
+@media(max-width:600px){.valley-selection-layout{grid-template-columns:1fr;gap:10px;}.valley-choice-list{grid-template-columns:1fr 1fr;max-height:148px;}.valley-selection-detail .valley-quantity{margin:7px 0;}}
+.valley-app[data-controls-raised=true] {--valley-control-lift:24px;}
+.valley-hud {top:max(8px,env(safe-area-inset-top));gap:8px;}
+.valley-vitals {width:208px;padding:8px 10px;gap:3px;}
+.valley-vitals strong {font-size:18px;}.valley-vitals small {display:none;}
+.valley-hud-actions {max-width:none;flex-wrap:nowrap;gap:6px;align-self:flex-start;align-items:flex-start;}
+.valley-hud-actions button {min-width:48px;}
+.valley-current-goal {top:max(100px,calc(env(safe-area-inset-top) + 100px));max-width:min(420px,calc(100% - 156px));}
+.valley-current-goal button {width:100%;max-height:48px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.valley-camera {top:max(100px,calc(env(safe-area-inset-top) + 100px));bottom:auto;right:max(12px,env(safe-area-inset-right));}
+.valley-camera button[aria-pressed=true] {border-color:#eddda6;background:#435b43;}
+.valley-app .three-performance {top:max(154px,calc(env(safe-area-inset-top) + 154px));bottom:auto;right:max(12px,env(safe-area-inset-right));z-index:7;}
+.valley-context {position:absolute;left:50%;bottom:calc(190px + env(safe-area-inset-bottom) + var(--valley-control-lift));transform:translateX(-50%);z-index:8;width:min(380px,calc(100% - 32px));padding:8px 12px;border:1px solid #bcb88b66;border-radius:11px;background:#18372fe8;text-align:center;pointer-events:none;font:12px/1.35 system-ui;}
+.valley-context strong,.valley-context span {display:block;}.valley-context strong{font-size:13px;color:#fff1c7;}.valley-context span{margin-top:2px;color:#d7dfc8;}
+.valley-context[data-target-ready=true] {border-color:#dce9a4;}
+.valley-context .valley-button-row {justify-content:center;pointer-events:auto;margin-top:6px;}
+.valley-context button {min-width:44px;min-height:44px;border:1px solid #dfd0a2;border-radius:8px;background:#314e3c;color:#fff0cd;padding:8px 12px;}
+.valley-message.valley-feedback {top:auto;left:50%;bottom:calc(254px + env(safe-area-inset-bottom) + var(--valley-control-lift));transform:translateX(-50%);width:min(420px,calc(100% - 32px));max-width:none;max-height:130px;overflow:hidden;padding:10px 13px;border:1px solid #ddcd9e88;border-left:4px solid #d2d6aa;border-radius:10px;background:#152e29f2;box-shadow:0 5px 22px #08241c55;font:13px/1.35 system-ui;opacity:1;visibility:visible;}
+.valley-feedback strong,.valley-feedback span {display:block;}.valley-feedback span {margin-top:4px;color:#e6e9ce;font-size:12px;}
+.valley-message.valley-feedback[data-visible=false] {opacity:0;visibility:hidden;}
+.valley-feedback[data-tone=success] {border-left-color:#c9e7a1;}.valley-feedback[data-tone=warning] {border-left-color:#f1cb83;}.valley-feedback[data-tone=danger] {border-left-color:#ed9b87;}
+.valley-working {position:absolute;left:max(12px,env(safe-area-inset-left));top:156px;z-index:7;max-width:300px;padding:7px 10px;border-radius:8px;background:#213d32e8;color:#e5dbb4;font-size:12px;}
+.valley-destination {position:absolute;top:158px;left:max(12px,env(safe-area-inset-left));display:flex;align-items:center;gap:8px;z-index:8;max-width:calc(100% - 120px);padding:2px 5px 2px 10px;border-radius:9px;background:#203d35ed;color:#f4dfad;font-size:12px;}
+.valley-destination button {min-height:44px;min-width:44px;background:transparent;border:0;color:inherit;font-size:20px;}
+.valley-settings-reach {margin-top:8px;}.valley-recipe-needs {color:#e5d6a4!important;background:#355041;padding:8px;border-radius:7px;}
+.valley-activity ol{padding:0;list-style:none;}.valley-activity li{padding:10px 12px;margin:8px 0;border-left:3px solid #b7ce99;background:#2c483a;border-radius:6px;font-size:13px;}.valley-activity li[data-tone=warning],.valley-activity li[data-tone=danger]{border-left-color:#e4ac80;}.valley-activity strong,.valley-activity span{display:block;}.valley-activity span{font-size:12px;margin-top:5px;color:#d6dec7;}
+.valley-placement-adjust {display:none;}.valley-placement-error {padding:8px;border-radius:6px;background:#72513e;color:#fff0d0!important;}
+.valley-app[data-panel-open=true] .three-performance {z-index:7;}
+@media(max-width:760px),(max-height:500px){
+  .valley-vitals{width:168px;padding:6px 8px;font-size:10px;gap:3px;}.valley-vitals strong{font-size:15px;}.valley-vitals small{display:none;}.valley-meter-row{gap:7px;}.valley-hud-actions{max-width:none;}.valley-hud button{padding:8px;font-size:12px;}
+  .valley-current-goal{top:max(90px,calc(env(safe-area-inset-top) + 90px));max-width:calc(100% - 148px);}.valley-current-goal button{font-size:11px;padding:7px 9px;}
+  .valley-camera{top:max(90px,calc(env(safe-area-inset-top) + 90px));gap:4px;}.valley-camera button{font-size:12px;padding:6px;}
+  .valley-app .three-performance{top:max(143px,calc(env(safe-area-inset-top) + 143px));bottom:auto;z-index:7;}
+  .valley-working{top:146px;max-width:calc(100% - 120px);font-size:11px;}.valley-destination{top:174px;}
+  .valley-placement{padding:10px;width:calc(100% - 20px);max-height:66%;}.valley-placement>header{margin-bottom:6px;}.valley-placement h2{font-size:20px;}.valley-placement p{margin:6px 0;font-size:11px;}.valley-placement .valley-placement-summary{padding:6px 8px;}.valley-placement-adjust{display:inline-flex;margin-bottom:6px;}.valley-placement-details[data-expanded=false]{display:none;}.valley-placement .valley-button-row{gap:5px;}.valley-coordinates{gap:5px;}
+}
+@media(orientation:landscape) and (max-height:500px){
+  .valley-console-menu .valley-menu-body{padding-top:8px;padding-bottom:8px;}
+  .valley-menu-primary{gap:4px;}.valley-console-menu .valley-menu-primary button{min-height:44px;padding:8px 14px;font-size:14px;}
+  .valley-console-menu[data-menu-panel=craft] .valley-carpentry{display:none;}
+  .valley-vitals{width:190px;}.valley-current-goal{top:90px;max-width:260px;}.valley-camera{top:90px;}.valley-working{top:145px;max-width:260px;}.valley-destination{top:145px;max-width:260px;}
+  .valley-context,.valley-message.valley-feedback{left:calc(50% - 30px);width:min(320px,calc(100% - 336px));}
+  .valley-app[data-controls-hand=left] .valley-context,.valley-app[data-controls-hand=left] .valley-message.valley-feedback{left:calc(50% + 30px);}
+  .valley-context{bottom:calc(100px + env(safe-area-inset-bottom) + var(--valley-control-lift));padding:6px 10px;font-size:11px;}.valley-context strong{font-size:12px;}
+  .valley-message.valley-feedback{bottom:max(16px,calc(env(safe-area-inset-bottom) + 8px));padding:8px 11px;font-size:12px;max-height:76px;}.valley-feedback span{font-size:11px;}
+  .valley-app .three-performance{top:143px;}.valley-placement{max-height:70%;width:min(570px,calc(100% - 250px));left:50%;}.valley-placement h2{font-size:18px;}.valley-placement>header button{padding:6px;}
+}
+@media(prefers-reduced-motion:no-preference){.valley-feedback{transition:opacity .15s;}}

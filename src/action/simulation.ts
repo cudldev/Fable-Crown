@@ -2,8 +2,8 @@ import { ACTION_DT, type ActionEnemy, type ActionEvent, type ActionInput, type A
 
 const QUANTA = 1024;
 const WALK_SPEED = 3;
-const SWING_FRAMES = 36;
-const SWING_CONTACT = 24;
+export const SWING_FRAMES = 36;
+export const SWING_CONTACT = 24;
 const REACH = 1.65;
 const ENEMY_REACH = 1.5;
 const ENEMY_SPEED = 1.5;
@@ -76,7 +76,7 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
   if (pressed && p.swing === 0 && !p.blocking) {
     state.swingTool = input.tool;
     p.swing = SWING_FRAMES;
-    const target = findTarget(state, world, state.swingTool);
+    const target = findActionTarget(state, world, state.swingTool);
     if (target) {
       const dx = target.x - p.x, dz = target.z - p.z;
       const length = Math.hypot(dx, dz);
@@ -91,7 +91,7 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
   if (p.swing > 0) {
     p.swing -= 1;
     if (p.swing === SWING_CONTACT) {
-      const target = findTarget(state, world, state.swingTool);
+      const target = findActionTarget(state, world, state.swingTool);
       if (target?.kind === "resource") events.push({ kind: "resource-hit", targetId: target.id });
       else if (target) {
         const enemy = state.enemies.find((candidate) => candidate.id === target.id);
@@ -118,7 +118,8 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
   return events;
 }
 
-function findTarget(state: ActionState, world: ActionWorld, tool: boolean): ActionTarget | undefined {
+/** Read-only target query shared by authoritative strikes and contextual controls. */
+export function findActionTarget(state: ActionState, world: ActionWorld, tool: boolean): ActionTarget | undefined {
   const p = state.player;
   const candidates: readonly ActionTarget[] = tool
     ? world.targets.filter((target) => target.kind === "resource")

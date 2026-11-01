@@ -1,8 +1,13 @@
-import {expect,test} from "@playwright/test";
+import {expect,test,type Page} from "@playwright/test";
 import {createValleySave} from "../src/valley/save";
 import {tile} from "../src/rpg/world";
 import {COTTAGE_TICKS,FORGE_TICKS} from "../src/valley/contracts";
 import {homeFootprints} from "../src/valley/world";
+
+async function settings(page:Page){
+  await page.getByRole("button",{name:"Menu",exact:true}).click();
+  await page.getByRole("dialog").getByRole("button",{name:"Settings",exact:true}).click();
+}
 
 test("native valley structures, furnishings and terraces share the actor scale",async({page})=>{
   const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
@@ -19,9 +24,9 @@ test("native valley structures, furnishings and terraces share the actor scale",
     ground:{"57,165":{level:1,path:false},"57,166":{level:0,path:true,stairs:0},"58,165":{level:1,path:false}}});
   const restore=async(x:number,z:number)=>{
     fixture.action.player.x=x;fixture.action.player.z=z;fixture.chapter.player.position=tile(x,z);fixture.savedAt=Date.now();
-    await page.getByRole("button",{name:"More",exact:true}).click();
+    await settings(page);
     await page.getByLabel("Import valley archive").setInputFiles({name:"art-review.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(fixture))});
-    await expect(page.locator(".valley-panel-message")).toContainText("Chapter restored");await page.keyboard.press("Escape");
+    await expect(page.locator(".valley-panel-message")).toContainText("Chapter restored");await page.getByRole("dialog").getByRole("button",{name:"Close",exact:true}).click();
     await page.getByRole("button",{name:"Follow",exact:true}).click();
     await expect(root).toHaveAttribute("data-player-x",x.toFixed(3));await page.waitForTimeout(2500);
   };
@@ -43,9 +48,9 @@ test("rotated native home doors stay aligned with continuous walk-in collision",
     Object.assign(fixture.valley,{home:{x:54,z:155,rotation,tentPacked:true},paid:100,cottageTicks:COTTAGE_TICKS,layoutRevision:1});
     const fp=homeFootprints(fixture.valley)!;
     fixture.action.player.x=fp.approach.x;fixture.action.player.z=fp.approach.z;fixture.chapter.player.position=tile(fp.approach.x,fp.approach.z);
-    await page.getByRole("button",{name:"More",exact:true}).click();
+    await settings(page);
     await page.getByLabel("Import valley archive").setInputFiles({name:"rotated-home.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(fixture))});
-    await expect(page.locator(".valley-panel-message")).toContainText("Chapter restored");await page.keyboard.press("Escape");
+    await expect(page.locator(".valley-panel-message")).toContainText("Chapter restored");await page.getByRole("dialog").getByRole("button",{name:"Close",exact:true}).click();
     await expect(root).toHaveAttribute("data-player-x",fp.approach.x.toFixed(3));
     const keys=[["w","d"],["d","s"],["s","a"],["a","w"]][rotation];
     for(const key of keys)await page.keyboard.down(key);await page.waitForTimeout(650);for(const key of keys)await page.keyboard.up(key);
@@ -61,18 +66,20 @@ test("authored shield and tool contact remain readable on clear ground",async({p
   await page.setViewportSize({width:1280,height:800});await page.goto("./?chapter=valley");
   const root=page.getByTestId("valley-app");await expect(root).toHaveAttribute("data-ready","true",{timeout:90000});
   const fixture=createValleySave(Date.now(),512);fixture.action.player.x=52;fixture.action.player.z=150;fixture.chapter.player.position=tile(52,150);
-  await page.getByRole("button",{name:"More",exact:true}).click();
+  await settings(page);
   await page.getByLabel("Import valley archive").setInputFiles({name:"pixel-pose-review.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(fixture))});
-  await expect(page.locator(".valley-panel-message")).toContainText("Chapter restored");await page.keyboard.press("Escape");
+  await expect(page.locator(".valley-panel-message")).toContainText("Chapter restored");await page.getByRole("dialog").getByRole("button",{name:"Close",exact:true}).click();
+  await settings(page);
   for(let i=0;i<4;i++)await page.getByRole("button",{name:"Zoom in",exact:true}).click();
-  const block=page.getByRole("button",{name:"Block",exact:true});
+  await page.getByRole("dialog").getByRole("button",{name:"Close",exact:true}).click();
+  const block=page.locator(".action-block");
   for(const direction of ["left","right"]){
     if(direction==="right"){await page.keyboard.down("d");await page.waitForTimeout(120);await page.keyboard.up("d");}
     await block.hover();await page.mouse.down();await page.waitForTimeout(250);
     await expect(page.locator("[data-character-clip]")).toHaveAttribute("data-character-clip","block");
     await page.screenshot({path:`docs/screenshots/valley-clear-block-${direction}.png`});await page.mouse.up();
   }
-  await page.getByRole("button",{name:"Tool / Attack",exact:true}).hover();await page.mouse.down();
+  await page.locator("[data-action-strike]").hover();await page.mouse.down();
   await expect(page.locator("[data-character-clip]")).toHaveAttribute("data-character-clip","strike");await page.waitForTimeout(205);
   await page.screenshot({path:"docs/screenshots/valley-clear-strike.png"});await page.mouse.up();
 });

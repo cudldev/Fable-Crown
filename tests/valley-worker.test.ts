@@ -3,6 +3,7 @@ import type { ValleySave, ValleyWorkerMessage, ValleyWorkerRequest } from "../sr
 import { idleActionInput } from "../src/action/simulation";
 import { createValleySave } from "../src/valley/save";
 import { itemCount } from "../src/rpg/inventory";
+import {tile} from "../src/rpg/world";
 
 const storage = vi.hoisted(() => ({ read: vi.fn(), write: vi.fn() }));
 vi.mock("../src/valley/save", async importOriginal => ({
@@ -43,6 +44,68 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("actual valley worker lifecycle", () => {
+  it("names connected storage when a finished batch cannot fit in the backpack",async()=>{
+    const fixture=createValleySave(Date.now());fixture.chapter.player.inventory=[{itemId:"logs",quantity:28}];
+    fixture.valley.workQueue=[{recipeId:"valley-plank",quantity:1,remainingTicks:1}];
+    await boot(fixture);await send({type:"resume"});await send({type:"interface",open:true});vi.advanceTimersByTime(600);
+    const feedback=messages.find(message=>message.feedback?.title==="Crafting complete")?.feedback;
+    expect(feedback?.detail).toContain("+2 Sawn plank");expect(feedback?.detail).toContain("Delivered to connected storage.");
+    const result=await exported();expect(itemCount(result.chapter.bank,"valley-plank")).toBe(2);expect(itemCount(result.chapter.player.inventory,"valley-plank")).toBe(0);
+  });
+  it("reports partial recovery and safe remaining belongings alongside the exact gain",async()=>{
+    const fixture=createValleySave(Date.now());fixture.action.player.x=94;fixture.action.player.z=160;
+    fixture.chapter.player.inventory=[{itemId:"logs",quantity:27}];
+    fixture.chapter.grave={position:tile(94,160),items:[{itemId:"logs",quantity:2},{itemId:"coins",quantity:5}],attempts:0,retryAt:0};
+    await boot(fixture);await send({type:"interact"});
+    const feedback=messages.filter(message=>message.feedback).at(-1)?.feedback;
+    expect(feedback?.title).toBe("Recovered what fits. Remaining belongings are safe.");expect(feedback?.detail).toBe("+1 Logs");
+    const result=await exported();expect(itemCount(result.chapter.player.inventory,"logs")).toBe(28);
+    expect(result.chapter.grave?.items).toEqual([{itemId:"logs",quantity:1},{itemId:"coins",quantity:5}]);
+  });
+  it("pauses action in menus while ordinary crafting continues, then resumes without replaying held inputs",async()=>{
+    const fixture=createValleySave(Date.now());fixture.action.player.x=69;fixture.action.player.z=141;
+    fixture.chapter.player.inventory.push({itemId:"logs",quantity:1});
+    await boot(fixture);await send({type:"resume"});
+    await send({type:"focus",selection:{kind:"object",id:"valley-workbench"}});
+    expect(messages.at(-1)?.service).toMatchObject({kind:"workbench",station:"workbench"});
+    await send({type:"interface",open:true});const frozen=structuredClone(actor());
+    await send({type:"command",command:{type:"craft",recipeId:"valley-plank",quantity:1}});
+    await send({type:"input",input:{...idleActionInput(),moveX:1,strike:true,block:true}});
+    vi.advanceTimersByTime(2400);
+    const completed=await exported();expect(completed.action).toEqual(frozen);expect(completed.chapter.tick).toBe(4);
+    expect(itemCount(completed.chapter.player.inventory,"valley-plank")).toBe(2);
+    expect(messages.find(message=>message.feedback?.title==="Crafting complete")?.feedback?.detail).toContain("+2 Sawn plank");
+    expect(messages.find(message=>message.feedback?.title==="Crafting complete")?.feedback?.detail).toContain("+10 carpentry XP");
+    expect(completed).not.toHaveProperty("feedback");expect(completed).not.toHaveProperty("service");
+    await send({type:"interface",open:false});vi.advanceTimersByTime(24);
+    expect(actor().frame).toBe(frozen.frame+1);expect(actor().player.x).toBe(frozen.player.x);
+    expect(actor().player.swing).toBe(0);expect(actor().player.blocking).toBe(false);
+  });
+
+  it("explains distant station interaction and grants only the actual nearby object's menu",async()=>{
+    await boot();await send({type:"focus",selection:{kind:"object",id:"valley-workbench"}});
+    expect(messages.some(message=>message.open)).toBe(false);
+    expect(messages.at(-1)?.feedback?.title).toContain("Walk closer");
+    const fixture=createValleySave(Date.now());fixture.action.player.x=81;fixture.action.player.z=141;
+    await boot(fixture);await send({type:"interact"});
+    expect(messages.find(message=>message.open)?.service).toMatchObject({objectId:"valley-cooking-fire",kind:"range",station:"range"});
+    expect(messages.find(message=>message.open)?.open).toBe("craft");
+  });
+
+  it("explains discarded rapid presses and renews identical empty swings without inventing rewards",async()=>{
+    await boot();await send({type:"resume"});const initial=await exported();
+    await send({type:"input",input:{...idleActionInput(),strike:true,tool:true}});vi.advanceTimersByTime(80);
+    await send({type:"input",input:{...idleActionInput(),strike:true,tool:true}});vi.advanceTimersByTime(32);
+    expect(messages.some(message=>message.feedback?.title==="Finishing this swing")).toBe(true);
+    vi.advanceTimersByTime(700);
+    const first=messages.filter(message=>message.feedback?.title==="Nothing gathered this swing").at(-1)?.feedback;
+    expect(first).toBeDefined();
+    await send({type:"input",input:{...idleActionInput(),strike:true,tool:true}});vi.advanceTimersByTime(250);
+    const second=messages.filter(message=>message.feedback?.title==="Nothing gathered this swing").at(-1)?.feedback;
+    expect(second?.id).toBeGreaterThan(first!.id);expect(second?.tone).toBe("info");
+    const final=await exported();expect(final.chapter.player.inventory).toEqual(initial.chapter.player.inventory);expect(final.chapter.player.skills).toEqual(initial.chapter.player.skills);
+  });
+
   it("ignores input and resume requests while storage is still preparing", async () => {
     let resolveRead!: (save: ValleySave) => void;
     storage.read.mockImplementationOnce(() => new Promise<ValleySave>(resolve => { resolveRead = resolve; }));

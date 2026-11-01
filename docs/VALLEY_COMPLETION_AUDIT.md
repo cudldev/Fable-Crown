@@ -1,5 +1,7 @@
 # Approved valley plan — completion audit
 
+Historical onboarding release gate. Later user-approved contextual console/mobile UX supersedes the menu presentation here; current evidence lives in MOBILE_UX_REVIEW.md and PROGRESS.md. Save/balance contracts remain.
+
 Scope: [approved sections 1–5](APPROVED_ONBOARDING_PLAN.md), with the later **fresh-save override**. Format7 uses `valley-v1`/backup; V3–V6 keys stay untouched and older files are rejected. Migration clauses are superseded, not incomplete requirements.
 
 This maps implemented acceptance requirements to evidence. Local candidate **c35e76d491e5** passed **10 functional GPU cases and 2 non-GPU release/PWA cases**, serialized on the production repository base path. **692 units/82 files**, strict types, build/native/baked/dist gates pass. Commit **8b21ba4**, Actions **41259232063**, is published and verified as public cache **8daf56535279**; its runtime entry matches the local candidate. **Established** identifies the evidence below; **weak** identifies broader human observations not demonstrated.

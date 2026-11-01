@@ -37,10 +37,16 @@ export type ValleyCommand =
   | {type:"eat"|"equip";itemId:string}
   | {type:"unequip";slot:import("../rpg/types").EquipmentSlot};
 export interface ValleyResult {ok:boolean;message:string}
+/** Session-only interaction feedback; never part of the saved simulation. */
+export interface ValleyFeedback {id:number;tone:"success"|"info"|"warning"|"danger";title:string;detail?:string}
+export type ValleyServicePanel="visitor"|"inventory"|"craft"|"trade"|"home"|"projects";
+/** Interaction context is granted by a nearby world object, never saved. */
+export interface ValleyService {objectId:string;name:string;kind:"workbench"|"furnace"|"range"|"caravan"|"home"|"planning"|"forge"|"visitor";x:number;z:number;range:number;station?:"workbench"|"furnace"|"range";visitorId?:string}
 export const COTTAGE_TICKS=9000;
 export const FORGE_TICKS=1800;
 export const FIRST_BILL=100;
 export type ValleyWorkerRequest =
+  | {type:"interface";open:boolean}
   | {type:"input";input:import("../action/contracts").ActionInput}
   | {type:"command";command:ValleyCommand;requestId?:number}
   | {type:"focus";selection:import("../render/scene-types").TileSelection}
@@ -48,7 +54,9 @@ export type ValleyWorkerRequest =
   | {type:"pause"|"resume"|"save"|"interact"|"export"|"reset"};
 export interface ValleyWorkerMessage {
   save?:ValleySave; action?:ActionState; message?:string; storageOkay?:boolean;
+  feedback?:ValleyFeedback;
   receipt?:{requestId?:number;ok:boolean}; export?:ValleySave;
-  open?:"visitor"|"inventory"|"craft"|"trade"|"home"|"projects";
+  open?:ValleyServicePanel;
+  service?:ValleyService;
   visitorId?:string;
 }

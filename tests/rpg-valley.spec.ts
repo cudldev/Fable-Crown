@@ -21,12 +21,20 @@ async function ready(page: Page) {
   await expect(root(page)).toHaveAttribute("data-mode", "world");
 }
 async function open(page: Page, tab: string) {
-  if (!await panel(page).isVisible()) await page.getByRole("button", { name: "More", exact: true }).click();
-  await panel(page).getByRole("button", { name: tab, exact: true }).click();
+  if (["Craft", "Trade", "Projects"].includes(tab)) {
+    if (!await panel(page).isVisible()) await page.locator(".action-interact").click();
+    if (tab === "Projects") { await expect(panel(page)).toHaveAttribute("data-menu-panel", "projects"); return; }
+    await panel(page).getByRole("button", { name: tab === "Craft" ? "Carpentry" : "Trade", exact: true }).click();
+    return;
+  }
+  if (await panel(page).isVisible()) await panel(page).getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await panel(page).getByRole("button", { name: tab === "Home" ? "Build & manage" : tab === "Bag" ? "Backpack" : tab, exact: true }).click();
 }
 async function tools(page: Page) {
   if (await panel(page).isVisible()) await panel(page).getByRole("button", { name: "Close", exact: true }).click();
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await panel(page).getByRole("button", { name: "Settings", exact: true }).click();
 }
 async function restore(page: Page, value: unknown) {
   await tools(page);
@@ -67,15 +75,16 @@ test("valley UI places a free tent, pays the account in parts and advances guida
   await page.goto("./?chapter=valley"); await ready(page);
   const fixture = createValleySave(Date.now()); addItems(fixture.chapter.bank, "coins", 75, Infinity);
   await restore(page, fixture);
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await open(page, "Home");
   await panel(page).getByRole("button", { name: "Place free tent", exact: true }).click();
   await page.getByLabel("Placement X").fill("54"); await page.getByLabel("Placement Z").fill("155");
   await panel(page).getByRole("button", { name: "Confirm", exact: true }).click();
   await expect(status(page)).toContainText("Your tent is ready");
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.locator(".action-interact").click();
+  await panel(page).getByRole("button", { name: "Royal account", exact: true }).click();
   await page.getByLabel("Cottage payment").fill("25");
   await panel(page).getByRole("button", { name: "Pay 25 coins", exact: true }).click();
-  await expect(panel(page)).toContainText("Cottage account: 25 / 100 coins.");
+  await expect(panel(page)).toContainText("Cottage account: 25 / 100 coins · 75 coins available.");
   await panel(page).getByRole("button", { name: "Pay remaining 75", exact: true }).click();
   await expect(status(page)).toContainText("90-minute cottage build");
   await expect(page.getByRole("progressbar", { name: "Cottage construction" })).toHaveAttribute("max", "9000");
@@ -92,18 +101,20 @@ test("valley UI places a free tent, pays the account in parts and advances guida
 
 test("valley UI reserves a real craft batch and sells the finished planks at the nearby caravan", async ({ page }) => {
   await page.goto("./?chapter=valley"); await ready(page);
-  const fixture = createValleySave(Date.now()); position(fixture, 71, 140); addItems(fixture.chapter.player.inventory, "logs", 2);
+  const fixture = createValleySave(Date.now()); position(fixture, 74, 142); addItems(fixture.chapter.player.inventory, "logs", 2);
   await restore(page, fixture); await open(page, "Craft");
+  await panel(page).getByRole("group", { name: "Recipes", exact: true }).getByRole("button", { name: "Saw two planks", exact: true }).click();
   await page.getByLabel("Quantity", { exact: true }).fill("2");
-  const recipe = panel(page).locator("article").filter({ has: page.getByRole("heading", { name: "Saw two planks", exact: true }) });
+  const recipe = panel(page).getByTestId("recipe-detail");
   await recipe.getByRole("button", { name: "Make 2", exact: true }).click();
   await expect(status(page)).toContainText("Ingredients reserved");
   await expect(panel(page).locator(".valley-job")).toHaveCount(1);
   await expect(panel(page).locator(".valley-job")).toHaveCount(0, { timeout: 15000 });
   await open(page, "Trade");
-  const planks = panel(page).locator(".valley-trade").filter({ hasText: "Sawn plank" });
+  await panel(page).getByRole("group", { name: "Goods", exact: true }).getByRole("button", { name: "Sawn plank", exact: true }).click();
+  const planks = panel(page).getByTestId("trade-detail");
   await expect(planks).toContainText("Have 4");
-  await planks.getByRole("button", { name: "Sell 2", exact: true }).click();
+  await planks.getByRole("button", { name: "Sell 2 · 4 coins", exact: true }).click();
   await expect(planks).toContainText("Have 2");
   const saved = await snapshot(page);
   expect(itemCount(saved.chapter.player.inventory, "logs")).toBe(0);
@@ -116,7 +127,9 @@ test("valley UI reserves a real craft batch and sells the finished planks at the
 test("actual import reconciles offline cottage and optional forge, with progress-based chapter three", async ({ page }) => {
   await page.goto("./?chapter=valley"); await ready(page);
   const before = Date.now() - 6 * HOUR, cottage = home(before);
-  await restore(page, cottage); await page.getByRole("button", { name: "Home", exact: true }).click();
+  await restore(page, cottage);
+  await page.locator(".action-interact").click();
+  await panel(page).getByRole("button", { name: "Royal account", exact: true }).click();
   await expect(panel(page)).toContainText("Your cottage is ready.");
   await expect(page.getByRole("progressbar", { name: "Cottage construction" })).toHaveJSProperty("value", COTTAGE_TICKS);
   const forge = home(Date.now() - 2 * HOUR);
@@ -125,6 +138,7 @@ test("actual import reconciles offline cottage and optional forge, with progress
   forge.valley.flags.push("talked-merchant", "talked-smith");
   // Progress, rather than three calendar dates, unlocks the final onboarding chapter.
   forge.valley.startedAt = Date.now();
+  position(forge, 70, 178);
   expect(validateValleySave(forge)).not.toBeNull();
   await restore(page, forge); await open(page, "Projects");
   await expect(panel(page)).toContainText("The public forge is ready.");
@@ -169,7 +183,7 @@ test("real IndexedDB starts fresh beside old archives and recovers only the curr
     };
   }));
   await page.reload(); await ready(page);
-  await expect(page.getByRole("button", { name: "Open current goal" })).toHaveText("Checkpoint A");
+  await expect(page.locator('[aria-label="Open current goal"]')).toHaveText("Checkpoint A");
   for (const [key, value] of Object.entries(archives)) expect(await read(page, key)).toEqual(value);
   const recovered = await snapshot(page);
   expect(recovered.valley.goal).toBe("Checkpoint A");
@@ -197,10 +211,10 @@ test("production valley keyboard, emulated controller and touch cancellation wor
     const pad = (window as unknown as { valleyTestPad: { buttons: { pressed: boolean; value: number }[] } }).valleyTestPad;
     pad.buttons[9].pressed = true; pad.buttons[9].value = 1;
   });
-  await expect(panel(page).getByRole("heading", { name: "Backpack & storage" })).toBeVisible();
+  await expect(panel(page).getByRole("heading", { name: "Game menu" })).toBeVisible();
   // A physical button commonly spans multiple animation frames; one hold is one menu edge.
   await page.waitForTimeout(200);
-  await expect(panel(page).getByRole("heading", { name: "Backpack & storage" })).toBeVisible();
+  await expect(panel(page).getByRole("heading", { name: "Game menu" })).toBeVisible();
   await page.evaluate(() => {
     const pad = (window as unknown as { valleyTestPad: { axes: number[]; buttons: { pressed: boolean; value: number }[] } }).valleyTestPad;
     pad.buttons[9].pressed = false; pad.buttons[9].value = 0; pad.axes[0] = 1;
@@ -263,7 +277,7 @@ test("invalid UI imports preserve the current valley and device save", async ({ 
   await page.getByLabel("Import valley archive").setInputFiles({ name: "broken.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({ version: 7, chapter: {} })) });
   await expect(status(page)).toContainText("invalid");
   await expect(status(page)).toContainText("Your current progress is safe.");
-  await expect(page.getByRole("button", { name: "Open current goal" })).toHaveText("Preserve this home");
+  await expect(page.locator('[aria-label="Open current goal"]')).toHaveText("Preserve this home");
   const saved = await read(page);
   expect(saved.valley.home).toEqual(before.valley.home);
   expect(saved.valley.paid).toBe(before.valley.paid);
@@ -271,5 +285,5 @@ test("invalid UI imports preserve the current valley and device save", async ({ 
   expect(saved.chapter.bank).toEqual(before.chapter.bank);
   await page.getByLabel("Import valley archive").setInputFiles({ name: "not-json.json", mimeType: "application/json", buffer: Buffer.from("{") });
   await expect(status(page)).toContainText("That file is not readable JSON.");
-  await expect(page.getByRole("button", { name: "Open current goal" })).toHaveText("Preserve this home");
+  await expect(page.locator('[aria-label="Open current goal"]')).toHaveText("Preserve this home");
 });

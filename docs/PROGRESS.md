@@ -1,5 +1,11 @@
 # Progress — 2026-10-29
 
+## Contextual console/mobile UX — 2026-11-01
+
+Replaced global action tabs with a console Menu/Back hierarchy and nearby-object services. Crafting/trade show one selected recipe/good; global backpack excludes storage; home/account, dialogue and projects follow context. Smaller HUD, mirrored/raised thumb docks, contextual labels, recovery ring, exact item/XP/coin results, recent activity and resumable placement drafts. Menus pause actors while ordinary background work continues. Format7/balance/assets unchanged.
+
+739units/84files, strict type/build/native/baked/dist pass. Full17 local GPU cases passed, then7 density/controller cases and3 final touch/controller cases passed after targeted fixes; final2 non-GPU release cases pass. Reviewed10 mobile captures; no-scroll landscape actions, pad quantity steppers and actual secondary-touch mode/interact verified. Saves stay format7. Publication/public upgrade verification follows; no performance claim or paid calls/reset/credits.
+
 ## Hands-on valley onboarding — 2026-11-01
 
 Release complete: 8b21ba4/Actions41259232063 passed and deployed public cache8daf56535279. Actual141aac→8daf cache upgrade, saved tent/25coins, untouched old keys, continuous movement, both mobile orientations, scope and offline WebGL/all11 asset entries pass; zero page errors/external runtime requests. Runtime entry matches the local candidate. Evidence: release/valley-public.json and VALLEY_COMPLETION_AUDIT.md. Weekly32%used/~68%remaining; no reset/credits. Stop for playtesting.

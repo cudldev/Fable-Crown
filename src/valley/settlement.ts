@@ -27,7 +27,7 @@ function bankNearby(save:ValleySave):boolean {
   const fp=homeFootprints(save.valley);
   return !!fp&&((!save.valley.home?.tentPacked&&near(save,fp.tentDoor.x,fp.tentDoor.z))||(complete(save)&&near(save,fp.door.x,fp.door.z)));
 }
-function orderNearby(save:ValleySave):boolean {return near(save,51,141)||near(save,74,140)||bankNearby(save);}
+function orderNearby(save:ValleySave):boolean {const fp=complete(save)?homeFootprints(save.valley):null;return near(save,51,141)||near(save,74,140)||bankNearby(save)||!!fp&&near(save,fp.planningTable.x,fp.planningTable.z);}
 function gift(save:ValleySave,itemId:string,n:number):boolean {
   if(!addItems(carried(save),itemId,n)) {
     // Connected storage has no slot limit, but the shared inventory integer ceiling still applies.

@@ -1,0 +1,30 @@
+.valley-menu-backdrop { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: #0b211c9c; }
+.valley-panel.valley-console-menu { display: flex; flex-direction: column; width: min(680px, 100%); min-height: 0; max-height: min(740px, 100%); margin: 0; padding: 0; overflow: hidden; border: 1px solid #d8c48eb0; border-radius: 17px; color: #f5e9cb; background: #233f34; box-shadow: 0 18px 70px #091c1a70; }
+.valley-console-menu > .valley-menu-header { position: sticky; top: 0; z-index: 2; display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 12px 14px; border-bottom: 1px solid #d8c48e44; background: #233f34; }
+.valley-menu-header h2 { flex: 1; min-width: 0; margin: 0; text-align: center; font: 26px/1.15 Georgia, serif; overflow-wrap: anywhere; }
+.valley-console-menu button { min-width: 44px; min-height: 44px; padding: 9px 12px; border: 1px solid #d9c58c88; border-radius: 9px; color: #fff0cd; background: #2d493d; font: 14px/1.25 system-ui, sans-serif; }
+.valley-console-menu button:focus-visible, .valley-console-menu a:focus-visible, .valley-console-menu summary:focus-visible { outline: 3px solid #ffe6a6; outline-offset: 3px; }
+.valley-console-menu button:active { background: #4c6648; }
+.valley-console-menu button[aria-pressed="true"] { color: #233e32; background: #e0cea0; border-color: #f4dfaf; }
+.valley-console-menu .valley-menu-header button { flex: 0 0 auto; min-width: 58px; }
+.valley-menu-body { flex: 1 1 auto; min-height: 0; padding: 16px 18px 20px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; touch-action: pan-y; }
+.valley-menu-primary { display: flex; flex-direction: column; gap: 9px; max-width: 420px; margin: 0 auto; }
+.valley-console-menu .valley-menu-primary button { width: 100%; min-height: 54px; padding: 13px 18px; text-align: left; font-size: 16px; }
+.valley-console-menu .valley-menu-primary .valley-menu-resume { color: #233f34; background: #dfc994; border-color: #f3dfac; font-weight: 650; }
+.valley-menu-sections { display: flex; flex: 0 0 auto; flex-wrap: wrap; gap: 7px; padding: 10px 16px; border-bottom: 1px solid #d8c48e2e; background: #203c32; }
+.valley-menu-sections button { flex: 1 1 auto; font-size: 13px; }
+.valley-console-menu > .valley-menu-footer { position: sticky; bottom: 0; z-index: 2; flex: 0 0 auto; margin: 0; padding: 10px 16px; border-top: 1px solid #d8c48e44; color: #f4e2b1; background: #1c362d; font: 12px/1.4 system-ui, sans-serif; }
+.valley-menu-notice { display: block; overflow-wrap: anywhere; }
+.valley-menu-console-hint { display: block; margin-top: 3px; color: #c6d3bc; font-size: 11px; }
+@media (max-width: 600px), (orientation: landscape) and (max-height: 500px) {
+  .valley-menu-backdrop { align-items: end; padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+  .valley-panel.valley-console-menu { width: 100%; max-height: 100%; border-radius: 15px; }
+  .valley-console-menu > .valley-menu-header { gap: 7px; padding: 9px 10px; }
+  .valley-menu-header h2 { font-size: 23px; }
+  .valley-console-menu .valley-menu-header button { min-width: 52px; padding: 8px; }
+  .valley-menu-body { padding: 12px 13px 16px; }
+  .valley-menu-sections { gap: 5px; padding: 8px 10px; }
+  .valley-menu-sections button { padding: 8px; font-size: 12px; }
+  .valley-console-menu > .valley-menu-footer { padding: 8px 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .valley-console-menu { scroll-behavior: auto; } }

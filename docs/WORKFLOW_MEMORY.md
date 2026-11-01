@@ -1,5 +1,7 @@
 # Working notes
 
+- UI: keep action menus contextual to world objects (services.ts), console Menu/Back hierarchy, one selected recipe/good. Personal backpack stays global; storage/account/workshop actions need their matching interaction. Feedback/service context and touch preferences never enter format7. Validate coarse-pointer portrait+landscape, mirrored reach, menu action-pause/background work, repeated feedback and recovery; keep GPU local.
+
 - Valley release: use isolated tmp/valley-onboarding. Build with VITE_BASE_PATH=/Fable-Crown/; production preview5398; serialize local GPU checks. Audit against APPROVED_ONBOARDING_PLAN.md, then verify the actual public PWA/WebGL with scripts/verify-valley-public.mjs (host Node uses --use-system-ca). Keep CI at two non-GPU cases.
 
 - Latest save decision: major redesign starts fresh. Format7 reads/writes only valley-v1 and valley-v1-backup; never migrate or import V3–V6. Keep old keys untouched. Current-format backup, import/export and offline reconciliation still apply.

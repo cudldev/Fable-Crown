@@ -25,7 +25,8 @@ async function ready(page: Page) {
 async function tools(page: Page) {
   if (await page.getByRole("button", { name: "Save on this device", exact: true }).isVisible()) return;
   if (await panel(page).isVisible()) await panel(page).getByRole("button", { name: "Close", exact: true }).click();
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await panel(page).getByRole("button", { name: "Settings", exact: true }).click();
 }
 async function restore(page: Page, save: ValleySave) {
   expect(validateValleySave(save)).not.toBeNull();
@@ -122,7 +123,7 @@ test("actual wilderness defeat returns to the placed tent and conserves repeated
   for (const enemy of recovery.action.enemies) { enemy.cooldown = 3600; enemy.windup = 0; }
   expect(inventorySlots(recovery.chapter.player.inventory)).toBe(27);
   await restore(page, recovery);
-  await page.getByRole("button", { name: "Interact", exact: true }).click();
+  await page.locator(".action-interact").click();
   await expect(status(page)).toContainText("Recovered what fits. Remaining belongings are safe.");
   const partial = await snapshot(page);
   expect(partial.chapter.player.inventory).toEqual([{ itemId: "logs", quantity: 28 }]);
@@ -149,11 +150,11 @@ test("real tree gathering consumes one tool swing per press rather than repeatin
   fixture.chapter.seed = 2; // The first two actual resource attempts succeed without depleting the node.
   const xp = fixture.chapter.player.skills.woodcutting;
   await restore(page, fixture);
-  await page.getByRole("button", { name: "Block", exact: true }).hover();
+  await page.locator(".action-block").hover();
   await page.mouse.down(); await page.waitForTimeout(200);
   await page.screenshot({ path: "docs/screenshots/valley-block.png" });
   await page.mouse.up();
-  await page.getByRole("button", { name: "Tool / Attack", exact: true }).hover();
+  await page.locator("[data-action-strike]").hover();
   await page.mouse.down(); await page.waitForTimeout(250);
   await page.screenshot({ path: "docs/screenshots/valley-strike.png" });
   await page.waitForTimeout(1050); await page.mouse.up();
@@ -161,7 +162,7 @@ test("real tree gathering consumes one tool swing per press rather than repeatin
   expect(itemCount(first.chapter.player.inventory, "logs")).toBe(1);
   expect(first.chapter.player.skills.woodcutting).toBe(xp + 250);
   await panel(page).getByRole("button", { name: "Close", exact: true }).click();
-  await page.getByRole("button", { name: "Tool / Attack", exact: true }).hover();
+  await page.locator("[data-action-strike]").hover();
   await page.mouse.down(); await page.waitForTimeout(900); await page.mouse.up();
   const second = await snapshot(page);
   expect(itemCount(second.chapter.player.inventory, "logs")).toBe(2);

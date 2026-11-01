@@ -9,6 +9,7 @@ export interface UseActionControlsOptions {
   cameraAxes?: CameraAxes;
   onInteract(): void;
   onInventory?(): void;
+  onMenu?(): void;
   onBuild?(): void;
   onBack?(): void;
   /** Called once per animation frame while the right stick is displaced. */
@@ -75,8 +76,13 @@ export function useActionControls(options: UseActionControlsOptions) {
     function onKeyDown(event: KeyboardEvent) {
       if (isTextTarget(event.target)) { inputBuffer.clear(); return; }
       if (event.altKey || event.ctrlKey || event.metaKey) return;
+      const menu=menuButtons();
+      if(menu&&["ArrowUp","ArrowLeft","ArrowDown","ArrowRight"].includes(event.code)) {
+        event.preventDefault(); inputBuffer.setKey(event.code,false);
+        moveMenuFocus(menu,event.code==="ArrowUp"||event.code==="ArrowLeft"?-1:1);return;
+      }
       const enabled = latest.current.enabled !== false;
-      if (MOVEMENT_KEYS.has(event.code) && enabled && !menuButtons()) {
+      if (MOVEMENT_KEYS.has(event.code) && enabled && !menu) {
         event.preventDefault(); inputBuffer.setKey(event.code, true);
       }
       if (event.repeat) return;
@@ -122,7 +128,7 @@ export function useActionControls(options: UseActionControlsOptions) {
             } else if (canAct) latest.current.onInteract();
           }
           if (edges.update("back", pressed(1))) latest.current.onBack?.();
-          if (edges.update("inventory", pressed(9))) latest.current.onInventory?.();
+          if (edges.update("inventory", pressed(9))) (latest.current.onMenu??latest.current.onInventory)?.();
           if (edges.update("build", pressed(2))) latest.current.onBuild?.();
           const previous = edges.update("previous", pressed(12) || pressed(14) || stick.y < -0.55 || stick.x < -0.55);
           const next = edges.update("next", pressed(13) || pressed(15) || stick.y > 0.55 || stick.x > 0.55);
@@ -134,6 +140,7 @@ export function useActionControls(options: UseActionControlsOptions) {
     }
     window.addEventListener("keydown", onKeyDown); window.addEventListener("keyup", onKeyUp);
     window.addEventListener("blur", clear); document.addEventListener("visibilitychange", visibilityChanged);
+    window.addEventListener("resize",clear); window.addEventListener("orientationchange",clear);
     document.addEventListener("focusin", focused);
     window.addEventListener("pointerup", releaseMouse); window.addEventListener("pointercancel", releaseMouse);
     window.addEventListener("gamepaddisconnected", disconnected);
@@ -142,6 +149,7 @@ export function useActionControls(options: UseActionControlsOptions) {
       cancelAnimationFrame(animationFrame); inputBuffer.clear();
       window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", clear); document.removeEventListener("visibilitychange", visibilityChanged);
+      window.removeEventListener("resize",clear); window.removeEventListener("orientationchange",clear);
       document.removeEventListener("focusin", focused);
       window.removeEventListener("pointerup", releaseMouse); window.removeEventListener("pointercancel", releaseMouse);
       window.removeEventListener("gamepaddisconnected", disconnected);

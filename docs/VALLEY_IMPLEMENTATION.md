@@ -1,5 +1,7 @@
 # Valley onboarding — approved 2026-11-01
 
+Latest UX decisions: console-style Menu/Back hierarchy; most actions open only from the intended nearby object. Workbench/caravan carpentry, brazier/forge smelting, fire cooking, local trade/storage, Rowan account/orders and planning-table/project-board actions have focused screens. Global backpack is personal. Menus pause60Hz actors while600ms background work continues. Mobile controls support mirrored/raised docks and contextual results. See MOBILE_UX_REVIEW.md; format7/balance/offline guarantees remain.
+
 Latest user override: start fresh saves for the major redesign. Format7 uses separate valley-v1/valley-v1-backup keys. No V3–V6 migration or older-file import; older keys remain untouched. This replaces the compatibility/migration portions below and in the original plan.
 
 The new default chapter is hands-on: safe valley → freely placed tent → earning and royal account → cottage → optional public projects. Days1–3 follow progress, including early payment, long sessions and late returns; no calendar lock or second required home. Earlier autonomous chapters remain at `?chapter=legacy` (also linked from More).

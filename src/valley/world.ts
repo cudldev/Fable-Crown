@@ -118,6 +118,7 @@ staticObject("workbench", "Communal carpentry workbench", "decor", 69, 139, "pro
 staticObject("caravan", "Travelling supply caravan", "shop", 73, 139, "prop-supplies", undefined, true, 3, 2).shopId = "valley-caravan";
 staticObject("brazier", "Communal smelting brazier", "furnace", 78, 139, "iso-workshop", undefined, true);
 staticObject("cooking-fire", "Communal cooking fire", "range", 81, 139, undefined, undefined, true);
+staticObject("forge-site", "Public forge project board", "sign", 70, 177, "prop-sign").serviceId="valley-forge-project";
 
 /** Bounded content-keyed cache; elapsed construction ticks do not allocate a world each tick. */
 const worlds = new Map<string, WorldDefinition>();

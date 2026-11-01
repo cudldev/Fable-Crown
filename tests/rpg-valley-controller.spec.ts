@@ -56,7 +56,8 @@ async function ready(page: Page) {
 async function restore(page: Page, save: ValleySave) {
   expect(validateValleySave(save)).not.toBeNull();
   if (await dialog(page).isVisible()) await dialog(page).getByRole("button", { name: "Close", exact: true }).click();
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await dialog(page).getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByLabel("Import valley archive").setInputFiles({ name: "controller-fixture.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(save)) });
   await expect(page.locator(".valley-message")).toContainText("Chapter restored");
   await dialog(page).getByRole("button", { name: "Close", exact: true }).click();
@@ -65,7 +66,8 @@ async function restore(page: Page, save: ValleySave) {
 async function saved(page: Page): Promise<ValleySave> {
   // Observation goes through the actual UI/worker persistence boundary; gameplay uses only pad inputs.
   if (await dialog(page).isVisible()) await dialog(page).getByRole("button", { name: "Close", exact: true }).click();
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await dialog(page).getByRole("button", { name: "Settings", exact: true }).click();
   await dialog(page).getByRole("button", { name: "Save on this device", exact: true }).click();
   await expect(page.locator(".valley-message")).toContainText("Chapter saved on this device");
   return page.evaluate(() => new Promise<ValleySave>((resolve, reject) => {
@@ -87,7 +89,10 @@ async function capturePlayback(page: Page) {
   await page.setViewportSize({ width: 1280, height: 800 });
   const fixture = createValleySave(Date.now()); at(fixture, 52, 150);
   await restore(page, fixture);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await dialog(page).getByRole("button", { name: "Settings", exact: true }).click();
   for (let i = 0; i < 4; i++) await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await dialog(page).getByRole("button", { name: "Close", exact: true }).click();
   const scene = page.locator("[data-character-clip]");
   const directory = "docs/screenshots/valley-playback"; await mkdir(directory, { recursive: true });
   const samples: unknown[] = [];
@@ -116,21 +121,21 @@ async function capturePlayback(page: Page) {
 
 test("standard controller selects weapon once per Y hold, attacks, blocks and reaches settings camera/tool controls", async ({ page }) => {
   await page.goto("./?chapter=valley"); await ready(page);
-  await expect(page.getByRole("button", { name: "Tool", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-action-mode]")).toHaveAttribute("data-mode", "tool");
   const encounter = createValleySave(Date.now(), 42); at(encounter, 94, 159);
   for (const enemy of encounter.action.enemies) { enemy.cooldown = 3600; enemy.windup = 0; }
   const target = encounter.action.enemies.find(enemy => enemy.id === "rock-mite-0")!;
   target.aggressive = false;
   await restore(page, encounter);
   await button(page, 3, true);
-  await expect(page.getByRole("button", { name: "Weapon", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-action-mode]")).toHaveAttribute("data-mode", "weapon");
   await page.waitForTimeout(350);
-  await expect(page.getByRole("button", { name: "Weapon", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-action-mode]")).toHaveAttribute("data-mode", "weapon");
   await button(page, 3, false); await page.waitForTimeout(100);
   await press(page, 3);
-  await expect(page.getByRole("button", { name: "Tool", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-action-mode]")).toHaveAttribute("data-mode", "tool");
   await press(page, 3);
-  await expect(page.getByRole("button", { name: "Weapon", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-action-mode]")).toHaveAttribute("data-mode", "weapon");
   await button(page, 7, true); await page.waitForTimeout(900); await button(page, 7, false);
   const attacked = await saved(page);
   expect(attacked.action.enemies.find(enemy => enemy.id === target.id)!.health).toBe(target.health - 3);
@@ -149,7 +154,13 @@ test("standard controller selects weapon once per Y hold, attacks, blocks and re
   await expect(root(page)).toHaveAttribute("data-camera-follow", "false");
   await page.evaluate(() => { (window as unknown as { valleyControllerTestPad: TestPad }).valleyControllerTestPad.axes[2] = 0; });
   await press(page, 9);
-  await expect(dialog(page).getByRole("heading", { name: "Backpack & storage" })).toBeVisible();
+  await expect(dialog(page).getByRole("heading", { name: "Game menu" })).toBeVisible();
+  await select(page, "Settings");
+  await press(page, 1);
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "menu");
+  await select(page, "Settings");
+  await page.keyboard.press("Escape");
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "menu");
   await select(page, "Settings");
   const zoom = Number(await root(page).getAttribute("data-camera-zoom"));
   await select(page, "Zoom out");
@@ -164,19 +175,28 @@ test("standard controller selects weapon once per Y hold, attacks, blocks and re
   await expect(dialog(page).locator("details")).not.toHaveAttribute("open", "");
   await focusMenu(page, "Earlier journey", "link");
   await page.keyboard.press("Tab");
-  await expect(dialog(page).getByRole("button", { name: "Close", exact: true })).toBeFocused();
+  await expect(dialog(page).getByRole("button", { name: "Back", exact: true })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
   await expect(dialog(page).getByRole("link", { name: "Earlier journey", exact: true })).toBeFocused();
   await button(page, 3, true); await page.waitForTimeout(200);
-  await expect(page.getByRole("button", { name: "Weapon", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(dialog(page).getByRole("button", { name: "Use weapon", exact: true })).toHaveAttribute("aria-pressed", "true");
   await select(page, "Use tool");
-  await expect(page.getByRole("button", { name: "Tool", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(dialog(page).getByRole("button", { name: "Use tool", exact: true })).toHaveAttribute("aria-pressed", "true");
   await select(page, "Follow prince");
   await expect(root(page)).toHaveAttribute("data-camera-follow", "true");
   await page.waitForTimeout(250);
-  await expect(page.getByRole("button", { name: "Tool", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-action-mode]")).toHaveAttribute("data-mode", "tool");
   await button(page, 3, false); await press(page, 1);
   await expect(dialog(page)).toHaveCount(0);
+  const workbench = createValleySave(Date.now()); at(workbench, 69, 140);
+  await restore(page, workbench);
+  await press(page, 0); // Real world Interact, then D-pad/A edit the station quantity.
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "craft");
+  await select(page, "Increase quantity");
+  await expect(dialog(page).getByLabel("Quantity", { exact: true })).toHaveValue("2");
+  await select(page, "Decrease quantity");
+  await expect(dialog(page).getByLabel("Quantity", { exact: true })).toHaveValue("1");
+  await press(page, 1); await expect(dialog(page)).toHaveCount(0);
   await capturePlayback(page);
 });
 
@@ -197,9 +217,12 @@ test("controller can pin all five day-three directions and inspect later housing
   for (const direction of VALLEY_DIRECTIONS) {
     await select(page, direction.label);
     await expect(dialog(page).getByRole("button", { name: direction.label, exact: true })).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByRole("button", { name: "Open current goal" })).toHaveText(direction.goal);
+    await expect(page.locator('[aria-label="Open current goal"]')).toHaveText(direction.goal);
   }
-  await select(page, "Home");
+  await select(page, "Back");
+  await expect(dialog(page)).toHaveAttribute("data-menu-panel", "menu");
+  await select(page, "Build & manage");
+  await select(page, "Future royal grants", "summary");
   await expect(dialog(page).locator(".valley-grant")).toHaveCount(3);
   for (const grant of FUTURE_GRANTS) {
     const card = dialog(page).locator(".valley-grant").filter({ has: page.getByRole("heading", { name: grant.title, exact: true }) });
