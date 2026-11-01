@@ -6,7 +6,7 @@ import type { ValleySave,ValleyWorkerMessage,ValleyWorkerRequest } from "./contr
 import { stepAction,idleActionInput } from "../action/simulation";
 import type { ActionInput } from "../action/contracts";
 import { actionInteract,actionSafe,applyActionEvents,rpgActionWorld,syncActionRespawns } from "../action/rpg-adapter";
-import { calendarDate,validateRpgSave } from "../rpg/engine";
+import { calendarDate } from "../rpg/engine";
 import { tile } from "../rpg/world";
 import type { TileSelection } from "../render/scene-types";
 
@@ -93,9 +93,8 @@ self.onmessage=async(event:MessageEvent<ValleyWorkerRequest>)=>{
   }else if(request.type==="save"){await persist();emit(storageOkay?"Chapter saved on this device.":"Storage is unavailable. Export your chapter to keep progress.");}
   else if(request.type==="export")send({export:save});
   else if(request.type==="import"){
-    let restored=validateValleySave(request.value);
-    if(!restored){const old=validateRpgSave(request.value);if(old)restored=createValleySave(Date.now(),old.seed,old);}
-    if(!restored){send({message:"That chapter is invalid. Your current progress is safe.",receipt:{ok:false}});return;}
+    const restored=validateValleySave(request.value);
+    if(!restored){send({message:"That chapter is invalid or from an earlier game. Your current progress is safe.",receipt:{ok:false}});return;}
     save=restored;canPersist=true;input=idleActionInput();ensureValleyResources(save);const summary=reconcileValley(save,Date.now());
     last=performance.now();worldLast=Date.now();accumulator=0;emit(`Chapter restored. ${summary.message}`);send({action:save.action});await persist();
   }else if(request.type==="reset"){

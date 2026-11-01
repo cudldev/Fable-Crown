@@ -1,5 +1,7 @@
 # Working notes
 
+- Latest save decision: major redesign starts fresh. Format7 reads/writes only valley-v1 and valley-v1-backup; never migrate or import V3–V6. Keep old keys untouched. Current-format backup, import/export and offline reconciliation still apply.
+
 - Full voxel bake: `npm run voxel:bake` compiles all props/LODs/states/supplies/shadows/GI inputs and terrain pigment; `voxel:check-bake` verifies deterministic artifacts. Runtime loads versioned baked.json/meshes.bin and terrain surface.json/bin; no raw VOX downloads or meshing. Use .bin for application-gzip payloads (.gz may be transparently decoded by static servers). Keep37templates/GPUwarmup; world atlas and GI remain dynamic. See performance/voxel-bake.
 
 - Floating UI: no plates; text halo. HealthVial uses separate12px SVG glass/liquid surfaces, deep saturated radial centre, lighter edges and light-reactive front reflection (FloatingVials: sun/fill+4lamps,10Hz). Skilling ring sits on actual target-model top, with cached bounds and no detached world caption; HUD keeps details. Arc follows real attempt/reset. Review partial-health day/night and tree/ore/phone captures; no backdrop blur/captures.

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { applyActionEvents } from "../src/action/rpg-adapter";
-import { createRpg, maxHealth, validateRpgSave } from "../src/rpg/engine";
 import { addItems, itemCount } from "../src/rpg/inventory";
 import { tile } from "../src/rpg/world";
 import { COTTAGE_TICKS } from "../src/valley/contracts";
@@ -128,33 +127,8 @@ describe("quarter-speed offline valley construction", () => {
   });
 });
 
-describe("V6 conservation at the offline boundary", () => {
-  it("keeps a wounded legacy character's earned maximum health when creating the action chapter", () => {
-    const old = createRpg(NOW, 42);
-    old.player.skills.hitpoints = 100_000;
-    old.player.health = 3;
-    expect(validateRpgSave(old)).not.toBeNull();
-    const save = createValleySave(NOW, old.seed, old);
-    expect(save.action.player.health).toBe(3);
-    expect(save.action.player.maxHealth).toBe(maxHealth(old.player));
-  });
-
-  it.each([3, 4, 5])("preserves a V%i archive, possessions, quests, grave and drops during additive migration", version => {
-    const old = createRpg(NOW, 42);
-    old.version = version as 5;
-    old.grave = { position: tile(52, 141), items: [{ itemId: "logs", quantity: 7 }], attempts: 2, retryAt: 10 };
-    old.drops = [{ id: "loot-rock-mite-0", position: tile(94, 158), items: [{ itemId: "coins", quantity: 3 }], expiresAt: 0 }];
-    const archive = JSON.stringify(old), normalized = validateRpgSave(old);
-    expect(normalized).not.toBeNull();
-    const save = createValleySave(NOW, old.seed, normalized!);
-    expect(JSON.stringify(old)).toBe(archive);
-    expect(save.chapter.grave).toEqual(old.grave);
-    expect(save.chapter.drops).toEqual(old.drops);
-    expect(save.chapter.bank).toEqual(old.bank);
-    expect(validateValleySave(JSON.parse(JSON.stringify(save)))).not.toBeNull();
-  });
-
-  it("preserves the relocated enemy, its loot and persistent backpack through 72h and V6 validation", () => {
+describe("fresh valley conservation at the offline boundary", () => {
+  it("preserves the relocated enemy, its loot and persistent backpack through 72h and current archive validation", () => {
     const save = createValleySave(NOW);
     ensureValleyResources(save);
     save.action.frame = 42;

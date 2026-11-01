@@ -54,7 +54,7 @@ async function snapshot(page: Page): Promise<ValleySave> {
     const request = indexedDB.open("fable-crown", 1);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
-      const db = request.result, get = db.transaction("saves").objectStore("saves").get("v6");
+      const db = request.result, get = db.transaction("saves").objectStore("saves").get("valley-v1");
       get.onsuccess = () => { resolve(get.result); db.close(); };
       get.onerror = () => { reject(get.error); db.close(); };
     };

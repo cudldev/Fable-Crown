@@ -1,21 +1,15 @@
 # Valley QA
 
-Lead final gate:684 units/80files, strict Pages-base build/native/baked/dist,3 local art/rotated-door/pixel cases and2 release/PWA cases pass. Plant lifting conserves original supplies without XP; bag HUD now counts occupied slots. Four rotated cottage entrances were walked through with continuous controls. Art/source review and input-proxy measurements are recorded separately; partial wall occlusion in cottage rotations1/2 remains a draft art limit. Public upgrade verification is recorded in docs/release/valley-public.json after publication.
+Current format: **7**, keys `valley-v1` / `valley-v1-backup`. Every player starts fresh with 25 coins. Old v3–v6 storage stays untouched; old files are rejected. No major-version migration.
 
-Independent T8/T12 coverage lives in `tests/valley-offline.test.ts` and `tests/valley-worker.test.ts`. The worker tests import the actual worker module, mock only storage I/O, clone posted messages, and control Date/performance/timers. No GPU or build was run during shared art work.
+Verified against production `http://127.0.0.1:5398/Fable-Crown/`:
 
-Covered: 0/1/6/24/72-hour returns, quarter-speed/24-hour cap, first 100-coin bill, tent/cottage state, fractional time through JSON/reload, rollback/idempotence, frozen combat/guard/health, reserved craft delivery/XP once, daily-help rollback, V3–V5 archive conservation, relocated enemy loot/grave, preparing/paused lifecycle, pulse retention, sub-600ms input, bounded axes, persistence, transactional command failure, valid/invalid import, export and storage failures.
+- Fresh storage CPU: **6/6**.
+- GPU functional cases: **8 pass across latest runs**. One obsolete exact-message assertion was corrected and its case rerun.
+- Non-GPU release/PWA: **2/2**. Repository scope, offline assets and zero external requests passed.
 
-Focused result: **36/36 pass**. QA reproduced lost live fractions, expired dead-enemy V6 rejection, date rollback, duplicate-resume credit, persisted-clock rollback and wounded legacy maximum-health loss. Lead fixes pass their regressions.
+Coverage: tent/payment, crafting/trading, offline construction, progress-based onboarding, current-format import/backup recovery, old-key isolation, legacy-file rejection, keyboard/emulated controller/touch, both mobile orientations, repeated defeat/graves, partial recovery, per-press gathering and reload persistence. No page errors.
 
-Integrated local Chrome coverage is in `tests/rpg-valley.spec.ts`, running the actual `?chapter=valley` route, worker and IndexedDB without backend mocks. Final combined production result: **6/6 pass (30.9s)** at `http://127.0.0.1:5398/Fable-Crown/`. Coverage includes tent/partial/full payment, craft/trade, offline cottage/forge, progress-based chapter three, V5 archive migration, corrupt-V6 backup recovery and invalid UI imports. QA reproduced a React crash when editing placement coordinates and held Menu repeatedly toggling a dialog; lead fixes pass. Keyboard, emulated controller Menu/Back and menu suppression, touch cancellation, and portrait/landscape Follow/zoom/action controls (visible, in bounds, at least 44px) pass. No page errors. This suite takes no screenshots or performance measurements.
+Use valid current-format fixtures and the real UI/worker/IndexedDB. Keep GPU checks local; release CI remains two non-GPU cases. Run `tests/valley-fresh-save.test.ts`, `tests/rpg-valley*.spec.ts`, then `npm run test:release` against a production build.
 
-Final action suite `tests/rpg-valley-action.spec.ts`: **2/2 pass (21.5s)** on the same rebuilt production URL. Real 1HP defeats return to the placed tent, conserve gear/skills/paid100, merge prior graves, recover only one log into a 27-slot bag, and retain the remainder after reload. Actual held tool presses gather once each; logs/XP/valley effects survive reload. This exposed a V6 save rejection for new resource-effect IDs; the lead fix passes. Requested native block/strike reference captures are `docs/screenshots/valley-block.png` and `valley-strike.png`; these are references, not art acceptance.
-
-Remaining gates: IndexedDB transaction-abort behavior, browser visibility scheduling, physical controllers/phones, WebGL art/collision review, mobile latency and actual public URL/PWA verification. These tests establish no art acceptance, device-performance claim, release approval or live deployment.
-
-Workflow: run `npx vitest run tests/valley-offline.test.ts tests/valley-worker.test.ts`; keep GPU checks local and release CI lightweight.
-
-Local integrated command: set `DEMO_URL=http://127.0.0.1:5397/`, then run `npx playwright test tests/rpg-valley.spec.ts --config=playwright.config.ts` against the existing Vite server. Keep this spec in the local visual suite; release-CI scope remains two non-GPU cases.
-
-`tests/release-smoke.spec.ts` retains exactly two non-GPU cases, adapted to the valley default, V6 storage, V5 history, deterministic Journal guidance, invalid import, mobile 44px controls, PWA scope/assets/offline and no external requests. Final sequential production result: **2/2 pass (6.2s)** with `DEMO_URL=http://127.0.0.1:5398/Fable-Crown/ npm run test:release`, after the two action and six integrated cases. The real repository base path and `/Fable-Crown/` service-worker scope worked. Do not run its PWA case against Vite development mode; this local verification does not establish a live deployment.
+Block/strike screenshots are review references. Art acceptance, physical-device performance and actual public deployment verification remain lead-owned.

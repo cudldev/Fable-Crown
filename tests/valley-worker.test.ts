@@ -230,6 +230,6 @@ describe("actual worker transactions and archives", () => {
     expect(latest().valley.paid).toBe(0);
     expect(messages.some(m => m.storageOkay === false && m.message?.includes("could not be opened"))).toBe(true);
     expect(storage.write).not.toHaveBeenCalled();
-    expect((await exported()).version).toBe(6);
+    expect((await exported()).version).toBe(7);
   });
 });

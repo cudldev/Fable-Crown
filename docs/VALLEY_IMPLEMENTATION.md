@@ -1,5 +1,7 @@
 # Valley onboarding — approved 2026-11-01
 
+Latest user override: start fresh saves for the major redesign. Format7 uses separate valley-v1/valley-v1-backup keys. No V3–V6 migration or older-file import; older keys remain untouched. This replaces the compatibility/migration portions below and in the original plan.
+
 The new default chapter is hands-on: safe valley → freely placed tent → earning and royal account → cottage → optional public projects. Days1–3 follow progress, including early payment, long sessions and late returns; no calendar lock or second required home. Earlier autonomous chapters remain at `?chapter=legacy` (also linked from More).
 
 ## Fixed first balance
@@ -19,7 +21,7 @@ Isolated checkout `tmp/valley-onboarding`, branch `codex/valley-onboarding`, bas
 
 | Tasks | Actual owner | Handback |
 |---|---|---|
-| T0,T8,T13 | Lead `/root` | Contracts, worker/V6 storage, integration, docs, gates/release |
+| T0,T8,T13 | Lead `/root` | Contracts, worker/current valley storage, integration, docs, gates/release |
 | T1,T3 | `/root/motion` | Pure action simulation; deterministic motion/combat/bridge tests |
 | T2,T9,T11 | `/root/controls` | Input, ValleyApp, camera/interpolation, terrain presentation, responsive interfaces |
 | T4 | `/root/world` | Valley, ownership, footprints, support, terrain, route validation |
@@ -29,7 +31,7 @@ Isolated checkout `tmp/valley-onboarding`, branch `codex/valley-onboarding`, bas
 
 Lead owns shared types, engine integration, valley contracts, worker/storage, release and progress. Specialist files were handed back before lead edits; no simultaneous shared-file ownership.
 
-V6 is an additive envelope: V5 chapter + action state + valley state + savedAt/fractional background remainder. V3–V5 archives remain untouched. Migrated belongings/skills/history enter at the safe grant entrance; no old rewards replay. Writes retain the last valid V6 backup. Invalid archives never overwrite stored progress. Known valley effect targets are checked alongside the strict V5 validator.
+The fresh valley archive contains its own simulation, continuous action state, valley and fractional background remainder. It reuses the engine's strict structural validation without importing earlier state. Current valley writes keep a valid backup; invalid or older files never overwrite progress. Actual valley resource effect targets remain validated and durable.
 
 ## Gates and evidence
 

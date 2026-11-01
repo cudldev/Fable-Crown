@@ -15,8 +15,8 @@ export interface ValleyData {
   startedAt:number; lastDate:string; message:string;
   workQueue:{recipeId:string;quantity:number;remainingTicks:number}[];
 }
-/** V6 is an additive chapter envelope. Original V3/V4/V5 archives remain untouched. */
-export interface ValleySave { version:6; chapter:RpgState; action:ActionState; valley:ValleyData; savedAt:number; offlineRemainder:number }
+/** Fresh valley format. Earlier game archives are deliberately not migrated. */
+export interface ValleySave { version:7; chapter:RpgState; action:ActionState; valley:ValleyData; savedAt:number; offlineRemainder:number }
 export type ValleyCommand =
   | {type:"place-home";x:number;z:number;rotation:0|1|2|3}
   | {type:"pay";amount:number}

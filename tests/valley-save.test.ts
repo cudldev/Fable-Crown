@@ -1,7 +1,5 @@
 import {describe,it,expect} from "vitest";
 import {createValleySave,validateValleySave} from "../src/valley/save";
-import {createRpg} from "../src/rpg/engine";
-import {addItems} from "../src/rpg/inventory";
 import {createValleyWorld} from "../src/valley/world";
 import {applyActionEvents} from "../src/action/rpg-adapter";
 describe("additive valley chapter",()=>{
@@ -21,14 +19,10 @@ describe("additive valley chapter",()=>{
     const save=createValleySave(now);save.action.player.x+=.125;save.chapter.player.position.x=52;
     expect(validateValleySave(JSON.parse(JSON.stringify(save)))).toEqual(save);
   });
-  it("copies belongings,gear,experience and completed quest history without modifying V5",()=>{
-    const old=createRpg(now,42);addItems(old.bank,"logs",12,Infinity);old.quests.forge.complete=true;old.quests.forge.accepted=true;old.quests.forge.stageId="complete";
-    const before=JSON.stringify(old),save=createValleySave(now,old.seed,old);
-    expect(JSON.stringify(old)).toBe(before);expect(save.chapter.bank).toEqual(old.bank);
-    expect(save.chapter.player.equipment).toEqual(old.player.equipment);expect(save.chapter.player.skills).toEqual(old.player.skills);
+  it("starts a fresh valley and rejects all earlier archive versions",()=>{
+    const save=createValleySave(now);expect(save.version).toBe(7);expect(save.valley.paid).toBe(0);expect(save.valley.home).toBeNull();
     expect(save.action.player.x).toBe(52);expect(save.action.player.z).toBe(141);
-    expect(save.chapter.quests.forge.complete).toBe(true);expect(save.valley.paid).toBe(0);
-    expect(validateValleySave(JSON.parse(JSON.stringify(save)))).not.toBeNull();
+    for(const version of [3,4,5,6])expect(validateValleySave({...save,version})).toBeNull();
   });
   it("preserves new resource states alongside the original world",()=>{
     const save=createValleySave(now),world=createValleyWorld(save.valley);

@@ -35,7 +35,7 @@ async function restore(page: Page, value: unknown) {
   await panel(page).getByRole("button", { name: "Close", exact: true }).click();
   await expect(panel(page)).toHaveCount(0);
 }
-async function read(page: Page, key = "v6"): Promise<ValleySave> {
+async function read(page: Page, key = "valley-v1"): Promise<ValleySave> {
   return page.evaluate(key => new Promise<ValleySave>((resolve, reject) => {
     const request = indexedDB.open("fable-crown", 1);
     request.onsuccess = () => {
@@ -134,35 +134,43 @@ test("actual import reconciles offline cottage and optional forge, with progress
   await expect(panel(page)).toContainText("A home in the valley");
 });
 
-test("real IndexedDB migrates V5 without changing its archive and recovers a corrupt V6 from backup", async ({ page }) => {
+test("real IndexedDB starts fresh beside old archives and recovers only the current valley backup", async ({ page }) => {
   await page.goto("./?chapter=valley"); await ready(page);
   const legacy = createRpg(Date.now(), 42); addItems(legacy.bank, "logs", 12, Infinity);
-  await page.evaluate(value => new Promise<void>((resolve, reject) => {
+  Object.assign(legacy.quests.forge, { accepted: true, complete: true, stageId: "complete" });
+  const beta = home(Date.now()); beta.chapter.bank = [{ itemId: "coins", quantity: 999 }];
+  const archives = { v3: { ...legacy, version: 3 }, v4: { ...legacy, version: 4 }, v5: legacy, v6: { ...beta, version: 6 } };
+  await page.evaluate(values => new Promise<void>((resolve, reject) => {
     const request = indexedDB.open("fable-crown", 1); request.onsuccess = () => {
       const db = request.result, tx = db.transaction("saves", "readwrite"), store = tx.objectStore("saves");
-      store.put(value, "v5"); store.delete("v6"); store.delete("v6-backup");
+      for (const [key, value] of Object.entries(values)) store.put(value, key);
+      store.delete("valley-v1"); store.delete("valley-v1-backup");
       tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => reject(tx.error);
     };
-  }), legacy);
+  }), archives);
   await page.reload(); await ready(page);
-  const migrated = await snapshot(page);
-  expect(itemCount(migrated.chapter.bank, "logs")).toBe(12);
-  expect(await read(page, "v5")).toEqual(legacy);
+  const fresh = await snapshot(page);
+  expect(fresh.version).toBe(7);
+  expect(itemCount(fresh.chapter.player.inventory, "coins")).toBe(25);
+  expect(fresh.chapter.bank).toEqual([]);
+  expect(fresh.chapter.quests.forge.complete).toBe(false);
+  expect(fresh.valley.home).toBeNull(); expect(fresh.valley.paid).toBe(0);
+  for (const [key, value] of Object.entries(archives)) expect(await read(page, key)).toEqual(value);
   const backup = createValleySave(Date.now()); backup.valley.goal = "Checkpoint A";
   await restore(page, backup);
   const next = structuredClone(backup); next.valley.goal = "Checkpoint B";
   await restore(page, next);
-  await expect.poll(async () => (await read(page, "v6-backup")).valley.goal).toBe("Checkpoint A");
+  await expect.poll(async () => (await read(page, "valley-v1-backup")).valley.goal).toBe("Checkpoint A");
   await page.evaluate(() => new Promise<void>((resolve, reject) => {
     const request = indexedDB.open("fable-crown", 1); request.onsuccess = () => {
       const db = request.result, tx = db.transaction("saves", "readwrite");
-      tx.objectStore("saves").put({ version: 6, corrupt: true }, "v6");
+      tx.objectStore("saves").put({ version: 7, corrupt: true }, "valley-v1");
       tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => reject(tx.error);
     };
   }));
   await page.reload(); await ready(page);
   await expect(page.getByRole("button", { name: "Open current goal" })).toHaveText("Checkpoint A");
-  expect(await read(page, "v5")).toEqual(legacy);
+  for (const [key, value] of Object.entries(archives)) expect(await read(page, key)).toEqual(value);
   const recovered = await snapshot(page);
   expect(recovered.valley.goal).toBe("Checkpoint A");
   expect(validateValleySave(recovered)).not.toBeNull();
@@ -237,8 +245,24 @@ test("invalid UI imports preserve the current valley and device save", async ({ 
   const fixture = home(Date.now()); fixture.valley.goal = "Preserve this home";
   await restore(page, fixture);
   const before = await snapshot(page);
-  await page.getByLabel("Import valley archive").setInputFiles({ name: "broken.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({ version: 6, chapter: {} })) });
-  await expect(status(page)).toContainText("That chapter is invalid. Your current progress is safe.");
+  const legacy = createRpg(Date.now(), 42);
+  addItems(legacy.bank, "coins", 999, Infinity);
+  for (const value of [{ ...legacy, version: 3 }, { ...legacy, version: 4 }, legacy, { ...fixture, version: 6 }]) {
+    await page.getByRole("button", { name: "Save on this device", exact: true }).click();
+    await expect(status(page)).toContainText("Chapter saved on this device");
+    await page.getByLabel("Import valley archive").setInputFiles({ name: "old-chapter.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(value)) });
+    await expect(status(page)).toContainText("invalid");
+    const retained = await read(page);
+    expect(retained.valley.home).toEqual(before.valley.home);
+    expect(retained.valley.paid).toBe(before.valley.paid);
+    expect(retained.chapter.player.inventory).toEqual(before.chapter.player.inventory);
+    expect(retained.chapter.bank).toEqual(before.chapter.bank);
+  }
+  await page.getByRole("button", { name: "Save on this device", exact: true }).click();
+  await expect(status(page)).toContainText("Chapter saved on this device");
+  await page.getByLabel("Import valley archive").setInputFiles({ name: "broken.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({ version: 7, chapter: {} })) });
+  await expect(status(page)).toContainText("invalid");
+  await expect(status(page)).toContainText("Your current progress is safe.");
   await expect(page.getByRole("button", { name: "Open current goal" })).toHaveText("Preserve this home");
   const saved = await read(page);
   expect(saved.valley.home).toEqual(before.valley.home);

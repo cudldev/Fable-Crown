@@ -142,6 +142,11 @@ describe("home storage, decoration and public development",()=>{
 });
 
 describe("settlement-only clock",()=>{
+  it("clears the deadline when ordinary overworld resources respawn",()=>{
+    const s=fresh(),resource=Object.values(s.chapter.resources).find(r=>!r.objectId.startsWith("valley-"))!;
+    resource.available=false;resource.respawnAt=s.chapter.tick+3;advanceSettlement(s,3,NOW);
+    expect(resource.available).toBe(true);expect(resource.respawnAt).toBe(0);expect(validateValleySave(s)).not.toBeNull();
+  });
   it("lifts owned vegetation without creating items or XP, including full-bag storage fallback",()=>{
     const s=fresh();home(s);at(s,58,168);run(s,{type:"plant",kind:"flowers",x:58,z:168});
     const id=s.valley.plants[0].id,xp=s.valley.carpentryXp;at(s,20,145);fail(s,{type:"lift-plant",id});at(s,58,168);

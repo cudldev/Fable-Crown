@@ -211,7 +211,7 @@ export function advanceSettlement(save:ValleySave,ticks:number,now:number):void 
     }
   }
   save.chapter.tick+=ticks;
-  for(const resource of Object.values(save.chapter.resources))if(!resource.available&&resource.respawnAt<=save.chapter.tick)resource.available=true;
+  for(const resource of Object.values(save.chapter.resources))if(!resource.available&&resource.respawnAt<=save.chapter.tick){resource.available=true;resource.respawnAt=0;}
   if(!wasComplete&&complete(save)){v.layoutRevision++;v.message="Your cottage is complete. Pella and Garrick have arrived; furnishing and terrace planning are unlocked.";}
   if(!forgeComplete&&v.forge.ticks>=FORGE_TICKS){v.layoutRevision++;v.message="The public forge is complete. Bronze smelting now takes four ticks.";}
   syncVisitors(save,now);v.lastDate=calendarDate(now);

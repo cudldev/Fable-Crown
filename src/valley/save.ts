@@ -13,25 +13,23 @@ export function createValleyData(now:number):ValleyData {
   return {home:null,paid:0,cottageTicks:0,forge:{logs:0,bars:0,ticks:0},furniture:[],plants:[],ground:{},undo:[],layoutRevision:0,
     commissions:[],dailyCommissions:[],dailyHelp:[],introduced:["builder"],flags:[],carpentryXp:0,goal:"",startedAt:now,lastDate:calendarDate(now),message:"Welcome to your valley. Choose a place for your tent.",workQueue:[]};
 }
-export function createValleySave(now:number,seed=1234567,previous?:RpgState):ValleySave {
-  const chapter=previous?structuredClone(previous):createRpg(now,seed);
-  // A new grant begins at its safe entrance; the untouched earlier archive keeps its location.
+export function createValleySave(now:number,seed=1234567):ValleySave {
+  const chapter=createRpg(now,seed);
   const position=tile(52,141);
   chapter.player.position={...position};chapter.player.previousPosition={...position};chapter.player.path=[];chapter.player.movement=null;chapter.player.action=null;
-  chapter.control.autoplay=false;chapter.control.waiting=true;chapter.control.active=null;chapter.control.thought=null;
+  for(const npc of chapter.npcs){npc.previousPosition={...npc.position};npc.path=[];npc.movement=null;npc.action=null;}
+  chapter.control.autoplay=false;chapter.control.waiting=true;chapter.control.active=null;chapter.control.source=null;chapter.control.thought=null;chapter.control.queue=[];chapter.dialogue=null;
   const action=createActionState(position.x,position.y,maxHealth(chapter.player));
   action.player.health=chapter.player.health;
-  if(!previous) {
-    const first=chapter.enemies.find(enemy=>enemy.id==="rock-mite-0");
-    if(first){first.position=tile(94,158);first.home={...first.position};}
-  }
+  const first=chapter.enemies.find(enemy=>enemy.id==="rock-mite-0");
+  if(first){first.position=tile(94,158);first.home={...first.position};}
   action.enemies=chapter.enemies.map(enemy=>({id:enemy.id,x:enemy.position.x,z:enemy.position.y,homeX:enemy.home.x,homeZ:enemy.home.y,
     health:enemy.health,maxHealth:ENEMIES[enemy.definitionId].health,cooldown:0,windup:0,damage:ENEMIES[enemy.definitionId].maxHit,
     aggressive:ENEMIES[enemy.definitionId].aggressive,defeated:enemy.health<=0}));
   chapter.action=action;
-  const result:ValleySave={version:6,chapter,action,valley:createValleyData(now),savedAt:now,offlineRemainder:0};
+  const result:ValleySave={version:7,chapter,action,valley:createValleyData(now),savedAt:now,offlineRemainder:0};
   for(const object of createValleyWorld(result.valley,chapter).objects)if(object.resourceId&&!chapter.resources[object.id])chapter.resources[object.id]={objectId:object.id,available:true,respawnAt:0};
-  if(!previous)chapter.journal=["The king's grant opens a new valley. Your first home begins with a tent."];
+  chapter.journal=["The king's grant opens a new valley. Your first home begins with a tent."];
   return result;
 }
 
@@ -61,7 +59,7 @@ function validGround(value:unknown):boolean {
 }
 export function validateValleySave(value:unknown):ValleySave|null {
   try {
-    if(!record(value)||value.version!==6||!record(value.chapter)||!record(value.valley)||!integer(value.savedAt,8.64e15)||!finite(value.offlineRemainder,0,599.999999))return null;
+    if(!record(value)||value.version!==7||!record(value.chapter)||!record(value.valley)||!integer(value.savedAt,8.64e15)||!finite(value.offlineRemainder,0,599.999999))return null;
     const input=structuredClone(value),v=input.valley as unknown as ValleyData;
     v.workQueue??=[];
     if(!Array.isArray(v.workQueue)||v.workQueue.length>1||v.workQueue.some(job=>!record(job)||typeof job.recipeId!=="string"||!VALLEY_RECIPES[job.recipeId]||!integer(job.quantity,100)||job.quantity<1||!integer(job.remainingTicks,360000)))return null;
@@ -92,8 +90,8 @@ export function validateValleySave(value:unknown):ValleySave|null {
     if(!Array.isArray(rawChapter.enemies)||rawChapter.enemies.length!==ENEMY_SPAWNS.length||rawChapter.enemies.some(enemy=>!record(enemy)||!integer(enemy.respawnAt)||(enemy.health===0&&enemy.respawnAt===0)))return null;
     const valleyIds=new Set(createValleyWorld(v,rawChapter).objects.filter(o=>o.id.startsWith("valley-")).map(o=>o.id));
     if(!Array.isArray(rawChapter.effects))return null;
-    // The V5 validator knows the original world's IDs. Validate every effect field
-    // through it, allowing only real V6 objects as additional target identities.
+    // The shared engine validator knows the original world's IDs. Also accept
+    // actual valley targets, validating every remaining effect field unchanged.
     const effects=rawChapter.effects.map(effect=>record(effect)&&typeof effect.targetId==="string"&&valleyIds.has(effect.targetId)?{...effect,targetId:undefined}:effect);
     const clean={...rawChapter,action:undefined,effects,resources:Object.fromEntries(Object.entries(rawChapter.resources??{}).filter(([id])=>originalIds.has(id))),
       enemies:rawChapter.enemies.map((enemy,index)=>({...enemy,position:{...ENEMY_SPAWNS[index].position},home:{...ENEMY_SPAWNS[index].position},respawnAt:enemy.health===0?Math.max(enemy.respawnAt,rawChapter.tick+1):enemy.respawnAt}))};
@@ -103,7 +101,7 @@ export function validateValleySave(value:unknown):ValleySave|null {
     chapter.resources={...chapter.resources,...Object.fromEntries(extra)};
     for(const enemy of chapter.enemies){const actor=input.action.enemies.find(value=>value.id===enemy.id)!;enemy.position=tile(Math.round(actor.x),Math.round(actor.z));enemy.home=tile(Math.round(actor.homeX),Math.round(actor.homeZ));enemy.respawnAt=rawChapter.enemies.find(value=>value.id===enemy.id)!.respawnAt;}
     chapter.action=input.action;
-    return {version:6,chapter,action:input.action,valley:v,savedAt:Number(input.savedAt),offlineRemainder:Number(input.offlineRemainder)};
+    return {version:7,chapter,action:input.action,valley:v,savedAt:Number(input.savedAt),offlineRemainder:Number(input.offlineRemainder)};
   }catch{return null;}
 }
 
@@ -115,16 +113,15 @@ function db():Promise<IDBDatabase>{return database??=new Promise((resolve,reject
 });}
 async function read(key:string):Promise<unknown>{const database=await db();return new Promise((resolve,reject)=>{const request=database.transaction("saves").objectStore("saves").get(key);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});}
 export async function readValleySave(now=Date.now()):Promise<ValleySave>{
-  const raw=await read("v6"),current=validateValleySave(raw);if(current){lastWritten=structuredClone(current);return current;}
+  const raw=await read("valley-v1"),current=validateValleySave(raw);if(current){lastWritten=structuredClone(current);return current;}
   if(raw!==undefined&&raw!==null){
-    const backup=validateValleySave(await read("v6-backup"));
+    const backup=validateValleySave(await read("valley-v1-backup"));
     if(backup){backup.valley.message="Recovered your previous valid valley checkpoint.";lastWritten=structuredClone(backup);return backup;}
     throw Error("The stored valley chapter is invalid; its data has been preserved.");
   }
-  for(const key of ["v5","v4","v3"]) {const old=validateRpgSave(await read(key));if(old)return createValleySave(now,old.seed,old);}
   return createValleySave(now);
 }
 export async function writeValleySave(save:ValleySave):Promise<void>{
   if(!validateValleySave(save))throw Error("Refusing to overwrite a chapter with invalid state");
-  const snapshot=structuredClone(save),database=await db();return new Promise((resolve,reject)=>{const transaction=database.transaction("saves","readwrite"),store=transaction.objectStore("saves");store.put(lastWritten??snapshot,"v6-backup");store.put(snapshot,"v6");transaction.oncomplete=()=>{lastWritten=snapshot;resolve();};transaction.onerror=()=>reject(transaction.error);});
+  const snapshot=structuredClone(save),database=await db();return new Promise((resolve,reject)=>{const transaction=database.transaction("saves","readwrite"),store=transaction.objectStore("saves");store.put(lastWritten??snapshot,"valley-v1-backup");store.put(snapshot,"valley-v1");transaction.oncomplete=()=>{lastWritten=snapshot;resolve();};transaction.onerror=()=>reject(transaction.error);});
 }

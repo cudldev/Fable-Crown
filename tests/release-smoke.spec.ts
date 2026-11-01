@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createRpg } from "../src/rpg/engine";
-import { addItems } from "../src/rpg/inventory";
+import { addItems, itemCount } from "../src/rpg/inventory";
 import type { ValleySave } from "../src/valley/contracts";
 import { createValleySave } from "../src/valley/save";
 
@@ -27,7 +27,7 @@ async function ready(page: Page) {
   await expect(page.getByTestId("valley-app")).toHaveAttribute("data-ready", "true");
   await expect(page.getByTestId("valley-app")).toHaveAttribute("data-mode", "dashboard");
 }
-async function read(page: Page, key = "v6") {
+async function read(page: Page, key = "valley-v1") {
   return page.evaluate(key => new Promise<ValleySave>((resolve, reject) => {
     const open = indexedDB.open("fable-crown", 1);
     open.onerror = () => reject(open.error);
@@ -59,27 +59,37 @@ test("real valley worker, local guidance and durable saves work without graphics
   const legacy = createRpg(Date.now(), 8128);
   addItems(legacy.bank, "logs", 12, Infinity);
   Object.assign(legacy.quests.forge, { accepted: true, complete: true, stageId: "complete" });
+  const beta = { ...createValleySave(Date.now(), 1111), version: 6 };
+  beta.chapter.bank = [{ itemId: "coins", quantity: 999 }];
   await page.evaluate(value => new Promise<void>((resolve, reject) => {
     const open = indexedDB.open("fable-crown", 1);
     open.onerror = () => reject(open.error);
     open.onsuccess = () => {
       const db = open.result, tx = db.transaction("saves", "readwrite"), store = tx.objectStore("saves");
-      store.put(value, "v5"); store.delete("v6"); store.delete("v6-backup");
+      store.put(value.legacy, "v5"); store.put(value.beta, "v6");
+      store.delete("valley-v1"); store.delete("valley-v1-backup");
       tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => reject(tx.error);
     };
-  }), legacy);
+  }), { legacy, beta });
   await page.reload(); await ready(page);
   const first = await snapshot(page);
-  expect(first.chapter.bank).toEqual(legacy.bank);
-  expect(first.chapter.quests).toEqual(legacy.quests);
+  expect(first.version).toBe(7);
+  expect(itemCount(first.chapter.player.inventory, "coins")).toBe(25);
+  expect(first.chapter.bank).toEqual([]);
+  expect(first.chapter.quests.forge.complete).toBe(false);
+  expect(first.valley.home).toBeNull(); expect(first.valley.paid).toBe(0);
   expect(await read(page, "v5")).toEqual(legacy);
+  expect(await read(page, "v6")).toEqual(beta);
   await expect.poll(async () => (await snapshot(page)).chapter.tick).toBeGreaterThan(first.chapter.tick);
   await page.getByRole("dialog").getByRole("button", { name: "Journal", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("Your own quiet valley");
   await page.getByRole("button", { name: "Pin next suggested goal", exact: true }).click();
   const chosen = await snapshot(page);
   expect(chosen.valley.goal).toBe("Choose a clear place for your free tent");
-  await restore(page, { version: 6, chapter: { player: { health: -999 } } });
+  await restore(page, legacy);
+  await expect(page.locator(".valley-message")).toContainText("invalid");
+  expect((await snapshot(page)).valley.goal).toBe(chosen.valley.goal);
+  await restore(page, { version: 7, chapter: { player: { health: -999 } } });
   await expect(page.locator(".valley-message")).toContainText("invalid");
   const preserved = await snapshot(page);
   expect(preserved.chapter.player).toEqual(chosen.chapter.player);
@@ -111,6 +121,7 @@ test("the installed PWA preserves the chapter and all required assets offline wi
   await restore(page, fixture);
   await expect(page.locator(".valley-message")).toContainText("Chapter restored");
   const before = await snapshot(page);
+  expect(before.version).toBe(7);
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
   expect(await page.evaluate(async () => (await navigator.serviceWorker.ready).scope))
     .toBe(new URL("./", page.url()).href);
@@ -119,6 +130,7 @@ test("the installed PWA preserves the chapter and all required assets offline wi
     await page.reload({ waitUntil: "domcontentloaded" });
     await ready(page);
     const after = await snapshot(page);
+    expect(after.version).toBe(7);
     for (const field of ["position", "skills", "inventory", "equipment", "ammo", "health"] as const)
       expect(after.chapter.player[field], field).toEqual(before.chapter.player[field]);
     expect(after.chapter.bank).toEqual(before.chapter.bank);
