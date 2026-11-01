@@ -7,7 +7,7 @@ Final local production candidate **c35e76d491e5**, `http://127.0.0.1:5398/Fable-
 - Fresh-storage CPU: **6/6**; full unit/type/build/native/dist gate is lead-recorded in PROGRESS.
 - Functional GPU: **10/10**, serialized controller2 + existing8.
 - Release/PWA: **2/2**, retaining the two-case non-GPU CI boundary. Scope/offline assets/zero external requests pass.
-- No page errors. Public evidence in `release/valley-public.json` remains lead-owned; local results do not claim this candidate live.
+- No page errors. Lead verified published8b21ba4/Actions41259232063, public8daf56535279: actual cache upgrade, saved tent/25coins, untouched old keys, both orientations, scope and offline WebGL/all11 assets; zero external requests. See `release/valley-public.json`.
 
 Coverage: earned peaceful/mixed reference journeys; home/economy/offline/recovery/current saves; fresh isolation and legacy-file rejection; keyboard/emulated-pad/touch orientations. New controller proof covers Y once/hold, real RT damage/LT block, Settings camera/tool controls, disclosure/Tab wrap, five day3 pins and later grant inspection.
 

@@ -2,11 +2,11 @@
 
 ## Hands-on valley onboarding — 2026-11-01
 
-Published baseline: c56f611/Actions41256670252, public cache141aac213cf0. Completion audit adds controller weapon/Settings access, five direction pins/future-grant inspection, factual return summaries, caravan starter crafting and self-overlap placement protection. Final browser/public verification follows; see VALLEY_COMPLETION_AUDIT.md.
+Release complete: 8b21ba4/Actions41259232063 passed and deployed public cache8daf56535279. Actual141aac→8daf cache upgrade, saved tent/25coins, untouched old keys, continuous movement, both mobile orientations, scope and offline WebGL/all11 asset entries pass; zero page errors/external runtime requests. Runtime entry matches the local candidate. Evidence: release/valley-public.json and VALLEY_COMPLETION_AUDIT.md. Weekly32%used/~68%remaining; no reset/credits. Stop for playtesting.
 
 Implemented the approved three-day slice in isolated branch codex/valley-onboarding: continuous controls/combat, free tent/account/cottage, craft/trade, visitors/guidance, forge, landscaping, recovery and offline progress. Latest user decision: start fresh. Format7 uses only valley-v1/backup, starts25coins and never reads, migrates or imports V3–V6; older keys stay untouched.
 
-692 units/82files, strict types and Pages-base build/native/baked/dist pass. Full peaceful/mixed reference journeys earn their cottage through real continuous input and commands, with no injected resources; offline construction time is compressed. Six storage-isolation tests verify the fresh boundary. CI stays two non-GPU cases.
+692 units/82files, strict types and Pages-base build/native/baked/dist pass; local10 functional GPU+2release checks pass. Full peaceful/mixed reference journeys earn their cottage through real continuous input and commands, with no injected resources; offline construction time is compressed. Six storage-isolation tests verify the fresh boundary. CI stays two non-GPU cases. Final audit fixes controller weapon/Settings access and focus wrapping, five goal pins/future-grant inspection, factual return summaries, caravan starter crafting and self-overlap placement.
 
 Eleven native assets and pixel poses are reviewed usable drafts. Minor roof/plant detail and partial rotated-wall occlusion remain. Local input proxy median32.7ms keyboard,32ms portrait touch,34ms landscape touch; raw evidence/limits in performance/valley. No physical-phone or screen-to-photon claim. No reset/credits consumed. Stop after the verified slice for human balance/device playtesting.
 

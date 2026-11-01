@@ -2,7 +2,7 @@
 
 Scope: [approved sections 1–5](APPROVED_ONBOARDING_PLAN.md), with the later **fresh-save override**. Format7 uses `valley-v1`/backup; V3–V6 keys stay untouched and older files are rejected. Migration clauses are superseded, not incomplete requirements.
 
-This maps implemented acceptance requirements to evidence. Local candidate **c35e76d491e5** passed **10 functional GPU cases and 2 non-GPU release/PWA cases**, serialized on the production repository base path. The lead reports **692 passing units/82 files**, strict types, build/native/baked/dist gates. **Established** identifies the evidence below; **weak** identifies broader human observations not demonstrated. Published cache `141aac213cf0` remains historical evidence until the lead verifies the new public artifact.
+This maps implemented acceptance requirements to evidence. Local candidate **c35e76d491e5** passed **10 functional GPU cases and 2 non-GPU release/PWA cases**, serialized on the production repository base path. **692 units/82 files**, strict types, build/native/baked/dist gates pass. Commit **8b21ba4**, Actions **41259232063**, is published and verified as public cache **8daf56535279**; its runtime entry matches the local candidate. **Established** identifies the evidence below; **weak** identifies broader human observations not demonstrated.
 
 Days1–3 are progress checkpoints, not a demand to spend three wall-clock days testing. Physical-device and hour-long pacing observations are human playtest follow-ups; they do not substitute for the listed deterministic/reference checks.
 
@@ -67,7 +67,7 @@ Days1–3 are progress checkpoints, not a demand to spend three wall-clock days 
 | T10 progress/visitors | State-grounded days, early/late/long-session logic, daily help/requests and optional wilderness prompts. |
 | T11 tutorial/summary/pins | Optional Journal/contextual UI; detailed return summary, five pins and future inspection pass direct checks. |
 | T12 independent QA | Actual worker/IDB, controls, economy/recovery and release cases; reproducible bugs reported to lead/owners. No implementation edits by this audit. |
-| T13 integration/release | Lead-reported692 units/type/build/native/baked/dist plus current10 functional GPU/2 release cases pass. New public artifact verification remains lead-owned. |
+| T13 integration/release | 692 units/type/build/native/baked/dist, local10 functional GPU/2 release cases and Actions41259232063 pass. Actual public8daf56535279 upgrade/save/offline/WebGL verification passes; release gate complete. |
 
 ## 4. Ownership, execution and art gates
 
@@ -108,7 +108,7 @@ Limits: one flat-ground facing in this sequence; earlier mirror/door/terrace cap
 | Keyboard/gamepad/touch in portrait/landscape | Emulator/touch cases in both viewports plus current Weapon/Settings proof pass; physical phone/controller remains untested. |
 | Unit/strict types/build/native/baked/dist; lightweight release vs local visual suite | Lead reports692 units/82 files and strict build/native/baked/dist gates. Current10 functional GPU and exactly2 non-GPU release cases pass. |
 | Approved voxel/pixel art; zero-cost/offline; static GitHub Pages | Native/pixel audits, release/PWA offline checks with WebGL disabled, real local/public WebGL proof; no required external requests recorded. |
-| Actual public paths/PWA scope/cached upgrades/new saved progress/offline/WebGL after publish | `docs/release/valley-public.json` records old-cache replacement, fresh format7, untouched old keys, real public scope and offline WebGL for prior cache141aac213cf0. New audit fixes have no public verification yet. |
-| Report measured performance and actual allowance without extrapolation | `docs/performance/valley/{README.md,metrics.json}`: small local DOM-pose latency proxies, not physical-device/frame-rate guarantees. Last progress note records30% used/~70% remaining; lead must refresh actual allowance at final handoff. |
+| Actual public paths/PWA scope/cached upgrades/new saved progress/offline/WebGL after publish | `docs/release/valley-public.json`: actual141aac→8daf cache replacement, current format7/tent/25coins, untouched old keys, correct public scope, both orientations and offline WebGL/all11 asset entries; zero page errors/external requests. |
+| Report measured performance and actual allowance without extrapolation | `docs/performance/valley/{README.md,metrics.json}`: local input proxy medians32.7ms keyboard/32ms portrait touch/34ms landscape, not physical-device/frame-rate guarantees. Final account reading32% used/~68% remaining; no reset/credits consumed. |
 
-Decision: listed implementation acceptance requirements now have local code/test/art evidence, including earned peaceful/mixed reference journeys and the previously missing controller/content routes. The final public artifact/upgrade verification remains with the lead before claiming this audit build live. Human pacing/physical-device playtests and unsampled animation/tool cases remain honest follow-up limits, not a demand for three wall-clock days.
+Decision: listed implementation acceptance requirements have code/test/art and public release evidence, including earned peaceful/mixed reference journeys and the previously missing controller/content routes. The approved vertical slice is complete; stop for playtesting. Human pacing/physical-device playtests and unsampled animation/tool cases remain explicit follow-up limits.
