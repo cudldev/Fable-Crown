@@ -1,5 +1,9 @@
 # Valley onboarding — approved 2026-11-01
 
+Latest timing override (2026-11-02): the user returned to old-school gameplay. Valley movement, strikes, gathering, combat and guard now commit at600ms; settlement stays600ms. Click acknowledgement/cancellation remains immediate; movement and character clips interpolate between commits. Timers retain60Hz storage quanta for format7 compatibility (36quanta/tick); collision samples are geometry checks, never additional gameplay steps. Keyboard/controller and pointer tasks use the same clock. Menus/pause clear pending input; offline time never advances actors. The60Hz actor specifications below are historical.
+
+Recommended follow-ups, not implemented by this timing change: Skills/next-unlock view and useful tool upgrades; gather→store→smelt/craft→equip/deliver circuits; equipment/styled combat and food timing; Walk/Run energy; small authored NPC adventures. Preserve the Valley's home building, contextual menus and optional wilderness.
+
 Current layout authority: [UX_LAYOUT_RULES.md](UX_LAYOUT_RULES.md). Organic conversations, object action prompts, encounter camera and combined full-screen crafting replace shared service tabs. Desktop uses keyboard/mouse without touch controls; mobile hides its dock during controller use.
 
 Latest UX decisions: console-style Menu/Back hierarchy; most actions open only from the intended nearby object. Workbench/caravan carpentry, brazier/forge smelting, fire cooking, local trade/storage, Rowan account/orders and planning-table/project-board actions have focused screens. Global backpack is personal. Menus pause60Hz actors while600ms background work continues. Mobile controls support mirrored/raised docks and contextual results. See MOBILE_UX_REVIEW.md; format7/balance/offline guarantees remain.

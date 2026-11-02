@@ -1,4 +1,9 @@
 .valley-app { font-family: system-ui,sans-serif; color:#f7edce; background:#314d43; }
+.tripo-test-controls {position:absolute;left:12px;bottom:128px;z-index:8;width:166px;max-width:calc(100% - 24px);padding:6px 10px;color:#f7edce;background:#203d36ed;border:1px solid #d9ca9a88;border-radius:8px;font:12px system-ui;pointer-events:auto;}
+.tripo-test-controls summary {min-height:44px;display:list-item;align-content:center;cursor:pointer;}
+.tripo-test-controls label {display:block;margin-bottom:4px;}
+.tripo-test-controls select {width:100%;min-height:44px;background:#f4e8c9;color:#263e36;border:1px solid #bba56d;border-radius:5px;padding:5px;}
+.valley-app:not([data-ui-state="exploration"]) .tripo-test-controls {display:none;}
 .valley-camera {position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));display:flex;gap:5px;z-index:9;}
 .valley-camera button {min-width:44px;min-height:44px;padding:8px;border:1px solid #d9c58c99;border-radius:9px;background:#24443bed;color:#fff0cd;font:13px system-ui;touch-action:manipulation;}
 .valley-camera .valley-follow {min-width:80px;display:inline-flex;align-items:center;justify-content:center;gap:5px;}

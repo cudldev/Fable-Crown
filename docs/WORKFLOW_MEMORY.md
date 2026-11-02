@@ -1,5 +1,7 @@
 # Working notes
 
+- Valley timing:600ms authoritative actor/settlement commits;36stored action quanta/tick for format7. Keep render interpolation separate, test599/600ms boundaries, click coalescing, collision sweeps, menu cancellation and offline actor exclusion. Current checkout tmp/valley-onboarding.
+
 - Layouts: follow UX_LAYOUT_RULES.md. NPC dialogue ends through turns; object prompt opens one action. Craft list/details stay together; info including action is roughly one-third. Hide HUD/FPS while panels own focus, restore camera on exit. Thumbnail previews borrow loaded baked geometry; release strips raw VOX.
 - Input: valley uses click/tap walking and approach-to-interact; right-click/hold options. No virtual dock. Keyboard/controller remain alternatives; clear held inputs on handoff. Explicit selected work stops on new destination/Stop/menu/visibility; never save or advance it offline. Drag/right stick detach the camera; F/right-stick press/HUD Follow reattach. Direction geometry stays in world.
 
@@ -172,3 +174,7 @@
 - Voxel shadows: all visible LODs cast through their baked cheaper proxy or exact surface; never gate onLOD0. Keep shared fade attributes and zero proxy color/depth draws. Regression: rpg-voxel-shadow-mesh.spec.ts, nativeoak0→1→3→4→0 plus minimal-mesh fallback.
 
 - Valley: use isolated tmp/valley-onboarding; new default is hands-on60Hz, settlement600ms. Historical browser scenarios explicitly use?chapter=legacy. V6 validates actualvalley effecttargets through the V5 validation view and restores them; keep actualgather→save→reload regression. Preservepad controller edges across menu input clearing; readReactevent values before deferredsetters. Native rotationY is negativequarterturn, matching world south→west. SetVITE_BASE_PATH beforebuild/preview; serializeGPU/build. Keep notes in VALLEY_IMPLEMENTATION/valley-qa and raw input probes in performance/valley.
+
+- Tripo valley trial: ?characters=tripo-test, current local preview5406/Fable-Crown. Saved corrected .blend in characters/tripo-valley-test-v1; preserve original texture/15 clips, runtime guard derived separately. Follow authoritative600ms commits with render interpolation; exclude debug controls from native pointer routing. GPU proof in art-audit/tripo-valley-test-v1; default cast unchanged.
+
+- Combined release preparation: user explicitly requested deploying Tripo together with600ms timing. Release checkout tmp/tripo-release/codex/tripo-valley-release; source checkout retained.925units,8localGPU,2release cases/build/dist pass. Verify public PWA upgrade and the character URL after Actions.

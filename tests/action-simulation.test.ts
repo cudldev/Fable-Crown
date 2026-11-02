@@ -14,6 +14,36 @@ function advance(state: ActionState, frames: number, input: Partial<ActionInput>
   return events;
 }
 
+describe("600ms action commits",()=>{
+  it("sweeps movement through thin obstacles and preserves progress up to the wall",()=>{
+    const state=createActionState(0,0);
+    stepAction(state,{...idleActionInput(),moveX:1},world({canOccupy:x=>x<.8||x>1}),36);
+    expect(state.player.x).toBeGreaterThan(.6);expect(state.player.x).toBeLessThan(.8);
+    expect(state.frame).toBe(36);expect(state.stepMs).toBe(600);
+  });
+  it("resolves player contact once and preserves an enemy tell before its next-tick hit",()=>{
+    const state=createActionState(0,0);state.enemies=[enemy()];
+    const events=stepAction(state,{...idleActionInput(),strike:true},world(),36);
+    expect(events.filter(e=>e.kind==="enemy-hit")).toHaveLength(1);
+    expect(events.filter(e=>e.kind==="player-hit")).toHaveLength(0);expect(state.enemies[0].windup).toBe(36);
+    expect(state.player.swing).toBe(0);expect(state.swingStartedAt).toBe(36);
+    expect(stepAction(state,idleActionInput(),world(),36).filter(e=>e.kind==="player-hit")).toHaveLength(1);
+    stepAction(state,idleActionInput(),world(),36);
+    expect(state.enemies[0].cooldown).toBeGreaterThanOrEqual(0);
+    expect(state.enemies[0].windup).toBeGreaterThanOrEqual(0);
+  });
+  it("replays coarse action state identically across a saved boundary",()=>{
+    const state=createActionState(0,0);state.enemies=[enemy("wolf",{x:4,homeX:4})];
+    stepAction(state,{...idleActionInput(),moveZ:.5},world(),36);
+    const restored=JSON.parse(JSON.stringify(state)) as ActionState;
+    for(let tick=0;tick<12;tick++){
+      const input={...idleActionInput(),moveX:tick<4?.5:0,strike:tick%2===0,block:tick>7};
+      expect(stepAction(state,input,world(),36)).toEqual(stepAction(restored,input,world(),36));
+    }
+    expect(restored).toEqual(state);
+  });
+});
+
 describe("continuous fixed action simulation", () => {
   it("travels exactly3m per second and normalizes diagonal input", () => {
     const straight = createActionState(0, 0), diagonal = createActionState(0, 0);

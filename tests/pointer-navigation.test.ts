@@ -172,6 +172,13 @@ describe("terrain-weighted pointer navigation",()=>{
 });
 
 describe("fixed-step pointer route following",()=>{
+  it("spends the same1.8m tick budget across route corners as direct movement",()=>{
+    const action=createActionState(1,1),surface=cellWorld([]);
+    const follow=followPointerRoute(action.player,[{x:2,z:1},{x:2,z:2},{x:3,z:2}],1.8);
+    stepAction(action,{...idleActionInput(),moveX:follow.moveX,moveZ:follow.moveZ},{...surface,movementPath:follow.movementPath},36);
+    expect(action.player.x).toBe(2);expect(action.player.z).toBeCloseTo(1.8,3);
+    expect(follow.remaining).toEqual([{x:2,z:2},{x:3,z:2}]);
+  });
   it("prunes reached points without changing the caller's route",()=>{
     const route=Object.freeze([Object.freeze({x:1,z:1}),Object.freeze({x:1.02,z:1}),Object.freeze({x:2,z:1})]);
     const answer=followPointerRoute({x:1,z:1},route);
@@ -193,13 +200,13 @@ describe("fixed-step pointer route following",()=>{
     expect(followPointerRoute({x:1,z:1},[{x:Infinity,z:1}])).toEqual({moveX:0,moveZ:0,remaining:[]});
   });
 
-  it("follows a full planned detour through authoritative 60Hz movement and finishes inside actual interaction range",()=>{
+  it.each([1,36])("follows a full planned detour at %i time quanta and finishes inside actual interaction range",(quanta)=>{
     const surface=cellWorld(["3,0","3,1","3,2","3,3","3,4","6,1"]),start={x:1.2,z:1.1},goal={x:6,z:1,range:1.5};
     let route=planPointerRoute(start,goal,surface,BOUNDS)!;expect(route).not.toBeNull();
     const action=createActionState(start.x,start.z);
     for(let i=0;i<2000&&route.length;i++){
-      const follow=followPointerRoute(action.player,route);route=follow.remaining;
-      stepAction(action,{...idleActionInput(),moveX:follow.moveX,moveZ:follow.moveZ},surface);
+      const follow=followPointerRoute(action.player,route,3*quanta/60);route=follow.remaining;
+      stepAction(action,{...idleActionInput(),moveX:follow.moveX,moveZ:follow.moveZ},{...surface,movementPath:follow.movementPath},quanta);
     }
     expect(route).toEqual([]);expect(Math.hypot(action.player.x-goal.x,action.player.z-goal.z)).toBeLessThan(goal.range);
   });

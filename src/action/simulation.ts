@@ -29,10 +29,13 @@ export function createActionState(x: number, z: number, maxHealth = 10): ActionS
 }
 
 /** One live fixed step only. Calendar/offline reconciliation must never call this. */
-export function stepAction(state: ActionState, input: ActionInput, world: ActionWorld): ActionEvent[] {
+export function stepAction(state: ActionState, input: ActionInput, world: ActionWorld, stepFrames = 1): ActionEvent[] {
+  if (!Number.isSafeInteger(stepFrames) || stepFrames < 1 || stepFrames > 36) throw new RangeError("Action step must be 1–36 time quanta.");
   const events: ActionEvent[] = [];
   const p = state.player;
-  state.frame += 1;
+  state.frame += stepFrames;
+  const dt = ACTION_DT * stepFrames;
+  if (stepFrames > 1) state.stepMs = stepFrames * 1000 / 60;
   const pressed = input.strike && !state.strikeHeld;
   state.strikeHeld = input.strike;
   if (p.health <= 0) {
@@ -40,13 +43,13 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
     return events;
   }
 
-  if (p.guardDelay > 0) p.guardDelay -= 1;
-  if (p.guardBroken > 0) p.guardBroken -= 1;
+  if (p.guardDelay > 0) p.guardDelay = Math.max(0, p.guardDelay - stepFrames);
+  if (p.guardBroken > 0) p.guardBroken = Math.max(0, p.guardBroken - stepFrames);
   p.blocking = input.block && p.guardBroken === 0 && p.guard > 0 && p.swing === 0;
   // Holding guard continually resets the rest period, even without a hit.
   if (input.block) p.guardDelay = 45;
   if (p.guardDelay === 0 && p.guardBroken === 0 && !input.block) {
-    p.guard = Math.min(100, p.guard + 20 * ACTION_DT);
+    p.guard = Math.min(100, p.guard + 20 * dt);
   }
 
   let mx = finite(input.moveX), mz = finite(input.moveZ);
@@ -55,20 +58,27 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
   if (magnitude > 0) {
     // Guard keeps the shield facing stable so retreat and strafing remain useful.
     if (!p.blocking && p.swing === 0) { p.facingX = mx / Math.hypot(mx, mz); p.facingZ = mz / Math.hypot(mx, mz); }
-    const speed = WALK_SPEED * (p.blocking ? 0.5 : 1) * ACTION_DT;
-    const rawX = mx * speed + p.moveRemainderX;
-    const rawZ = mz * speed + p.moveRemainderZ;
-    const dx = q(rawX), dz = q(rawZ);
-    p.moveRemainderX = rawX - dx;
-    p.moveRemainderZ = rawZ - dz;
-    const nx = q(p.x + dx), nz = q(p.z + dz);
-    if (world.canOccupy(nx, nz, p.x, p.z)) { p.x = nx; p.z = nz; }
-    else {
-      // Fixed X-then-Z slide order is part of replay determinism.
-      if (world.canOccupy(nx, p.z, p.x, p.z)) p.x = nx;
-      else p.moveRemainderX = 0;
-      if (world.canOccupy(p.x, nz, p.x, p.z)) p.z = nz;
-      else p.moveRemainderZ = 0;
+    const speed = WALK_SPEED * (p.blocking ? 0.5 : 1) * dt;
+    if (world.movementPath?.length) {
+      let remaining=speed*Math.min(1,magnitude);
+      for (const point of world.movementPath) {
+        const dx=point.x-p.x,dz=point.z-p.z,length=Math.hypot(dx,dz);
+        if (!Number.isFinite(length)||remaining<=0) break;
+        if (length===0) continue;
+        const fraction=Math.min(1,remaining/length),x=p.x+dx*fraction,z=p.z+dz*fraction;
+        if (!p.blocking&&p.swing===0) {p.facingX=dx/length;p.facingZ=dz/length;}
+        sweepPlayer(p,q(dx*fraction),q(dz*fraction),world);
+        remaining-=length*fraction;
+        if (Math.hypot(p.x-x,p.z-z)>.003) break;
+      }
+      p.moveRemainderX=0;p.moveRemainderZ=0;
+    } else {
+      const rawX = mx * speed + p.moveRemainderX;
+      const rawZ = mz * speed + p.moveRemainderZ;
+      const dx = q(rawX), dz = q(rawZ);
+      p.moveRemainderX = rawX - dx;
+      p.moveRemainderZ = rawZ - dz;
+      sweepPlayer(p,dx,dz,world);
     }
   } else { p.moveRemainderX = 0; p.moveRemainderZ = 0; }
   p.height = q(finite(world.groundHeight(p.x, p.z)));
@@ -76,6 +86,7 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
   if (pressed && p.swing === 0 && !p.blocking) {
     state.swingTool = input.tool;
     p.swing = SWING_FRAMES;
+    if (stepFrames > 1) state.swingStartedAt = state.frame;
     const target = findActionTarget(state, world, state.swingTool);
     if (target) {
       const dx = target.x - p.x, dz = target.z - p.z;
@@ -89,8 +100,9 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
     }
   }
   if (p.swing > 0) {
-    p.swing -= 1;
-    if (p.swing === SWING_CONTACT) {
+    const previousSwing = p.swing;
+    p.swing = Math.max(0, p.swing - stepFrames);
+    if (previousSwing > SWING_CONTACT && p.swing <= SWING_CONTACT) {
       const target = findActionTarget(state, world, state.swingTool);
       if (target?.kind === "resource") events.push({ kind: "resource-hit", targetId: target.id });
       else if (target) {
@@ -112,10 +124,25 @@ export function stepAction(state: ActionState, input: ActionInput, world: Action
   // Stable array order defines simultaneous hit order and guard-break behavior.
   for (const enemy of state.enemies) {
     if (enemy.defeated || enemy.health <= 0) continue;
-    stepEnemy(enemy, state, world, events);
+    stepEnemy(enemy, state, world, events, stepFrames);
     if (p.health <= 0) break;
   }
   return events;
+}
+
+/** Collision samples only: never run actions, AI or intermediate rewards. */
+function sweepPlayer(p:ActionState["player"],dx:number,dz:number,world:ActionWorld):void {
+  const samples=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.125));
+  for(let i=1;i<=samples;i++){
+    const sx=q(dx*i/samples)-q(dx*(i-1)/samples),sz=q(dz*i/samples)-q(dz*(i-1)/samples);
+    const nx=q(p.x+sx),nz=q(p.z+sz);
+    if(world.canOccupy(nx,nz,p.x,p.z)){p.x=nx;p.z=nz;}
+    else {
+      // Fixed X-then-Z slide order is part of replay determinism.
+      if(world.canOccupy(nx,p.z,p.x,p.z))p.x=nx;else p.moveRemainderX=0;
+      if(world.canOccupy(p.x,nz,p.x,p.z))p.z=nz;else p.moveRemainderZ=0;
+    }
+  }
 }
 
 /** Read-only target query shared by authoritative strikes and contextual controls. */
@@ -133,20 +160,24 @@ export function findActionTarget(state: ActionState, world: ActionWorld, tool: b
   }).sort((a, b) => distance(a.x, a.z, p.x, p.z) - distance(b.x, b.z, p.x, p.z) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
 }
 
-function stepEnemy(enemy: ActionEnemy, state: ActionState, world: ActionWorld, events: ActionEvent[]): void {
+function stepEnemy(enemy: ActionEnemy, state: ActionState, world: ActionWorld, events: ActionEvent[], stepFrames: number): void {
   const p = state.player;
-  if (enemy.cooldown > 0) enemy.cooldown -= 1;
+  if (enemy.cooldown > 0) enemy.cooldown = Math.max(0, enemy.cooldown - stepFrames);
   const safe = !outsideSafeSegment(p.x, p.z, enemy.x, enemy.z, world);
   const leashed = distance(p.x, p.z, enemy.homeX, enemy.homeZ) > ENEMY_LEASH;
   if (!enemy.aggressive || safe || leashed) {
     enemy.windup = 0;
-    moveEnemy(enemy, enemy.homeX, enemy.homeZ, world);
+    moveEnemy(enemy, enemy.homeX, enemy.homeZ, world, stepFrames);
     return;
   }
   const range = distance(enemy.x, enemy.z, p.x, p.z);
-  if (enemy.windup === 0 && enemy.cooldown === 0 && range <= ENEMY_REACH) enemy.windup = 36;
+  if (enemy.windup === 0 && enemy.cooldown === 0 && range <= ENEMY_REACH) {
+    enemy.windup = 36;
+    // Keep the tell visible for one coarse tick before resolving contact.
+    if (stepFrames > 1) return;
+  }
   if (enemy.windup > 0) {
-    enemy.windup -= 1;
+    enemy.windup = Math.max(0, enemy.windup - stepFrames);
     if (enemy.windup === 0) {
       enemy.cooldown = 60;
       if (range > ENEMY_REACH || !world.canOccupy(p.x, p.z, enemy.x, enemy.z)) return;
@@ -163,13 +194,13 @@ function stepEnemy(enemy: ActionEnemy, state: ActionState, world: ActionWorld, e
         if (p.health === 0) events.push({ kind: "player-defeat" });
       }
     }
-  } else if (range > ENEMY_REACH) moveEnemy(enemy, p.x, p.z, world);
+  } else if (range > ENEMY_REACH) moveEnemy(enemy, p.x, p.z, world, stepFrames);
 }
 
-function moveEnemy(enemy: ActionEnemy, x: number, z: number, world: ActionWorld): void {
+function moveEnemy(enemy: ActionEnemy, x: number, z: number, world: ActionWorld, stepFrames: number): void {
   const dx = x - enemy.x, dz = z - enemy.z, length = Math.hypot(dx, dz);
   if (length === 0) return;
-  const scale = Math.min(length, ENEMY_SPEED * ACTION_DT) / length;
+  const scale = Math.min(length, ENEMY_SPEED * ACTION_DT * stepFrames) / length;
   const nx = q(enemy.x + dx * scale), nz = q(enemy.z + dz * scale);
   if (outsideSafeSegment(enemy.x, enemy.z, nx, nz, world) && world.canOccupy(nx, nz, enemy.x, enemy.z)) { enemy.x = nx; enemy.z = nz; }
 }

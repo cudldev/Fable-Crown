@@ -13,6 +13,7 @@ import { ThreeRuntime, type RuntimeInput, type CameraMode } from "./three/runtim
 import { loadProductionArt } from "./three/production-assets";
 import type { LightingPreset } from "./three/lighting";
 import VisualSettingsPanel from "./three/VisualSettingsPanel";
+import { TRIPO_CLIPS, type TripoPreview } from "./three/tripo-motion";
 import { DEFAULT_VISUAL_PRESET, DEFAULT_VISUAL_SETTINGS, normalizeVisualSettings, type VisualSettings } from "./three/visual-settings";
 import "./tile-scene.css";
 import "./three/three-scene.css";
@@ -74,6 +75,7 @@ export default function ThreeScene(props: ThreeSceneProps) {
   const [assets, setAssets] = useState<{ source: string; ids: string[]; voxelIds: string[]; warning: string; characterStyle: string; characterReady: boolean }>({ source: "loading", ids: [], voxelIds: [], warning: "", characterStyle: "pixel", characterReady: false });
   const [status, setStatus] = useState<"starting" | "ready" | "unavailable">("starting");
   const [failure, setFailure] = useState("");
+  const [characterPreview, setCharacterPreview] = useState<TripoPreview>("gameplay");
   const latest = useRef<RuntimeInput>({ ...props, lighting, shadows, cameraMode, gi, ao, visual });
   latest.current = { ...props, lighting, shadows, cameraMode, gi, ao, visual };
   const world = props.worldOverride ?? worldForState(props.state);
@@ -140,6 +142,16 @@ export default function ThreeScene(props: ThreeSceneProps) {
       <canvas ref={canvas} data-testid="three-canvas" aria-label={props.pointControls?"The Fable Crown valley. Click or tap to walk, or choose a target to approach and interact. Right click or touch and hold for options. Drag to pan; Follow or F returns to Alden. Wheel or pinch zooms.":props.camera.dynamicFollow?"The Fable Crown valley. Move with WASD, a controller or joystick. The camera follows you; wheel or pinch zooms.":"The 3D Fable Crown frontier. Drag to pan, wheel or pinch to zoom. Arrow keys pan when focused."} tabIndex={0} />
       {status === "starting" && <div className="loading-screen" aria-live="polite">Opening the voxel village…</div>}
       {status === "ready" && <>
+        {assets.characterStyle === "tripo-test" && <details className="tripo-test-controls" onPointerDown={event => event.stopPropagation()} onPointerUp={event => event.stopPropagation()} onClick={event => event.stopPropagation()} onKeyDown={event => event.stopPropagation()}>
+          <summary>Character test</summary>
+          <label htmlFor="tripo-clip">Animation</label>
+          <select id="tripo-clip" aria-label="Character animation" value={characterPreview} onChange={event => {
+            const clip = event.target.value as TripoPreview; setCharacterPreview(clip); runtime.current?.setCharacterPreview(clip);
+          }}>
+            <option value="gameplay">Follow gameplay</option><option value="rest">T-pose</option>
+            {TRIPO_CLIPS.map(clip => <option key={clip} value={clip}>{clip === "rig-test" ? "Shoulders and elbows" : clip[0]!.toUpperCase() + clip.slice(1)}</option>)}
+          </select>
+        </details>}
         <span className="three-performance" data-testid="fps-indicator" aria-label="Rendering performance" aria-live="off">FPS —</span>
         <div className="three-light-controls" role="group" aria-label="View settings">
           <span>VOXEL</span>

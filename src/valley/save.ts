@@ -41,6 +41,7 @@ const strings=(v:unknown,max=512):v is string[]=>Array.isArray(v)&&v.length<=max
 const rotation=(v:unknown)=>integer(v,3);
 export function validActionState(value:unknown,chapter:RpgState):value is ActionState {
   if(!record(value)||!integer(value.frame)||typeof value.strikeHeld!=="boolean"||typeof value.swingTool!=="boolean"||!record(value.player)||!Array.isArray(value.enemies)||value.enemies.length!==chapter.enemies.length)return false;
+  if(value.stepMs!==undefined&&value.stepMs!==600||value.swingStartedAt!==undefined&&(!integer(value.swingStartedAt)||value.swingStartedAt>value.frame))return false;
   const p=value.player;
   if(!finite(p.x,0,WORLD.width-1)||!finite(p.z,0,WORLD.height-1)||!finite(p.height,-1,8)||!finite(p.facingX,-1,1)||!finite(p.facingZ,-1,1)||
     !finite(p.moveRemainderX,-1,1)||!finite(p.moveRemainderZ,-1,1)||!finite(p.maxHealth,1,999)||!finite(p.health,0,Number(p.maxHealth))||

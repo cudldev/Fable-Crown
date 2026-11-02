@@ -44,18 +44,44 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("actual valley worker lifecycle", () => {
+  it("keeps the pending tick when another point click redundantly closes the interface",async()=>{
+    await boot();await send({type:"resume"});await send({type:"point",selection:{kind:"tile",position:tile(55,146)}});
+    vi.advanceTimersByTime(300);await send({type:"interface",open:false});
+    await send({type:"point",selection:{kind:"tile",position:tile(56,146)}});
+    vi.advanceTimersByTime(299);expect(actor().frame).toBe(0);
+    vi.advanceTimersByTime(1);expect(actor().frame).toBe(36);
+    expect(actor().player.x!==52||actor().player.z!==141).toBe(true);
+  });
+  it("autosaves a pre-tick format7 frame that is not divisible by36",async()=>{
+    const fixture=createValleySave(Date.now());fixture.action.frame=1;
+    await boot(fixture);await send({type:"resume"});const writes=storage.write.mock.calls.length;
+    vi.advanceTimersByTime(4800);await flush();
+    expect(storage.write.mock.calls.length).toBeGreaterThan(writes);
+    expect(storage.write.mock.calls.at(-1)![0].action.frame).toBe(289);
+  });
+  it("never awards combat damage or XP between ticks and coalesces repeated clicks",async()=>{
+    const fixture=createValleySave(Date.now());Object.assign(fixture.action.player,{x:93,z:158,facingX:1,facingZ:0});
+    const enemy=fixture.action.enemies[0];Object.assign(enemy,{x:94,z:158,homeX:94,homeZ:158,health:10,maxHealth:10,aggressive:false});
+    await boot(fixture);await send({type:"resume"});
+    for(let i=0;i<3;i++)await send({type:"input",input:{...idleActionInput(),strike:true}});
+    vi.advanceTimersByTime(599);const waiting=await exported();
+    expect(waiting.action.enemies[0].health).toBe(10);expect(waiting.chapter.player.skills.attack).toBe(fixture.chapter.player.skills.attack);
+    vi.advanceTimersByTime(1);const hit=await exported();
+    expect(hit.action.enemies[0].health).toBe(7);expect(hit.chapter.player.skills.attack-fixture.chapter.player.skills.attack).toBe(120);
+    vi.advanceTimersByTime(599);expect((await exported()).action.enemies[0].health).toBe(7);
+  });
   it("preserves a queued controller strike across movement packets before the next step",async()=>{
     await boot();await send({type:"resume"});await send({type:"input",input:{...idleActionInput(),moveX:1,strike:true}});
-    await send({type:"input",input:{...idleActionInput(),moveX:1,strike:false}});vi.advanceTimersByTime(24);
-    expect(actor().player.swing).toBeGreaterThan(0);
+    await send({type:"input",input:{...idleActionInput(),moveX:1,strike:false}});vi.advanceTimersByTime(600);
+    expect(actor().swingStartedAt).toBe(actor().frame);
   });
-  it("keeps the swing recovery when a pointer activity is cancelled and selected again",async()=>{
+  it("cannot gain another action in the same tick by cancelling and selecting again",async()=>{
     const fixture=createValleySave(Date.now(),2);Object.assign(fixture.action.player,{x:25,z:140});
-    await boot(fixture);await send({type:"resume"});await send({type:"point",selection:{kind:"object",id:"valley-tree-1"}});vi.advanceTimersByTime(250);
-    const hit=await exported();expect(hit.action.player.swing).toBeGreaterThan(0);expect(hit.chapter.player.skills.woodcutting).toBeGreaterThan(0);
+    await boot(fixture);await send({type:"resume"});await send({type:"point",selection:{kind:"object",id:"valley-tree-1"}});vi.advanceTimersByTime(600);
+    const hit=await exported();expect(hit.action.swingStartedAt).toBe(36);expect(hit.chapter.player.skills.woodcutting).toBeGreaterThan(0);
     await send({type:"cancel"});await send({type:"point",selection:{kind:"object",id:"valley-tree-1"}});vi.advanceTimersByTime(250);
-    const recovery=await exported();expect(recovery.chapter.player.skills.woodcutting).toBe(hit.chapter.player.skills.woodcutting);expect(recovery.action.player.swing).toBeGreaterThan(0);
-    vi.advanceTimersByTime(400);expect((await exported()).chapter.player.skills.woodcutting).toBeGreaterThan(hit.chapter.player.skills.woodcutting);
+    const recovery=await exported();expect(recovery.chapter.player.skills.woodcutting).toBe(hit.chapter.player.skills.woodcutting);expect(recovery.action.frame).toBe(hit.action.frame);
+    vi.advanceTimersByTime(350);expect((await exported()).chapter.player.skills.woodcutting).toBeGreaterThan(hit.chapter.player.skills.woodcutting);
   });
   it("repeats only the selected resource and stops cleanly on cancellation",async()=>{
     const fixture=createValleySave(Date.now(),2);Object.assign(fixture.action.player,{x:25,z:140});
@@ -66,9 +92,9 @@ describe("actual valley worker lifecycle", () => {
     await send({type:"cancel"});const stopped=await exported();vi.advanceTimersByTime(1000);const after=await exported();
     expect(after.chapter.player.inventory).toEqual(stopped.chapter.player.inventory);expect(after.chapter.player.skills).toEqual(stopped.chapter.player.skills);
   });
-  it("walks continuously to a selected ground point and cancels on new direct movement",async()=>{
+  it("walks along tick waypoints to a selected ground point and cancels on new direct movement",async()=>{
     await boot();await send({type:"resume"});await send({type:"point",selection:{kind:"tile",position:tile(55,146)}});
-    vi.advanceTimersByTime(2400);const walked=await exported();
+    vi.advanceTimersByTime(4200);const walked=await exported();
     expect(walked.action.player.x).toBeCloseTo(55,1);expect(walked.action.player.z).toBeCloseTo(146,1);
     expect(messages.some(message=>message.pointer?.kind==="walk")).toBe(true);expect(messages.at(-1)?.pointer).toBeNull();
     await send({type:"point",selection:{kind:"tile",position:tile(62,150)}});vi.advanceTimersByTime(160);
@@ -76,7 +102,7 @@ describe("actual valley worker lifecycle", () => {
   });
   it("approaches a far station and opens only once it is nearby",async()=>{
     await boot();await send({type:"resume"});await send({type:"point",selection:{kind:"object",id:"valley-workbench"}});
-    expect(messages.some(message=>message.open)).toBe(false);vi.advanceTimersByTime(6500);
+    expect(messages.some(message=>message.open)).toBe(false);vi.advanceTimersByTime(12000);
     expect(messages.filter(message=>message.open)).toHaveLength(1);expect(messages.find(message=>message.open)?.service?.objectId).toBe("valley-workbench");
     const value=await exported();expect(Math.hypot(value.action.player.x-69,value.action.player.z-139)).toBeLessThanOrEqual(3);
   });
@@ -142,8 +168,8 @@ describe("actual valley worker lifecycle", () => {
     expect(messages.find(message=>message.feedback?.title==="Crafting complete")?.feedback?.detail).toContain("+2 Sawn plank");
     expect(messages.find(message=>message.feedback?.title==="Crafting complete")?.feedback?.detail).toContain("+10 carpentry XP");
     expect(completed).not.toHaveProperty("feedback");expect(completed).not.toHaveProperty("service");
-    await send({type:"interface",open:false});vi.advanceTimersByTime(24);
-    expect(actor().frame).toBe(frozen.frame+1);expect(actor().player.x).toBe(frozen.player.x);
+    await send({type:"interface",open:false});vi.advanceTimersByTime(600);
+    expect(actor().frame).toBe(frozen.frame+36);expect(actor().player.x).toBe(frozen.player.x);
     expect(actor().player.swing).toBe(0);expect(actor().player.blocking).toBe(false);
   });
 
@@ -157,15 +183,16 @@ describe("actual valley worker lifecycle", () => {
     expect(messages.find(message=>message.open)?.open).toBe("craft");
   });
 
-  it("explains discarded rapid presses and renews identical empty swings without inventing rewards",async()=>{
+  it("coalesces rapid presses into one tick and renews empty-swing feedback without rewards",async()=>{
     await boot();await send({type:"resume"});const initial=await exported();
     await send({type:"input",input:{...idleActionInput(),strike:true,tool:true}});vi.advanceTimersByTime(80);
     await send({type:"input",input:{...idleActionInput(),strike:true,tool:true}});vi.advanceTimersByTime(32);
-    expect(messages.some(message=>message.feedback?.title==="Finishing this swing")).toBe(true);
-    vi.advanceTimersByTime(700);
+    expect(actor().frame).toBe(0);
+    vi.advanceTimersByTime(488);
+    expect(messages.filter(message=>message.feedback?.title==="Nothing gathered this swing")).toHaveLength(1);
     const first=messages.filter(message=>message.feedback?.title==="Nothing gathered this swing").at(-1)?.feedback;
     expect(first).toBeDefined();
-    await send({type:"input",input:{...idleActionInput(),strike:true,tool:true}});vi.advanceTimersByTime(250);
+    await send({type:"input",input:{...idleActionInput(),strike:true,tool:true}});vi.advanceTimersByTime(600);
     const second=messages.filter(message=>message.feedback?.title==="Nothing gathered this swing").at(-1)?.feedback;
     expect(second?.id).toBeGreaterThan(first!.id);expect(second?.tone).toBe("info");
     const final=await exported();expect(final.chapter.player.inventory).toEqual(initial.chapter.player.inventory);expect(final.chapter.player.skills).toEqual(initial.chapter.player.skills);
@@ -193,8 +220,8 @@ describe("actual valley worker lifecycle", () => {
     vi.advanceTimersByTime(2000);
     expect(actor()).toEqual(initial);
     await send({ type: "resume" });
-    vi.advanceTimersByTime(24);
-    expect(actor().frame).toBe(1);
+    vi.advanceTimersByTime(600);
+    expect(actor().frame).toBe(36);
     expect(actor().player.x).toBe(initial.player.x);
     expect(actor().player.blocking).toBe(false);
     expect(actor().player.swing).toBe(0);
@@ -204,8 +231,9 @@ describe("actual valley worker lifecycle", () => {
     await boot(); await send({ type: "resume" });
     await send({ type: "input", input: { ...idleActionInput(), strike: true, tool: true } });
     await send({ type: "input", input: idleActionInput() });
-    vi.advanceTimersByTime(24);
-    expect(actor().player.swing).toBe(35);
+    vi.advanceTimersByTime(599);expect(actor().frame).toBe(0);
+    vi.advanceTimersByTime(1);
+    expect(actor().frame).toBe(36);expect(actor().swingStartedAt).toBe(36);
     expect(actor().swingTool).toBe(true);
     vi.advanceTimersByTime(1000);
     expect(actor().player.swing).toBe(0);
@@ -214,7 +242,7 @@ describe("actual valley worker lifecycle", () => {
   it("clears held movement, guard and queued strikes on pause and resume", async () => {
     await boot(); await send({ type: "resume" });
     await send({ type: "input", input: { moveX: 1, moveZ: 0, block: true, strike: true, tool: false } });
-    vi.advanceTimersByTime(24);
+    vi.advanceTimersByTime(600);
     expect(actor().player.blocking).toBe(true);
     await send({ type: "pause" });
     const paused = await exported(), frame = paused.action.frame, x = paused.action.player.x;
@@ -223,38 +251,42 @@ describe("actual valley worker lifecycle", () => {
     vi.advanceTimersByTime(5000);
     expect((await exported()).action.frame).toBe(frame);
     await send({ type: "resume" });
-    vi.advanceTimersByTime(24);
-    expect(actor().frame).toBe(frame + 1);
+    vi.advanceTimersByTime(600);
+    expect(actor().frame).toBe(frame + 36);
     expect(actor().player.x).toBe(x);
     expect(actor().player.blocking).toBe(false);
   });
 
-  it("moves and guards within one action frame without waiting for the 600ms settlement tick", async () => {
+  it("commits movement and guard only on the 600ms gameplay boundary", async () => {
     await boot(); await send({ type: "resume" });
     const start = actor().player.x;
     await send({ type: "input", input: { ...idleActionInput(), moveX: 1, block: true } });
-    vi.advanceTimersByTime(24);
+    vi.advanceTimersByTime(599);
+    expect(actor().player.x).toBe(start);expect(actor().player.blocking).toBe(false);
+    vi.advanceTimersByTime(1);
     expect(actor().player.x).toBeGreaterThan(start);
     expect(actor().player.blocking).toBe(true);
-    expect((await exported()).chapter.tick).toBe(0);
+    expect((await exported()).chapter.tick).toBe(1);
+    const committed=structuredClone(actor());vi.advanceTimersByTime(599);expect(actor()).toEqual(committed);
+    vi.advanceTimersByTime(1);expect(actor().frame).toBe(72);
   });
 
   it("rejects invalid input and clamps axes before simulation", async () => {
     await boot(); await send({ type: "resume" });
     const start = actor().player.x;
     await send({ type: "input", input: { ...idleActionInput(), moveX: NaN } });
-    vi.advanceTimersByTime(24);
+    vi.advanceTimersByTime(600);
     expect(actor().player.x).toBe(start);
     await send({ type: "input", input: { ...idleActionInput(), moveX: 100 } });
-    vi.advanceTimersByTime(24);
+    vi.advanceTimersByTime(600);
     expect(actor().player.x - start).toBeGreaterThan(0);
-    expect(actor().player.x - start).toBeLessThan(.2);
+    expect(actor().player.x - start).toBeLessThanOrEqual(1.801);
   });
 
   it("persists new movement, guard, tool state and continuous positions through the worker", async () => {
     await boot(); await send({ type: "resume" });
     await send({ type: "input", input: { moveX: 1, moveZ: 0, block: true, strike: true, tool: true } });
-    vi.advanceTimersByTime(24);
+    vi.advanceTimersByTime(600);
     const current = structuredClone(actor());
     await send({ type: "save" });
     expect(storage.write.mock.calls.at(-1)![0].action).toEqual(current);

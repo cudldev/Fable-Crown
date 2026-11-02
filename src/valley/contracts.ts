@@ -46,6 +46,9 @@ export interface ValleyService {objectId:string;name:string;kind:"workbench"|"fu
 export const COTTAGE_TICKS=9000;
 export const FORGE_TICKS=1800;
 export const FIRST_BILL=100;
+/** Authoritative live gameplay and settlement cadence. Rendering interpolates between commits. */
+export const VALLEY_TICK_MS=600;
+export const VALLEY_ACTION_QUANTA=36;
 /** Explicit point-and-click task. Transient: never saved or advanced offline. */
 export interface PointerActivity {kind:"walk"|"interact"|"gather"|"attack";label:string;phase:"walking"|"acting";selection:import("../render/scene-types").TileSelection;path:{x:number;z:number}[]}
 export interface AmbientNpcPose {id:string;x:number;z:number;fromX:number;fromZ:number;activity:string;working:boolean;moving:boolean}

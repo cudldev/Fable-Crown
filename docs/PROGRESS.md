@@ -1,5 +1,17 @@
 # Progress — 2026-10-29
 
+## Valley gameplay back to600ms — 2026-11-02
+
+Movement, gathering, combat and guard now commit every600ms; renderer interpolates player/enemy motion and existing clips. Queued presses coalesce, retargeting preserves the pending tick, collision sweeps follow route corners at the existing movement budget, and enemy tells last one tick. Format7 remains compatible, including uneven old frame counters/autosaves; restored snapshots do not replay old swing markers. Menus/cancellation/offline actor boundaries retained.
+
+925unit tests/98files, strict build/type/assets/Pages-base/PWA checks,8local GPU checks and2release save/offline checks pass. Actual600ms commits plus between-tick animation, point/context controls, selected gathering, NPC conversations, guard, Tripo clips and phone orientations verified. No publication, new art acceptance or performance claim. Follow-up priorities in VALLEY_IMPLEMENTATION.md; recommendations are not implemented by this patch.
+
+## Tripo character in current valley — 2026-11-02
+
+Ported corrected saved-source Tripo Alden as opt-in ?characters=tripo-test; default cast unchanged. Uses current60Hz walking, strike phase, guard, gathering and conversation controls. Original texture/15 clips preserved; runtime adds a draft guard. Character test offers16 motions plus rest; native pointer routing excludes its controls. Panel hides during interactions.
+
+917 tests/98 files, typecheck, subpath build/dist and2 release checks pass.2 local GPU checks cover all preview poses, movement/guard, actual gathering/conversation, both phone orientations and offline reload; no game errors/external requests. Actual captures: docs/art-audit/tripo-valley-test-v1. Local preview port5406/Fable-Crown; no publication, physical-phone benchmark or final art acceptance. Extreme bends/grips/contact remain draft.
+
 ## Published quiet voxel surfaces — 2026-11-02
 
 User explicitly authorized publication. Published dba4653 through Actions41367774528:913units/97files, type/build/assets/dist and2release cases pass. Public8abeab6be469 runtime entry matches the tested local build.4actual public WebGL checks cover cached upgrade/offline, desktop/controller settings, mobile orientations and approach-to-workbench crafting. Depth0.2/variation1.0 confirmed; fine grid and quiet baked diffuse retained.

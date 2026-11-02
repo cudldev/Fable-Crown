@@ -2,7 +2,7 @@ import { readValleySave,writeValleySave,validateValleySave,createValleySave } fr
 import { reconcileValley } from "./offline";
 import { applyValleyCommand,advanceSettlement,ensureValleyResources } from "./settlement";
 import { createValleyWorld,canTraverseValley,sampleValleyGround,homeFootprints } from "./world";
-import { COTTAGE_TICKS,FORGE_TICKS } from "./contracts";
+import { COTTAGE_TICKS,FORGE_TICKS,VALLEY_TICK_MS,VALLEY_ACTION_QUANTA } from "./contracts";
 import type { ValleySave,ValleyWorkerMessage,ValleyWorkerRequest,ValleyFeedback,PointerActivity } from "./contracts";
 import {pointTarget} from "./point-actions";
 import {planPointerRoute,followPointerRoute} from "./pointer-navigation";
@@ -50,7 +50,7 @@ void(async()=>{
 function captureLiveBackground():boolean{
   if(!ready||!running)return false;
   const now=Date.now(),elapsed=Math.min(86400000,Math.max(0,now-worldLast));worldLast=Math.max(worldLast,now);
-  const total=save.offlineRemainder+elapsed;let ticks=Math.floor(total/600);save.offlineRemainder=total%600;
+  const total=save.offlineRemainder+elapsed;let ticks=Math.floor(total/VALLEY_TICK_MS);save.offlineRemainder=total%VALLEY_TICK_MS;
   const changed=ticks>0;
   const npcTicks=Math.min(ticks,10);
   const before=changed?rewardSnapshot(save.chapter,save.valley.carpentryXp):null;
@@ -89,22 +89,23 @@ function point(selection:TileSelection,intent?:"walk"|"examine"){
 }
 function pointerInput(env:ReturnType<typeof world>["env"],layout:ReturnType<typeof world>["layout"]):ActionInput|null{
   const task=pointerTask;if(!task)return null;const p=save.action.player,target=pointTarget(save,layout,task.selection);
-  if(task.stalled>=60){cancelPointer();announce({tone:"warning",title:"The way is blocked.",detail:"Choose another spot."});return idleActionInput();}
+  if(task.stalled>=2){cancelPointer();announce({tone:"warning",title:"The way is blocked.",detail:"Choose another spot."});return idleActionInput();}
   if(!target||target.problem&&task.kind!=="walk"){const message=target?.problem,wasWalking=task.phase==="walking";cancelPointer();if(message&&wasWalking)announce({tone:"info",title:message});return null;}
   if(task.kind!=="walk"&&selectionInRange(save,save.action,layout,task.selection)){
     task.phase="acting";task.path=[];face(target.x,target.z);
     if(task.kind==="interact"){const selected=task.selection;pointerTask=undefined;openSelection(selected);return idleActionInput();}
-    return {...idleActionInput(),tool:task.kind==="gather",strike:p.swing===0&&!save.action.strikeHeld};
+    return {...idleActionInput(),tool:task.kind==="gather",strike:p.swing===0};
   }
-  if((task.revision!==save.valley.layoutRevision||task.stalled>=30||task.kind!=="walk"&&Math.hypot(target.x-task.goal.x,target.z-task.goal.z)>.45)&&save.action.frame-task.replanFrame>=15){
+  if((task.revision!==save.valley.layoutRevision||task.stalled>=1||task.kind!=="walk"&&Math.hypot(target.x-task.goal.x,target.z-task.goal.z)>.45)&&save.action.frame-task.replanFrame>=VALLEY_ACTION_QUANTA){
     const route=planPointerRoute(p,{x:target.x,z:target.z,range:task.kind==="walk"&&task.selection.kind==="tile"?0:Math.min(target.range-.1,1.25)},env,layout);
     if(!route){cancelPointer();announce({tone:"warning",title:"That target can’t be reached from here."});return null;}
     task.path=route;task.goal={x:target.x,z:target.z};task.revision=save.valley.layoutRevision;task.replanFrame=save.action.frame;
   }
-  const next=followPointerRoute(p,task.path);task.path=next.remaining;task.phase="walking";
-  if(!next.remaining.length){const walking=task.kind==="walk";cancelPointer();if(!walking)announce({tone:"info",title:"Move to the wilderness side to reach that target."});return idleActionInput();}
+  const next=followPointerRoute(p,task.path,3*VALLEY_TICK_MS/1000);task.path=next.remaining;task.phase="walking";
+  env.movementPath=next.movementPath;
+  if(!next.remaining.length&&!next.movementPath?.length){const walking=task.kind==="walk";cancelPointer();if(!walking)announce({tone:"info",title:"Move to the wilderness side to reach that target."});return idleActionInput();}
   const moved=Math.hypot(p.x-task.last.x,p.z-task.last.z);task.stalled=moved<.001?task.stalled+1:0;task.last={x:p.x,z:p.z};
-  if(task.stalled>=60){cancelPointer();announce({tone:"warning",title:"The way is blocked.",detail:"Choose another spot."});return idleActionInput();}
+  if(task.stalled>=2){cancelPointer();announce({tone:"warning",title:"The way is blocked.",detail:"Choose another spot."});return idleActionInput();}
   return {...idleActionInput(),moveX:next.moveX,moveZ:next.moveZ};
 }
 function openSelection(selection:TileSelection):void {
@@ -145,12 +146,13 @@ function interact(){
 self.onmessage=async(event:MessageEvent<ValleyWorkerRequest>)=>{
   if(!ready)return;const request=event.data;
   if(request.type==="interface"){
+    const changed=request.open!==interfaceOpen;
     if(request.open)cancelPointer();conversationNpc=request.open?request.npcId??conversationNpc:undefined;if(conversationNpc)npcs.hold(save,conversationNpc);
-    interfaceOpen=request.open;input=idleActionInput();save.action.player.blocking=false;save.action.strikeHeld=false;accumulator=0;last=performance.now();send({action:save.action});
+    interfaceOpen=request.open;input=idleActionInput();save.action.player.blocking=false;save.action.strikeHeld=false;if(changed){accumulator=0;last=performance.now();}send({action:save.action});
   }else if(request.type==="input"){
     const next=request.input;
     if(next&&Number.isFinite(next.moveX)&&Number.isFinite(next.moveZ)&&typeof next.strike==="boolean"&&typeof next.block==="boolean"&&typeof next.tool==="boolean")
-      {if(next.moveX||next.moveZ||next.strike||next.block)cancelPointer();input={moveX:Math.max(-1,Math.min(1,next.moveX)),moveZ:Math.max(-1,Math.min(1,next.moveZ)),block:next.block,strike:input.strike||next.strike,tool:next.strike?next.tool:input.strike?input.tool:next.tool};}
+      {if(next.moveX||next.moveZ||next.strike||next.block){const active=!!pointerTask;cancelPointer();if(active)send({});}input={moveX:Math.max(-1,Math.min(1,next.moveX)),moveZ:Math.max(-1,Math.min(1,next.moveZ)),block:next.block,strike:input.strike||next.strike,tool:next.strike?next.tool:input.strike?input.tool:next.tool};}
   }else if(request.type==="point"){point(request.selection,request.intent);}
   else if(request.type==="cancel"){cancelPointer();send({});
   }else if(request.type==="command"){
@@ -182,9 +184,9 @@ setInterval(()=>{
   const now=performance.now();if(!ready||!running){last=now;return;}
   if(captureLiveBackground())emit();
   if(interfaceOpen){last=now;accumulator=0;return;}
-  accumulator+=Math.min(200,now-last);last=now;let advanced=false;
-  while(accumulator>=1000/60){
-    accumulator-=1000/60;const {layout,env}=world();
+  accumulator+=Math.min(VALLEY_TICK_MS,now-last);last=now;let advanced=false;
+  while(accumulator>=VALLEY_TICK_MS){
+    accumulator-=VALLEY_TICK_MS;const {layout,env}=world();
     if(save.action.player.swing===0){cancelledPointerSwing=false;pointerSwingTarget=undefined;}
     const automatic=pointerInput(env,layout),stepInput=automatic??input;
     if(automatic?.strike&&pointerTask&&(pointerTask.selection.kind==="object"||pointerTask.selection.kind==="enemy"))pointerSwingTarget=pointerTask.selection.id;
@@ -192,16 +194,17 @@ setInterval(()=>{
     const swing=save.action.player.swing,pressed=stepInput.strike&&!save.action.strikeHeld;
     if(pressed&&swing>0)announce({tone:"info",title:"Finishing this swing",detail:"Tap again when the recovery ring clears."});
     else if(pressed&&save.action.player.blocking)announce({tone:"info",title:"Lower your guard to strike",detail:"Release Block, then tap your tool or weapon."});
-    const events=stepAction(save.action,stepInput,env);input.strike=false;
+    const saveBucket=Math.floor(save.action.frame/(VALLEY_ACTION_QUANTA*8));
+    const events=stepAction(save.action,stepInput,env,VALLEY_ACTION_QUANTA);input.strike=false;save.action.strikeHeld=false;
     if(events.some(event=>event.kind==="player-defeat"))cancelPointer();
     const before=events.length?rewardSnapshot(save.chapter,save.valley.carpentryXp):null;
     const footprint=homeFootprints(save.valley),home=(save.valley.home?.tentPacked?footprint?.approach:footprint?.tentApproach)??{x:52,z:141};
     const message=applyActionEvents(save.chapter,save.action,events,layout,tile(home.x,home.z));
     if(events.some(event=>event.kind==="resource-hit")&&!save.valley.flags.includes("first-strike"))save.valley.flags.push("first-strike");
     if(events.length){const feedback=actionResultFeedback(save,save.action,events,message,before?rewardChanges(before,save.chapter,save.valley.carpentryXp):"");emit(message,feedback??undefined);}
-    else if(!cancelledPointerSwing&&swing===SWING_CONTACT+1&&save.action.player.swing===SWING_CONTACT)announce(emptySwingFeedback(save,save.action,layout,save.action.swingTool));
+    else if(!cancelledPointerSwing&&(swing>SWING_CONTACT||save.action.swingStartedAt===save.action.frame)&&save.action.player.swing<=SWING_CONTACT)announce(emptySwingFeedback(save,save.action,layout,save.action.swingTool));
     advanced=true;
-    if(save.action.frame%300===0)void persist();
+    if(Math.floor(save.action.frame/(VALLEY_ACTION_QUANTA*8))>saveBucket)void persist();
   }
   if(advanced)send({action:save.action});
-},8);
+},20);

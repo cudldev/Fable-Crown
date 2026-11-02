@@ -11,7 +11,7 @@ import {ITEMS} from "../rpg/content";
 import {itemCount,inventorySlots} from "../rpg/inventory";
 import {tile,WORLD} from "../rpg/world";
 import type {EquipmentSlot} from "../rpg/types";
-import {COTTAGE_TICKS,FIRST_BILL,FORGE_TICKS} from "./contracts";
+import {COTTAGE_TICKS,FIRST_BILL,FORGE_TICKS,VALLEY_TICK_MS} from "./contracts";
 import type {FurnitureId,ValleyCommand,ValleySave,ValleyWorkerMessage,ValleyWorkerRequest,ValleyFeedback,ValleyService,PointerActivity,AmbientNpcPose} from "./contracts";
 import {ValleyMenu} from "./ValleyMenu";
 import {ValleyInteraction} from "./ValleyInteraction";
@@ -199,7 +199,7 @@ export default function ValleyApp(){
   const quantityField=<div className="valley-quantity"><label htmlFor="valley-quantity">Quantity</label><button type="button" aria-label="Decrease quantity" disabled={quantity<=1} onClick={()=>setQuantity(value=>Math.max(1,value-1))}>−</button><input id="valley-quantity" aria-label="Quantity" type="number" min={1} max={100} value={quantity} onChange={e=>setQuantity(amount(e.currentTarget.valueAsNumber))}/><button type="button" aria-label="Increase quantity" disabled={quantity>=100} onClick={()=>setQuantity(value=>Math.min(100,value+1))}>+</button></div>;
 
   return <main className="game-shell valley-app" data-testid="valley-app" data-ready={ready} data-mode={unavailable?"dashboard":"world"} data-preparing={!ready} data-panel-open={!!panel}
-    data-player-x={player?.x.toFixed(3)} data-player-z={player?.z.toFixed(3)} data-guard={player?.guard.toFixed(2)} data-blocking={player?.blocking??false} data-wilderness={!!player&&!actionSafe(player.x,player.z)} data-swing={player?.swing.toFixed(3)} data-action-frame={hud?.frame}
+    data-player-x={player?.x.toFixed(3)} data-player-z={player?.z.toFixed(3)} data-guard={player?.guard.toFixed(2)} data-blocking={player?.blocking??false} data-wilderness={!!player&&!actionSafe(player.x,player.z)} data-swing={player?.swing.toFixed(3)} data-action-frame={hud?.frame} data-tick-ms={VALLEY_TICK_MS}
     data-controls="point" data-point-menu={!!worldMenu} data-pointer-kind={pointer?.kind??"none"} data-pointer-phase={pointer?.phase??"none"} data-camera-zoom={camera.zoom.toFixed(3)} data-camera-follow={camera.follow} data-controls-hand={touch.handedness} data-controls-raised={touch.raised} data-context-active={!!service} data-input-mode={controls.inputMode} data-tool-mode={tool?"tool":"weapon"} data-ui-state={worldMenu?"menu":panel==="interaction"?"interaction":panel==="craft"?"crafting":panel?"menu":placement?"placement":"exploration"}>
     <div className="valley-viewport" {...controls.worldBindings} inert={!ready||!!panel||!!worldMenu}>
       {save&&world&&!unavailable&&<SceneHost state={save.chapter} worldOverride={world} readAction={readAction} sampleGround={sampleGround} groundRevision={groundRevision} presentationEpoch={sceneEpoch}

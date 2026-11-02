@@ -1,4 +1,4 @@
-import type { Group, Mesh, MeshLambertMaterial, Vector3 } from "three";
+import type { AnimationClip, Group, Mesh, MeshLambertMaterial, Vector3 } from "three";
 import type { ActorState, WorldObject, Terrain } from "../../rpg/types";
 import type { VoxelObject } from "./voxel-data";
 import type { TerrainTiles } from "./terrain-tiles";
@@ -32,8 +32,11 @@ export interface RigidActorArt {
   tool: Group;
   cape?: Mesh;
 }
-export type ActorArt = RigidActorArt;
+export interface SkinnedActorArt extends Omit<RigidActorArt, "kind"> { kind: "skinned" }
+export type ActorArt = RigidActorArt | SkinnedActorArt;
+export interface SkinnedActorSource { scene: Group; clips: AnimationClip[]; tools: Group }
 export interface ArtLibrary {
+  skinnedActorSource?: SkinnedActorSource;
   terrain: Record<Terrain, MeshLambertMaterial>;
   terrainTiles?: TerrainTiles;
   createObject(object: WorldObject, options?: { standaloneVoxels?: boolean }): ObjectArt;

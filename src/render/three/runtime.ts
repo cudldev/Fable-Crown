@@ -6,6 +6,8 @@ import { actionPose, consumeEffects, observeActorMotion, observeFootstep, observ
 import { createArtLibrary } from "./art";
 import type { ActorArt, ArtLibrary, ObjectArt } from "./contracts";
 import { PixelBillboards } from "./pixel-billboards";
+import { TripoCharacter } from "./tripo-character";
+import { TRIPO_CLIPS, type TripoClip, type TripoPreview } from "./tripo-motion";
 import { UNIT_PIXEL_METRES } from "../unit-scale";
 import { samplePixelUnitPose } from "../pixel-canvas";
 import { heldToolForActor, heldToolForEnemy } from "../unit-tools";
@@ -64,6 +66,9 @@ export class ThreeRuntime {
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera = this.perspectiveCamera;
   private art: ArtLibrary;
   private pixelUnits: PixelBillboards;
+  private tripo?: TripoCharacter;
+  private tripoHealth?: number;
+  private tripoHitUntil = 0;
   private pixelReactions = new Map<THREE.Group, { frame: number; until: number }>();
   private pixelStrikes = new Map<THREE.Group, number>();
   private enemyMotion = new Map<string, { x: number; z: number; fromX: number; fromZ: number; at: number; moving: boolean; health: number; hitUntil: number; deathUntil: number }>();
@@ -138,7 +143,8 @@ export class ThreeRuntime {
   private raf = 0;
   private disposed = false;
   private previousTime = 0;
-  private fastPlayer?: { frame: number; at: number; fromX: number; fromZ: number; fromY: number; x: number; z: number; y: number };
+  private fastPlayer?: { frame: number; at: number; fromX: number; fromZ: number; fromY: number; x: number; z: number; y: number; animateSwing:boolean };
+  private fastEnemies = new Map<string, {frame:number;at:number;fromX:number;fromZ:number;x:number;z:number}>();
   private metricsAt = 0;
   private visibilityAt = 0;
   private ready = false;
@@ -160,8 +166,15 @@ export class ThreeRuntime {
   constructor(canvas: HTMLCanvasElement, root: HTMLElement, initial: RuntimeInput,
     hits: Map<string, HTMLElement>, onReady: () => void, onError: (message: string) => void, art?: ArtLibrary) {
     this.canvas = canvas; this.root = root; this.props = initial; this.hits = hits; this.onError = onError;
-    this.pixelUnits = new PixelBillboards(art ?? createArtLibrary());
-    this.art = this.pixelUnits.library; this.root.dataset.actorStyle = "pixel-billboard"; this.root.dataset.billboardMode = "screen-aligned"; this.root.dataset.spriteCellMeters = String(UNIT_PIXEL_METRES); this.root.dataset.spriteGrid = "voxel";
+    const baseArt = art ?? createArtLibrary();
+    this.pixelUnits = new PixelBillboards(baseArt);
+    this.tripo = baseArt.skinnedActorSource ? new TripoCharacter(baseArt.skinnedActorSource) : undefined;
+    const pixels = this.pixelUnits.library;
+    this.art = { ...pixels, createActor: actor => actor.id === 0 && this.tripo ? this.tripo.createActor() : pixels.createActor(actor),
+      dispose: () => { this.tripo?.dispose(); pixels.dispose(); } };
+    this.root.dataset.actorStyle = this.tripo ? "tripo-valley-test" : "pixel-billboard";
+    this.root.dataset.characterRig = this.tripo ? "tripo-skinned" : "billboard";
+    this.root.dataset.billboardMode = "screen-aligned"; this.root.dataset.spriteCellMeters = String(UNIT_PIXEL_METRES); this.root.dataset.spriteGrid = "voxel";
     this.world = initial.worldOverride ?? worldForState(initial.state);
     // Capability errors are caught by the React host without changing game state.
     // Render the world at display resolution with hardware antialiasing.
@@ -235,6 +248,7 @@ export class ThreeRuntime {
   private ownGeometry<T extends THREE.BufferGeometry>(geometry: T): T { this.ownGeometries.push(geometry); return geometry; }
   private ownMaterial<T extends THREE.Material>(material: T): T { this.ownMaterials.push(material); return material; }
   update(props: RuntimeInput) { if (this.ready) this.props = props; else this.pendingStartupInput = props; }
+  setCharacterPreview(clip: TripoPreview) { this.tripo?.setPreview(clip); }
   private nextPreparationFrame(): Promise<void> {
     const signal = this.startupAbort.signal;
     return new Promise((resolve, reject) => {
@@ -547,7 +561,7 @@ export class ThreeRuntime {
     const { state, presentationEpoch = 0 } = this.props;
     if (this.observedState === state && this.observedEpoch === presentationEpoch) return;
     const resetPresentation = this.observedEpoch !== presentationEpoch;
-    if(resetPresentation){this.fastPlayer=undefined;this.followCamera.reset();this.ambientMotion.clear();}
+    if(resetPresentation){this.fastPlayer=undefined;this.fastEnemies.clear();this.followCamera.reset();this.ambientMotion.clear();}
     const tickChanged = this.observedState?.tick !== state.tick || resetPresentation;
     this.observedState = state; this.observedEpoch = presentationEpoch;
     if (tickChanged) this.observedAt = time;
@@ -652,26 +666,44 @@ export class ThreeRuntime {
     const fast = actor.id === 0 ? this.props.readAction?.() ?? this.props.actionState : undefined;
     if (fast) {
       const p = fast.player, old = this.fastPlayer;
-      const continuous=old&&fast.frame>old.frame&&fast.frame-old.frame<6&&Math.hypot(p.x-old.x,p.z-old.z)<1;
+      const stepMs=fast.stepMs??1000/60;
+      const continuous=old&&fast.frame>old.frame&&fast.frame-old.frame<=Math.max(5,stepMs*.06)&&Math.hypot(p.x-old.x,p.z-old.z)<Math.max(1,stepMs*.003+0.1);
       if (!old || old.frame !== fast.frame || old.x!==p.x || old.z!==p.z) this.fastPlayer = { frame: fast.frame, at: time,
-        fromX: continuous ? old.x : p.x,
-        fromZ: continuous ? old.z : p.z,
-        fromY: continuous ? old.y : p.height,
-        x: p.x, z: p.z, y: p.height };
-      const sample = this.fastPlayer!, fraction = Math.min(1, Math.max(0, (time - sample.at) / (1000 / 60)));
+        fromX: continuous ? entry.art.group.position.x : p.x,
+        fromZ: continuous ? entry.art.group.position.z : p.z,
+        fromY: continuous ? entry.art.group.position.y : p.height,
+        x: p.x, z: p.z, y: p.height,animateSwing:!!old&&old.frame!==fast.frame&&fast.swingStartedAt===fast.frame };
+      const sample = this.fastPlayer!, fraction = this.reducedMotion ? 1 : Math.min(1, Math.max(0, (time - sample.at) / stepMs));
       const x = sample.fromX + (sample.x - sample.fromX) * fraction;
       const z = sample.fromZ + (sample.z - sample.fromZ) * fraction;
       const y = sample.fromY + (sample.y - sample.fromY) * fraction;
-      const moving = Math.hypot(sample.x - sample.fromX, sample.z - sample.fromZ) > .0001;
+      const moving = fraction<1&&Math.hypot(sample.x - sample.fromX, sample.z - sample.fromZ) > .0001;
+      // A tick commits contact once. Animation between commits is presentation only.
+      const swing=fast.stepMs&&sample.animateSwing?36*(1-fraction):p.swing;
+      const animationFrame=fast.stepMs?fast.frame+fraction*stepMs*.06:fast.frame;
       entry.art.group.position.set(x, this.props.sampleGround ? this.heightAt(x,z) : y, z);
-      const frame = p.swing > 0 ? p.swing > 24 ? 5 : p.swing > 12 ? 6 : 7 : p.blocking ? 5 : moving ? 1 + Math.floor(fast.frame / 8) % 4 : 0;
+      const frame = swing > 0 ? swing > 24 ? 5 : swing > 12 ? 6 : 7 : p.blocking ? 5 : moving ? 1 + Math.floor(animationFrame / 8) % 4 : 0;
       const facing = p.facingX * this.camera.matrixWorld.elements[0] + p.facingZ * this.camera.matrixWorld.elements[2];
       if (Math.abs(facing) > .01) entry.flipX = facing < 0;
       const worked = this.objects.get(actor.action?.targetId ?? "")?.object ?? this.world.objects.find(object => object.resourceId && Math.hypot(object.position.x-p.x,object.position.y-p.z)<1.7);
       const toolPose = worked?.kind === "rock" ? "mine" : worked?.kind === "fish" ? "fish" : "cut";
-      this.pixelUnits.frame(entry.art.group, frame, 0, undefined, p.blocking?"shield":heldToolForActor(actor,fast.swingTool && p.swing>0 ? toolPose : undefined), entry.flipX ?? false);
+      if (this.tripo?.has(entry.art.group)) {
+        if (this.tripoHealth !== undefined && p.health < this.tripoHealth) this.tripoHitUntil = time + 180;
+        this.tripoHealth = p.health;
+        let work: string | undefined = fast.swingTool && swing > 0 ? toolPose : actor.action ? actionPose(actor, worked) : undefined;
+        if (this.props.camera.interaction && this.props.selection?.kind === "object" && this.props.selection.id.startsWith("valley-visitor-")) work = "talk";
+        const workClip = work && (TRIPO_CLIPS as readonly string[]).includes(work) ? work as TripoClip : undefined;
+        const clip = this.tripo.pose(entry.art.group, { time, frame: animationFrame, moving, swing, swingTool: fast.swingTool,
+          blocking: p.blocking, health: p.health, hit: time < this.tripoHitUntil, facingX: p.facingX, facingZ: p.facingZ,
+          workClip, tool: heldToolForActor(actor), reducedMotion: this.reducedMotion });
+        this.root.dataset.characterClip = clip;
+        this.root.dataset.characterTool = String(entry.art.group.userData.characterTool);
+        this.root.dataset.characterFacing = entry.art.group.rotation.y.toFixed(4);
+      } else {
+        this.pixelUnits.frame(entry.art.group, frame, 0, undefined, p.blocking?"shield":heldToolForActor(actor,fast.swingTool && swing>0 ? toolPose : undefined), entry.flipX ?? false);
+        this.root.dataset.characterClip = swing ? "strike" : p.blocking ? "block" : moving ? "walk" : "idle";
+      }
       this.playerRing.position.set(x, entry.art.group.position.y + .035, z);
-      this.root.dataset.characterClip = p.swing ? "strike" : p.blocking ? "block" : moving ? "walk" : "idle";
       this.root.dataset.actionFrame = String(fast.frame);
       this.root.dataset.continuousX = x.toFixed(4); this.root.dataset.continuousZ = z.toFixed(4);
       return;
@@ -792,9 +824,17 @@ export class ThreeRuntime {
     this.root.dataset.spriteNormalStrength = String(this.props.visual?.spriteNormalStrength ?? .35);
     for (const enemy of state.enemies) {
       const group = this.enemies.get(enemy.id), motion = this.enemyMotion.get(enemy.id); if (!group || !motion) continue;
-      const fastEnemy = (this.props.readAction?.() ?? this.props.actionState)?.enemies.find(value => value.id === enemy.id);
+      const fastAction=this.props.readAction?.()??this.props.actionState;
+      const fastEnemy = fastAction?.enemies.find(value => value.id === enemy.id);
       if (fastEnemy) {
-        group.position.set(fastEnemy.x, this.props.sampleGround?.(fastEnemy.x, fastEnemy.z) ?? 0, fastEnemy.z);
+        const previous=this.fastEnemies.get(enemy.id),stepMs=fastAction?.stepMs??0;
+        if(!previous||previous.frame!==fastAction!.frame){
+          const continuous=previous&&stepMs>0&&fastAction!.frame-previous.frame<=stepMs*.06&&Math.hypot(fastEnemy.x-previous.x,fastEnemy.z-previous.z)<2;
+          this.fastEnemies.set(enemy.id,{frame:fastAction!.frame,at:time,fromX:continuous?group.position.x:fastEnemy.x,fromZ:continuous?group.position.z:fastEnemy.z,x:fastEnemy.x,z:fastEnemy.z});
+        }
+        const sample=this.fastEnemies.get(enemy.id)!,fraction=this.reducedMotion||!stepMs?1:clamp((time-sample.at)/stepMs,0,1);
+        const x=sample.fromX+(sample.x-sample.fromX)*fraction,z=sample.fromZ+(sample.z-sample.fromZ)*fraction;
+        group.position.set(x, this.props.sampleGround?.(x,z) ?? 0, z);
         group.visible = !fastEnemy.defeated;
         this.pixelUnits.frame(group, fastEnemy.windup > 0 ? 5 : 0, 0, undefined, heldToolForEnemy(enemy.definitionId));
         continue;
@@ -1153,6 +1193,7 @@ export class ThreeRuntime {
     };
     const context = (event: MouseEvent) => {
       if(inputBlocked())return;
+      if ((event.target as HTMLElement).closest(".tripo-test-controls")) return;
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings, .three-fallback")) return;
       event.preventDefault(); clearHold(); this.clearClickIndicator();
       if(this.props.camera.dynamicFollow&&!pointMode())return;
@@ -1162,6 +1203,7 @@ export class ThreeRuntime {
     };
     const down = (event: PointerEvent) => {
       if(inputBlocked())return;
+      if ((event.target as HTMLElement).closest(".tripo-test-controls")) return;
       // A new secondary click is a fresh request, even just after a prior menu.
       // Keep the touch-hold guard for its synthesized contextmenu event only.
       if (event.button === 2) { contextAt = -Infinity;clearHold();dragged=true;return; }
@@ -1252,6 +1294,7 @@ export class ThreeRuntime {
     };
     const wheel = (event: WheelEvent) => {
       if(inputBlocked())return;
+      if ((event.target as HTMLElement).closest(".tripo-test-controls")) return;
       if ((event.target as HTMLElement).closest(".three-light-controls, .three-visual-settings")) return;
       event.preventDefault(); const factor = Math.exp(-event.deltaY * .0015);
       this.props.onCamera(current => ({ ...current, zoom: clampGameplayZoom(current.zoom * factor), overview: false }));

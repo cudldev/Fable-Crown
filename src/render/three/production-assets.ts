@@ -9,7 +9,7 @@ import { loadVoxelAssets, voxelBindingId, voxelObject } from "./voxel-assets";
 import { loadTerrainTiles, type TerrainTiles } from "./terrain-tiles";
 import { standaloneVoxel } from "./voxel-buckets";
 import type { VoxelObject } from "./voxel-data";
-import type { ArtLibrary, LightAnchor, ObjectArt } from "./contracts";
+import type { ArtLibrary, LightAnchor, ObjectArt, SkinnedActorSource } from "./contracts";
 import type { WorldObject } from "../../rpg/types";
 
 interface AssetSpec { id: string; url: string; footprint?: [number, number]; requiredNodes: string[] }
@@ -19,7 +19,7 @@ export interface ProductionArtResult {
   loadedIds: string[];
   warnings: string[];
   source: "blender" | "procedural";
-  characterStyle: "pixel";
+  characterStyle: "pixel" | "tripo-test";
   /** The pixel cast is authored locally and requires no character model download. */
   characterReady: boolean;
   voxelIds: string[];
@@ -149,6 +149,7 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
   const converted = new Map<Material, MeshLambertMaterial>();
   const emissiveVariants = new Map<string, MeshLambertMaterial>();
   const warnings: string[] = [];
+  let skinnedActorSource: SkinnedActorSource | undefined;
   let disposed = false;
   const dispose = () => {
     if (disposed) return; disposed = true; fallback.dispose();
@@ -240,6 +241,33 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
     if (signal.aborted) { dispose(); throw error; }
     warnings.push(error instanceof Error ? error.message : "Production art unavailable; using procedural test models.");
   }
+  const parameters = new URLSearchParams(location.search);
+  if (parameters.get("characters") === "tripo-test" && parameters.get("chapter") !== "legacy") try {
+    const directory = new URL(`${import.meta.env.BASE_URL}art3d/`, location.href);
+    const load = async (filename: string) => {
+      const response = await fetch(productionAssetUrl(filename, directory), { signal });
+      if (!response.ok) throw Error("Character test asset unavailable: " + filename);
+      const buffer = await response.arrayBuffer(); validateEmbeddedGlb(buffer);
+      const gltf = await new GLTFLoader().parseAsync(buffer, directory.href);
+      gltf.scene.traverse(node => { if (node instanceof Mesh) {
+        geometry.add(node.geometry); node.castShadow = node.receiveShadow = true;
+        for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+          materials.add(material);
+          for (const value of Object.values(material)) if (value instanceof Texture) textures.add(value);
+          if ("roughness" in material) material.roughness = 1;
+          if ("metalness" in material) material.metalness = 0;
+        }
+      } });
+      return gltf;
+    };
+    const character = await load("tripo-character-test-v1.glb"), tools = await load("tripo-test-tools-v1.glb");
+    if (!character.scene.getObjectByProperty("isSkinnedMesh", true)) throw Error("Character test has no skin.");
+    if (signal.aborted) throw new DOMException("Renderer startup cancelled", "AbortError");
+    skinnedActorSource = { scene: character.scene, clips: character.animations, tools: tools.scene };
+  } catch (error) {
+    if (signal.aborted) { dispose(); throw error; }
+    warnings.push(error instanceof Error ? error.message : "Character test unavailable; retained pixel cast loaded.");
+  }
   function copy(id: string) {
     const template = templates.get(id);
     if (!template) return null;
@@ -254,7 +282,7 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
   }
   const bindingModels = voxelModels;
   const library: ArtLibrary = {
-    terrain, terrainTiles,
+    terrain, terrainTiles, skinnedActorSource,
     createObject(object: WorldObject, options): ObjectArt {
       if (object.art === "valley-built-in") return { group: new Group(), lights: [] };
       const voxelId = voxelBindingId(object), voxels = voxelId ? bindingModels.get(voxelId) : undefined;
@@ -291,5 +319,5 @@ export async function loadProductionArt(signal: AbortSignal, options: { terrain?
     createEnemy: id => fallback.createEnemy(id),
     dispose,
   };
-  return { library, loadedIds: [...templates.keys(), ...voxelModels.keys()], voxelIds: [...voxelModels.keys()], warnings, source: templates.size ? "blender" : "procedural", characterStyle: "pixel", characterReady: true };
+  return { library, loadedIds: [...templates.keys(), ...voxelModels.keys(), ...(skinnedActorSource ? ["tripo-character-test-v1"] : [])], voxelIds: [...voxelModels.keys()], warnings, source: templates.size ? "blender" : "procedural", characterStyle: skinnedActorSource ? "tripo-test" : "pixel", characterReady: true };
 }

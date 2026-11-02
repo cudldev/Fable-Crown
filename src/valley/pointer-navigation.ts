@@ -115,12 +115,21 @@ export function planPointerRoute(start:Point,goal:NavigationGoal,world:ActionWor
   return bestRoute();
 }
 
-/** One authoritative 60Hz input sample; the worker owns route cancellation and replanning. */
-export function followPointerRoute(player:Point,route:readonly Point[]):{moveX:number;moveZ:number;remaining:Point[]} {
+/** One authoritative input sample; clamp to the next waypoint at either gameplay cadence. */
+export function followPointerRoute(player:Point,route:readonly Point[],stepDistance=STEP_DISTANCE):{moveX:number;moveZ:number;remaining:Point[];movementPath?:Point[]} {
   if(!finite(player)||route.some(point=>!finite(point)))return {moveX:0,moveZ:0,remaining:[]};
   let index=0;while(index<route.length&&distance(player,route[index])<=ARRIVAL_DISTANCE)index++;
   const remaining=route.slice(index).map(point=>({...point})),next=remaining[0];
   if(!next)return {moveX:0,moveZ:0,remaining};
-  const dx=next.x-player.x,dz=next.z-player.z,length=Math.hypot(dx,dz),divisor=Math.max(STEP_DISTANCE,length);
+  const dx=next.x-player.x,dz=next.z-player.z,length=Math.hypot(dx,dz),divisor=Math.max(stepDistance,length);
+  if(stepDistance>STEP_DISTANCE){
+    let from=player,budget=stepDistance,consumed=0;const movementPath:Point[]=[];
+    for(const point of remaining){
+      const length=distance(from,point);if(budget<=1e-9)break;
+      if(length<=budget){movementPath.push({...point});budget-=length;from=point;consumed++;}
+      else {const fraction=budget/length;movementPath.push({x:from.x+(point.x-from.x)*fraction,z:from.z+(point.z-from.z)*fraction});break;}
+    }
+    return {moveX:dx/length,moveZ:dz/length,remaining:remaining.slice(consumed),movementPath};
+  }
   return {moveX:dx/divisor,moveZ:dz/divisor,remaining};
 }
