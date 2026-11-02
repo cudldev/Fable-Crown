@@ -1,6 +1,7 @@
 {
   "chapter": "valley",
   "format": 7,
+  "tickMs": 600,
   "clips": [
     "rest",
     "idle",
@@ -28,5 +29,7 @@
   "offline": true,
   "errors": [],
   "external": [],
-  "physicalPhoneBenchmark": false
+  "physicalPhoneBenchmark": false,
+  "publicUrl": "https://cudldev.github.io/Fable-Crown/?characters=tripo-test",
+  "publicVersion": "46eeaf7e5bf7"
 }

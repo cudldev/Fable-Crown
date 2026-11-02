@@ -1,0 +1,41 @@
+{
+  "url": "https://cudldev.github.io/Fable-Crown/",
+  "verifiedAt": "2026-11-02T08:20:49.277Z",
+  "version": "46eeaf7e5bf7",
+  "previousVersion": "8abeab6be469",
+  "runtimeEntry": "/Fable-Crown/assets/index-BC6EWJRx.js",
+  "runtimeMatchesLocal": true,
+  "tickMs": 600,
+  "scope": "https://cudldev.github.io/Fable-Crown/",
+  "cacheKeys": [
+    "fable-art-46eeaf7e5bf7",
+    "fable-v3-46eeaf7e5bf7"
+  ],
+  "defaults": {
+    "depth": 0.2,
+    "variation": 1
+  },
+  "fineGrid": true,
+  "progressPreserved": true,
+  "archiveKeysPreserved": [],
+  "webglOffline": true,
+  "offlineAssets": 11,
+  "glError": 0,
+  "errors": [],
+  "external": [],
+  "ignoredProbeResources": [
+    "https://cudldev.github.io/favicon.ico"
+  ],
+  "commit": "517b29550c708868564a8a19e4ac1e809cde2f75",
+  "actionsRun": 41411916523,
+  "publicCharacterAssets": {
+    "tripo-character-test-v1.glb": {
+      "bytes": 2350932,
+      "sha256": "9d9137fbe51d95e2562a9a0e08969ef5b532c6be20d329ec0b70e2396ea83f65"
+    },
+    "tripo-test-tools-v1.glb": {
+      "bytes": 163700,
+      "sha256": "c89bf431b2719997bcb651d929bed984ca5e3eb47dbbf667b377e76670ca84df"
+    }
+  }
+}

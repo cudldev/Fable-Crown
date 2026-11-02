@@ -1,5 +1,7 @@
 # Working notes
 
+- Published combined Tripo/600ms trial:517b295, Actions41411916523, public46eeaf7e5bf7. Use https://cudldev.github.io/Fable-Crown/?characters=tripo-test;16motions plus rest. Public timing/character/mobile/offline and cached-save upgrade pass. Release checkout tmp/tripo-release; evidence release/tripo-valley-public.json. Keep saved corrected Blender source and default cast.
+
 - Valley timing:600ms authoritative actor/settlement commits;36stored action quanta/tick for format7. Keep render interpolation separate, test599/600ms boundaries, click coalescing, collision sweeps, menu cancellation and offline actor exclusion. Current checkout tmp/valley-onboarding.
 
 - Layouts: follow UX_LAYOUT_RULES.md. NPC dialogue ends through turns; object prompt opens one action. Craft list/details stay together; info including action is roughly one-third. Hide HUD/FPS while panels own focus, restore camera on exit. Thumbnail previews borrow loaded baked geometry; release strips raw VOX.

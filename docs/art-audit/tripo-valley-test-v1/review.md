@@ -1,5 +1,7 @@
 # Current valley Tripo test — 2026-11-02
 
+Published517b295 via Actions41411916523. PNG captures now show the actual public combined600ms version. Three public GPU cases pass: timing/interpolation, all17character poses plus movement/guard/mobile/offline, and selected gathering/conversation. Separate cached-install upgrade preserves saved progress; exact published GLB hashes and matching runtime entry recorded in docs/release/tripo-valley-public.json. No game errors/external requests. User art acceptance remains pending.
+
 Actual WebGL game captures from this checkout at port5406/Fable-Crown, not the older Oakrest port4174. Opt-in `?characters=tripo-test` changes Alden only. Original corrected mesh/texture remain;15 source motions plus a derived guard are available through Character test.
 
 Reviewed idle/walk/mine/guard/rig-test, actual gathering, conversation and phone layouts. Faceted source silhouette and original colors read in the valley. Skin deformation is allowed for this trial; grips, extreme bends and action contact remain draft. Technical success is not user art acceptance.

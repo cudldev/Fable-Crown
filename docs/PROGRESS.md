@@ -1,5 +1,9 @@
 # Progress — 2026-10-29
 
+## Published combined Tripo / 600ms valley test — 2026-11-02
+
+User explicitly requested combining and deploying both changes. Published517b295 through Actions41411916523;925unit tests, build/type/assets/dist,8local GPU and2release cases pass. Public46eeaf7e5bf7 matches the tested runtime entry; exact character/tool GLB hashes verified. Public3GPU cases cover600ms commits with interpolated motion, all17character poses, movement/guard, gathering, conversation, phone orientations and offline reload. Cached8abeab6be469 upgrade preserves current save progress. No game/shader errors or external requests; neutral manifest probe favicon404 separately recorded. Evidence docs/release/tripo-valley-public.json and docs/art-audit/tripo-valley-test-v1. Character remains opt-in at https://cudldev.github.io/Fable-Crown/?characters=tripo-test; default valley now uses600ms. No final art acceptance or physical-phone performance claim.
+
 ## Valley gameplay back to600ms — 2026-11-02
 
 Movement, gathering, combat and guard now commit every600ms; renderer interpolates player/enemy motion and existing clips. Queued presses coalesce, retargeting preserves the pending tick, collision sweeps follow route corners at the existing movement budget, and enemy tells last one tick. Format7 remains compatible, including uneven old frame counters/autosaves; restored snapshots do not replay old swing markers. Menus/cancellation/offline actor boundaries retained.
