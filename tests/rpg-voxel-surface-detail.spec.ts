@@ -11,8 +11,8 @@ import {VOXEL_SURFACE_DETAIL_PROFILE} from "../src/render/three/voxel-surface-de
 import { LinearMipmapLinearFilter, NearestFilter, NoColorSpace, RedFormat, UnsignedByteType } from "three";
 
 // Local GPU evidence only. Do not add these tests to the two-case release suite.
-const reports = "docs/performance/voxel-surface-detail";
-const captures = "docs/screenshots/voxel-surface-detail";
+const reports = process.env.SURFACE_REPORTS || "docs/performance/voxel-surface-detail";
+const captures = process.env.SURFACE_CAPTURES || "docs/screenshots/voxel-surface-detail";
 const world = (page: Page) => page.getByTestId("rpg-world");
 const defaults = { strength: DEFAULT_VISUAL_SETTINGS.voxelSurfaceStrength, variation: DEFAULT_VISUAL_SETTINGS.voxelSurfaceVariation };
 const errors = new WeakMap<Page, string[]>();

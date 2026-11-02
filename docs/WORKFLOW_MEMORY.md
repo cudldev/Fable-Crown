@@ -52,6 +52,7 @@
 - Camera drags: anchor the grabbed world point; never combine per-event deltas with a last-rendered camera. Regression: batched events + direction reversal, both renderers/camera modes and phone orientations.
 - Grass: moving visitors never invalidate static habitat. Preserve committed cover while streaming edits; browser foliage counters lag500ms, so wait for the destination window upload before sampling. Serialize full unit suites and GPU checks to avoid host contention.
 - Voxel relief: fixed6.25cm grid, defaults depth0.2/variation1.0, gentle capped normals and shared16³R8 baked diffuse tones250–255. Real hardware mips; flat cell centers, no grain/grid growth. Uniforms never rebake geometry/GI. See VOXEL_SURFACE_DETAIL.md. Reflections require an allocated sun shadow map.
+- Public surface checks: set SURFACE_REPORTS/SURFACE_CAPTURES to dedicated public evidence paths. verify-voxel-surfaces-public.mjs --before/after checks cached saves/offline; on Windows use node --use-system-ca for trusted local certificate roots.
 
 - Historical voxel-volume character sources: use fable-voxel-reference, one transparent three-quarter neutral pose, physical brief/shared pitch, clear limb gaps and short cape; inspect alpha on light/dark. Alden source candidate: assets/explorations/voxel/alden-source-v1/. Image only; no mesh/animation acceptance.
 

@@ -1,5 +1,11 @@
 # Progress — 2026-10-29
 
+## Published quiet voxel surfaces — 2026-11-02
+
+User explicitly authorized publication. Published dba4653 through Actions41367774528:913units/97files, type/build/assets/dist and2release cases pass. Public8abeab6be469 runtime entry matches the tested local build.4actual public WebGL checks cover cached upgrade/offline, desktop/controller settings, mobile orientations and approach-to-workbench crafting. Depth0.2/variation1.0 confirmed; fine grid and quiet baked diffuse retained.
+
+Installed8b2306ff22de upgrades with current valley belongings/home/skills/paid progress preserved; v5/v6/v6-backup archives untouched. Correct Pages/PWA scope, all11offline assets, offline WebGL reload, no game errors/external requests. The neutral manifest probe's implicit root favicon404 is separately recorded. Evidence: release/voxel-surfaces-public.json and voxel-surface-detail/public captures/reports. No physical-phone performance claim. Weekly55%used/45%remaining; no reset/credits/paid calls. Stop for playtesting.
+
 ## Quiet fine-grid surfaces — 2026-11-02
 
 Restored fixed6.25cm detail; reduced strongest normal relief, removed facet grain/tilt and added quiet flat diffuse tones from one shared4KiB16³R8 bake with real mipmaps. No distance grid growth. Defaults/reset now depth0.2,variation1.0; custom preferences remain saved. Ground tops and terrace walls share the treatment; source VOX, geometry and saves are unchanged.

@@ -1,0 +1,41 @@
+{
+  "url": "https://cudldev.github.io/Fable-Crown/",
+  "verifiedAt": "2026-11-02T00:39:10.976Z",
+  "version": "8abeab6be469",
+  "previousVersion": "8b2306ff22de",
+  "runtimeEntry": "/Fable-Crown/assets/index-D05POjEW.js",
+  "runtimeMatchesLocal": true,
+  "scope": "https://cudldev.github.io/Fable-Crown/",
+  "cacheKeys": [
+    "fable-art-8abeab6be469",
+    "fable-v3-8abeab6be469"
+  ],
+  "defaults": {
+    "depth": 0.2,
+    "variation": 1
+  },
+  "fineGrid": true,
+  "progressPreserved": true,
+  "archiveKeysPreserved": [
+    "v5",
+    "v6",
+    "v6-backup"
+  ],
+  "webglOffline": true,
+  "offlineAssets": 11,
+  "glError": 0,
+  "errors": [],
+  "external": [],
+  "ignoredProbeResources": [
+    "https://cudldev.github.io/favicon.ico"
+  ],
+  "commit": "dba46533ff659cf1c2e68520b9f75a2b2012ad9b",
+  "actions": 41367774528,
+  "ciUnits": 913,
+  "ciUnitFiles": 97,
+  "releaseCases": 2,
+  "publicWebglCases": 4,
+  "contextualBenchApproach": true,
+  "desktopControllerTuning": true,
+  "touchPortraitLandscapeTuning": true
+}
