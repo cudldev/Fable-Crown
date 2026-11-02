@@ -4,10 +4,10 @@ import { LightingRig, LIGHTING_PRESETS, resolveLighting } from "../src/render/th
 import { DEFAULT_VISUAL_PRESET, DEFAULT_VISUAL_SETTINGS, normalizeVisualSettings, sunDirection, transportSettingsKey, visualPresetJSON } from "../src/render/three/visual-settings";
 
 test("voxel surface preferences are bounded, copied and independent of GI transport",()=>{
-  expect(normalizeVisualSettings({})).toMatchObject({voxelSurfaceStrength:.55,voxelSurfaceVariation:.65});
+  expect(normalizeVisualSettings({})).toMatchObject({voxelSurfaceStrength:.2,voxelSurfaceVariation:1});
   const visual=normalizeVisualSettings({voxelSurfaceStrength:2,voxelSurfaceVariation:-1});
   expect(visual).toMatchObject({voxelSurfaceStrength:1,voxelSurfaceVariation:0});
-  expect(normalizeVisualSettings({voxelSurfaceStrength:NaN,voxelSurfaceVariation:Infinity})).toMatchObject({voxelSurfaceStrength:.55,voxelSurfaceVariation:.65});
+  expect(normalizeVisualSettings({voxelSurfaceStrength:NaN,voxelSurfaceVariation:Infinity})).toMatchObject({voxelSurfaceStrength:.2,voxelSurfaceVariation:1});
   expect(transportSettingsKey(visual)).toBe(transportSettingsKey(DEFAULT_VISUAL_SETTINGS));
   expect(JSON.parse(visualPresetJSON({...DEFAULT_VISUAL_PRESET,visual})).visual).toMatchObject({voxelSurfaceStrength:1,voxelSurfaceVariation:0});
 });

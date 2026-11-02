@@ -19,7 +19,7 @@ export interface VisualSettings {
 }
 export const DEFAULT_VISUAL_SETTINGS: Readonly<VisualSettings> = Object.freeze({
   renderStyle: "smooth", spriteNormalStrength: .85,
-  voxelSurfaceStrength: .55, voxelSurfaceVariation: .65,
+  voxelSurfaceStrength: .2, voxelSurfaceVariation: 1,
   bloom: .12, chromaticAberration: .18, lensDistortion: .15, depthOfField: .25, worldCurvature: 2,
   exposure: 1.05, sunStrength: 1, ambientStrength: .85, lampStrength: 1,
   sunAzimuth: 23.3, sunElevation: 62.3,

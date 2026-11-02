@@ -1,10 +1,10 @@
 import { MeshLambertMaterial } from "three";
 import { installVoxelTransition } from "./voxel-transition";
-import {installVoxelSurfaceDetail} from "./voxel-surface-detail";
+import {installVoxelSurfaceDetail,VOXEL_SURFACE_DETAIL_PROFILE,type VoxelSurfaceDetailOptions} from "./voxel-surface-detail";
 import {DEFAULT_VISUAL_SETTINGS} from "./visual-settings";
 
 /** Static surfaces carry linear pigment and the same per-corner native VOX AO. */
-export function voxelMeshMaterial(pitch: number, strength: { value: number }, distance: { value: number },detail={pitch,origin:[0,0,0]as readonly[number,number,number],strength:{value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceStrength},variation:{value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceVariation}}) {
+export function voxelMeshMaterial(pitch: number, strength: { value: number }, distance: { value: number },detail:VoxelSurfaceDetailOptions={pitch:pitch*VOXEL_SURFACE_DETAIL_PROFILE.cellScale,origin:[0,0,0],strength:{value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceStrength},variation:{value:DEFAULT_VISUAL_SETTINGS.voxelSurfaceVariation}}) {
   const material = new MeshLambertMaterial({ color: 0xffffff, vertexColors: true });
   material.onBeforeCompile = shader => {
     shader.uniforms.voxelAOStrength = strength;

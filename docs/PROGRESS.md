@@ -1,5 +1,13 @@
 # Progress — 2026-10-29
 
+## Quiet fine-grid surfaces — 2026-11-02
+
+Restored fixed6.25cm detail; reduced strongest normal relief, removed facet grain/tilt and added quiet flat diffuse tones from one shared4KiB16³R8 bake with real mipmaps. No distance grid growth. Defaults/reset now depth0.2,variation1.0; custom preferences remain saved. Ground tops and terrace walls share the treatment; source VOX, geometry and saves are unchanged.
+
+913units/97files, native/baked assets, strict types/build/dist pass.4local shader/art/desktop/mobile checks pass; independent review found missing terrace-wall binding, corrected and checked in final WebGL art run. Final90eb03cb5b7d passes that art case and2lightweight release/offline cases.18minification phases,5hardware mip levels, exact depth0 and shared-texture disposal verified. Actual captures/performance: voxel-surface-detail folders; host RAF results do not establish phone performance.
+
+Local preview updated; no production push attempted. Weekly54%used/46%remaining, no reset/credits/paid calls.
+
 ## Varied voxel normal overlay — 2026-11-02
 
 Added deterministic normal relief to native voxel props/resources/buildings/furnishings and voxel-derived terrain. Cell bevel width, apparent depth and facet tilt vary on the finest source grid; LOD/instance changes preserve the pattern and subpixel filtering limits shimmer. No new textures, asset bake, geometry or save changes. Camera settings expose persisted depth0.55/variation0.65, reset and controller/keyboard/touch adjustment. Legacy presets copy/reset the same controls. Shader hooks retain AO, GI, curvature and transitions. GPU diagnostics also exposed an initial reflection draw using an unallocated sun-shadow comparison texture; reflections now wait for the main shadow pass.

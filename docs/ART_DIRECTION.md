@@ -1,6 +1,6 @@
 # Fable Crown — Voxel World and Pixel Cast (CURRENT)
 
-Surface update (2026-11-02): native voxel objects and voxel-derived terrain use a subtle procedural normal overlay with varied cell depth, bevels and facet tilt. Preserve native grid alignment across LODs and instance transforms; fade unresolved detail. Camera settings expose depth/variation. See [voxel surface detail](VOXEL_SURFACE_DETAIL.md) for implementation and actual review evidence. This is a lighting treatment of the current geometry.
+Surface update (2026-11-02): use a fixed source-aligned6.25cm grid, gentle capped normal relief and a quiet baked diffuse field with real mipmaps. Keep flat grain-free cell interiors and stable LOD/instance alignment. No distance-driven grid enlargement. Camera settings expose depth/variation. See [voxel surface detail](VOXEL_SURFACE_DETAIL.md). Geometry remains unchanged.
 
 Ground foliage update (2026-10-30): user requested denser flat plant cards with big pixels, then a Minecraft Dungeons-inspired treatment. Original fuller tufts, fern fans and small flower clusters use0.0625m pixels on crossed cards, at roughly the earlier clump scale. Smooth clustered planting replaces square density patches. Grid roots, wind and character depth remain. Terrain, trees and structures retain their voxel direction. See [foliage rendering](FOLIAGE_RENDERING.md).
 

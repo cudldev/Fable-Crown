@@ -70,8 +70,8 @@
     "visual": {
       "renderStyle": "smooth",
       "spriteNormalStrength": 0.85,
-      "voxelSurfaceStrength": 0.55,
-      "voxelSurfaceVariation": 0.65,
+      "voxelSurfaceStrength": 0.2,
+      "voxelSurfaceVariation": 1,
       "bloom": 0.12,
       "chromaticAberration": 0.18,
       "lensDistortion": 0.15,

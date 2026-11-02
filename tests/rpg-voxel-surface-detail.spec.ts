@@ -7,6 +7,8 @@ import { createValleySave } from "../src/valley/save";
 import { tile } from "../src/rpg/world";
 import { openWorldTools } from "./world-tools";
 import type { SurfaceLabResult } from "./voxel-surface-detail-lab";
+import {VOXEL_SURFACE_DETAIL_PROFILE} from "../src/render/three/voxel-surface-detail";
+import { LinearMipmapLinearFilter, NearestFilter, NoColorSpace, RedFormat, UnsignedByteType } from "three";
 
 // Local GPU evidence only. Do not add these tests to the two-case release suite.
 const reports = "docs/performance/voxel-surface-detail";
@@ -22,26 +24,75 @@ test.beforeEach(async ({ page }) => {
 });
 test.afterEach(async ({ page }) => { expect(errors.get(page)).toEqual([]); });
 
-test("native-pitch face normals turn off exactly, vary by cell and remain attached through instance transforms", async ({ page }) => {
+test("native-pitch normals turn off exactly, stay anchored and minify without growing extreme contrast", async ({ page }) => {
   await page.setViewportSize({ width: 640, height: 480 });
   const bundled = await build({ entryPoints: [resolve("tests/voxel-surface-detail-lab.ts")], bundle: true, format: "iife", write: false, logLevel: "error" });
   await page.setContent('<!doctype html><style>body{margin:0}canvas{display:block}</style><canvas></canvas>');
   await page.addScriptTag({ content: bundled.outputFiles[0].text });
   const result: SurfaceLabResult = await page.evaluate(() => window.voxelSurfaceLab.result);
-  await writeFile(`${reports}/shader-lab.json`, JSON.stringify({ ...result, errors: errors.get(page), note: "Actual WebGL pixels from a coplanar 0.0625 m native grid under fixed directional lighting. No per-cell color or geometry variation." }, null, 2) + "\n");
+  const labReport = { ...result, errors: errors.get(page), note: "Actual WebGL pixels from a fixed 0.0625 m grid with uniform source albedo and fixed directional lighting. One shared baked R8 16³ diffuse texture uses hardware mipmaps; there is no procedural grid growth. Interior color range excludes bevels; edge energy references each cell's own center. Eighteen minification phases use actual 16,8,4,2,1,0.5 pixels/cell and three subpixel offsets. Surface masks exclude background; native captures are not upscaled. Mip allocation is checked using real GPU framebuffer attachments at all five levels." };
+  await writeFile(`${reports}/shader-lab.json`, JSON.stringify(labReport, null, 2) + "\n");
   for (const mode of ["stock", "off", "uniform", "varied", "instanced"] as const) {
     await page.evaluate(mode => window.voxelSurfaceLab.show(mode), mode);
     await page.locator("canvas").screenshot({ path: `${captures}/lab-${mode}.png` });
   }
-  expect(result.pitch).toBe(.0625);
+  for (const pixelsPerCell of [16, 4, 1, .5]) {
+    await page.evaluate(value => window.voxelSurfaceLab.showMinification(value, [.17, .31]), pixelsPerCell);
+    await expect(page.locator("canvas")).toHaveAttribute("width", String(8 * pixelsPerCell));
+    await expect(page.locator("canvas")).toHaveAttribute("height", String(6 * pixelsPerCell));
+    const size = await page.locator("canvas").boundingBox();
+    expect(size!.width).toBe(8 * pixelsPerCell); expect(size!.height).toBe(6 * pixelsPerCell);
+    await page.locator("canvas").screenshot({ path: `${captures}/lab-minified-${pixelsPerCell}px-cell.png` });
+  }
+  expect(result.pitch).toBe(.0625*VOXEL_SURFACE_DETAIL_PROFILE.cellScale);
   expect(result.offDelta).toBe(0);
   expect(result.shadingDelta).toBeGreaterThan(.1);
   expect(result.variationDelta).toBeGreaterThan(.05);
   expect(result.repeatDelta).toBe(0);
   expect(result.variedCellDelta).toBeGreaterThan(result.uniformCellDelta + .01);
+  expect(result.cellRelief.interiorDelta).toBeGreaterThan(0);
+  expect(result.cellRelief.interiorDelta).toBeLessThanOrEqual(4);
+  expect(result.cellRelief.interiorColorRange).toBe(0);
+  expect(result.cellRelief.cellCenterShadeRange).toBeGreaterThan(0);
+  expect(result.cellRelief.centerBrightening).toBe(0);
+  expect(result.cellRelief.cells).toHaveLength(48);
+  for (const cell of result.cellRelief.cells) expect(cell.interiorColorRange, `cell ${cell.column},${cell.row}`).toBe(0);
+  expect(result.cellRelief.maxMean).toBeGreaterThan(.1);
+  expect(result.cellRelief.minMean).toBeGreaterThan(.1);
+  expect(result.cellRelief.maxMean).toBeGreaterThan(result.cellRelief.minMean+.05);
+  expect(result.cellRelief.lowReliefCells).toBeGreaterThan(0);
   for (const transform of result.transformDeltas) expect(transform.delta, transform.name).toBeLessThan(.12);
-  expect(result.topologyUnchanged).toBe(true); expect(result.textures).toBe(0);
+  expect(result.minification).toHaveLength(18);
+  const nearPeak = Math.max(...result.minification.filter(sample => sample.pixelsPerCell === 16).map(sample => sample.maxChannelDelta));
+  expect(nearPeak).toBeGreaterThan(0); // The distance test must not pass by filtering out every near detail.
+  for (const sample of result.minification) {
+    const phase = `${sample.pixelsPerCell}px/cell at ${sample.offsetPixels.join(",")}`;
+    expect(sample.buffer, phase).toEqual([8 * sample.pixelsPerCell, 6 * sample.pixelsPerCell]);
+    expect(sample.surfacePixels, phase).toBeGreaterThan(0);
+    expect(sample.offDelta, phase).toBe(0); expect(sample.repeatDelta, phase).toBe(0);
+    // Allow quantization/sampling headroom instead of demanding a brittle
+    // monotonic mean. Minification must not produce a stronger contrast spike
+    // than the near surface, or an extreme dark/light rim at any phase.
+    expect(sample.maxChannelDelta, phase).toBeLessThanOrEqual(nearPeak + 8);
+    expect(sample.maxChannelDelta, phase).toBeLessThanOrEqual(64);
+    if (sample.pixelsPerCell <= 1) {
+      expect(sample.surfaceColorRange, phase).toBeLessThanOrEqual(2);
+      expect(sample.meanDelta, phase).toBeGreaterThan(0);
+      expect(sample.meanDelta, phase).toBeLessThanOrEqual(4);
+      expect(sample.maxChannelDelta, phase).toBeLessThanOrEqual(4);
+      expect(sample.maxBrightening, phase).toBe(0);
+    }
+  }
+  expect(result.topologyUnchanged).toBe(true); expect(result.textures).toBe(1);
+  expect(result.bakedTexture).toMatchObject({ size: [16, 16, 16], bytes: 4096, minimum: 250, maximum: 255, sharedIdentity: true, generateMipmaps: true,
+    minFilter: LinearMipmapLinearFilter, magFilter: NearestFilter, format: RedFormat, type: UnsignedByteType, colorSpace: NoColorSpace,
+    hardwareMinFilter: 0x2703, hardwareMagFilter: 0x2600, texturesAfterUniformChanges: 1 });
+  expect(result.bakedTexture.mipLevels.map(level => level.size)).toEqual([16, 8, 4, 2, 1]);
+  for (const level of result.bakedTexture.mipLevels) expect(level.complete, `GPU mip ${level.level}`).toBe(true);
   expect(result.programCounts[1]).toBe(result.programCounts[0]); expect(result.glError).toBe(0);
+  const disposal = await page.evaluate(() => window.voxelSurfaceLab.inspectDisposal());
+  await writeFile(`${reports}/shader-lab.json`, JSON.stringify({ ...labReport, disposal }, null, 2) + "\n");
+  expect(disposal).toEqual({ before: 1, afterOneMaterial: 1, afterLastMaterial: 1, afterLastLease: 0, disposeEvents: 1 });
 });
 
 async function setRange(slider: Locator, value: number) {
@@ -105,6 +156,7 @@ async function runtimeReview(page: Page, label: "desktop" | "mobile") {
   await page.goto("./?chapter=valley");
   await expect(page.getByTestId("valley-app")).toHaveAttribute("data-ready", "true", { timeout: 90000 });
   await expect(page.getByTestId("valley-app")).toHaveAttribute("data-mode", "world");
+  await expect(world(page)).toHaveAttribute("data-voxel-surface-cell-scale",String(VOXEL_SURFACE_DETAIL_PROFILE.cellScale));
   const save = createValleySave(Date.now());
   Object.assign(save.action.player, { x: 25, z: 142 });
   Object.assign(save.chapter.player, { position: tile(25, 142), previousPosition: tile(25, 142), path: [], movement: null, action: null });
@@ -140,6 +192,7 @@ async function runtimeReview(page: Page, label: "desktop" | "mobile") {
   }
   panel = await settings(page);
   const depth = panel.getByRole("slider", { name: "Voxel depth", exact: true }), variation = panel.getByRole("slider", { name: "Voxel variation", exact: true });
+  await expect(panel.getByRole("slider", { name: "Voxel distance blend", exact: true })).toHaveCount(0);
   await setRange(depth, defaults.strength); await setRange(variation, 1);
   if(label==="desktop"){
     const padButton=async(index:number,pressed:boolean)=>{await page.evaluate(({index,pressed})=>{const pad=(window as unknown as {surfaceQaPad:{buttons:{pressed:boolean;value:number}[]}}).surfaceQaPad;pad.buttons[index].pressed=pressed;pad.buttons[index].value=pressed?1:0;},{index,pressed});await page.waitForTimeout(60);};
@@ -175,6 +228,7 @@ async function runtimeReview(page: Page, label: "desktop" | "mobile") {
   const visual = page.getByRole("dialog", { name: "Visual settings", exact: true });
   await setRange(visual.getByRole("slider", { name: "Voxel depth", exact: true }), 0);
   await setRange(visual.getByRole("slider", { name: "Voxel variation", exact: true }), 1);
+  await expect(visual.getByRole("slider", { name: "Voxel distance blend", exact: true })).toHaveCount(0);
   const configured = await copyPreset(page, visual);
   expect(configured.type).toBe("fable-crown.visual-settings");
   expect(configured.visual).toMatchObject({ voxelSurfaceStrength: 0, voxelSurfaceVariation: 1 });

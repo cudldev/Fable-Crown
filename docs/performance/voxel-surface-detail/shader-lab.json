@@ -1,11 +1,11 @@
 {
   "pitch": 0.0625,
   "offDelta": 0,
-  "shadingDelta": 0.8904166666666666,
-  "variationDelta": 0.3813671875,
+  "shadingDelta": 0.5884375,
+  "variationDelta": 0.23733940972222223,
   "repeatDelta": 0,
   "uniformCellDelta": 0,
-  "variedCellDelta": 0.49174377713600914,
+  "variedCellDelta": 0.23834256694367498,
   "transformDeltas": [
     {
       "name": "identity instance",
@@ -25,11 +25,941 @@
     },
     {
       "name": "uniform scale",
-      "delta": 0.000008680555555555556
+      "delta": 0.000007595486111111111
     }
   ],
+  "minification": [
+    {
+      "pixelsPerCell": 16,
+      "buffer": [
+        128,
+        96
+      ],
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "offDelta": 0,
+      "surfacePixels": 12288,
+      "meanDelta": 0.8627658420139007,
+      "p95Delta": 2.3333333333333335,
+      "maxChannelDelta": 4,
+      "surfaceColorRange": 7,
+      "maxBrightening": 3,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 16,
+      "buffer": [
+        128,
+        96
+      ],
+      "offsetPixels": [
+        0.17,
+        0.31
+      ],
+      "offDelta": 0,
+      "surfacePixels": 12288,
+      "meanDelta": 0.7855360243055637,
+      "p95Delta": 2.6666666666666665,
+      "maxChannelDelta": 4,
+      "surfaceColorRange": 7,
+      "maxBrightening": 3,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 16,
+      "buffer": [
+        128,
+        96
+      ],
+      "offsetPixels": [
+        0.43,
+        -0.27
+      ],
+      "offDelta": 0,
+      "surfacePixels": 12288,
+      "meanDelta": 0.7585991753472303,
+      "p95Delta": 2.6666666666666665,
+      "maxChannelDelta": 4,
+      "surfaceColorRange": 7,
+      "maxBrightening": 3,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 8,
+      "buffer": [
+        64,
+        48
+      ],
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "offDelta": 0,
+      "surfacePixels": 3072,
+      "meanDelta": 0.8428819444444456,
+      "p95Delta": 2.3333333333333335,
+      "maxChannelDelta": 3,
+      "surfaceColorRange": 5,
+      "maxBrightening": 2,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 8,
+      "buffer": [
+        64,
+        48
+      ],
+      "offsetPixels": [
+        0.17,
+        0.31
+      ],
+      "offDelta": 0,
+      "surfacePixels": 3072,
+      "meanDelta": 0.8198784722222237,
+      "p95Delta": 2.3333333333333335,
+      "maxChannelDelta": 4,
+      "surfaceColorRange": 6,
+      "maxBrightening": 2,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 8,
+      "buffer": [
+        64,
+        48
+      ],
+      "offsetPixels": [
+        0.43,
+        -0.27
+      ],
+      "offDelta": 0,
+      "surfacePixels": 3072,
+      "meanDelta": 0.8250868055555571,
+      "p95Delta": 2.3333333333333335,
+      "maxChannelDelta": 4,
+      "surfaceColorRange": 6,
+      "maxBrightening": 3,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 4,
+      "buffer": [
+        32,
+        24
+      ],
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "offDelta": 0,
+      "surfacePixels": 768,
+      "meanDelta": 0.674479166666664,
+      "p95Delta": 1.3333333333333333,
+      "maxChannelDelta": 2,
+      "surfaceColorRange": 3,
+      "maxBrightening": 2,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 4,
+      "buffer": [
+        32,
+        24
+      ],
+      "offsetPixels": [
+        0.17,
+        0.31
+      ],
+      "offDelta": 0,
+      "surfacePixels": 768,
+      "meanDelta": 0.5802951388888865,
+      "p95Delta": 1.3333333333333333,
+      "maxChannelDelta": 2,
+      "surfaceColorRange": 3,
+      "maxBrightening": 2,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 4,
+      "buffer": [
+        32,
+        24
+      ],
+      "offsetPixels": [
+        0.43,
+        -0.27
+      ],
+      "offDelta": 0,
+      "surfacePixels": 768,
+      "meanDelta": 0.6783854166666653,
+      "p95Delta": 1.3333333333333333,
+      "maxChannelDelta": 2,
+      "surfaceColorRange": 4,
+      "maxBrightening": 2,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 2,
+      "buffer": [
+        16,
+        12
+      ],
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "offDelta": 0,
+      "surfacePixels": 192,
+      "meanDelta": 0.1336805555555555,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 1,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 2,
+      "buffer": [
+        16,
+        12
+      ],
+      "offsetPixels": [
+        0.17,
+        0.31
+      ],
+      "offDelta": 0,
+      "surfacePixels": 192,
+      "meanDelta": 0.1336805555555555,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 1,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 2,
+      "buffer": [
+        16,
+        12
+      ],
+      "offsetPixels": [
+        0.43,
+        -0.27
+      ],
+      "offDelta": 0,
+      "surfacePixels": 192,
+      "meanDelta": 0.17013888888888876,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 1,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 1,
+      "buffer": [
+        8,
+        6
+      ],
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "offDelta": 0,
+      "surfacePixels": 48,
+      "meanDelta": 0.11805555555555552,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 0,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 1,
+      "buffer": [
+        8,
+        6
+      ],
+      "offsetPixels": [
+        0.17,
+        0.31
+      ],
+      "offDelta": 0,
+      "surfacePixels": 48,
+      "meanDelta": 0.11805555555555552,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 0,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 1,
+      "buffer": [
+        8,
+        6
+      ],
+      "offsetPixels": [
+        0.43,
+        -0.27
+      ],
+      "offDelta": 0,
+      "surfacePixels": 48,
+      "meanDelta": 0.11805555555555552,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 0,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 0.5,
+      "buffer": [
+        4,
+        3
+      ],
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "offDelta": 0,
+      "surfacePixels": 12,
+      "meanDelta": 0.13888888888888887,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 0,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 0.5,
+      "buffer": [
+        4,
+        3
+      ],
+      "offsetPixels": [
+        0.17,
+        0.31
+      ],
+      "offDelta": 0,
+      "surfacePixels": 12,
+      "meanDelta": 0.13888888888888887,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 0,
+      "repeatDelta": 0
+    },
+    {
+      "pixelsPerCell": 0.5,
+      "buffer": [
+        4,
+        3
+      ],
+      "offsetPixels": [
+        0.43,
+        -0.27
+      ],
+      "offDelta": 0,
+      "surfacePixels": 12,
+      "meanDelta": 0.13888888888888887,
+      "p95Delta": 0.3333333333333333,
+      "maxChannelDelta": 1,
+      "surfaceColorRange": 1,
+      "maxBrightening": 0,
+      "repeatDelta": 0
+    }
+  ],
+  "cellRelief": {
+    "interiorDelta": 1,
+    "interiorColorRange": 0,
+    "cellCenterShadeRange": 1,
+    "centerBrightening": 0,
+    "minMean": 0.4840720221606648,
+    "maxMean": 0.7277239150507848,
+    "lowReliefCells": 17,
+    "cells": [
+      {
+        "row": 0,
+        "column": 0,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.7277239150507848
+      },
+      {
+        "row": 0,
+        "column": 1,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.7277239150507848
+      },
+      {
+        "row": 0,
+        "column": 2,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 0,
+        "column": 3,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 0,
+        "column": 4,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 0,
+        "column": 5,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 0,
+        "column": 6,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 0,
+        "column": 7,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 1,
+        "column": 0,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.7277239150507848
+      },
+      {
+        "row": 1,
+        "column": 1,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.7277239150507848
+      },
+      {
+        "row": 1,
+        "column": 2,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 1,
+        "column": 3,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 1,
+        "column": 4,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 1,
+        "column": 5,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 1,
+        "column": 6,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 1,
+        "column": 7,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 2,
+        "column": 0,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.7277239150507848
+      },
+      {
+        "row": 2,
+        "column": 1,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 2,
+        "column": 2,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 2,
+        "column": 3,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 2,
+        "column": 4,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 2,
+        "column": 5,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 2,
+        "column": 6,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 2,
+        "column": 7,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 3,
+        "column": 0,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 3,
+        "column": 1,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 3,
+        "column": 2,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 3,
+        "column": 3,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 3,
+        "column": 4,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 3,
+        "column": 5,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 3,
+        "column": 6,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 3,
+        "column": 7,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.4840720221606648
+      },
+      {
+        "row": 4,
+        "column": 0,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 4,
+        "column": 1,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 4,
+        "column": 2,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 4,
+        "column": 3,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 4,
+        "column": 4,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 4,
+        "column": 5,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 4,
+        "column": 6,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.4840720221606648
+      },
+      {
+        "row": 4,
+        "column": 7,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.4840720221606648
+      },
+      {
+        "row": 5,
+        "column": 0,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 5,
+        "column": 1,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6646468144044322
+      },
+      {
+        "row": 5,
+        "column": 2,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 5,
+        "column": 3,
+        "centerColor": [
+          134,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.6237880886426593
+      },
+      {
+        "row": 5,
+        "column": 4,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 5,
+        "column": 5,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.5317405355493998
+      },
+      {
+        "row": 5,
+        "column": 6,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.4840720221606648
+      },
+      {
+        "row": 5,
+        "column": 7,
+        "centerColor": [
+          133,
+          112,
+          77
+        ],
+        "interiorColorRange": 0,
+        "meanEdgeRelief": 0.4840720221606648
+      }
+    ]
+  },
+  "bakedTexture": {
+    "size": [
+      16,
+      16,
+      16
+    ],
+    "bytes": 4096,
+    "minimum": 250,
+    "maximum": 255,
+    "sharedIdentity": true,
+    "generateMipmaps": true,
+    "minFilter": 1008,
+    "magFilter": 1003,
+    "format": 1028,
+    "type": 1009,
+    "colorSpace": "",
+    "hardwareMinFilter": 9987,
+    "hardwareMagFilter": 9728,
+    "mipLevels": [
+      {
+        "level": 0,
+        "size": 16,
+        "complete": true
+      },
+      {
+        "level": 1,
+        "size": 8,
+        "complete": true
+      },
+      {
+        "level": 2,
+        "size": 4,
+        "complete": true
+      },
+      {
+        "level": 3,
+        "size": 2,
+        "complete": true
+      },
+      {
+        "level": 4,
+        "size": 1,
+        "complete": true
+      }
+    ],
+    "texturesAfterUniformChanges": 1
+  },
   "topologyUnchanged": true,
-  "textures": 0,
+  "textures": 1,
   "programCounts": [
     3,
     3
@@ -37,5 +967,12 @@
   "glError": 0,
   "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
   "errors": [],
-  "note": "Actual WebGL pixels from a coplanar 0.0625 m native grid under fixed directional lighting. No per-cell color or geometry variation."
+  "note": "Actual WebGL pixels from a fixed 0.0625 m grid with uniform source albedo and fixed directional lighting. One shared baked R8 16³ diffuse texture uses hardware mipmaps; there is no procedural grid growth. Interior color range excludes bevels; edge energy references each cell's own center. Eighteen minification phases use actual 16,8,4,2,1,0.5 pixels/cell and three subpixel offsets. Surface masks exclude background; native captures are not upscaled. Mip allocation is checked using real GPU framebuffer attachments at all five levels.",
+  "disposal": {
+    "before": 1,
+    "afterOneMaterial": 1,
+    "afterLastMaterial": 1,
+    "afterLastLease": 0,
+    "disposeEvents": 1
+  }
 }

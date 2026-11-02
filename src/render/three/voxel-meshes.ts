@@ -5,6 +5,7 @@ import type { VoxelShadowData, VoxelSurfaceData } from "./voxel-surface";
 import { cellPixels, chooseVoxelLod, VOXEL_VISIBLE_CELL_BUDGET, type VoxelStats } from "./voxel-buckets";
 import { createVoxelTransitionDepthMaterial } from "./voxel-transition";
 import { voxelMeshMaterial } from "./voxel-mesh-material";
+import {VOXEL_SURFACE_DETAIL_PROFILE} from "./voxel-surface-detail";
 import { DEFAULT_VISUAL_SETTINGS } from "./visual-settings";
 import type { WorldCurve } from "./world-curve";
 
@@ -116,9 +117,10 @@ export class VoxelMeshes {
   }
   private admit(template: Template) {
     if (template.ready) return;
-    const key=JSON.stringify([template.data.pitch,template.nativePitch,template.nativeOrigin]);
+    const detailPitch=template.nativePitch*VOXEL_SURFACE_DETAIL_PROFILE.cellScale;
+    const key=JSON.stringify([template.data.pitch,detailPitch,template.nativeOrigin]);
     let material=this.materials.get(key);
-    if(!material) { material=voxelMeshMaterial(template.data.pitch,this.aoStrength,this.aoDistance,{pitch:template.nativePitch,origin:template.nativeOrigin,strength:this.surfaceStrength,variation:this.surfaceVariation});this.materials.set(key,material); }
+    if(!material) { material=voxelMeshMaterial(template.data.pitch,this.aoStrength,this.aoDistance,{pitch:detailPitch,origin:template.nativeOrigin,strength:this.surfaceStrength,variation:this.surfaceVariation});this.materials.set(key,material); }
     template.material=material;template.geometry=geometry(template.data,template.data);
     if(template.shadowData) {
       let cached=this.shadowGeometries.get(template.shadowData);

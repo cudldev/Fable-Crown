@@ -4,6 +4,7 @@ import { VoxelMeshes, type VoxelMeshOptions } from "../src/render/three/voxel-me
 import { voxelObject } from "../src/render/three/voxel-assets";
 import { voxelModel, type VoxelGrid } from "../src/render/three/voxel-data";
 import { bakeVoxelModelSurfaces } from "../src/render/three/voxel-surface";
+import {VOXEL_SURFACE_DETAIL_PROFILE} from "../src/render/three/voxel-surface-detail";
 
 function baked(n = 16, checker = true, cut?: number) {
   const grid: VoxelGrid = { size: [n,n,n], cells: new Uint8Array(n ** 3), palette: new Uint8Array([125,150,80,255, 140,100,60,255]) };
@@ -31,7 +32,7 @@ test("surface normals keep the source grid through LOD changes and live tuning p
   try{
     renderer.replace([{art}]);settle(renderer,c,clock);
     const first=color(scene)[0],material=first.material as MeshLambertMaterial,shader=surfaceShader(material),geometry=first.geometry,builds=renderer.stats.templateBuilds,key=material.customProgramCacheKey();
-    expect(shader.uniforms.fableSurfacePitch.value).toBe(model.pitch);
+    expect(shader.uniforms.fableSurfacePitch.value).toBe(model.pitch*VOXEL_SURFACE_DETAIL_PROFILE.cellScale);
     expect(shader.uniforms.fableSurfaceOrigin.value.toArray()).toEqual(model.surfaces![0].bounds.min);
     renderer.setSurfaceDetail(0,.9);clock.tick(renderer,c);
     expect(shader.uniforms.fableSurfaceStrength.value).toBe(0);expect(shader.uniforms.fableSurfaceVariation.value).toBe(.9);
@@ -39,7 +40,7 @@ test("surface normals keep the source grid through LOD changes and live tuning p
     settle(renderer,c,clock,100);
     const coarse=surfaceShader(color(scene)[0].material as MeshLambertMaterial);
     expect(coarse.uniforms.voxelSurfacePitch.value).toBeGreaterThan(shader.uniforms.voxelSurfacePitch.value);
-    expect(coarse.uniforms.fableSurfacePitch.value).toBe(model.pitch);expect(coarse.uniforms.fableSurfaceOrigin.value.toArray()).toEqual(model.surfaces![0].bounds.min);
+    expect(coarse.uniforms.fableSurfacePitch.value).toBe(model.pitch*VOXEL_SURFACE_DETAIL_PROFILE.cellScale);expect(coarse.uniforms.fableSurfaceOrigin.value.toArray()).toEqual(model.surfaces![0].bounds.min);
     expect(coarse.uniforms.fableSurfaceStrength.value).toBe(0);
   }finally{renderer.dispose();}
 });

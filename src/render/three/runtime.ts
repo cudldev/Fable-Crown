@@ -33,7 +33,7 @@ import { FloatingVials } from "./floating-vials";
 import { HitDimensions } from "./hit-dimensions";
 import { appendSteppedGround, pickSteppedGround } from "./stepped-ground";
 import {staticSceneKey,objectTransformKey} from "./static-scene";
-import {installVoxelSurfaceDetail} from "./voxel-surface-detail";
+import {installVoxelSurfaceDetail,VOXEL_SURFACE_DETAIL_PROFILE} from "./voxel-surface-detail";
 
 export type CameraMode = "perspective" | "orthographic";
 export interface RuntimeInput extends TileSceneProps { lighting: LightingPreset; shadows: boolean; cameraMode: CameraMode; gi?: boolean; ao?: boolean; visual?: Readonly<VisualSettings> }
@@ -178,6 +178,7 @@ export class ThreeRuntime {
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     // Count all passes in one frame, including the shared water reflection.
     this.renderer.info.autoReset = false;
+    installVoxelSurfaceDetail(this.terrainEarthMaterial,{pitch:UNIT_PIXEL_METRES*VOXEL_SURFACE_DETAIL_PROFILE.cellScale,strength:this.surfaceStrength,variation:this.surfaceVariation});
     this.scene.add(this.terrain);
     this.buildTerrain();
     this.buildObjects();
@@ -362,7 +363,7 @@ export class ThreeRuntime {
           this.terrainSurface = buildTerrainSurface(this.art.terrainTiles, this.world, { quietDirtSpeckles: true }); this.terrainBakes++;
           this.terrainBakeMs = performance.now() - started;
           this.terrainMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, map: this.terrainSurface.texture });
-          installVoxelSurfaceDetail(this.terrainMaterial,{pitch:.0625,strength:this.surfaceStrength,variation:this.surfaceVariation});
+          installVoxelSurfaceDetail(this.terrainMaterial,{pitch:UNIT_PIXEL_METRES*VOXEL_SURFACE_DETAIL_PROFILE.cellScale,strength:this.surfaceStrength,variation:this.surfaceVariation});
           this.terrainMaterial.name = "native-voxel-ground";
           this.contactDetail.decorate(this.terrainMaterial);
         } catch (error) { this.root.dataset.terrainWarning = error instanceof Error ? error.message : "Native ground baking unavailable."; }
@@ -888,6 +889,7 @@ export class ThreeRuntime {
     this.voxelBuckets.setSurfaceDetail(visual.voxelSurfaceStrength,visual.voxelSurfaceVariation);
     this.surfaceStrength.value=visual.voxelSurfaceStrength;this.surfaceVariation.value=visual.voxelSurfaceVariation;
     this.root.dataset.voxelSurfaceStrength=String(visual.voxelSurfaceStrength);this.root.dataset.voxelSurfaceVariation=String(visual.voxelSurfaceVariation);
+    this.root.dataset.voxelSurfaceCellScale=String(VOXEL_SURFACE_DETAIL_PROFILE.cellScale);
     this.voxelBuckets.update(this.camera, this.height, this.curve, time);
     // Continuity probes need frame-level observations; avoid unchanged DOM writes.
     const voxel = this.voxelBuckets.stats;
